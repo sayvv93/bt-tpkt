@@ -19,37 +19,37 @@
     </style>
 </head>
 <body class="bg-light">
-
-    <!-- MÀN HÌNH ĐĂNG NHẬP -->
-    <div id="loginOverlay">
-        <div class="card shadow-lg border-0 rounded-4 p-4" style="width: 100%; max-width: 400px;">
-            <div class="text-center mb-4">
-                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                    <i class="bi bi-shield-lock-fill fs-3"></i>
-                </div>
-                <h4 class="fw-bold text-dark">Đăng nhập hệ thống</h4>
-                <p class="text-muted small">Đang đồng bộ tài khoản từ Sheet Accounts...</p>
-            </div>
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="mb-3">
-                    <label class="form-label fw-bold small">Tên đăng nhập (Username)</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
-                        <input type="text" id="loginUser" class="form-control" placeholder="Nhập username..." required>
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label fw-bold small">Mật khẩu (Password)</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light"><i class="bi bi-key"></i></span>
-                        <input type="password" id="loginPass" class="form-control" placeholder="Nhập mật khẩu..." required>
-                    </div>
-                </div>
-                <div id="loginError" class="alert alert-danger py-2 small mb-3 d-none"></div>
-                <button type="submit" id="btnLoginSubmit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm" disabled>ĐANG TẢI DỮ LIỆU...</button>
-            </form>
-        </div>
+<!-- MÀN HÌNH ĐĂNG NHẬP -->
+<div id="loginOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+  <div style="position: relative; width: 100%; max-width: 440px; background: linear-gradient(135deg, #73b800 0%, #5c9600 100%); border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); padding: 35px 30px 30px 40px; font-family: 'Segoe UI', Arial, sans-serif;">
+    
+    <!-- Nếp gấp trang trí bên trái -->
+    <div style="position: absolute; left: -14px; top: 35px; width: 14px; height: 50px; background: #3f6600; clip-path: polygon(100% 0, 0 50%, 100% 100%); border-top-left-radius: 2px; border-bottom-left-radius: 2px;"></div>
+    
+    <div style="text-align: center; margin-bottom: 25px;">
+      <h3 style="color: #ffffff; font-weight: 700; font-size: 18px; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-transform: uppercase;">HỆ THỐNG CHECK CA VỤ BẢO TRÌ CHO TPKT</h3>
+      <p style="color: #eaf5cc; font-size: 13px; margin-top: 6px;">Nhập thông tin tài khoản</p>
     </div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div style="display: flex; align-items: center; margin-bottom: 16px;">
+        <label style="width: 110px; color: #ffffff; font-weight: 600; font-size: 13px;">Tên đăng nhập</label>
+        <input type="text" id="loginUser" class="form-control" placeholder="Nhập username..." required style="flex: 1; padding: 10px 12px; border: none; border-radius: 6px; background: #f4fae6; font-size: 14px; color: #333; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);">
+      </div>
+      
+      <div style="display: flex; align-items: center; margin-bottom: 16px;">
+        <label style="width: 110px; color: #ffffff; font-weight: 600; font-size: 13px;">Mật khẩu</label>
+        <input type="password" id="loginPass" class="form-control" placeholder="Nhập mật khẩu..." required style="flex: 1; padding: 10px 12px; border: none; border-radius: 6px; background: #f4fae6; font-size: 14px; color: #333; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);">
+      </div>
+
+      <div id="loginError" class="alert alert-danger py-2 small mb-3 d-none" style="background: #ffe6e6; color: #cc0000; border: none; border-radius: 6px; font-weight: 500; text-align: center; padding: 8px; font-size: 13px;"></div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+        <button type="submit" id="btnLoginSubmit" class="btn" style="background: linear-gradient(135deg, #ff8c1a 0%, #ff7300 100%); color: #ffffff; border: none; padding: 10px 28px; font-weight: 700; font-size: 14px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,115,0,0.4); transition: all 0.2s;">ĐĂNG NHẬP</button>
+      </div>
+    </form>
+  </div>
+</div>
 
     <div class="container-fluid py-4">
         <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 bg-white p-3 rounded shadow-sm">
