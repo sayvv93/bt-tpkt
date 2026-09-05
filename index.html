@@ -391,12 +391,15 @@
         }
     }
 
+    // ĐÃ CẬP NHẬT: Thêm username vào hàm updateRecord để Worker nhận diện ghi log
     async function updateRecord(rowId, tpktCheck, xlLai) {
         try {
+            let username = (currentUser && currentUser.username) ? currentUser.username : "unknown";
+
             fetch(WEB_APP_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ rowId, tpktCheck, xlLai })
+                body: JSON.stringify({ rowId, username, tpktCheck, xlLai })
             }).catch(err => console.error("Lỗi lưu:", err));
         } catch (error) {
             console.error("Lỗi cập nhật record:", error);
