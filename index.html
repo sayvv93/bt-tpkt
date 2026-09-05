@@ -23,7 +23,6 @@
 <div id="loginOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 9999; display: flex; align-items: center; justify-content: center;">
   <div style="position: relative; width: 100%; max-width: 440px; background: linear-gradient(135deg, #73b800 0%, #5c9600 100%); border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); padding: 35px 30px 30px 40px; font-family: 'Segoe UI', Arial, sans-serif;">
     
-    <!-- Nếp gấp trang trí bên trái -->
     <div style="position: absolute; left: -14px; top: 35px; width: 14px; height: 50px; background: #3f6600; clip-path: polygon(100% 0, 0 50%, 100% 100%); border-top-left-radius: 2px; border-bottom-left-radius: 2px;"></div>
     
     <div style="text-align: center; margin-bottom: 25px;">
@@ -85,9 +84,15 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label fw-bold">Block</label>
-                <select id="filterBlock" class="form-select form-select-sm" onchange="onBlockChange()">
-                    <option value="">Tất cả Block</option>
+                <label class="form-label fw-bold">TPKT CHECK</label>
+                <select id="filterTpktCheck" class="form-select form-select-sm" onchange="filterData()">
+                    <option value="">Tất cả TPKT Check</option>
+                    <option value="Chưa kiểm tra">Chưa kiểm tra</option>
+                    <option value="Bảo trì ok">Bảo trì ok</option>
+                    <option value="Suy hao">Suy hao</option>
+                    <option value="Không tín hiệu">Không tín hiệu</option>
+                    <option value="Rớt kết nối">Rớt kết nối</option>
+                    <option value="Vùng phủ không đảm bảo">Vùng phủ không đảm bảo</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -150,6 +155,7 @@
                                     <option value="">-- Chọn XL Lại --</option>
                                     <option value="Chuyển KTV XL lại">Chuyển KTV XL lại</option>
                                     <option value="Đã xử lý lại">Đã xử lý lại</option>
+                                    <option value="Checklist Onsite">Checklist Onsite</option>
                                 </select>
                                 <button class="btn btn-sm btn-warning fw-bold text-nowrap" onclick="applyBatchXlLai()">Gửi Hàng Loạt XL Lại</button>
                             </div>
@@ -325,18 +331,16 @@
         let chartDoiTacInstance = null;
         let chartDoiTruongInstance = null;
 
-        // Tích hợp loadData (GET) tối ưu
         async function loadData() {
             try {
                 const response = await fetch(WEB_APP_URL, { method: "GET" });
-                return await response.json(); // Trả về object chứa { accounts, dataBT }
+                return await response.json();
             } catch (error) {
                 console.error("Lỗi khi tải dữ liệu:", error);
                 throw error;
             }
         }
 
-        // Tích hợp updateRecord (POST) tối ưu
         async function updateRecord(rowId, tpktCheck, xlLai) {
             try {
                 const response = await fetch(WEB_APP_URL, {
@@ -468,7 +472,8 @@
 
         function fillSelect(elementId, arr, selectedVal = "") {
             let select = document.getElementById(elementId);
-            select.innerHTML = `<option value="">Tất cả</option>`;
+            let firstOptHtml = select.options[0] ? select.options[0].outerHTML : `<option value="">Tất cả</option>`;
+            select.innerHTML = firstOptHtml;
             arr.forEach(val => {
                 let opt = document.createElement('option');
                 opt.value = val;
@@ -482,7 +487,6 @@
             let vung = document.getElementById('filterVung').value;
             let doiTac = document.getElementById('filterDoiTac').value;
             let doiTruong = document.getElementById('filterDoiTruong').value;
-            let block = document.getElementById('filterBlock').value;
 
             return globalData.filter(item => {
                 if (currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "") {
@@ -491,7 +495,6 @@
                 if (level >= 1 && vung && item.vung !== vung) return false;
                 if (level >= 2 && doiTac && item.doiTac !== doiTac) return false;
                 if (level >= 3 && doiTruong && item.doiTruong !== doiTruong) return false;
-                if (level >= 4 && block && item.block !== block) return false;
                 return true;
             });
         }
@@ -500,7 +503,6 @@
             let vungVal = document.getElementById('filterVung').value;
             let doiTacVal = document.getElementById('filterDoiTac').value;
             let doiTruongVal = document.getElementById('filterDoiTruong').value;
-            let blockVal = document.getElementById('filterBlock').value;
             let nhanVienVal = document.getElementById('filterNhanVien').value;
 
             let dataForDoiTac = getSubFilteredData(1);
@@ -519,11 +521,7 @@
             let doiTruongs = [...new Set(dataForDoiTruong.map(i => i.doiTruong))].filter(Boolean).sort();
             fillSelect('filterDoiTruong', doiTruongs, doiTruongVal);
 
-            let dataForBlock = getSubFilteredData(3);
-            let blocks = [...new Set(dataForBlock.map(i => i.block))].filter(Boolean).sort();
-            fillSelect('filterBlock', blocks, blockVal);
-
-            let dataForNhanVien = getSubFilteredData(4);
+            let dataForNhanVien = getSubFilteredData(3);
             let nhanViens = [...new Set(dataForNhanVien.map(i => i.nhanVien))].filter(Boolean).sort();
             fillSelect('filterNhanVien', nhanViens, nhanVienVal);
         }
@@ -534,7 +532,6 @@
                 doiTacSelect.value = "";
             }
             document.getElementById('filterDoiTruong').value = "";
-            document.getElementById('filterBlock').value = "";
             document.getElementById('filterNhanVien').value = "";
             updateDependentFilters();
             filterData();
@@ -542,20 +539,12 @@
 
         function onDoiTacChange() {
             document.getElementById('filterDoiTruong').value = "";
-            document.getElementById('filterBlock').value = "";
             document.getElementById('filterNhanVien').value = "";
             updateDependentFilters();
             filterData();
         }
 
         function onDoiTruongChange() {
-            document.getElementById('filterBlock').value = "";
-            document.getElementById('filterNhanVien').value = "";
-            updateDependentFilters();
-            filterData();
-        }
-
-        function onBlockChange() {
             document.getElementById('filterNhanVien').value = "";
             updateDependentFilters();
             filterData();
@@ -571,7 +560,7 @@
             let vung = document.getElementById('filterVung').value;
             let doiTac = document.getElementById('filterDoiTac').value;
             let doiTruong = document.getElementById('filterDoiTruong').value;
-            let block = document.getElementById('filterBlock').value;
+            let tpktCheckVal = document.getElementById('filterTpktCheck').value;
             let nhanVien = document.getElementById('filterNhanVien').value;
             let searchHDSmooth = document.getElementById('searchSoHopDong').value.trim().toLowerCase();
 
@@ -583,8 +572,10 @@
                 if (vung && item.vung !== vung) return false;
                 if (doiTac && item.doiTac !== doiTac) return false;
                 if (doiTruong && item.doiTruong !== doiTruong) return false;
-                if (block && item.block !== block) return false;
                 if (nhanVien && item.nhanVien !== nhanVien) return false;
+
+                let currentItemTpkt = item.userSelectedTpkt || item.tpktCheck || "Chưa kiểm tra";
+                if (tpktCheckVal && currentItemTpkt !== tpktCheckVal) return false;
 
                 if (searchHDSmooth) {
                     let soHD = item.soHopDong ? String(item.soHopDong).trim().toLowerCase() : "";
@@ -607,6 +598,9 @@
             if (currentUser && (currentUser.role === 'admin' || !currentUser.doiTac || currentUser.doiTac.trim() === "")) {
                 doiTacSelect.value = "";
             }
+            document.getElementById('filterDoiTruong').value = "";
+            document.getElementById('filterTpktCheck').value = "";
+            document.getElementById('filterNhanVien').value = "";
             document.getElementById('searchSoHopDong').value = "";
             updateDependentFilters();
             filterData();
@@ -678,7 +672,8 @@
                 let tgHoanTat = formatDate(row.tgHoanTat);
                 let ghiChu = row.ghiChu || "";
 
-                if (xllaiVal === "Đã xử lý lại") return;
+                // Ẩn dòng khi đã xử lý lại hoặc đã chọn Checklist Onsite (Mục 4.1 & 4.2)
+                if (xllaiVal === "Đã xử lý lại" || xllaiVal === "Checklist Onsite") return;
                 if (serverTpkt === "Bảo trì ok" && currentTpkt === "Bảo trì ok" && !row._modified) return;
 
                 let isBaoTriOk = (currentTpkt === "Bảo trì ok");
@@ -699,6 +694,7 @@
                         <select class="form-select form-select-sm mb-1" id="xllai_${row.id}">
                             <option value="Chuyển KTV XL lại" ${xllaiVal === "Chuyển KTV XL lại" || !xllaiVal ? 'selected' : ''}>Chuyển KTV XL lại</option>
                             <option value="Đã xử lý lại" ${xllaiVal === "Đã xử lý lại" ? 'selected' : ''}>Đã xử lý lại</option>
+                            <option value="Checklist Onsite" ${xllaiVal === "Checklist Onsite" ? 'selected' : ''}>Checklist Onsite</option>
                         </select>
                         <button class="btn btn-sm btn-warning w-100 mt-1 fw-bold" onclick="submitXlLai(${row.id}, '${serverTpkt}')">Gửi</button>
                     `;
@@ -733,6 +729,7 @@
                         <select class="form-select form-select-sm mb-1" id="xllai_${row.id}">
                             <option value="Chuyển KTV XL lại" ${xllaiVal === "Chuyển KTV XL lại" || !xllaiVal ? 'selected' : ''}>Chuyển KTV XL lại</option>
                             <option value="Đã xử lý lại" ${xllaiVal === "Đã xử lý lại" ? 'selected' : ''}>Đã xử lý lại</option>
+                            <option value="Checklist Onsite" ${xllaiVal === "Checklist Onsite" ? 'selected' : ''}>Checklist Onsite</option>
                         </select>
                         <button class="btn btn-sm btn-warning w-100 mt-1 fw-bold" onclick="submitXlLai(${row.id}, '${currentTpkt}')">Gửi</button>
                     `;
@@ -1062,12 +1059,12 @@
                 item.tpktCheck = tpktVal;
                 item.userSelectedTpkt = tpktVal;
                 item.xlLai = xllaiVal;
-                if (xllaiVal === "Đã xử lý lại") {
+                if (xllaiVal === "Đã xử lý lại" || xllaiVal === "Checklist Onsite") {
                     document.getElementById(`row_${rowId}`)?.remove();
                     updateBatchBar();
                 }
                 await updateRecord(rowId, tpktVal, xllaiVal);
-                if (xllaiVal !== "Đã xử lý lại") fetchAllDataAndInit();
+                if (xllaiVal !== "Đã xử lý lại" && xllaiVal !== "Checklist Onsite") fetchAllDataAndInit();
             }
         }
 
@@ -1116,7 +1113,7 @@
                     item.userSelectedTpkt = chosenTpkt;
                     item.xlLai = chosenXlLai;
                     
-                    if (chosenXlLai === "Đã xử lý lại") {
+                    if (chosenXlLai === "Đã xử lý lại" || chosenXlLai === "Checklist Onsite") {
                         document.getElementById(`row_${rowId}`)?.remove();
                     }
 
