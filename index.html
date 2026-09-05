@@ -19,7 +19,6 @@
     </style>
 </head>
 <body class="bg-light">
-
 <!-- MÀN HÌNH ĐĂNG NHẬP -->
 <div id="loginOverlay">
   <div style="position: relative; width: 100%; max-width: 440px; background: linear-gradient(135deg, #73b800 0%, #5c9600 100%); border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); padding: 35px 30px 30px 40px; font-family: 'Segoe UI', Arial, sans-serif;">
@@ -27,7 +26,7 @@
     
     <div style="text-align: center; margin-bottom: 25px;">
       <h3 style="color: #ffffff; font-weight: 700; font-size: 18px; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-transform: uppercase;">HỆ THỐNG CHECK CA VỤ BẢO TRÌ CHO TPKT</h3>
-      <p style="color: #eaf5cc; font-size: 13px; margin-top: 6px;">Hệ thống bảo mật đã sẵn sàng</p>
+      <p style="color: #eaf5cc; font-size: 13px; margin-top: 6px;">Đang kết nối hệ thống...</p>
     </div>
 
     <form id="loginForm" onsubmit="handleLogin(event)">
@@ -44,7 +43,7 @@
       <div id="loginError" class="alert alert-danger py-2 small mb-3 d-none" style="background: #ffe6e6; color: #cc0000; border: none; border-radius: 6px; font-weight: 500; text-align: center; padding: 8px; font-size: 13px;"></div>
 
       <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-        <button type="submit" id="btnLoginSubmit" class="btn" style="background: linear-gradient(135deg, #ff8c1a 0%, #ff7300 100%); color: #ffffff; border: none; padding: 10px 28px; font-weight: 700; font-size: 14px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,115,0,0.4); transition: all 0.2s;">ĐĂNG NHẬP</button>
+        <button type="submit" id="btnLoginSubmit" class="btn" disabled style="background: linear-gradient(135deg, #ff8c1a 0%, #ff7300 100%); color: #ffffff; border: none; padding: 10px 28px; font-weight: 700; font-size: 14px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,115,0,0.4); transition: all 0.2s;">ĐANG TẢI...</button>
       </div>
     </form>
   </div>
@@ -54,24 +53,16 @@
     <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 bg-white p-3 rounded shadow-sm">
         <h2 class="fw-bold text-dark mb-0 fs-4">Dashboard Vận hành & Kiểm tra checklist Bảo trì TPKT</h2>
         <div class="d-flex align-items-center gap-3">
-            <!-- Widget hiển thị tài khoản đang online -->
-            <div class="d-inline-flex align-items-center bg-light border rounded px-2 py-1" style="font-size: 13px;">
-                <span class="badge bg-success me-1" id="online-count">0</span> 
-                <span class="text-secondary me-2">Đang online</span>
-                <button class="btn btn-sm btn-outline-secondary py-0 px-1" data-bs-toggle="modal" data-bs-target="#onlineModal">Xem</button>
-            </div>
-
             <div class="text-end">
                 <span class="text-muted small d-block">Xin chào, <strong id="lblCurrentUsername" class="text-primary">--</strong></span>
                 <span class="badge bg-secondary" id="lblCurrentRole">Role: --</span>
-                <span class="badge bg-info text-dark" id="lblCurrentDoiTac">Đối tác: Tất cả</span>
+                <span class="badge bg-info text-dark d-block mt-1" id="lblCurrentDoiTac">Đối tác: Tất cả</span>
             </div>
-            <button class="btn btn-outline-warning btn-sm fw-bold" onclick="openChangePasswordModal()"><i class="bi bi-key me-1"></i> Đổi Mật Khẩu</button>
             <button class="btn btn-outline-danger btn-sm fw-bold" onclick="handleLogout()"><i class="bi bi-box-arrow-right me-1"></i> Đăng xuất</button>
         </div>
     </div>
     
-    <!-- THANH BỘ LỌC ĐẦY ĐỦ -->
+    <!-- THANH BỘ LỌC -->
     <div class="row g-2 mb-3 bg-white p-3 rounded shadow-sm align-items-end">
         <div class="col-md-2">
             <label class="form-label fw-bold">Vùng</label>
@@ -324,49 +315,11 @@
     </div>
 </div>
 
-<!-- MODAL ĐỔI MẬT KHẨU -->
-<div id="changePasswordModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 1050; align-items: center; justify-content: center;">
-  <div style="width: 100%; max-width: 400px; background: #ffffff; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); padding: 30px; font-family: 'Segoe UI', Arial, sans-serif;">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="fw-bold text-dark m-0"><i class="bi bi-key-fill text-warning me-2"></i> Đổi Mật Khẩu</h5>
-      <button type="button" class="btn-close" onclick="closeChangePasswordModal()"></button>
-    </div>
-    
-    <div class="mb-3">
-      <label class="form-label fw-bold small text-muted">Mật khẩu mới</label>
-      <input type="password" id="txtNewPassword" class="form-control" placeholder="Nhập mật khẩu mới...">
-    </div>
-
-    <div id="changePassMessage" class="alert py-2 small mb-3 d-none"></div>
-
-    <div class="d-flex justify-content-end gap-2">
-      <button type="button" class="btn btn-secondary btn-sm px-3" onclick="closeChangePasswordModal()">Hủy</button>
-      <button type="button" class="btn btn-primary btn-sm px-3 fw-bold" onclick="submitChangePassword()">Xác nhận đổi</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL DANH SÁCH ACC ONLINE -->
-<div class="modal fade" id="onlineModal" tabindex="-1">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      <div class="modal-header py-2">
-        <h6 class="modal-title">Tài khoản đang thao tác</h6>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body p-0">
-        <ul class="list-group list-group-flush" id="online-users-list">
-          <li class="list-group-item text-center text-muted py-2">Đang tải...</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    const WEB_APP_URL = "https://tpkt-backend.sayvv93.workers.dev/";
+    const WEB_APP_URL = "https://bt-tpkt.sayvv93.workers.dev/";
     
+    let globalAccounts = []; 
     let currentUser = null;
     let globalData = [];
     let filteredDataCache = [];
@@ -385,95 +338,69 @@
         }, 300);
     }
 
-    window.onload = function() {
-        let cachedData = localStorage.getItem('tpkt_cached_dataBT');
-        if (cachedData) {
-            try {
-                globalData = JSON.parse(cachedData);
-            } catch(e){}
-        }
-
-        checkSavedSession();
-        backgroundFetchData();
-    };
-
-    async function backgroundFetchData() {
+    async function loadData() {
         try {
-            const response = await fetch(WEB_APP_URL + "api/get-data", { method: "GET" });
-            const res = await response.json();
-            
-            const rawList = res.dataBT || res.data || [];
-            globalData = rawList.map((item, idx) => ({
-                id: item.id !== undefined ? item.id : idx,
-                vung: item.vung || item.Vung || item.VÙNG || item.vùng || "",
-                doiTac: item.doiTacQuanLy || item.doi_tac_quan_ly || item.doiTac || item.doi_tac || item.DoiTac || item.Doi_Tac || item.đối_tác || item.Doi_tac || item.doiTacName || "",
-                doiTruong: item.doiTruong || item.doi_truong || item.DoiTruong || item.Doi_Truong || item.đội_trưởng || item.Doi_truong || "",
-                soHopDong: item.soHopDong || item.so_hop_dong || item.SoHopDong || item.So_Hop_Dong || item.số_hợp_đồng || item.So_hop_dong || "",
-                nhanVien: item.nhanVien || item.nhan_vien || item.NhanVien || item.Nhan_Vien || item.nhân_viên || item.Nhan_vien || "",
-                tgHoanTat: item.tgHoanTat || item.tg_hoan_tat || item.TgHoanTat || item.Tg_Hoan_Tat || item.thời_gian_hoàn_tất || item.Tg_hoan_tat || "",
-                ghiChu: item.ghiChu || item.ghi_chu || item.GhiChu || item.Ghi_Chu || item.ghi_chú || "",
-                tpktCheck: item.tpktCheck || item.tpkt_check || item.TpktCheck || item.TPKT_Check || item.tpkt_Check || "",
-                xlLai: item.xlLai || item.xl_lai || item.XlLai || item.XL_Lai || item.xl_Lai || "",
-                userSelectedTpkt: (item.tpktCheck || item.tpkt_check || item.TpktCheck || item.TPKT_Check || item.tpkt_Check) ? String(item.tpktCheck || item.tpkt_check || item.TpktCheck || item.TPKT_Check || item.tpkt_Check).trim() : "Chưa kiểm tra"
-            }));
-
-            localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
-
-            if (currentUser) {
-                initFilters(globalData);
-                filterData();
-                checkDuplicateContracts(globalData);
-            }
+            const response = await fetch(WEB_APP_URL, { method: "GET" });
+            return await response.json();
         } catch (error) {
-            console.error("Lỗi đồng bộ ngầm:", error);
+            console.error("Lỗi khi tải dữ liệu:", error);
+            throw error;
         }
     }
 
     async function updateRecord(rowId, tpktCheck, xlLai) {
         try {
-            let username = (currentUser && currentUser.username) ? currentUser.username : "unknown";
-            fetch(WEB_APP_URL, {
+            const response = await fetch(WEB_APP_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ rowId, username, tpktCheck, xlLai })
-            }).catch(err => console.error("Lỗi lưu:", err));
+                body: JSON.stringify({ rowId, tpktCheck, xlLai })
+            });
+            return await response.json();
         } catch (error) {
-            console.error("Lỗi cập nhật record:", error);
+            console.error("Lỗi khi cập nhật:", error);
         }
     }
 
-    async function handleLogin(event) {
+    async function fetchAllDataAndInit() {
+        try {
+            const res = await loadData();
+            globalAccounts = res.accounts || [];
+            
+            globalData = (res.dataBT || []).map(item => ({
+                ...item,
+                userSelectedTpkt: item.tpktCheck ? item.tpktCheck.trim() : "Chưa kiểm tra"
+            }));
+
+            let btnSubmit = document.getElementById('btnLoginSubmit');
+            btnSubmit.disabled = false;
+            btnSubmit.innerText = "ĐĂNG NHẬP";
+            document.querySelector('#loginOverlay p').innerText = "Nhập thông tin tài khoản từ hệ thống";
+
+            initFilters(globalData);
+            checkSavedSession();
+        } catch(error) {
+            document.querySelector('#loginOverlay p').innerText = "Lỗi kết nối Server! Vui lòng tải lại trang.";
+        }
+    }
+
+    function handleLogin(event) {
         event.preventDefault();
         let uInput = document.getElementById('loginUser').value.trim();
         let pInput = document.getElementById('loginPass').value.trim();
         let errBox = document.getElementById('loginError');
 
-        try {
-            let response = await fetch(WEB_APP_URL + "api/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: uInput, password: pInput })
-            });
-            let result = await response.json();
-
-            if (result.success && result.user) {
-                currentUser = result.user;
-                localStorage.setItem('tpkt_current_user', JSON.stringify(result.user));
-                errBox.classList.add('d-none');
-                document.getElementById('loginOverlay').style.display = 'none';
-                initSessionUI();
-                initFilters(globalData);
-                filterData();
-                checkDuplicateContracts(globalData);
-                
-                // Kích hoạt tính năng ping online ngay sau khi đăng nhập thành công
-                startOnlinePing();
-            } else {
-                errBox.innerText = result.message || "Tên đăng nhập hoặc mật khẩu không chính xác!";
-                errBox.classList.remove('d-none');
-            }
-        } catch (e) {
-            errBox.innerText = "Lỗi kết nối đến server!";
+        let found = globalAccounts.find(acc => acc.username === uInput && acc.password === pInput);
+        
+        if (found) {
+            currentUser = found;
+            localStorage.setItem('tpkt_current_user', JSON.stringify(found));
+            errBox.classList.add('d-none');
+            document.getElementById('loginOverlay').style.display = 'none';
+            initSessionUI();
+            filterData();
+            checkDuplicateContracts(globalData);
+        } else {
+            errBox.innerText = "Tên đăng nhập hoặc mật khẩu không chính xác!";
             errBox.classList.remove('d-none');
         }
     }
@@ -491,7 +418,7 @@
         document.getElementById('lblCurrentUsername').innerText = currentUser.username;
         document.getElementById('lblCurrentRole').innerText = `Role: ${currentUser.role}`;
         
-        let dtLabel = (currentUser.doiTac && currentUser.doiTac.trim() !== "" && currentUser.doiTac.toUpperCase() !== "ALL") ? currentUser.doiTac : "Tất cả (Full quyền)";
+        let dtLabel = (currentUser.doiTac && currentUser.doiTac.trim() !== "") ? currentUser.doiTac : "Tất cả (Full quyền)";
         document.getElementById('lblCurrentDoiTac').innerText = `Đối tác: ${dtLabel}`;
     }
 
@@ -500,16 +427,13 @@
         if (savedUser) {
             try {
                 let parsed = JSON.parse(savedUser);
-                if (parsed && parsed.username) {
-                    currentUser = parsed;
+                let validAcc = globalAccounts.find(acc => acc.username === parsed.username);
+                if (validAcc) {
+                    currentUser = validAcc;
                     document.getElementById('loginOverlay').style.display = 'none';
                     initSessionUI();
-                    if (globalData.length > 0) {
-                        initFilters(globalData);
-                        filterData();
-                        checkDuplicateContracts(globalData);
-                    }
-                    startOnlinePing();
+                    filterData();
+                    checkDuplicateContracts(globalData);
                     return;
                 }
             } catch(e) {}
@@ -517,34 +441,9 @@
         document.getElementById('loginOverlay').style.display = 'flex';
     }
 
-    // Hàm gọi API ping định kỳ lên Cloudflare Worker để cập nhật danh sách online
-    function startOnlinePing() {
-        pingActiveUser();
-        setInterval(pingActiveUser, 60000); // Lặp lại mỗi 60 giây
-    }
-
-    function pingActiveUser() {
-        if (!currentUser || !currentUser.username) return;
-
-        fetch(WEB_APP_URL + 'api/ping', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: currentUser.username, role: currentUser.role || 'user' })
-        })
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById('online-count').innerText = data.length || 0;
-            let html = '';
-            (data || []).forEach(item => {
-                html += `<li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
-                    <span><i class="bi bi-person-circle text-success me-1"></i> ${item.username}</span>
-                    <span class="badge bg-secondary text-dark" style="font-size:10px;">${item.role}</span>
-                </li>`;
-            });
-            document.getElementById('online-users-list').innerHTML = html || '<li class="list-group-item text-center text-muted py-2">Không có ai khác</li>';
-        })
-        .catch(err => console.error("Lỗi ping online:", err));
-    }
+    window.onload = function() {
+        fetchAllDataAndInit();
+    };
 
     function formatDate(dateStr) {
         if (!dateStr) return "";
@@ -568,12 +467,11 @@
         let doiTacs = [...new Set(data.map(item => item.doiTac))].filter(Boolean).sort();
         fillSelect('filterDoiTac', doiTacs);
 
-        if (currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "" && currentUser.doiTac.toUpperCase() !== 'ALL') {
-            doiTacSelect.value = currentUser.doiTac.trim();
+        if (currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "") {
+            doiTacSelect.value = currentUser.doiTac;
             doiTacSelect.disabled = true;
         } else {
             doiTacSelect.disabled = false;
-            doiTacSelect.value = "";
         }
 
         updateDependentFilters();
@@ -589,7 +487,7 @@
             opt.textContent = val;
             select.appendChild(opt);
         });
-        if (selectedVal) select.value = selectedVal;
+        select.value = selectedVal;
     }
 
     function getSubFilteredData(level) {
@@ -598,13 +496,11 @@
         let doiTruong = document.getElementById('filterDoiTruong').value;
 
         return globalData.filter(item => {
-            if (currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "" && currentUser.doiTac.toUpperCase() !== 'ALL') {
-                if (!item.doiTac || item.doiTac.trim().toUpperCase() !== currentUser.doiTac.trim().toUpperCase()) return false;
-            } else {
-                if (doiTac && level >= 2 && item.doiTac !== doiTac) return false;
+            if (currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "") {
+                if (item.doiTac !== currentUser.doiTac) return false;
             }
-
             if (level >= 1 && vung && item.vung !== vung) return false;
+            if (level >= 2 && doiTac && item.doiTac !== doiTac) return false;
             if (level >= 3 && doiTruong && item.doiTruong !== doiTruong) return false;
             return true;
         });
@@ -621,8 +517,8 @@
         fillSelect('filterDoiTac', doiTacs, doiTacVal);
         
         let doiTacSelect = document.getElementById('filterDoiTac');
-        if (currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "" && currentUser.doiTac.toUpperCase() !== 'ALL') {
-            doiTacSelect.value = currentUser.doiTac.trim();
+        if (currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "") {
+            doiTacSelect.value = currentUser.doiTac;
             doiTacSelect.disabled = true;
         } else {
             doiTacSelect.disabled = false;
@@ -639,7 +535,7 @@
 
     function onVungChange() {
         let doiTacSelect = document.getElementById('filterDoiTac');
-        if (currentUser && (currentUser.role === 'admin' || !currentUser.doiTac || currentUser.doiTac.toUpperCase() === 'ALL')) {
+        if (currentUser && (currentUser.role === 'admin' || !currentUser.doiTac || currentUser.doiTac.trim() === "")) {
             doiTacSelect.value = "";
         }
         document.getElementById('filterDoiTruong').value = "";
@@ -676,13 +572,12 @@
         let searchHDSmooth = document.getElementById('searchSoHopDong').value.trim().toLowerCase();
 
         filteredDataCache = globalData.filter(item => {
-            if (currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "" && currentUser.doiTac.toUpperCase() !== 'ALL') {
-                if (!item.doiTac || item.doiTac.trim().toUpperCase() !== currentUser.doiTac.trim().toUpperCase()) return false;
-            } else {
-                if (doiTac && item.doiTac !== doiTac) return false;
+            if (currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "") {
+                if (item.doiTac !== currentUser.doiTac) return false;
             }
 
             if (vung && item.vung !== vung) return false;
+            if (doiTac && item.doiTac !== doiTac) return false;
             if (doiTruong && item.doiTruong !== doiTruong) return false;
             if (nhanVien && item.nhanVien !== nhanVien) return false;
 
@@ -707,7 +602,7 @@
     function resetFilters() {
         document.getElementById('filterVung').value = "";
         let doiTacSelect = document.getElementById('filterDoiTac');
-        if (currentUser && (currentUser.role === 'admin' || !currentUser.doiTac || currentUser.doiTac.toUpperCase() === 'ALL')) {
+        if (currentUser && (currentUser.role === 'admin' || !currentUser.doiTac || currentUser.doiTac.trim() === "")) {
             doiTacSelect.value = "";
         }
         document.getElementById('filterDoiTruong').value = "";
@@ -1145,7 +1040,7 @@
 
     function onTpktChange(rowId) {
         let val = document.getElementById(`tpkt_${rowId}`).value;
-        let item = globalData.find(i => i.id == rowId);
+        let item = globalData.find(i => i.id === rowId);
         if (!item) return;
 
         item.userSelectedTpkt = val;
@@ -1161,7 +1056,7 @@
     }
 
     function resetRowTpkt(rowId) {
-        let item = globalData.find(i => i.id == rowId);
+        let item = globalData.find(i => i.id === rowId);
         if (item) {
             item.userSelectedTpkt = "Chưa kiểm tra";
             item._modified = true;
@@ -1170,67 +1065,60 @@
         }
     }
 
-    function submitBaoTriOk(rowId) {
-        let item = globalData.find(i => i.id == rowId);
+    async function submitBaoTriOk(rowId) {
+        let item = globalData.find(i => i.id === rowId);
         if (item) {
             item.tpktCheck = "Bảo trì ok";
             item.userSelectedTpkt = "Bảo trì ok";
             item.xlLai = "";
-            
             document.getElementById(`row_${rowId}`)?.remove();
             updateBatchBar();
-            
-            updateRecord(rowId, "Bảo trì ok", "");
-            localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
+            await updateRecord(rowId, "Bảo trì ok", "");
         }
     }
 
-    function submitXlLai(rowId, tpktVal) {
+    async function submitXlLai(rowId, tpktVal) {
         let xllaiElem = document.getElementById(`xllai_${rowId}`);
         let xllaiVal = xllaiElem ? xllaiElem.value : "Chuyển KTV XL lại";
-        let item = globalData.find(i => i.id == rowId);
+        let item = globalData.find(i => i.id === rowId);
         if (item) {
             item.tpktCheck = tpktVal;
             item.userSelectedTpkt = tpktVal;
             item.xlLai = xllaiVal;
-            
             if (xllaiVal === "Đã xử lý lại" || xllaiVal === "Checklist Onsite") {
                 document.getElementById(`row_${rowId}`)?.remove();
                 updateBatchBar();
             }
-            
-            updateRecord(rowId, tpktVal, xllaiVal);
-            localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
-            
-            if (xllaiVal !== "Đã xử lý lại" && xllaiVal !== "Checklist Onsite") {
-                renderTable(filteredDataCache);
-            }
+            await updateRecord(rowId, tpktVal, xllaiVal);
+            if (xllaiVal !== "Đã xử lý lại" && xllaiVal !== "Checklist Onsite") fetchAllDataAndInit();
         }
     }
 
-    function applyBatchTpkt() {
+    async function applyBatchTpkt() {
         let checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
         let chosenTpkt = document.getElementById('batchTpktValue').value;
         if (!chosenTpkt || checkedBoxes.length === 0) return alert("Vui lòng chọn TPKT Check và tích chọn dòng!");
 
+        let promises = [];
         checkedBoxes.forEach(cb => {
-            let rowId = isNaN(cb.value) ? cb.value : parseInt(cb.value);
-            let item = globalData.find(i => i.id == rowId);
+            let rowId = parseInt(cb.value);
+            let item = globalData.find(i => i.id === rowId);
             if (item) {
                 item.tpktCheck = chosenTpkt;
                 item.userSelectedTpkt = chosenTpkt;
                 item.xlLai = "";
                 document.getElementById(`row_${rowId}`)?.remove();
-                updateRecord(rowId, chosenTpkt, "");
+
+                promises.push(updateRecord(rowId, chosenTpkt, ""));
             }
         });
 
-        localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
+        await Promise.all(promises);
         updateBatchBar(); 
-        filterData();
+        fetchAllDataAndInit();
     }
 
-    function applyBatchXlLai() {
+    async function applyBatchXlLai() {
         let checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
         let chosenTpkt = document.getElementById('batchTpktValue').value;
         let chosenXlLai = document.getElementById('batchXlLaiValue').value;
@@ -1242,9 +1130,10 @@
             return alert("Vui lòng chọn hình thức XL Lại và tích chọn dòng!");
         }
 
+        let promises = [];
         checkedBoxes.forEach(cb => {
-            let rowId = isNaN(cb.value) ? cb.value : parseInt(cb.value);
-            let item = globalData.find(i => i.id == rowId);
+            let rowId = parseInt(cb.value);
+            let item = globalData.find(i => i.id === rowId);
             if (item) {
                 item.tpktCheck = chosenTpkt;
                 item.userSelectedTpkt = chosenTpkt;
@@ -1254,73 +1143,12 @@
                     document.getElementById(`row_${rowId}`)?.remove();
                 }
 
-                updateRecord(rowId, chosenTpkt, chosenXlLai);
+                promises.push(updateRecord(rowId, chosenTpkt, chosenXlLai));
             }
         });
-
-        localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
+        await Promise.all(promises);
         updateBatchBar(); 
-        filterData();
-    }
-
-    function openChangePasswordModal() {
-        document.getElementById('txtNewPassword').value = "";
-        let msgBox = document.getElementById('changePassMessage');
-        msgBox.classList.add('d-none');
-        msgBox.innerText = "";
-        document.getElementById('changePasswordModal').style.display = 'flex';
-    }
-
-    function closeChangePasswordModal() {
-        document.getElementById('changePasswordModal').style.display = 'none';
-    }
-
-    async function submitChangePassword() {
-        let newPassword = document.getElementById('txtNewPassword').value.trim();
-        let msgBox = document.getElementById('changePassMessage');
-
-        if (!newPassword) {
-            msgBox.className = "alert alert-danger py-2 small mb-3";
-            msgBox.innerText = "Vui lòng nhập mật khẩu mới!";
-            msgBox.classList.remove('d-none');
-            return;
-        }
-
-        if (!currentUser || !currentUser.username) {
-            alert("Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại!");
-            return;
-        }
-
-        try {
-            let response = await fetch(WEB_APP_URL + "api/change-password", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    username: currentUser.username,
-                    newPassword: newPassword
-                })
-            });
-
-            let result = await response.json();
-
-            if (result.success) {
-                msgBox.className = "alert alert-success py-2 small mb-3";
-                msgBox.innerText = "Đổi mật khẩu thành công!";
-                msgBox.classList.remove('d-none');
-                setTimeout(() => {
-                    closeChangePasswordModal();
-                }, 1500);
-            } else {
-                msgBox.className = "alert alert-danger py-2 small mb-3";
-                msgBox.innerText = result.error || "Không thể đổi mật khẩu!";
-                msgBox.classList.remove('d-none');
-            }
-        } catch (error) {
-            console.error("Lỗi đổi mật khẩu:", error);
-            msgBox.className = "alert alert-danger py-2 small mb-3";
-            msgBox.innerText = "Lỗi kết nối đến server!";
-            msgBox.classList.remove('d-none');
-        }
+        fetchAllDataAndInit();
     }
 </script>
 </body>
