@@ -19,6 +19,7 @@
     </style>
 </head>
 <body class="bg-light">
+
 <!-- MÀN HÌNH ĐĂNG NHẬP -->
 <div id="loginOverlay">
   <div style="position: relative; width: 100%; max-width: 440px; background: linear-gradient(135deg, #73b800 0%, #5c9600 100%); border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); padding: 35px 30px 30px 40px; font-family: 'Segoe UI', Arial, sans-serif;">
@@ -26,7 +27,7 @@
     
     <div style="text-align: center; margin-bottom: 25px;">
       <h3 style="color: #ffffff; font-weight: 700; font-size: 18px; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-transform: uppercase;">HỆ THỐNG CHECK CA VỤ BẢO TRÌ CHO TPKT</h3>
-      <p style="color: #eaf5cc; font-size: 13px; margin-top: 6px;">Đang kết nối hệ thống...</p>
+      <p style="color: #eaf5cc; font-size: 13px; margin-top: 6px;">Hệ thống đã sẵn sàng kết nối</p>
     </div>
 
     <form id="loginForm" onsubmit="handleLogin(event)">
@@ -43,7 +44,7 @@
       <div id="loginError" class="alert alert-danger py-2 small mb-3 d-none" style="background: #ffe6e6; color: #cc0000; border: none; border-radius: 6px; font-weight: 500; text-align: center; padding: 8px; font-size: 13px;"></div>
 
       <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-        <button type="submit" id="btnLoginSubmit" class="btn" disabled style="background: linear-gradient(135deg, #ff8c1a 0%, #ff7300 100%); color: #ffffff; border: none; padding: 10px 28px; font-weight: 700; font-size: 14px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,115,0,0.4); transition: all 0.2s;">ĐANG TẢI...</button>
+        <button type="submit" id="btnLoginSubmit" class="btn" style="background: linear-gradient(135deg, #ff8c1a 0%, #ff7300 100%); color: #ffffff; border: none; padding: 10px 28px; font-weight: 700; font-size: 14px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,115,0,0.4); transition: all 0.2s;">ĐĂNG NHẬP</button>
       </div>
     </form>
   </div>
@@ -51,7 +52,7 @@
 
 <div class="container-fluid py-4">
     <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 bg-white p-3 rounded shadow-sm">
-        <h2 class="fw-bold text-dark mb-0 fs-4">Dashboard Vận hành & Kiểm tra checklist Bảo trì TPKT</h2>
+        <h2 class="fw-bold text-dark mb-0 fs-4">Dashboard Vận hành & Kiểm tra checklist Bảo trì TPKT (Tốc độ tối ưu)</h2>
         <div class="d-flex align-items-center gap-3">
             <div class="text-end">
                 <span class="text-muted small d-block">Xin chào, <strong id="lblCurrentUsername" class="text-primary">--</strong></span>
@@ -62,7 +63,7 @@
         </div>
     </div>
     
-    <!-- THANH BỘ LỌC -->
+    <!-- THANH BỘ LỌC ĐẦY ĐỦ -->
     <div class="row g-2 mb-3 bg-white p-3 rounded shadow-sm align-items-end">
         <div class="col-md-2">
             <label class="form-label fw-bold">Vùng</label>
@@ -179,7 +180,7 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <tr><td colspan="10" class="text-center">Đang tải dữ liệu từ Google Sheets...</td></tr>
+                        <tr><td colspan="10" class="text-center">Đang tải dữ liệu...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -338,48 +339,67 @@
         }, 300);
     }
 
-    async function loadData() {
+    window.onload = function() {
+        let cachedAccounts = localStorage.getItem('tpkt_cached_accounts');
+        let cachedData = localStorage.getItem('tpkt_cached_dataBT');
+        
+        if (cachedAccounts) {
+            try { globalAccounts = JSON.parse(cachedAccounts); } catch(e){}
+        }
+        if (cachedData) {
+            try {
+                globalData = JSON.parse(cachedData);
+                initFilters(globalData);
+                checkSavedSession();
+            } catch(e){}
+        }
+
+        backgroundFetchData();
+    };
+
+    async function backgroundFetchData() {
         try {
             const response = await fetch(WEB_APP_URL, { method: "GET" });
-            return await response.json();
+            const res = await response.json();
+            
+            globalAccounts = res.accounts || [];
+            localStorage.setItem('tpkt_cached_accounts', JSON.stringify(globalAccounts));
+
+            globalData = (res.dataBT || []).map(item => ({
+                id: item.id,
+                vung: item.vung || item.Vung || "",
+                doiTac: item.doiTac || item.doi_tac || item.DoiTac || "",
+                doiTruong: item.doiTruong || item.doi_truong || item.DoiTruong || "",
+                soHopDong: item.soHopDong || item.so_hop_dong || item.SoHopDong || "",
+                nhanVien: item.nhanVien || item.nhan_vien || item.NhanVien || "",
+                tgHoanTat: item.tgHoanTat || item.tg_hoan_tat || item.TgHoanTat || "",
+                ghiChu: item.ghiChu || item.ghi_chu || item.GhiChu || "",
+                tpktCheck: item.tpktCheck || item.tpkt_check || item.TpktCheck || "",
+                xlLai: item.xlLai || item.xl_lai || item.XlLai || "",
+                userSelectedTpkt: (item.tpktCheck || item.tpkt_check || item.TpktCheck) ? (item.tpktCheck || item.tpkt_check || item.TpktCheck).trim() : "Chưa kiểm tra"
+            }));
+
+            localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
+
+            if (currentUser) {
+                initFilters(globalData);
+                filterData();
+                checkDuplicateContracts(globalData);
+            }
         } catch (error) {
-            console.error("Lỗi khi tải dữ liệu:", error);
-            throw error;
+            console.error("Lỗi đồng bộ ngầm:", error);
         }
     }
 
     async function updateRecord(rowId, tpktCheck, xlLai) {
         try {
-            const response = await fetch(WEB_APP_URL, {
+            fetch(WEB_APP_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ rowId, tpktCheck, xlLai })
-            });
-            return await response.json();
+            }).catch(err => console.error("Lỗi lưu:", err));
         } catch (error) {
-            console.error("Lỗi khi cập nhật:", error);
-        }
-    }
-
-    async function fetchAllDataAndInit() {
-        try {
-            const res = await loadData();
-            globalAccounts = res.accounts || [];
-            
-            globalData = (res.dataBT || []).map(item => ({
-                ...item,
-                userSelectedTpkt: item.tpktCheck ? item.tpktCheck.trim() : "Chưa kiểm tra"
-            }));
-
-            let btnSubmit = document.getElementById('btnLoginSubmit');
-            btnSubmit.disabled = false;
-            btnSubmit.innerText = "ĐĂNG NHẬP";
-            document.querySelector('#loginOverlay p').innerText = "Nhập thông tin tài khoản từ Sheet Accounts";
-
-            initFilters(globalData);
-            checkSavedSession();
-        } catch(error) {
-            document.querySelector('#loginOverlay p').innerText = "Lỗi kết nối Server! Vui lòng tải lại trang.";
+            console.error("Lỗi cập nhật record:", error);
         }
     }
 
@@ -397,6 +417,7 @@
             errBox.classList.add('d-none');
             document.getElementById('loginOverlay').style.display = 'none';
             initSessionUI();
+            initFilters(globalData);
             filterData();
             checkDuplicateContracts(globalData);
         } else {
@@ -432,18 +453,17 @@
                     currentUser = validAcc;
                     document.getElementById('loginOverlay').style.display = 'none';
                     initSessionUI();
+                    initFilters(globalData);
                     filterData();
                     checkDuplicateContracts(globalData);
                     return;
                 }
             } catch(e) {}
         }
-        document.getElementById('loginOverlay').style.display = 'flex';
+        if (globalAccounts.length > 0) {
+            document.getElementById('loginOverlay').style.display = 'flex';
+        }
     }
-
-    window.onload = function() {
-        fetchAllDataAndInit();
-    };
 
     function formatDate(dateStr) {
         if (!dateStr) return "";
@@ -1065,19 +1085,22 @@
         }
     }
 
-    async function submitBaoTriOk(rowId) {
+    function submitBaoTriOk(rowId) {
         let item = globalData.find(i => i.id === rowId);
         if (item) {
             item.tpktCheck = "Bảo trì ok";
             item.userSelectedTpkt = "Bảo trì ok";
             item.xlLai = "";
+            
             document.getElementById(`row_${rowId}`)?.remove();
             updateBatchBar();
-            await updateRecord(rowId, "Bảo trì ok", "");
+            
+            updateRecord(rowId, "Bảo trì ok", "");
+            localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
         }
     }
 
-    async function submitXlLai(rowId, tpktVal) {
+    function submitXlLai(rowId, tpktVal) {
         let xllaiElem = document.getElementById(`xllai_${rowId}`);
         let xllaiVal = xllaiElem ? xllaiElem.value : "Chuyển KTV XL lại";
         let item = globalData.find(i => i.id === rowId);
@@ -1085,40 +1108,44 @@
             item.tpktCheck = tpktVal;
             item.userSelectedTpkt = tpktVal;
             item.xlLai = xllaiVal;
+            
             if (xllaiVal === "Đã xử lý lại" || xllaiVal === "Checklist Onsite") {
                 document.getElementById(`row_${rowId}`)?.remove();
                 updateBatchBar();
             }
-            await updateRecord(rowId, tpktVal, xllaiVal);
-            if (xllaiVal !== "Đã xử lý lại" && xllaiVal !== "Checklist Onsite") fetchAllDataAndInit();
+            
+            updateRecord(rowId, tpktVal, xllaiVal);
+            localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
+            
+            if (xllaiVal !== "Đã xử lý lại" && xllaiVal !== "Checklist Onsite") {
+                renderTable(filteredDataCache);
+            }
         }
     }
 
-    async function applyBatchTpkt() {
+    function applyBatchTpkt() {
         let checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
         let chosenTpkt = document.getElementById('batchTpktValue').value;
         if (!chosenTpkt || checkedBoxes.length === 0) return alert("Vui lòng chọn TPKT Check và tích chọn dòng!");
 
-        let promises = [];
         checkedBoxes.forEach(cb => {
-            let rowId = parseInt(cb.value);
-            let item = globalData.find(i => i.id === rowId);
+            let rowId = isNaN(cb.value) ? cb.value : parseInt(cb.value);
+            let item = globalData.find(i => i.id == rowId);
             if (item) {
                 item.tpktCheck = chosenTpkt;
                 item.userSelectedTpkt = chosenTpkt;
                 item.xlLai = "";
                 document.getElementById(`row_${rowId}`)?.remove();
-
-                promises.push(updateRecord(rowId, chosenTpkt, ""));
+                updateRecord(rowId, chosenTpkt, "");
             }
         });
 
-        await Promise.all(promises);
+        localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
         updateBatchBar(); 
-        fetchAllDataAndInit();
+        filterData();
     }
 
-    async function applyBatchXlLai() {
+    function applyBatchXlLai() {
         let checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
         let chosenTpkt = document.getElementById('batchTpktValue').value;
         let chosenXlLai = document.getElementById('batchXlLaiValue').value;
@@ -1130,10 +1157,9 @@
             return alert("Vui lòng chọn hình thức XL Lại và tích chọn dòng!");
         }
 
-        let promises = [];
         checkedBoxes.forEach(cb => {
-            let rowId = parseInt(cb.value);
-            let item = globalData.find(i => i.id === rowId);
+            let rowId = isNaN(cb.value) ? cb.value : parseInt(cb.value);
+            let item = globalData.find(i => i.id == rowId);
             if (item) {
                 item.tpktCheck = chosenTpkt;
                 item.userSelectedTpkt = chosenTpkt;
@@ -1143,12 +1169,13 @@
                     document.getElementById(`row_${rowId}`)?.remove();
                 }
 
-                promises.push(updateRecord(rowId, chosenTpkt, chosenXlLai));
+                updateRecord(rowId, chosenTpkt, chosenXlLai);
             }
         });
-        await Promise.all(promises);
+
+        localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
         updateBatchBar(); 
-        fetchAllDataAndInit();
+        filterData();
     }
 </script>
 </body>
