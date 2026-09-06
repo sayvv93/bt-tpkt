@@ -6,84 +6,322 @@
     <title>Hệ thống Vận hành & Xử lý TPKT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        #batchActionBar { position: sticky; top: 10px; z-index: 1020; }
+        :root {
+            --ink: #12181B;
+            --surface: #F5F6F2;
+            --card: #FFFFFF;
+            --brand: #3F7D1F;
+            --brand-dark: #2E5D16;
+            --brand-soft: #E7F1DA;
+            --amber: #A6620A;
+            --red: #AC2B22;
+            --red-soft: #FBE7E4;
+            --slate: #5C6660;
+            --slate-soft: #8B948D;
+            --line: #E1E4DD;
+        }
+
+        * { font-family: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif; }
+        .mono, #dataTable td b, #dataTable td small, .stat-value, .op-code {
+            font-family: 'IBM Plex Mono', 'Courier New', monospace;
+        }
+
+        body { background: var(--surface); color: var(--ink); }
+
+        /* ---------- HEADER (thanh chỉ huy) ---------- */
+        .ops-header {
+            background: var(--ink);
+            color: #fff;
+            border-radius: 10px;
+            padding: 16px 22px;
+        }
+        .ops-header .ops-mark {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.04em;
+            color: #9FD971;
+            background: rgba(159, 217, 113, 0.12);
+            border: 1px solid rgba(159, 217, 113, 0.35);
+            border-radius: 4px;
+            padding: 2px 7px;
+            display: inline-block;
+        }
+        .ops-header h2 { color: #fff; letter-spacing: -0.01em; }
+        .ops-pill {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11.5px;
+            border-radius: 4px;
+            padding: 3px 9px;
+            border: 1px solid rgba(255,255,255,0.18);
+            color: #D7DBD5;
+            background: rgba(255,255,255,0.06);
+        }
+        .ops-pill.is-brand { color: #9FD971; border-color: rgba(159,217,113,0.4); background: rgba(159,217,113,0.1); }
+        .online-dot {
+            display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+            background: #9FD971; box-shadow: 0 0 0 rgba(159,217,113,0.5);
+            animation: online-pulse 2s infinite;
+        }
+        @keyframes online-pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(159,217,113,0.55); }
+            70%  { box-shadow: 0 0 0 6px rgba(159,217,113,0); }
+            100% { box-shadow: 0 0 0 0 rgba(159,217,113,0); }
+        }
+        .ops-btn {
+            border-radius: 5px; font-size: 12.5px; font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.22); color: #E7E9E5; background: transparent;
+            padding: 6px 12px; transition: background .15s;
+        }
+        .ops-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .ops-btn.is-danger:hover { background: rgba(172,43,34,0.35); border-color: rgba(172,43,34,0.6); }
+
+        /* ---------- FILTER STRIP ---------- */
+        .filter-strip {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 14px 18px;
+        }
+        .filter-strip .f-group {
+            border-right: 1px solid var(--line);
+            padding-right: 16px;
+        }
+        .filter-strip .f-group:last-of-type { border-right: none; }
+        .filter-strip label {
+            font-size: 10.5px; font-weight: 600; letter-spacing: 0.03em;
+            color: var(--slate); margin-bottom: 3px; display: block;
+        }
+        .filter-strip select, .filter-strip input {
+            border: none; border-bottom: 2px solid var(--line);
+            border-radius: 0; padding: 3px 2px; font-size: 13.5px;
+            background: transparent; color: var(--ink);
+        }
+        .filter-strip select:focus, .filter-strip input:focus {
+            outline: none; border-bottom-color: var(--brand); box-shadow: none;
+        }
+        .filter-reset-btn {
+            border: 1px solid var(--line); background: var(--surface); color: var(--slate);
+            border-radius: 6px; font-size: 12.5px; font-weight: 600; padding: 7px 10px;
+        }
+        .filter-reset-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+        /* ---------- SEGMENTED TAB CONTROL ---------- */
+        .seg-tabs { display: flex; gap: 6px; border: none; margin: 0; }
+        .seg-tabs .nav-item { margin: 0; }
+        .seg-tabs .nav-link {
+            border: 1px solid var(--line); background: var(--card); color: var(--slate);
+            border-radius: 7px; font-size: 13.5px; font-weight: 600; padding: 9px 16px;
+        }
+        .seg-tabs .nav-link.active {
+            background: var(--ink); color: #fff; border-color: var(--ink);
+        }
+        .seg-tabs .nav-link .count-chip {
+            font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600;
+            background: var(--red); color: #fff; border-radius: 20px; padding: 1px 7px; margin-left: 6px;
+        }
+
+        /* ---------- DATA TABLE ---------- */
+        .table-panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 4px; }
         .table-responsive { max-height: 70vh; overflow-y: auto; }
-        .table thead th { position: sticky; top: 0; background-color: #212529 !important; color: #fff; z-index: 1010; box-shadow: inset 0 -2px 0 #dee2e6; }
-        .kpi-card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.2s; }
-        .kpi-card:hover { transform: translateY(-3px); }
-        .executive-chart-container { position: relative; height: 380px; }
-        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .table thead th {
+            position: sticky; top: 0; background-color: var(--ink) !important; color: #fff;
+            z-index: 1010; font-size: 11.5px; font-weight: 600; letter-spacing: 0.02em;
+            border-bottom: none; padding: 10px 12px; vertical-align: middle;
+        }
+        .table thead th.sortable:hover { background-color: var(--brand-dark) !important; }
+        .sort-indicator { font-size: 10px; opacity: 0.7; }
+        .sort-indicator.active { opacity: 1; color: #9FD971; }
+
+        #dataTable tbody tr:hover { background: var(--brand-soft); }
+        #dataTable tbody tr.row-overdue { background: var(--red-soft); }
+        #dataTable td { font-size: 13.5px; border-color: var(--line); vertical-align: middle; }
+        #dataTable td b { font-weight: 600; color: var(--ink); }
+
+        /* status chip dùng trong cột TPKT CHECK (áp trong JS) */
+        .status-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 600; padding: 2px 0;
+        }
+        .status-chip::before {
+            content: ""; width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+        }
+        .status-chip.is-ok { color: var(--brand-dark); }
+        .status-chip.is-ok::before { background: var(--brand); }
+        .status-chip.is-loi { color: var(--red); }
+        .status-chip.is-loi::before { background: var(--red); }
+
+        #batchActionBar { position: sticky; top: 10px; z-index: 1020; }
+        .batch-bar {
+            background: var(--ink); color: #fff; border-radius: 10px; border: none;
+        }
+        .batch-bar .batch-count { font-family: 'IBM Plex Mono', monospace; color: #9FD971; font-weight: 700; }
+
+        /* ---------- KPI STAT STRIP (thay cho card lặp lại) ---------- */
+        .stat-strip {
+            display: flex; background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+            overflow: hidden; margin-bottom: 24px;
+        }
+        .stat-item {
+            flex: 1; padding: 16px 20px; border-right: 1px solid var(--line);
+            border-top: 3px solid transparent; position: relative;
+        }
+        .stat-item:last-child { border-right: none; }
+        .stat-label { font-size: 11px; font-weight: 600; color: var(--slate); letter-spacing: 0.02em; }
+        .stat-value { font-size: 26px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+        .stat-item.accent-neutral { border-top-color: var(--slate-soft); }
+        .stat-item.accent-brand  { border-top-color: var(--brand); }
+        .stat-item.accent-amber  { border-top-color: var(--amber); }
+        .stat-item.accent-red    { border-top-color: var(--red); }
+        .stat-item.accent-brand .stat-value { color: var(--brand-dark); }
+        .stat-item.accent-amber .stat-value { color: var(--amber); }
+        .stat-item.accent-red .stat-value { color: var(--red); }
+
+        /* ---------- ALERT CONSOLE (cảnh báo nhân sự / trùng hợp đồng) ---------- */
+        .alert-console { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+        .alert-console-head {
+            background: var(--red-soft); color: var(--red); padding: 12px 18px;
+            display: flex; align-items: center; justify-content: space-between;
+            font-weight: 700; font-size: 14px; border-bottom: 1px solid var(--line);
+        }
+        .alert-console-head .count-pill {
+            font-family: 'IBM Plex Mono', monospace; background: var(--red); color: #fff;
+            border-radius: 20px; padding: 2px 10px; font-size: 12px;
+        }
+        .alert-console table thead th {
+            background: var(--surface) !important; color: var(--slate) !important;
+            position: static; font-size: 11px; font-weight: 600; box-shadow: none;
+            border-bottom: 1px solid var(--line);
+        }
+        .severity-dot { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12.5px; }
+        .severity-dot::before { content: ""; width: 8px; height: 8px; border-radius: 50%; }
+        .severity-dot.is-high::before { background: var(--red); }
+        .severity-dot.is-high { color: var(--red); }
+        .severity-dot.is-watch::before { background: var(--amber); }
+        .severity-dot.is-watch { color: var(--amber); }
+
+        .chart-panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
+        .chart-panel h5 { font-size: 13.5px; font-weight: 700; color: var(--ink); letter-spacing: 0.01em; }
+        .executive-chart-container { position: relative; height: 340px; }
+
+        /* ---------- CHAT NỘI BỘ ---------- */
+        .chat-panel {
+            background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+            display: flex; flex-direction: column; height: 65vh; overflow: hidden;
+            max-width: 760px; margin: 0 auto;
+        }
+        .chat-panel-head {
+            padding: 12px 18px; border-bottom: 1px solid var(--line);
+            font-size: 13.5px; font-weight: 700; color: var(--ink);
+        }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+        .chat-bubble { max-width: 78%; }
+        .chat-bubble .chat-meta { font-size: 11px; color: var(--slate-soft); margin-bottom: 3px; }
+        .chat-bubble .chat-text {
+            background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+            padding: 8px 13px; font-size: 13.5px; line-height: 1.45; color: var(--ink);
+            white-space: pre-wrap; word-break: break-word; display: inline-block; text-align: left;
+        }
+        .chat-bubble.is-own { align-self: flex-end; text-align: right; }
+        .chat-bubble.is-own .chat-text { background: var(--brand); border-color: var(--brand); color: #fff; }
+        .chat-input-bar {
+            display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line);
+        }
+        .chat-input-bar input {
+            flex: 1; border: 1px solid var(--line); border-radius: 20px; padding: 8px 16px; font-size: 13.5px;
+        }
+        .chat-input-bar input:focus { outline: none; border-color: var(--brand); }
+        .chat-input-bar button { border: none; border-radius: 50%; width: 38px; height: 38px; padding: 0; flex-shrink: 0; }
+
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(18, 24, 27, 0.82); backdrop-filter: blur(4px); z-index: 9999; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
-<body class="bg-light">
+<body>
+
 <!-- MÀN HÌNH ĐĂNG NHẬP -->
 <div id="loginOverlay">
-  <div style="position: relative; width: 100%; max-width: 440px; background: linear-gradient(135deg, #73b800 0%, #5c9600 100%); border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); padding: 35px 30px 30px 40px; font-family: 'Segoe UI', Arial, sans-serif;">
-    <div style="position: absolute; left: -14px; top: 35px; width: 14px; height: 50px; background: #3f6600; clip-path: polygon(100% 0, 0 50%, 100% 100%); border-top-left-radius: 2px; border-bottom-left-radius: 2px;"></div>
-    
-    <div style="text-align: center; margin-bottom: 25px;">
-      <h3 style="color: #ffffff; font-weight: 700; font-size: 18px; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-transform: uppercase;">HỆ THỐNG CHECK CA VỤ BẢO TRÌ CHO TPKT</h3>
-      <p style="color: #eaf5cc; font-size: 13px; margin-top: 6px;">Đang kết nối hệ thống...</p>
+  <div style="position: relative; width: 100%; max-width: 400px; background: var(--ink); border-radius: 10px; box-shadow: 0 24px 60px rgba(0,0,0,0.45); padding: 32px 34px; border-top: 3px solid var(--brand);">
+
+    <span class="ops-mark">TPKT · OPS</span>
+    <div style="margin: 14px 0 26px;">
+      <h3 style="color: #fff; font-weight: 700; font-size: 19px; margin: 0; letter-spacing: -0.01em;">Hệ thống Check ca vụ Bảo trì</h3>
+      <p style="color: #9AA39C; font-size: 13px; margin-top: 6px;">Đăng nhập để tiếp tục vận hành</p>
     </div>
 
     <form id="loginForm" onsubmit="handleLogin(event)">
-      <div style="display: flex; align-items: center; margin-bottom: 16px;">
-        <label style="width: 110px; color: #ffffff; font-weight: 600; font-size: 13px;">Tên đăng nhập</label>
-        <input type="text" id="loginUser" class="form-control" placeholder="Nhập username..." required style="flex: 1; padding: 10px 12px; border: none; border-radius: 6px; background: #f4fae6; font-size: 14px; color: #333; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);">
-      </div>
-      
-      <div style="display: flex; align-items: center; margin-bottom: 16px;">
-        <label style="width: 110px; color: #ffffff; font-weight: 600; font-size: 13px;">Mật khẩu</label>
-        <input type="password" id="loginPass" class="form-control" placeholder="Nhập mật khẩu..." required style="flex: 1; padding: 10px 12px; border: none; border-radius: 6px; background: #f4fae6; font-size: 14px; color: #333; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);">
+      <div style="margin-bottom: 16px;">
+        <label style="color: #9AA39C; font-weight: 600; font-size: 11.5px; letter-spacing: 0.02em; display:block; margin-bottom: 5px;">TÊN ĐĂNG NHẬP</label>
+        <input type="text" id="loginUser" class="form-control" placeholder="username" required style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); border-radius: 6px; color: #fff; font-size: 14px; padding: 9px 12px;">
       </div>
 
-      <div id="loginError" class="alert alert-danger py-2 small mb-3 d-none" style="background: #ffe6e6; color: #cc0000; border: none; border-radius: 6px; font-weight: 500; text-align: center; padding: 8px; font-size: 13px;"></div>
-
-      <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-        <button type="submit" id="btnLoginSubmit" class="btn" disabled style="background: linear-gradient(135deg, #ff8c1a 0%, #ff7300 100%); color: #ffffff; border: none; padding: 10px 28px; font-weight: 700; font-size: 14px; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,115,0,0.4); transition: all 0.2s;">ĐANG TẢI...</button>
+      <div style="margin-bottom: 18px;">
+        <label style="color: #9AA39C; font-weight: 600; font-size: 11.5px; letter-spacing: 0.02em; display:block; margin-bottom: 5px;">MẬT KHẨU</label>
+        <input type="password" id="loginPass" class="form-control" placeholder="••••••••" required style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); border-radius: 6px; color: #fff; font-size: 14px; padding: 9px 12px;">
       </div>
+
+      <div id="loginError" class="alert py-2 small mb-3 d-none" style="background: rgba(172,43,34,0.18); color: #FF9D91; border: 1px solid rgba(172,43,34,0.4); border-radius: 6px; font-weight: 500; padding: 8px 12px;"></div>
+
+      <button type="submit" id="btnLoginSubmit" class="btn w-100" style="background: var(--brand); color: #ffffff; border: none; padding: 10px; font-weight: 700; font-size: 14px; border-radius: 6px;">Đăng nhập</button>
     </form>
   </div>
 </div>
 
 <div class="container-fluid py-4">
-    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 bg-white p-3 rounded shadow-sm">
-        <h2 class="fw-bold text-dark mb-0 fs-4">Dashboard Vận hành & Kiểm tra checklist Bảo trì TPKT</h2>
-        <div class="d-flex align-items-center gap-3">
-            <div class="text-end">
-                <span class="text-muted small d-block">Xin chào, <strong id="lblCurrentUsername" class="text-primary">--</strong></span>
-                <span class="badge bg-secondary" id="lblCurrentRole">Role: --</span>
-                <span class="badge bg-info text-dark d-block mt-1" id="lblCurrentDoiTac">Đối tác: Tất cả</span>
+    <div class="ops-header d-flex flex-wrap align-items-center justify-content-between mb-3">
+        <div>
+            <span class="ops-mark mb-2 d-inline-block">TPKT · OPS</span>
+            <h2 class="fw-bold mb-0 fs-4">Vận hành &amp; Kiểm tra checklist Bảo trì</h2>
+            <div class="d-flex align-items-center gap-3 mt-2" style="position:relative;">
+                <div style="position:relative;">
+                    <button class="ops-pill" id="btnOnlineCount" onclick="toggleOnlinePanel()" style="cursor:pointer;">
+                        <span class="online-dot"></span> <span id="lblOnlineCount">--</span> online
+                    </button>
+                    <div id="onlinePanel" class="d-none" style="position:absolute; top:130%; left:0; min-width:200px; background:var(--ink); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:10px; z-index:2000; box-shadow:0 12px 30px rgba(0,0,0,0.4);">
+                        <div class="small fw-bold mb-2" style="color:#9AA39C;">Đang online</div>
+                        <div id="onlineListBody" class="small" style="color:#E7E9E5;">--</div>
+                    </div>
+                </div>
+                <span class="small" id="lblLastSynced" style="color:#9AA39C;">--</span>
             </div>
-            <button class="btn btn-outline-danger btn-sm fw-bold" onclick="handleLogout()"><i class="bi bi-box-arrow-right me-1"></i> Đăng xuất</button>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-2 mt-3 mt-md-0">
+            <span class="text-end small me-1" style="color:#9AA39C;">Xin chào, <strong id="lblCurrentUsername" style="color:#fff;">--</strong></span>
+            <span class="ops-pill" id="lblCurrentRole">Role: --</span>
+            <span class="ops-pill is-brand" id="lblCurrentDoiTac">Đối tác: Tất cả</span>
+            <button class="ops-btn" id="btnManualRefresh" onclick="refreshData()" title="Làm mới dữ liệu ngay"><i class="bi bi-arrow-clockwise me-1"></i>Làm mới</button>
+            <button class="ops-btn" onclick="openChangePasswordModal()"><i class="bi bi-key me-1"></i>Đổi mật khẩu</button>
+            <button class="ops-btn is-danger" onclick="handleLogout()"><i class="bi bi-box-arrow-right me-1"></i>Đăng xuất</button>
         </div>
     </div>
-    
+
     <!-- THANH BỘ LỌC -->
-    <div class="row g-2 mb-3 bg-white p-3 rounded shadow-sm align-items-end">
-        <div class="col-md-2">
-            <label class="form-label fw-bold">Vùng</label>
+    <div class="filter-strip row g-2 mb-3 align-items-end">
+        <div class="col-md-2 f-group">
+            <label>Vùng</label>
             <select id="filterVung" class="form-select form-select-sm" onchange="onVungChange()">
                 <option value="">Tất cả Vùng</option>
             </select>
         </div>
-        <div class="col-md-2">
-            <label class="form-label fw-bold">Đối tác</label>
+        <div class="col-md-2 f-group">
+            <label>Đối tác</label>
             <select id="filterDoiTac" class="form-select form-select-sm" onchange="onDoiTacChange()">
                 <option value="">Tất cả Đối tác</option>
             </select>
         </div>
-        <div class="col-md-2">
-            <label class="form-label fw-bold">Đội trưởng</label>
+        <div class="col-md-2 f-group">
+            <label>Đội trưởng</label>
             <select id="filterDoiTruong" class="form-select form-select-sm" onchange="onDoiTruongChange()">
                 <option value="">Tất cả Đội trưởng</option>
             </select>
         </div>
-        <div class="col-md-2">
-            <label class="form-label fw-bold">TPKT CHECK</label>
+        <div class="col-md-2 f-group">
+            <label>TPKT CHECK</label>
             <select id="filterTpktCheck" class="form-select form-select-sm" onchange="filterData()">
                 <option value="">Tất cả TPKT Check</option>
                 <option value="Chưa kiểm tra">Chưa kiểm tra</option>
@@ -94,36 +332,42 @@
                 <option value="Vùng phủ không đảm bảo">Vùng phủ không đảm bảo</option>
             </select>
         </div>
-        <div class="col-md-2">
-            <label class="form-label fw-bold">Nhân viên</label>
+        <div class="col-md-2 f-group">
+            <label>Nhân viên</label>
             <select id="filterNhanVien" class="form-select form-select-sm" onchange="filterData()">
                 <option value="">Tất cả Nhân viên</option>
             </select>
         </div>
         <div class="col-md-2">
-            <button class="btn btn-secondary btn-sm w-100 fw-bold" onclick="resetFilters()">Đặt lại bộ lọc</button>
+            <button class="filter-reset-btn w-100" onclick="resetFilters()">Đặt lại bộ lọc</button>
         </div>
 
-        <div class="col-md-4 mt-2">
-            <label class="form-label fw-bold text-primary"><i class="bi bi-search me-1"></i> Tìm kiếm số hợp đồng</label>
+        <div class="col-md-5 mt-3">
+            <label style="font-size:10.5px;font-weight:600;letter-spacing:.03em;color:var(--slate);">TÌM KIẾM SỐ HỢP ĐỒNG</label>
             <div class="input-group input-group-sm">
-                <input type="text" id="searchSoHopDong" class="form-control" placeholder="Nhập số hợp đồng cần tìm..." oninput="debounceFilter()">
-                <button class="btn btn-outline-secondary" type="button" onclick="clearSearchHopDong()"><i class="bi bi-x-lg"></i></button>
+                <span class="input-group-text bg-transparent border-0 border-bottom" style="border-bottom:2px solid var(--line) !important; color:var(--slate);"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchSoHopDong" class="form-control" placeholder="Nhập số hợp đồng cần tìm..." oninput="debounceFilter()" style="border:none; border-bottom:2px solid var(--line); border-radius:0;">
+                <button class="btn btn-sm" type="button" onclick="clearSearchHopDong()" style="border:none; border-bottom:2px solid var(--line); border-radius:0; color:var(--slate);"><i class="bi bi-x-lg"></i></button>
             </div>
         </div>
     </div>
 
     <!-- TABS -->
-    <ul class="nav nav-tabs mb-3" id="mainTabs" role="tablist">
+    <ul class="nav seg-tabs mb-3" id="mainTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active fw-bold" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboardContent" type="button" role="tab">TPKT CHECK</button>
+            <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboardContent" type="button" role="tab">TPKT Check</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold" id="report-tab" data-bs-toggle="tab" data-bs-target="#reportContent" type="button" role="tab">Báo cáo Tổng quan (Executive)</button>
+            <button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#reportContent" type="button" role="tab">Báo cáo Tổng quan</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold text-danger" id="cll-tab" data-bs-toggle="tab" data-bs-target="#cllContent" type="button" role="tab">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i> Cảnh báo CLL2 & 3 <span id="badgeDuplicateCount" class="badge bg-danger ms-1">0</span>
+            <button class="nav-link" id="cll-tab" data-bs-toggle="tab" data-bs-target="#cllContent" type="button" role="tab">
+                <i class="bi bi-exclamation-triangle-fill me-1" style="color:var(--red);"></i> Cảnh báo CLL2 &amp; 3 <span id="badgeDuplicateCount" class="count-chip">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chatContent" type="button" role="tab">
+                <i class="bi bi-chat-dots-fill me-1"></i> Trò chuyện <span id="badgeChatUnread" class="count-chip d-none">0</span>
             </button>
         </li>
     </ul>
@@ -131,13 +375,13 @@
     <div class="tab-content" id="mainTabsContent">
         <!-- TAB 1: TPKT CHECK -->
         <div class="tab-pane fade show active" id="dashboardContent" role="tabpanel">
-            <div id="batchActionBar" class="card mb-3 border-primary shadow" style="display: none;">
-                <div class="card-body bg-primary-subtle py-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div id="batchActionBar" class="card batch-bar mb-3" style="display: none;">
+                <div class="card-body py-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
                     <div>
-                        <span class="fw-bold text-primary">Đã chọn: <span id="selectedCount">0</span>/20 dòng</span>
+                        <span class="fw-bold">Đã chọn: <span class="batch-count" id="selectedCount">0</span>/20 dòng</span>
                     </div>
                     <div class="d-flex flex-wrap align-items-center gap-3">
-                        <div class="d-flex align-items-center gap-1 border-end pe-3">
+                        <div class="d-flex align-items-center gap-1 border-end pe-3" style="border-color: rgba(255,255,255,0.18) !important;">
                             <select id="batchTpktValue" class="form-select form-select-sm" style="width: 180px;" onchange="onBatchTpktChange()">
                                 <option value="">-- Chọn TPKT Check --</option>
                                 <option value="Bảo trì ok">Bảo trì ok</option>
@@ -146,7 +390,7 @@
                                 <option value="Rớt kết nối">Rớt kết nối</option>
                                 <option value="Vùng phủ không đảm bảo">Vùng phủ không đảm bảo</option>
                             </select>
-                            <button class="btn btn-sm btn-success fw-bold text-nowrap" onclick="applyBatchTpkt()">Áp dụng Hàng Loạt TPKT</button>
+                            <button id="btnApplyBatchTpkt" class="btn btn-sm fw-bold text-nowrap" style="background:var(--brand); color:#fff;" onclick="applyBatchTpkt()">Áp dụng Hàng Loạt TPKT</button>
                         </div>
 
                         <div class="d-flex align-items-center gap-1 d-none" id="batchXlLaiContainer">
@@ -156,23 +400,28 @@
                                 <option value="Đã xử lý lại">Đã xử lý lại</option>
                                 <option value="Checklist Onsite">Checklist Onsite</option>
                             </select>
-                            <button class="btn btn-sm btn-warning fw-bold text-nowrap" onclick="applyBatchXlLai()">Gửi Hàng Loạt XL Lại</button>
+                            <button class="btn btn-sm fw-bold text-nowrap" style="background:var(--amber); color:#fff;" onclick="applyBatchXlLai()">Gửi Hàng Loạt XL Lại</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="table-responsive bg-white p-3 rounded shadow-sm">
-                <table class="table table-bordered table-hover align-middle mb-0" id="dataTable">
+            <div class="d-flex justify-content-end mb-2">
+                <button class="filter-reset-btn" onclick="exportFilteredToExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Xuất Excel</button>
+            </div>
+
+            <div class="table-panel">
+                <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="dataTable">
                     <thead>
                         <tr>
                             <th style="width: 40px;"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
-                            <th>Vùng</th>
-                            <th>Đối tác</th>
-                            <th>Đội trưởng</th>
-                            <th>Số HĐ</th>
-                            <th>Nhân viên</th>
-                            <th>TG Hoàn Tất</th>
+                            <th class="sortable" onclick="onSortClick('vung')" style="cursor:pointer;">Vùng <span class="sort-indicator" data-key="vung"></span></th>
+                            <th class="sortable" onclick="onSortClick('doiTac')" style="cursor:pointer;">Đối tác <span class="sort-indicator" data-key="doiTac"></span></th>
+                            <th class="sortable" onclick="onSortClick('doiTruong')" style="cursor:pointer;">Đội trưởng <span class="sort-indicator" data-key="doiTruong"></span></th>
+                            <th class="sortable" onclick="onSortClick('soHopDong')" style="cursor:pointer;">Số HĐ <span class="sort-indicator" data-key="soHopDong"></span></th>
+                            <th class="sortable" onclick="onSortClick('nhanVien')" style="cursor:pointer;">Nhân viên <span class="sort-indicator" data-key="nhanVien"></span></th>
+                            <th class="sortable" onclick="onSortClick('tgHoanTat')" style="cursor:pointer;">TG Hoàn Tất <span class="sort-indicator" data-key="tgHoanTat"></span></th>
                             <th>Ghi chú</th>
                             <th style="width: 230px;">TPKT CHECK</th>
                             <th style="width: 230px;">XL LẠI</th>
@@ -182,10 +431,22 @@
                         <tr><td colspan="10" class="text-center">Đang tải dữ liệu...</td></tr>
                     </tbody>
                 </table>
+                </div>
             </div>
 
-            <div class="d-flex flex-wrap align-items-center justify-content-between bg-white p-3 rounded shadow-sm mt-2">
-                <div class="small text-muted" id="paginationInfo">Hiển thị 0 - 0 của 0 dòng</div>
+            <div class="d-flex flex-wrap align-items-center justify-content-between mt-2 px-1 gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="small" style="color:var(--slate);" id="paginationInfo">Hiển thị 0 - 0 của 0 dòng</div>
+                    <div class="d-flex align-items-center gap-1">
+                        <label class="small mb-0" style="color:var(--slate);">Dòng/trang</label>
+                        <select id="rowsPerPageSelect" class="form-select form-select-sm" style="width:80px;" onchange="onRowsPerPageChange()">
+                            <option value="50">50</option>
+                            <option value="100" selected>100</option>
+                            <option value="200">200</option>
+                            <option value="500">500</option>
+                        </select>
+                    </div>
+                </div>
                 <nav>
                     <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
                 </nav>
@@ -194,78 +455,52 @@
 
         <!-- TAB 2: REPORT EXECUTIVE -->
         <div class="tab-pane fade" id="reportContent" role="tabpanel">
-            <div class="row g-3 mb-4">
-                <div class="col-md-3">
-                    <div class="card kpi-card bg-white p-3 border-start border-4 border-primary">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-grow-1">
-                                <span class="text-muted small fw-bold text-uppercase">Tổng ca Bảo trì</span>
-                                <h3 class="fw-bold mb-0 mt-1 text-primary" id="kpiTotalCa">0</h3>
-                            </div>
-                            <div class="fs-1 text-primary opacity-25"><i class="bi bi-file-earmark-text"></i></div>
-                        </div>
-                    </div>
+            <div class="stat-strip">
+                <div class="stat-item accent-neutral">
+                    <div class="stat-label">TỔNG CA BẢO TRÌ</div>
+                    <div class="stat-value" id="kpiTotalCa">0</div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card kpi-card bg-white p-3 border-start border-4 border-danger">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-grow-1">
-                                <span class="text-muted small fw-bold text-uppercase">Xử lý lại</span>
-                                <h3 class="fw-bold mb-0 mt-1 text-danger" id="kpiTotalLoi">0</h3>
-                            </div>
-                            <div class="fs-1 text-danger opacity-25"><i class="bi bi-exclamation-triangle"></i></div>
-                        </div>
-                    </div>
+                <div class="stat-item accent-neutral">
+                    <div class="stat-label">CHƯA KIỂM TRA</div>
+                    <div class="stat-value" id="kpiChuaKiemTra">0</div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card kpi-card bg-white p-3 border-start border-4 border-warning">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-grow-1">
-                                <span class="text-muted small fw-bold text-uppercase">Tỉ lệ Xử lý lại</span>
-                                <h3 class="fw-bold mb-0 mt-1 text-warning" id="kpiRateLoi">0%</h3>
-                            </div>
-                            <div class="fs-1 text-warning opacity-25"><i class="bi bi-pie-chart"></i></div>
-                        </div>
-                    </div>
+                <div class="stat-item accent-red">
+                    <div class="stat-label">CHƯA XỬ LÝ</div>
+                    <div class="stat-value" id="kpiTotalLoi">0</div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card kpi-card bg-white p-3 border-start border-4 border-success">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-grow-1">
-                                <span class="text-muted small fw-bold text-uppercase">Bảo trì OK / Đã xử lý</span>
-                                <h3 class="fw-bold mb-0 mt-1 text-success" id="kpiTotalOk">0</h3>
-                            </div>
-                            <div class="fs-1 text-success opacity-25"><i class="bi bi-check-circle"></i></div>
-                        </div>
-                    </div>
+                <div class="stat-item accent-amber">
+                    <div class="stat-label">TỈ LỆ CHƯA XỬ LÝ</div>
+                    <div class="stat-value" id="kpiRateLoi">0%</div>
+                </div>
+                <div class="stat-item accent-brand">
+                    <div class="stat-label">BẢO TRÌ OK / ĐÃ XỬ LÝ</div>
+                    <div class="stat-value" id="kpiTotalOk">0</div>
                 </div>
             </div>
 
             <div class="row mb-4">
                 <div class="col-md-12">
-                    <div class="card border-0 shadow-sm rounded-3">
-                        <div class="card-header bg-danger text-white fw-bold d-flex align-items-center justify-content-between">
-                            <span><i class="bi bi-shield-exclamation me-2"></i> Danh sách Cảnh báo Nhân sự Bảo trì không đứt điểm</span>
-                            <span class="badge bg-white text-danger" id="warningCountBadge">0 nhân sự</span>
+                    <div class="alert-console">
+                        <div class="alert-console-head">
+                            <span><i class="bi bi-shield-exclamation me-2"></i>Cảnh báo Nhân sự Bảo trì không đứt điểm</span>
+                            <span class="count-pill" id="warningCountBadge">0 nhân sự</span>
                         </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive mb-0">
-                                <table class="table table-hover align-middle mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Nhân viên</th>
-                                            <th>Đội trưởng</th>
-                                            <th>Đối tác</th>
-                                            <th class="text-center">Số ca lỗi</th>
-                                            <th class="text-center">Tỷ lệ lỗi / Tổng ca</th>
-                                            <th class="text-center">Mức độ cảnh báo</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="warningTableBody">
-                                        <tr><td colspan="6" class="text-center text-muted py-3">Không có nhân sự nào vượt ngưỡng cảnh báo.</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="table-responsive mb-0">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Nhân viên</th>
+                                        <th>Đội trưởng</th>
+                                        <th>Đối tác</th>
+                                        <th class="text-center">Số ca lỗi</th>
+                                        <th class="text-center">Tỷ lệ lỗi / Tổng ca</th>
+                                        <th class="text-center">Mức độ cảnh báo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="warningTableBody">
+                                    <tr><td colspan="6" class="text-center py-3" style="color:var(--slate);">Không có nhân sự nào vượt ngưỡng cảnh báo.</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -273,14 +508,14 @@
 
             <div class="row g-4">
                 <div class="col-md-6">
-                    <div class="card border-0 shadow-sm p-3 rounded-3">
-                        <h5 class="text-secondary fw-bold mb-3"><i class="bi bi-bar-chart-fill text-primary me-2"></i> Hiệu suất theo Đối tác</h5>
+                    <div class="chart-panel">
+                        <h5 class="mb-3"><i class="bi bi-bar-chart-fill me-2" style="color:var(--brand);"></i>Hiệu suất theo Đối tác</h5>
                         <div class="executive-chart-container"><canvas id="chartDoiTac"></canvas></div>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="card border-0 shadow-sm p-3 rounded-3">
-                        <h5 class="text-secondary fw-bold mb-3"><i class="bi bi-bar-chart-fill text-success me-2"></i> Hiệu suất theo Đội trưởng</h5>
+                    <div class="chart-panel">
+                        <h5 class="mb-3"><i class="bi bi-bar-chart-fill me-2" style="color:var(--amber);"></i>Hiệu suất theo Đội trưởng</h5>
                         <div class="executive-chart-container"><canvas id="chartDoiTruong"></canvas></div>
                     </div>
                 </div>
@@ -289,47 +524,105 @@
 
         <!-- TAB 3: CẢNH BÁO TRÙNG SỐ HỢP ĐỒNG -->
         <div class="tab-pane fade" id="cllContent" role="tabpanel">
-            <div class="card border-0 shadow-sm rounded-3">
-                <div class="card-header bg-danger text-white fw-bold d-flex align-items-center justify-content-between">
-                    <span><i class="bi bi-exclamation-octagon-fill me-2"></i> Danh sách Số Hợp Đồng bị Trùng Lặp (CLL2 & 3)</span>
-                    <span class="badge bg-white text-danger" id="cllDuplicateBadge">0 số hợp đồng trùng</span>
+            <div class="alert-console">
+                <div class="alert-console-head">
+                    <span><i class="bi bi-exclamation-octagon-fill me-2"></i>Số Hợp Đồng bị Trùng Lặp (CLL2 &amp; 3)</span>
+                    <span class="count-pill" id="cllDuplicateBadge">0 số hợp đồng trùng</span>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive mb-0">
-                        <table class="table table-striped table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Số Hợp Đồng</th>
-                                    <th class="text-center">Số lần trùng</th>
-                                    <th>Chi tiết các dòng bị trùng</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cllTableBody">
-                                <tr><td colspan="3" class="text-center text-muted py-4">Không có số hợp đồng nào bị trùng lặp.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive mb-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Số Hợp Đồng</th>
+                                <th class="text-center">Số lần trùng</th>
+                                <th>Chi tiết các dòng bị trùng</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cllTableBody">
+                            <tr><td colspan="3" class="text-center py-4" style="color:var(--slate);">Không có số hợp đồng nào bị trùng lặp.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: TRÒ CHUYỆN NỘI BỘ -->
+        <div class="tab-pane fade" id="chatContent" role="tabpanel">
+            <div class="chat-panel">
+                <div class="chat-panel-head"><i class="bi bi-chat-dots-fill me-2" style="color:var(--brand);"></i>Trò chuyện nội bộ</div>
+                <div class="chat-messages" id="chatMessagesBody">
+                    <div class="text-center small py-4" style="color:var(--slate);">Đang tải tin nhắn...</div>
+                </div>
+                <div class="chat-input-bar">
+                    <input type="text" id="chatInput" class="form-control" placeholder="Nhập tin nhắn..." maxlength="500" onkeydown="if(event.key==='Enter'){event.preventDefault();sendChatMessage();}">
+                    <button class="btn fw-bold" style="background:var(--brand); color:#fff;" onclick="sendChatMessage()"><i class="bi bi-send-fill"></i></button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- MODAL ĐỔI MẬT KHẨU -->
+<div id="changePasswordModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(18, 24, 27, 0.82); backdrop-filter: blur(4px); z-index: 1050; align-items: center; justify-content: center;">
+  <div style="width: 100%; max-width: 380px; background: #ffffff; border-radius: 10px; box-shadow: 0 24px 60px rgba(0,0,0,0.35); padding: 26px; border-top: 3px solid var(--amber);">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold m-0" style="color:var(--ink);"><i class="bi bi-key-fill me-2" style="color:var(--amber);"></i>Đổi Mật Khẩu</h5>
+      <button type="button" class="btn-close" onclick="closeChangePasswordModal()"></button>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label small fw-bold" style="color:var(--slate);">Mật khẩu mới</label>
+      <input type="password" id="txtNewPassword" class="form-control" placeholder="Nhập mật khẩu mới...">
+    </div>
+
+    <div id="changePassMessage" class="alert py-2 small mb-3 d-none"></div>
+
+    <div class="d-flex justify-content-end gap-2">
+      <button type="button" class="btn btn-sm px-3" style="background:var(--surface); color:var(--slate); border:1px solid var(--line);" onclick="closeChangePasswordModal()">Hủy</button>
+      <button type="button" class="btn btn-sm px-3 fw-bold" style="background:var(--ink); color:#fff;" onclick="submitChangePassword()">Xác nhận đổi</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    const WEB_APP_URL = "https://bt-tpkt.sayvv93.workers.dev/";
-    
-    let globalAccounts = []; 
+    const WEB_APP_URL = "https://tpkt-backend.sayvv93.workers.dev/";
+
     let currentUser = null;
     let globalData = [];
     let filteredDataCache = [];
     
     let currentPage = 1;
     let rowsPerPage = 100;
+    let currentSort = { key: null, dir: 1 };
     
     let chartDoiTacInstance = null;
     let chartDoiTruongInstance = null;
     let searchTimeout = null;
+
+    // Chuẩn hoá 1 giá trị TPKT Check / XL Lại thô: coi 0, "0", null, undefined,
+    // chuỗi rỗng/khoảng trắng đều là "chưa có giá trị" (KHÔNG phải giá trị hợp lệ).
+    // Dùng ở mọi nơi đọc tpktCheck/xlLai để không bao giờ bị "kẹt" render ra ô trống,
+    // dù dữ liệu đến từ server, cache cũ, hay do thao tác hàng loạt.
+    function normalizeVal(v) {
+        if (v === undefined || v === null) return "";
+        let s = String(v).trim();
+        if (s === "") return "";
+        // n8n / Google Sheet có thể trả số 0 dưới nhiều dạng chuỗi khác nhau:
+        // "0", "00", "0.0", "0.00"... — tất cả đều coi là "chưa có giá trị".
+        if (/^0+(\.0+)?$/.test(s)) return "";
+        return s;
+    }
+
+    // Thoát ký tự đặc biệt HTML (<, >, &, ", ') trước khi chèn dữ liệu tự do
+    // (ghi chú, tên nhân viên...) vào innerHTML — dữ liệu này đến từ n8n/Google
+    // Sheet do KTV nhập tay, không kiểm soát được nội dung, nên phải coi là
+    // không đáng tin cậy để tránh HTML/script injection.
+    function escapeHtml(v) {
+        return String(v ?? '').replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
 
     function debounceFilter() {
         clearTimeout(searchTimeout);
@@ -338,74 +631,264 @@
         }, 300);
     }
 
-    async function loadData() {
+    function onRowsPerPageChange() {
+        rowsPerPage = parseInt(document.getElementById('rowsPerPageSelect').value, 10) || 100;
+        currentPage = 1;
+        renderTable(filteredDataCache);
+    }
+
+    // Xuất toàn bộ danh sách ĐANG LỌC (không chỉ trang hiện tại) ra file Excel.
+    function exportFilteredToExcel() {
+        if (typeof XLSX === 'undefined') {
+            alert("Thư viện xuất Excel chưa tải xong, vui lòng thử lại sau giây lát.");
+            return;
+        }
+        if (!filteredDataCache || filteredDataCache.length === 0) {
+            alert("Không có dữ liệu để xuất!");
+            return;
+        }
+
+        let rows = filteredDataCache.map(item => {
+            let tpktCheckVal = normalizeVal(item.userSelectedTpkt) || normalizeVal(item.tpktCheck) || "Chưa kiểm tra";
+            return {
+                "Vùng": item.vung || "",
+                "Đối tác": item.doiTac || "",
+                "Đội trưởng": item.doiTruong || "",
+                "Số HĐ": item.soHopDong || "",
+                "Nhân viên": item.nhanVien || "",
+                "TG Hoàn Tất": formatDate(item.tgHoanTat),
+                "Ghi chú": item.ghiChu || "",
+                "TPKT Check": tpktCheckVal,
+                "XL Lại": normalizeVal(item.xlLai) || "",
+                "Cập nhật lần cuối": item.ngayCapNhat ? formatDateTime(item.ngayCapNhat) : ""
+            };
+        });
+
+        let ws = XLSX.utils.json_to_sheet(rows);
+        ws['!cols'] = [ {wch:10},{wch:10},{wch:16},{wch:14},{wch:16},{wch:12},{wch:50},{wch:22},{wch:20},{wch:16} ];
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "TPKT Check");
+
+        let now = new Date();
+        let stamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+        XLSX.writeFile(wb, `TPKT_export_${stamp}.xlsx`);
+    }
+
+    // Danh sách tài khoản KHÔNG còn được tải về client nữa.
+    // Việc xác thực đăng nhập và phân quyền dữ liệu đều xử lý ở Worker (D1).
+    window.onload = function() {
+        let cachedData = localStorage.getItem('tpkt_cached_dataBT');
+        if (cachedData) {
+            try { globalData = JSON.parse(cachedData); } catch(e){}
+        }
+
+        let savedUser = localStorage.getItem('tpkt_current_user');
+        if (savedUser) {
+            try {
+                currentUser = JSON.parse(savedUser);
+                // alias để toàn bộ logic filter cũ (dùng field "doiTac") vẫn chạy đúng
+                currentUser.doiTac = currentUser.doiTacQuanLy || "";
+
+                document.getElementById('loginOverlay').style.display = 'none';
+                initSessionUI();
+                initFilters(globalData);
+                filterData();
+                checkDuplicateContracts(globalData);
+                refreshData();
+                startAutoRefresh();
+                startPingOnline();
+                startChatPolling();
+                return;
+            } catch(e) {}
+        }
+
+        document.getElementById('loginOverlay').style.display = 'flex';
+    };
+
+    const AUTO_REFRESH_INTERVAL_MS = 2 * 60 * 1000; // 2 phút
+    const PING_INTERVAL_MS = 45 * 1000; // 45 giây — phải ngắn hơn nhiều so với
+    // ngưỡng "online" 2 phút mà Worker đang dùng, để không bị rớt trạng thái oan.
+    let autoRefreshTimer = null;
+    let pingTimer = null;
+
+    function updateLastSyncedLabel() {
+        let now = new Date();
+        let hh = String(now.getHours()).padStart(2, '0');
+        let mm = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('lblLastSynced').innerText = `Cập nhật lúc ${hh}:${mm}`;
+    }
+
+    function startAutoRefresh() {
+        stopAutoRefresh();
+        autoRefreshTimer = setInterval(refreshData, AUTO_REFRESH_INTERVAL_MS);
+    }
+
+    function stopAutoRefresh() {
+        if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
+    }
+
+    // Báo "đang online" lên Worker (bảng active_sessions có sẵn) và cập nhật
+    // số lượng + danh sách người đang hoạt động trong 2 phút gần nhất.
+    async function pingOnline() {
+        if (!currentUser || !currentUser.username) return;
         try {
-            const response = await fetch(WEB_APP_URL, { method: "GET" });
-            return await response.json();
+            let response = await fetch(WEB_APP_URL + "api/ping", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: currentUser.username, role: currentUser.role })
+            });
+            let list = await response.json();
+            if (!Array.isArray(list)) return;
+
+            document.getElementById('lblOnlineCount').textContent = list.length;
+
+            let body = document.getElementById('onlineListBody');
+            if (list.length === 0) {
+                body.innerHTML = '<div style="color:#8B948D;">Không có ai</div>';
+            } else {
+                body.innerHTML = list.map(u =>
+                    `<div class="d-flex justify-content-between py-1"><span>${escapeHtml(u.username)}</span><span style="color:#8B948D;">${escapeHtml(u.role || '')}</span></div>`
+                ).join('');
+            }
         } catch (error) {
-            console.error("Lỗi khi tải dữ liệu:", error);
-            throw error;
+            console.error("Lỗi ping online:", error);
+        }
+    }
+
+    function startPingOnline() {
+        stopPingOnline();
+        pingOnline();
+        pingTimer = setInterval(pingOnline, PING_INTERVAL_MS);
+    }
+
+    function stopPingOnline() {
+        if (pingTimer) { clearInterval(pingTimer); pingTimer = null; }
+        document.getElementById('lblOnlineCount').textContent = '--';
+    }
+
+    function toggleOnlinePanel() {
+        document.getElementById('onlinePanel').classList.toggle('d-none');
+    }
+
+    // Bấm ra ngoài thì tự đóng panel danh sách online
+    document.addEventListener('click', (e) => {
+        let panel = document.getElementById('onlinePanel');
+        let btn = document.getElementById('btnOnlineCount');
+        if (!panel || panel.classList.contains('d-none')) return;
+        if (!panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+            panel.classList.add('d-none');
+        }
+    });
+
+    // Gọi lại dữ liệu từ server (đã được Worker lọc sẵn theo doiTacQuanLy của user)
+    async function refreshData() {
+        if (!currentUser || !currentUser.username) return;
+        try {
+            const response = await fetch(WEB_APP_URL + "?username=" + encodeURIComponent(currentUser.username), { method: "GET" });
+            const res = await response.json();
+
+            if (res.error) {
+                console.error("Lỗi xác thực / lấy dữ liệu:", res.error);
+                return;
+            }
+
+            // Giữ lại các dòng đang thao tác dở (đã chọn TPKT Check nhưng CHƯA bấm
+            // Gửi — row._modified) thay vì để bản mới từ server ghi đè mất lựa chọn
+            // đó, vì tính năng tự động làm mới định kỳ có thể chạy giữa lúc người
+            // dùng đang thao tác.
+            let pendingLocalEdits = {};
+            globalData.forEach(item => { if (item._modified) pendingLocalEdits[item.id] = item; });
+
+            globalData = (res.dataBT || []).map(item => {
+                if (pendingLocalEdits[item.id]) return pendingLocalEdits[item.id];
+                let tpktCheckVal = normalizeVal(item.tpktCheck);
+                return {
+                    id: item.id,
+                    vung: item.vung || "",
+                    doiTac: item.doiTacQuanLy || "",
+                    doiTruong: item.doiTruong || "",
+                    soHopDong: item.soHopDong || "",
+                    nhanVien: item.nhanVien || "",
+                    tgHoanTat: item.tgHoanTat || "",
+                    ghiChu: item.ghiChu || "",
+                    tpktCheck: tpktCheckVal,
+                    xlLai: normalizeVal(item.xlLai),
+                    ngayCapNhat: item.ngayCapNhat || "",
+                    userSelectedTpkt: tpktCheckVal ? tpktCheckVal : "Chưa kiểm tra"
+                };
+            });
+
+            localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
+            updateLastSyncedLabel();
+
+            initFilters(globalData);
+            filterData();
+            checkDuplicateContracts(globalData);
+        } catch (error) {
+            console.error("Lỗi đồng bộ ngầm:", error);
         }
     }
 
     async function updateRecord(rowId, tpktCheck, xlLai) {
         try {
-            const response = await fetch(WEB_APP_URL, {
+            let username = (currentUser && currentUser.username) ? currentUser.username : "unknown";
+
+            fetch(WEB_APP_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ rowId, tpktCheck, xlLai })
-            });
-            return await response.json();
+                body: JSON.stringify({ rowId, username, tpktCheck, xlLai })
+            }).catch(err => console.error("Lỗi lưu:", err));
         } catch (error) {
-            console.error("Lỗi khi cập nhật:", error);
+            console.error("Lỗi cập nhật record:", error);
         }
     }
 
-    async function fetchAllDataAndInit() {
-        try {
-            const res = await loadData();
-            globalAccounts = res.accounts || [];
-            
-            globalData = (res.dataBT || []).map(item => ({
-                ...item,
-                userSelectedTpkt: item.tpktCheck ? item.tpktCheck.trim() : "Chưa kiểm tra"
-            }));
-
-            let btnSubmit = document.getElementById('btnLoginSubmit');
-            btnSubmit.disabled = false;
-            btnSubmit.innerText = "ĐĂNG NHẬP";
-            document.querySelector('#loginOverlay p').innerText = "Nhập thông tin tài khoản từ hệ thống";
-
-            initFilters(globalData);
-            checkSavedSession();
-        } catch(error) {
-            document.querySelector('#loginOverlay p').innerText = "Lỗi kết nối Server! Vui lòng tải lại trang.";
-        }
-    }
-
-    function handleLogin(event) {
+    async function handleLogin(event) {
         event.preventDefault();
         let uInput = document.getElementById('loginUser').value.trim();
         let pInput = document.getElementById('loginPass').value.trim();
         let errBox = document.getElementById('loginError');
+        let btn = document.getElementById('btnLoginSubmit');
 
-        let found = globalAccounts.find(acc => acc.username === uInput && acc.password === pInput);
-        
-        if (found) {
-            currentUser = found;
-            localStorage.setItem('tpkt_current_user', JSON.stringify(found));
-            errBox.classList.add('d-none');
-            document.getElementById('loginOverlay').style.display = 'none';
-            initSessionUI();
-            filterData();
-            checkDuplicateContracts(globalData);
-        } else {
-            errBox.innerText = "Tên đăng nhập hoặc mật khẩu không chính xác!";
+        errBox.classList.add('d-none');
+        btn.disabled = true;
+
+        try {
+            let response = await fetch(WEB_APP_URL + "api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: uInput, password: pInput })
+            });
+            let result = await response.json();
+
+            if (result.success) {
+                currentUser = result.user;
+                currentUser.doiTac = currentUser.doiTacQuanLy || "";
+                localStorage.setItem('tpkt_current_user', JSON.stringify(currentUser));
+
+                document.getElementById('loginOverlay').style.display = 'none';
+                initSessionUI();
+                await refreshData();
+                startAutoRefresh();
+                startPingOnline();
+                startChatPolling();
+            } else {
+                errBox.innerText = result.message || "Tên đăng nhập hoặc mật khẩu không chính xác!";
+                errBox.classList.remove('d-none');
+            }
+        } catch (error) {
+            console.error("Lỗi đăng nhập:", error);
+            errBox.innerText = "Lỗi kết nối đến server!";
             errBox.classList.remove('d-none');
+        } finally {
+            btn.disabled = false;
         }
     }
 
     function handleLogout() {
+        stopAutoRefresh();
+        stopPingOnline();
+        stopChatPolling();
         localStorage.removeItem('tpkt_current_user');
         currentUser = null;
         document.getElementById('loginUser').value = "";
@@ -422,42 +905,62 @@
         document.getElementById('lblCurrentDoiTac').innerText = `Đối tác: ${dtLabel}`;
     }
 
-    function checkSavedSession() {
-        let savedUser = localStorage.getItem('tpkt_current_user');
-        if (savedUser) {
-            try {
-                let parsed = JSON.parse(savedUser);
-                let validAcc = globalAccounts.find(acc => acc.username === parsed.username);
-                if (validAcc) {
-                    currentUser = validAcc;
-                    document.getElementById('loginOverlay').style.display = 'none';
-                    initSessionUI();
-                    filterData();
-                    checkDuplicateContracts(globalData);
-                    return;
-                }
-            } catch(e) {}
-        }
-        document.getElementById('loginOverlay').style.display = 'flex';
-    }
+    // Parse linh hoạt nhiều định dạng ngày mà server/n8n có thể trả về.
+    // Dùng chung cho formatDate() (hiển thị) và daysSince() (tính ca tồn đọng).
+    function parseFlexibleDate(dateStr) {
+        if (!dateStr) return null;
+        let s = String(dateStr).trim();
 
-    window.onload = function() {
-        fetchAllDataAndInit();
-    };
+        // Nhận diện dd/mm/yyyy (kiểu Việt Nam) TRƯỚC TIÊN — vì new Date() mặc định
+        // hiểu chuỗi có dấu "/" theo kiểu Mỹ (mm/dd/yyyy), sẽ đảo ngược ngày/tháng
+        // một cách ÂM THẦM (không báo lỗi, chỉ sai ngày) nếu để nó tự parse trước.
+        let slashMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+        if (slashMatch) {
+            let [, dd, mm, yyyy, hh, min, ss] = slashMatch;
+            let d = new Date(+yyyy, +mm - 1, +dd, +(hh || 0), +(min || 0), +(ss || 0));
+            if (!isNaN(d.getTime())) return d;
+        }
+
+        let d = new Date(s);
+        if (!isNaN(d.getTime())) return d;
+        let parts = s.split('T')[0].split('-');
+        if (parts.length === 3) {
+            let alt = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
+            if (!isNaN(alt.getTime())) return alt;
+        }
+        return null;
+    }
 
     function formatDate(dateStr) {
         if (!dateStr) return "";
-        let d = new Date(dateStr);
-        if (!isNaN(d.getTime())) {
+        let d = parseFlexibleDate(dateStr);
+        if (d) {
             let day = String(d.getDate()).padStart(2, '0');
             let month = String(d.getMonth() + 1).padStart(2, '0');
             let year = d.getFullYear();
             return `${day}/${month}/${year}`;
         }
-        let parts = dateStr.split('T')[0].split('-');
-        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
         return dateStr;
     }
+
+    function formatDateTime(dateStr) {
+        if (!dateStr) return "";
+        let d = parseFlexibleDate(dateStr);
+        if (!d) return dateStr;
+        let hh = String(d.getHours()).padStart(2, '0');
+        let mm = String(d.getMinutes()).padStart(2, '0');
+        return `${formatDate(dateStr)} ${hh}:${mm}`;
+    }
+
+    // Số ngày đã trôi qua kể từ dateStr tới hiện tại — dùng để đánh dấu ca
+    // "Chưa xử lý" bị tồn đọng quá lâu. Trả về null nếu không parse được ngày.
+    function daysSince(dateStr) {
+        let d = parseFlexibleDate(dateStr);
+        if (!d) return null;
+        return Math.floor((Date.now() - d.getTime()) / 86400000);
+    }
+
+    const OVERDUE_DAYS_THRESHOLD = 3;
 
     function initFilters(data) {
         let vungs = [...new Set(data.map(item => item.vung))].filter(Boolean).sort();
@@ -562,6 +1065,52 @@
         filterData();
     }
 
+    function onSortClick(key) {
+        if (currentSort.key === key) {
+            currentSort.dir *= -1;
+        } else {
+            currentSort.key = key;
+            currentSort.dir = 1;
+        }
+        currentPage = 1;
+        applySortToFilteredData();
+        renderTable(filteredDataCache);
+        updateSortIndicators();
+        updateSortIndicators();
+    }
+
+    function applySortToFilteredData() {
+        if (!currentSort.key) return;
+        let key = currentSort.key;
+        let dir = currentSort.dir;
+        filteredDataCache.sort((a, b) => {
+            if (key === 'tgHoanTat') {
+                let da = parseFlexibleDate(a.tgHoanTat), db = parseFlexibleDate(b.tgHoanTat);
+                let ta = da ? da.getTime() : -Infinity;
+                let tb = db ? db.getTime() : -Infinity;
+                return (ta - tb) * dir;
+            }
+            let va = (a[key] || '').toString().toLowerCase();
+            let vb = (b[key] || '').toString().toLowerCase();
+            if (va < vb) return -1 * dir;
+            if (va > vb) return 1 * dir;
+            return 0;
+        });
+    }
+
+    function updateSortIndicators() {
+        document.querySelectorAll('.sort-indicator').forEach(span => {
+            let key = span.dataset.key;
+            if (key === currentSort.key) {
+                span.textContent = currentSort.dir === 1 ? '▲' : '▼';
+                span.classList.add('active');
+            } else {
+                span.textContent = '↕';
+                span.classList.remove('active');
+            }
+        });
+    }
+
     function filterData() {
         currentPage = 1;
         let vung = document.getElementById('filterVung').value;
@@ -581,7 +1130,7 @@
             if (doiTruong && item.doiTruong !== doiTruong) return false;
             if (nhanVien && item.nhanVien !== nhanVien) return false;
 
-            let currentItemTpkt = item.userSelectedTpkt || item.tpktCheck || "Chưa kiểm tra";
+            let currentItemTpkt = normalizeVal(item.userSelectedTpkt) || normalizeVal(item.tpktCheck) || "Chưa kiểm tra";
             if (tpktCheckVal && currentItemTpkt !== tpktCheckVal) return false;
 
             if (searchHDSmooth) {
@@ -592,12 +1141,128 @@
             return true;
         });
 
+        applySortToFilteredData();
         renderTable(filteredDataCache);
-        renderExecutiveReport(filteredDataCache);
+        // Chỉ vẽ lại KPI + Chart.js khi tab "Báo cáo Tổng quan" đang thực sự mở —
+        // huỷ/tạo lại biểu đồ là thao tác nặng, không cần làm khi người dùng
+        // đang ở tab khác (mỗi lần gõ tìm kiếm/đổi bộ lọc đều gọi hàm này).
+        if (document.getElementById('reportContent').classList.contains('active')) {
+            renderExecutiveReport(filteredDataCache);
+        }
         
         document.getElementById('selectAll').checked = false;
         updateBatchBar();
     }
+
+    // Vẽ lại báo cáo đúng lúc chuyển sang tab "Báo cáo Tổng quan", để dữ liệu
+    // luôn mới nhất kể cả khi bộ lọc/tìm kiếm đã đổi trong lúc tab đang ẩn.
+    document.getElementById('report-tab').addEventListener('shown.bs.tab', () => {
+        renderExecutiveReport(filteredDataCache);
+    });
+
+    // ================== TRÒ CHUYỆN NỘI BỘ ==================
+    // Cần Worker có thêm 2 route: GET /api/chat/messages?since_id=N và
+    // POST /api/chat/send { username, message } — xem hướng dẫn kèm theo.
+    const CHAT_POLL_INTERVAL_MS = 8 * 1000; // 8 giây
+    let chatMessages = [];
+    let lastChatId = 0;
+    let chatUnreadCount = 0;
+    let chatPollTimer = null;
+
+    function isChatTabActive() {
+        return document.getElementById('chatContent').classList.contains('active');
+    }
+
+    async function fetchChatMessages() {
+        if (!currentUser || !currentUser.username) return;
+        try {
+            let response = await fetch(WEB_APP_URL + "api/chat/messages?since_id=" + lastChatId, { method: "GET" });
+            let res = await response.json();
+            let newMsgs = (res && res.messages) ? res.messages : [];
+            if (newMsgs.length === 0) return;
+
+            chatMessages = chatMessages.concat(newMsgs);
+            lastChatId = newMsgs[newMsgs.length - 1].id;
+
+            if (isChatTabActive()) {
+                renderChatMessages();
+            } else {
+                chatUnreadCount += newMsgs.length;
+                updateChatBadge();
+            }
+        } catch (error) {
+            console.error("Lỗi tải tin nhắn:", error);
+        }
+    }
+
+    function renderChatMessages() {
+        let body = document.getElementById('chatMessagesBody');
+        if (chatMessages.length === 0) {
+            body.innerHTML = '<div class="text-center small py-4" style="color:var(--slate);">Chưa có tin nhắn nào.</div>';
+            return;
+        }
+        body.innerHTML = chatMessages.map(m => {
+            let isOwn = currentUser && m.username === currentUser.username;
+            return `
+                <div class="chat-bubble ${isOwn ? 'is-own' : ''}">
+                    <div class="chat-meta">${escapeHtml(m.username)} · ${formatDateTime(m.created_at)}</div>
+                    <div class="chat-text">${escapeHtml(m.message)}</div>
+                </div>
+            `;
+        }).join('');
+        body.scrollTop = body.scrollHeight;
+    }
+
+    function updateChatBadge() {
+        let badge = document.getElementById('badgeChatUnread');
+        if (chatUnreadCount > 0) {
+            badge.textContent = chatUnreadCount;
+            badge.classList.remove('d-none');
+        } else {
+            badge.classList.add('d-none');
+        }
+    }
+
+    async function sendChatMessage() {
+        let input = document.getElementById('chatInput');
+        let text = input.value.trim();
+        if (!text || !currentUser || !currentUser.username) return;
+
+        input.value = "";
+        try {
+            let response = await fetch(WEB_APP_URL + "api/chat/send", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: currentUser.username, message: text })
+            });
+            let result = await response.json();
+            if (!result.success) {
+                alert(result.error || "Không gửi được tin nhắn, vui lòng thử lại!");
+                return;
+            }
+            await fetchChatMessages();
+        } catch (error) {
+            console.error("Lỗi gửi tin nhắn:", error);
+            alert("Lỗi kết nối đến server!");
+        }
+    }
+
+    function startChatPolling() {
+        stopChatPolling();
+        fetchChatMessages();
+        chatPollTimer = setInterval(fetchChatMessages, CHAT_POLL_INTERVAL_MS);
+    }
+
+    function stopChatPolling() {
+        if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
+    }
+
+    // Vào tab Trò chuyện thì coi như đã đọc hết + render lại + cuộn xuống cuối
+    document.getElementById('chat-tab').addEventListener('shown.bs.tab', () => {
+        chatUnreadCount = 0;
+        updateChatBadge();
+        renderChatMessages();
+    });
 
     function resetFilters() {
         document.getElementById('filterVung').value = "";
@@ -631,22 +1296,22 @@
         cllBody.innerHTML = "";
 
         if (duplicateEntries.length === 0) {
-            cllBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-4">Không có số hợp đồng nào bị trùng lặp.</td></tr>`;
+            cllBody.innerHTML = `<tr><td colspan="3" class="text-center py-4" style="color:var(--slate);">Không có số hợp đồng nào bị trùng lặp.</td></tr>`;
             return;
         }
 
         const fragment = document.createDocumentFragment();
         duplicateEntries.forEach(([soHD, items]) => {
             let tr = document.createElement('tr');
-            let detailsHtml = '<ul class="mb-0 ps-3 text-secondary small">';
+            let detailsHtml = '<ul class="mb-0 ps-3 small" style="color:var(--slate);">';
             items.forEach(subItem => {
-                detailsHtml += `<li><b>Vùng:</b> ${subItem.vung || '--'} | <b>Đối tác:</b> ${subItem.doiTac || '--'} | <b>Đội trưởng:</b> ${subItem.doiTruong || '--'} | <b>Nhân viên:</b> ${subItem.nhanVien || '--'} | <b>TG Hoàn Tất:</b> ${formatDate(subItem.tgHoanTat)}</li>`;
+                detailsHtml += `<li><b>Vùng:</b> ${escapeHtml(subItem.vung) || '--'} | <b>Đối tác:</b> ${escapeHtml(subItem.doiTac) || '--'} | <b>Đội trưởng:</b> ${escapeHtml(subItem.doiTruong) || '--'} | <b>Nhân viên:</b> ${escapeHtml(subItem.nhanVien) || '--'} | <b>TG Hoàn Tất:</b> ${formatDate(subItem.tgHoanTat)}</li>`;
             });
             detailsHtml += '</ul>';
 
             tr.innerHTML = `
-                <td class="fw-bold text-danger">${soHD}</td>
-                <td class="text-center"><span class="badge bg-danger">${items.length} lần</span></td>
+                <td class="op-code fw-bold" style="color:var(--red);">${escapeHtml(soHD)}</td>
+                <td class="text-center"><span class="severity-dot is-high">${items.length} lần</span></td>
                 <td>${detailsHtml}</td>
             `;
             fragment.appendChild(tr);
@@ -656,10 +1321,18 @@
 
     function renderTable(data) {
         let tbody = document.getElementById('tableBody');
+
+        // Lưu lại các dòng đang được tick TRƯỚC khi xoá DOM — nếu dò lại sau khi
+        // đã tbody.innerHTML = "" thì querySelector luôn trả về null (DOM đã mất),
+        // khiến mọi lựa chọn checkbox bị reset oan mỗi lần render lại (gõ tìm kiếm,
+        // đổi bộ lọc, đồng bộ ngầm...). Dùng Set để tra cứu nhanh, khỏi truy vấn DOM.
+        let checkedIds = new Set();
+        tbody.querySelectorAll('.row-checkbox:checked').forEach(cb => checkedIds.add(cb.value));
+
         tbody.innerHTML = "";
         
         if (data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="10" class="text-center text-muted">Không có dữ liệu phù hợp</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="10" class="text-center" style="color:var(--slate);">Không có dữ liệu phù hợp</td></tr>`;
             document.getElementById('paginationInfo').innerText = "Hiển thị 0 - 0 của 0 dòng";
             document.getElementById('paginationControls').innerHTML = "";
             return;
@@ -677,9 +1350,13 @@
         const fragment = document.createDocumentFragment();
 
         paginatedData.forEach(row => {
-            let serverTpkt = row.tpktCheck ? row.tpktCheck.trim() : "";
-            let currentTpkt = row.userSelectedTpkt !== undefined ? row.userSelectedTpkt : (serverTpkt || "Chưa kiểm tra");
-            let xllaiVal = row.xlLai ? row.xlLai.trim() : "";
+            // normalizeVal() coi 0 / "0" / null / "" đều là "chưa có giá trị" — áp dụng
+            // ngay tại điểm render để chắc chắn không bao giờ ra ô trống, dù dữ liệu
+            // đến từ cache cũ (localStorage), server, hay vừa được batch cập nhật.
+            let serverTpkt = normalizeVal(row.tpktCheck);
+            let rawCurrentTpkt = row.userSelectedTpkt !== undefined ? normalizeVal(row.userSelectedTpkt) : serverTpkt;
+            let currentTpkt = rawCurrentTpkt || "Chưa kiểm tra";
+            let xllaiVal = normalizeVal(row.xlLai);
             let tgHoanTat = formatDate(row.tgHoanTat);
             let ghiChu = row.ghiChu || "";
 
@@ -690,23 +1367,36 @@
             let isLoi = ["Suy hao", "Không tín hiệu", "Rớt kết nối", "Vùng phủ không đảm bảo"].includes(currentTpkt);
             let isServerLoi = ["Suy hao", "Không tín hiệu", "Rớt kết nối", "Vùng phủ không đảm bảo"].includes(serverTpkt);
 
-            let isServerProcessed = serverTpkt && serverTpkt !== "Chưa kiểm tra";
-            let checkboxDisabled = isServerProcessed ? "disabled" : "";
-            let isChecked = document.querySelector(`#row_${row.id} .row-checkbox`)?.checked || false;
+            // Dòng đã bị "thao tác" (đã chọn TPKT Check riêng lẻ, dù đã Gửi hay chưa)
+            // thì không còn được phép chọn để thao tác hàng loạt nữa.
+            let isRowTouched = currentTpkt && currentTpkt !== "Chưa kiểm tra";
+            let checkboxDisabled = isRowTouched ? "disabled" : "";
+            let isChecked = !isRowTouched && checkedIds.has(String(row.id));
+
+            // Ca lỗi còn "Chưa xử lý" (chưa chọn XL Lại cuối cùng) mà đã quá lâu kể
+            // từ ngày hoàn tất — đánh dấu để không bị bỏ sót.
+            let isPendingXuLy = isLoi && (xllaiVal === "" || xllaiVal === "Chuyển KTV XL lại");
+            let overdueDays = isPendingXuLy ? daysSince(row.tgHoanTat) : null;
+            let isOverdue = overdueDays !== null && overdueDays > OVERDUE_DAYS_THRESHOLD;
 
             let tr = document.createElement('tr');
             tr.id = `row_${row.id}`;
+            if (isOverdue) tr.classList.add('row-overdue');
             let tpktHtml = "", xllaiHtml = "";
 
+            let overdueBadge = isOverdue
+                ? `<div class="small mt-1" style="color:var(--red);"><i class="bi bi-alarm me-1"></i>Quá ${overdueDays} ngày chưa xử lý</div>`
+                : '';
+
             if (isServerLoi && !row._modified) {
-                tpktHtml = `<span class="fw-bold text-danger">${serverTpkt}</span>`;
+                tpktHtml = `<span class="status-chip is-loi">${serverTpkt}</span>${overdueBadge}`;
                 xllaiHtml = `
                     <select class="form-select form-select-sm mb-1" id="xllai_${row.id}">
                         <option value="Chuyển KTV XL lại" ${xllaiVal === "Chuyển KTV XL lại" || !xllaiVal ? 'selected' : ''}>Chuyển KTV XL lại</option>
                         <option value="Đã xử lý lại" ${xllaiVal === "Đã xử lý lại" ? 'selected' : ''}>Đã xử lý lại</option>
                         <option value="Checklist Onsite" ${xllaiVal === "Checklist Onsite" ? 'selected' : ''}>Checklist Onsite</option>
                     </select>
-                    <button class="btn btn-sm btn-warning w-100 mt-1 fw-bold" onclick="submitXlLai(${row.id}, '${serverTpkt}')">Gửi</button>
+                    <button class="btn btn-sm w-100 mt-1 fw-bold" style="background:var(--amber); color:#fff;" onclick="submitXlLai(${row.id}, '${serverTpkt}')">Gửi</button>
                 `;
             } else if (currentTpkt === "" || currentTpkt === "Chưa kiểm tra") {
                 tpktHtml = `
@@ -719,21 +1409,22 @@
                         <option value="Vùng phủ không đảm bảo">Vùng phủ không đảm bảo</option>
                     </select>
                 `;
-                xllaiHtml = `<span class="text-muted small">--</span>`;
+                xllaiHtml = `<span class="small" style="color:var(--slate-soft);">--</span>`;
             } else if (isBaoTriOk) {
                 tpktHtml = `
                     <div class="d-flex align-items-center justify-content-between">
-                        <span class="fw-bold text-success">Bảo trì ok</span>
-                        <button class="btn btn-sm btn-link text-muted p-0 text-decoration-none" onclick="resetRowTpkt(${row.id})" style="font-size: 12px;">[Chọn lại]</button>
+                        <span class="status-chip is-ok">Bảo trì ok</span>
+                        <button class="btn btn-sm btn-link p-0 text-decoration-none" style="color:var(--slate-soft); font-size: 12px;" onclick="resetRowTpkt(${row.id})">[Chọn lại]</button>
                     </div>
                 `;
-                xllaiHtml = `<button class="btn btn-sm btn-success w-100 fw-bold" onclick="submitBaoTriOk(${row.id})">Gửi</button>`;
+                xllaiHtml = `<button class="btn btn-sm w-100 fw-bold" style="background:var(--brand); color:#fff;" onclick="submitBaoTriOk(${row.id})">Gửi</button>`;
             } else if (isLoi) {
                 tpktHtml = `
                     <div class="d-flex align-items-center justify-content-between">
-                        <span class="fw-bold text-danger">${currentTpkt}</span>
-                        <button class="btn btn-sm btn-link text-muted p-0 text-decoration-none" onclick="resetRowTpkt(${row.id})" style="font-size: 12px;">[Chọn lại]</button>
+                        <span class="status-chip is-loi">${currentTpkt}</span>
+                        <button class="btn btn-sm btn-link p-0 text-decoration-none" style="color:var(--slate-soft); font-size: 12px;" onclick="resetRowTpkt(${row.id})">[Chọn lại]</button>
                     </div>
+                    ${overdueBadge}
                 `;
                 xllaiHtml = `
                     <select class="form-select form-select-sm mb-1" id="xllai_${row.id}">
@@ -741,7 +1432,7 @@
                         <option value="Đã xử lý lại" ${xllaiVal === "Đã xử lý lại" ? 'selected' : ''}>Đã xử lý lại</option>
                         <option value="Checklist Onsite" ${xllaiVal === "Checklist Onsite" ? 'selected' : ''}>Checklist Onsite</option>
                     </select>
-                    <button class="btn btn-sm btn-warning w-100 mt-1 fw-bold" onclick="submitXlLai(${row.id}, '${currentTpkt}')">Gửi</button>
+                    <button class="btn btn-sm w-100 mt-1 fw-bold" style="background:var(--amber); color:#fff;" onclick="submitXlLai(${row.id}, '${currentTpkt}')">Gửi</button>
                 `;
             }
 
@@ -752,7 +1443,7 @@
                 <td></td>
                 <td><b></b></td>
                 <td></td>
-                <td><small></small></td>
+                <td><small></small><br><small class="mono" style="color:var(--slate-soft); font-size:11px;"></small></td>
                 <td><small></small></td>
                 <td>${tpktHtml}</td>
                 <td>${xllaiHtml}</td>
@@ -763,7 +1454,13 @@
             tr.cells[3].textContent = row.doiTruong || '';
             tr.querySelector('b').textContent = row.soHopDong || '';
             tr.cells[5].textContent = row.nhanVien || '';
-            tr.cells[6].querySelector('small').textContent = tgHoanTat;
+            tr.cells[6].querySelectorAll('small')[0].textContent = tgHoanTat;
+            // "Cập nhật lần cuối" chỉ có ý nghĩa khi dòng đã từng được ai đó xử lý
+            // (serverTpkt khác rỗng) — dòng còn "Chưa kiểm tra" thì ngayCapNhat chỉ
+            // là thời điểm n8n import, không phải lúc người dùng thao tác.
+            if (serverTpkt && row.ngayCapNhat) {
+                tr.cells[6].querySelectorAll('small')[1].textContent = `Cập nhật: ${formatDateTime(row.ngayCapNhat)}`;
+            }
             tr.cells[7].querySelector('small').textContent = ghiChu;
 
             fragment.appendChild(tr);
@@ -829,30 +1526,63 @@
         document.querySelector('.table-responsive').scrollTop = 0;
     }
 
+    // Danh sách các giá trị TPKT Check được coi là "lỗi" (cần xử lý lại)
+    const LOI_VALUES = ["Suy hao", "Không tín hiệu", "Rớt kết nối", "Vùng phủ không đảm bảo"];
+
+    // Phân loại 1 dòng vào đúng 1 trong 3 nhóm SUM theo bảng logic nghiệp vụ:
+    // CHUA_KIEM_TRA / CHUA_XU_LY / DA_HOAN_THANH
+    // Lưu ý: "Checklist Onsite" tính là ĐÃ HOÀN THÀNH nhưng KHÔNG được tính vào
+    // các số liệu "chưa xử lý / ca lỗi cần theo dõi" (isCountedAsLoi = false).
+    function classifyRow(item) {
+        let tpkt = normalizeVal(item.tpktCheck);
+        let xlLai = normalizeVal(item.xlLai);
+
+        if (!tpkt || tpkt === "Chưa kiểm tra") {
+            return { category: "CHUA_KIEM_TRA", isLoi: false, isCountedAsLoi: false };
+        }
+        if (tpkt === "Bảo trì ok") {
+            return { category: "DA_HOAN_THANH", isLoi: false, isCountedAsLoi: false };
+        }
+        if (LOI_VALUES.includes(tpkt)) {
+            if (xlLai === "Đã xử lý lại") {
+                return { category: "DA_HOAN_THANH", isLoi: true, isCountedAsLoi: true };
+            }
+            if (xlLai === "Checklist Onsite") {
+                // Đã xong nhưng không tính vào SUM XL Lại / Ca lỗi
+                return { category: "DA_HOAN_THANH", isLoi: true, isCountedAsLoi: false };
+            }
+            // Chưa chọn XL Lại hoặc đang "Chuyển KTV XL lại" => vẫn đang chờ xử lý
+            return { category: "CHUA_XU_LY", isLoi: true, isCountedAsLoi: true };
+        }
+        return { category: "CHUA_KIEM_TRA", isLoi: false, isCountedAsLoi: false };
+    }
+
     function renderExecutiveReport(data) {
         let totalCa = data.length;
-        let totalCaLoi = 0;
-        let totalOk = 0;
+        let totalChuaKiemTra = 0;
+        let totalCaLoi = 0; // = SUM CHƯA XỬ LÝ (không tính Checklist Onsite)
+        let totalOk = 0;    // = SUM ĐÃ HOÀN THÀNH (Bảo trì ok + Đã xử lý lại + Checklist Onsite)
 
         let nvStats = {};
         data.forEach(item => {
-            let tpkt = item.tpktCheck ? item.tpktCheck.trim() : "";
-            let isLoi = ["Suy hao", "Không tín hiệu", "Rớt kết nối", "Vùng phủ không đảm bảo"].includes(tpkt);
-            
-            if (isLoi) totalCaLoi++;
-            if (tpkt === "Bảo trì ok") totalOk++;
+            let { category, isCountedAsLoi } = classifyRow(item);
+
+            if (category === "CHUA_KIEM_TRA") totalChuaKiemTra++;
+            if (category === "CHUA_XU_LY") totalCaLoi++;
+            if (category === "DA_HOAN_THANH") totalOk++;
 
             let nv = item.nhanVien || "Chưa rõ";
             if (!nvStats[nv]) {
                 nvStats[nv] = { nhanVien: nv, doiTruong: item.doiTruong || "", doiTac: item.doiTac || "", totalCa: 0, khongDutDiem: 0 };
             }
             nvStats[nv].totalCa += 1;
-            if (isLoi) nvStats[nv].khongDutDiem += 1;
+            if (isCountedAsLoi) nvStats[nv].khongDutDiem += 1;
         });
 
         let globalRate = totalCa > 0 ? ((totalCaLoi / totalCa) * 100).toFixed(1) : 0;
 
         document.getElementById('kpiTotalCa').innerText = totalCa;
+        document.getElementById('kpiChuaKiemTra').innerText = totalChuaKiemTra;
         document.getElementById('kpiTotalLoi').innerText = totalCaLoi;
         document.getElementById('kpiRateLoi').innerText = globalRate + '%';
         document.getElementById('kpiTotalOk').innerText = totalOk;
@@ -864,13 +1594,14 @@
         document.getElementById('warningCountBadge').innerText = warningList.length + ' nhân sự';
 
         if (warningList.length === 0) {
-            warningBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Tuyệt vời! Không có nhân sự nào phát sinh lỗi.</td></tr>`;
+            warningBody.innerHTML = `<tr><td colspan="6" class="text-center py-3" style="color:var(--slate);">Tuyệt vời! Không có nhân sự nào phát sinh lỗi.</td></tr>`;
         } else {
             const fragment = document.createDocumentFragment();
             warningList.forEach(stat => {
                 let ratio = ((stat.khongDutDiem / stat.totalCa) * 100).toFixed(1);
                 let isHighRisk = stat.khongDutDiem >= 5 || ratio >= 30;
-                let badgeClass = isHighRisk ? "bg-danger" : "bg-warning text-dark";
+                let severityClass = isHighRisk ? "is-high" : "is-watch";
+                let barColor = isHighRisk ? "var(--red)" : "var(--amber)";
                 let statusText = isHighRisk ? "Rủi ro cao" : "Cần theo dõi";
 
                 let tr = document.createElement('tr');
@@ -878,16 +1609,16 @@
                     <td class="fw-bold"></td>
                     <td></td>
                     <td></td>
-                    <td class="text-center fw-bold text-danger">${stat.khongDutDiem}</td>
+                    <td class="text-center op-code fw-bold" style="color:var(--red);">${stat.khongDutDiem}</td>
                     <td class="text-center">
                         <div class="d-flex align-items-center justify-content-center gap-2">
-                            <span>${ratio}%</span>
-                            <div class="progress" style="width: 60px; height: 6px;">
-                                <div class="progress-bar ${isHighRisk ? 'bg-danger' : 'bg-warning'}" style="width: ${Math.min(ratio, 100)}%"></div>
+                            <span class="mono small">${ratio}%</span>
+                            <div class="progress" style="width: 60px; height: 6px; background:var(--line);">
+                                <div class="progress-bar" style="width: ${Math.min(ratio, 100)}%; background:${barColor};"></div>
                             </div>
                         </div>
                     </td>
-                    <td class="text-center"><span class="badge ${badgeClass}">${statusText}</span></td>
+                    <td class="text-center"><span class="severity-dot ${severityClass}">${statusText}</span></td>
                 `;
                 tr.cells[0].textContent = stat.nhanVien;
                 tr.cells[1].textContent = stat.doiTruong;
@@ -903,8 +1634,7 @@
             let key = item.doiTac ? item.doiTac.trim() : "Khác";
             if (!dtStatsRaw[key]) dtStatsRaw[key] = { total: 0, khongDutDiem: 0 };
             dtStatsRaw[key].total += 1;
-            let tpkt = item.tpktCheck ? item.tpktCheck.trim() : "";
-            if (["Suy hao", "Không tín hiệu", "Rớt kết nối", "Vùng phủ không đảm bảo"].includes(tpkt)) {
+            if (classifyRow(item).isCountedAsLoi) {
                 dtStatsRaw[key].khongDutDiem += 1;
             }
         });
@@ -936,8 +1666,7 @@
             let key = item.doiTruong || "Khác";
             if (!dtrStats[key]) dtrStats[key] = { total: 0, khongDutDiem: 0 };
             dtrStats[key].total += 1;
-            let tpkt = item.tpktCheck ? item.tpktCheck.trim() : "";
-            if (["Suy hao", "Không tín hiệu", "Rớt kết nối", "Vùng phủ không đảm bảo"].includes(tpkt)) {
+            if (classifyRow(item).isCountedAsLoi) {
                 dtrStats[key].khongDutDiem += 1;
             }
         });
@@ -956,20 +1685,21 @@
             data: {
                 labels: dtLabels,
                 datasets: [
-                    { label: 'Tổng ca', data: dtTotalData, backgroundColor: '#0d6efd', borderRadius: 4 },
-                    { label: 'Ca lỗi', data: dtErrorData, backgroundColor: '#dc3545', borderRadius: 4 }
+                    { label: 'Tổng ca', data: dtTotalData, backgroundColor: '#12181B', borderRadius: 3 },
+                    { label: 'Ca lỗi', data: dtErrorData, backgroundColor: '#AC2B22', borderRadius: 3 }
                 ]
             },
             options: { 
                 responsive: true, maintainAspectRatio: false, 
                 plugins: { 
-                    legend: { position: 'bottom' },
+                    legend: { position: 'bottom', labels: { font: { family: "'IBM Plex Sans'", size: 12 } } },
                     datalabels: {
                         anchor: 'end', align: 'top',
                         formatter: (value, context) => context.datasetIndex === 1 ? dtPercentData[context.dataIndex] : '',
-                        font: { weight: 'bold', size: 11 }, color: '#dc3545'
+                        font: { family: "'IBM Plex Mono'", weight: 'bold', size: 11 }, color: '#AC2B22'
                     }
-                } 
+                },
+                scales: { x: { ticks: { font: { family: "'IBM Plex Sans'" } } }, y: { ticks: { font: { family: "'IBM Plex Mono'" } } } }
             },
             plugins: [ChartDataLabels]
         });
@@ -980,27 +1710,28 @@
             data: {
                 labels: dtrLabels,
                 datasets: [
-                    { label: 'Tổng ca', data: dtrTotalData, backgroundColor: '#198754', borderRadius: 4 },
-                    { label: 'Ca lỗi', data: dtrErrorData, backgroundColor: '#ffc107', borderRadius: 4 }
+                    { label: 'Tổng ca', data: dtrTotalData, backgroundColor: '#3F7D1F', borderRadius: 3 },
+                    { label: 'Ca lỗi', data: dtrErrorData, backgroundColor: '#A6620A', borderRadius: 3 }
                 ]
             },
             options: { 
                 responsive: true, maintainAspectRatio: false, 
                 plugins: { 
-                    legend: { position: 'bottom' },
+                    legend: { position: 'bottom', labels: { font: { family: "'IBM Plex Sans'", size: 12 } } },
                     datalabels: {
                         anchor: 'end', align: 'top',
                         formatter: (value, context) => context.datasetIndex === 1 ? dtrPercentData[context.dataIndex] : '',
-                        font: { weight: 'bold', size: 11 }, color: '#b78103'
+                        font: { family: "'IBM Plex Mono'", weight: 'bold', size: 11 }, color: '#A6620A'
                     }
-                } 
+                },
+                scales: { x: { ticks: { font: { family: "'IBM Plex Sans'" } } }, y: { ticks: { font: { family: "'IBM Plex Mono'" } } } }
             },
             plugins: [ChartDataLabels]
         });
     }
 
     function handleCheckboxChange(checkbox) {
-        if (document.querySelectorAll('.row-checkbox:checked').length > 20) {
+        if (document.querySelectorAll('.row-checkbox:checked:not(:disabled)').length > 20) {
             alert("Chỉ được chọn tối đa 20 dòng!");
             checkbox.checked = false;
         }
@@ -1014,10 +1745,11 @@
     }
 
     function updateBatchBar() {
-        let count = document.querySelectorAll('.row-checkbox:checked').length;
+        let count = document.querySelectorAll('.row-checkbox:checked:not(:disabled)').length;
         document.getElementById('selectedCount').innerText = count;
         document.getElementById('batchActionBar').style.display = count > 0 ? "block" : "none";
         document.getElementById('batchTpktValue').value = "";
+        document.getElementById('btnApplyBatchTpkt').classList.remove('d-none');
         let xlLaiContainer = document.getElementById('batchXlLaiContainer');
         xlLaiContainer.classList.add('d-none');
         xlLaiContainer.classList.remove('d-flex');
@@ -1027,14 +1759,19 @@
     function onBatchTpktChange() {
         let batchTpkt = document.getElementById('batchTpktValue').value;
         let xlLaiContainer = document.getElementById('batchXlLaiContainer');
-        
+        let btnApplyTpkt = document.getElementById('btnApplyBatchTpkt');
+
         if (["Suy hao", "Không tín hiệu", "Rớt kết nối", "Vùng phủ không đảm bảo"].includes(batchTpkt)) {
+            // Nhóm lỗi bắt buộc phải chọn thêm XL Lại (nhóm 2) rồi mới gửi được,
+            // nên ẩn nút áp dụng của nhóm 1 để tránh gửi thiếu XL Lại.
             xlLaiContainer.classList.remove('d-none');
             xlLaiContainer.classList.add('d-flex');
+            btnApplyTpkt.classList.add('d-none');
         } else {
             xlLaiContainer.classList.add('d-none');
             xlLaiContainer.classList.remove('d-flex');
             document.getElementById('batchXlLaiValue').value = "";
+            btnApplyTpkt.classList.remove('d-none');
         }
     }
 
@@ -1065,61 +1802,73 @@
         }
     }
 
-    async function submitBaoTriOk(rowId) {
+    function submitBaoTriOk(rowId) {
         let item = globalData.find(i => i.id === rowId);
         if (item) {
+            if (!confirm(`Xác nhận ghi nhận "Bảo trì ok" cho hợp đồng ${item.soHopDong || rowId}?`)) return;
+
             item.tpktCheck = "Bảo trì ok";
             item.userSelectedTpkt = "Bảo trì ok";
             item.xlLai = "";
+            
             document.getElementById(`row_${rowId}`)?.remove();
             updateBatchBar();
-            await updateRecord(rowId, "Bảo trì ok", "");
+            
+            updateRecord(rowId, "Bảo trì ok", "");
+            localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
         }
     }
 
-    async function submitXlLai(rowId, tpktVal) {
+    function submitXlLai(rowId, tpktVal) {
         let xllaiElem = document.getElementById(`xllai_${rowId}`);
         let xllaiVal = xllaiElem ? xllaiElem.value : "Chuyển KTV XL lại";
         let item = globalData.find(i => i.id === rowId);
         if (item) {
+            if (!confirm(`Xác nhận: "${tpktVal}" — "${xllaiVal}" cho hợp đồng ${item.soHopDong || rowId}?`)) return;
+
             item.tpktCheck = tpktVal;
             item.userSelectedTpkt = tpktVal;
             item.xlLai = xllaiVal;
+            
             if (xllaiVal === "Đã xử lý lại" || xllaiVal === "Checklist Onsite") {
                 document.getElementById(`row_${rowId}`)?.remove();
                 updateBatchBar();
             }
-            await updateRecord(rowId, tpktVal, xllaiVal);
-            if (xllaiVal !== "Đã xử lý lại" && xllaiVal !== "Checklist Onsite") fetchAllDataAndInit();
+            
+            updateRecord(rowId, tpktVal, xllaiVal);
+            localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
+            
+            if (xllaiVal !== "Đã xử lý lại" && xllaiVal !== "Checklist Onsite") {
+                renderTable(filteredDataCache);
+            }
         }
     }
 
-    async function applyBatchTpkt() {
-        let checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+    function applyBatchTpkt() {
+        let checkedBoxes = document.querySelectorAll('.row-checkbox:checked:not(:disabled)');
         let chosenTpkt = document.getElementById('batchTpktValue').value;
         if (!chosenTpkt || checkedBoxes.length === 0) return alert("Vui lòng chọn TPKT Check và tích chọn dòng!");
+        if (!confirm(`Xác nhận áp dụng "${chosenTpkt}" cho ${checkedBoxes.length} dòng đã chọn? Thao tác này không thể hoàn tác.`)) return;
 
-        let promises = [];
         checkedBoxes.forEach(cb => {
-            let rowId = parseInt(cb.value);
-            let item = globalData.find(i => i.id === rowId);
+            let rowId = isNaN(cb.value) ? cb.value : parseInt(cb.value);
+            let item = globalData.find(i => i.id == rowId);
             if (item) {
                 item.tpktCheck = chosenTpkt;
                 item.userSelectedTpkt = chosenTpkt;
                 item.xlLai = "";
                 document.getElementById(`row_${rowId}`)?.remove();
-
-                promises.push(updateRecord(rowId, chosenTpkt, ""));
+                updateRecord(rowId, chosenTpkt, "");
             }
         });
 
-        await Promise.all(promises);
+        localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
         updateBatchBar(); 
-        fetchAllDataAndInit();
+        filterData();
     }
 
-    async function applyBatchXlLai() {
-        let checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+    function applyBatchXlLai() {
+        let checkedBoxes = document.querySelectorAll('.row-checkbox:checked:not(:disabled)');
         let chosenTpkt = document.getElementById('batchTpktValue').value;
         let chosenXlLai = document.getElementById('batchXlLaiValue').value;
 
@@ -1129,11 +1878,11 @@
         if (!chosenXlLai || checkedBoxes.length === 0) {
             return alert("Vui lòng chọn hình thức XL Lại và tích chọn dòng!");
         }
+        if (!confirm(`Xác nhận: "${chosenTpkt}" — "${chosenXlLai}" cho ${checkedBoxes.length} dòng đã chọn? Thao tác này không thể hoàn tác.`)) return;
 
-        let promises = [];
         checkedBoxes.forEach(cb => {
-            let rowId = parseInt(cb.value);
-            let item = globalData.find(i => i.id === rowId);
+            let rowId = isNaN(cb.value) ? cb.value : parseInt(cb.value);
+            let item = globalData.find(i => i.id == rowId);
             if (item) {
                 item.tpktCheck = chosenTpkt;
                 item.userSelectedTpkt = chosenTpkt;
@@ -1143,12 +1892,73 @@
                     document.getElementById(`row_${rowId}`)?.remove();
                 }
 
-                promises.push(updateRecord(rowId, chosenTpkt, chosenXlLai));
+                updateRecord(rowId, chosenTpkt, chosenXlLai);
             }
         });
-        await Promise.all(promises);
+
+        localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
         updateBatchBar(); 
-        fetchAllDataAndInit();
+        filterData();
+    }
+
+    function openChangePasswordModal() {
+        document.getElementById('txtNewPassword').value = "";
+        let msgBox = document.getElementById('changePassMessage');
+        msgBox.classList.add('d-none');
+        msgBox.innerText = "";
+        document.getElementById('changePasswordModal').style.display = 'flex';
+    }
+
+    function closeChangePasswordModal() {
+        document.getElementById('changePasswordModal').style.display = 'none';
+    }
+
+    async function submitChangePassword() {
+        let newPassword = document.getElementById('txtNewPassword').value.trim();
+        let msgBox = document.getElementById('changePassMessage');
+
+        if (!newPassword) {
+            msgBox.className = "alert alert-danger py-2 small mb-3";
+            msgBox.innerText = "Vui lòng nhập mật khẩu mới!";
+            msgBox.classList.remove('d-none');
+            return;
+        }
+
+        if (!currentUser || !currentUser.username) {
+            alert("Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại!");
+            return;
+        }
+
+        try {
+            let response = await fetch(WEB_APP_URL + "api/change-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    username: currentUser.username,
+                    newPassword: newPassword
+                })
+            });
+
+            let result = await response.json();
+
+            if (result.success) {
+                msgBox.className = "alert alert-success py-2 small mb-3";
+                msgBox.innerText = "Đổi mật khẩu thành công!";
+                msgBox.classList.remove('d-none');
+                setTimeout(() => {
+                    closeChangePasswordModal();
+                }, 1500);
+            } else {
+                msgBox.className = "alert alert-danger py-2 small mb-3";
+                msgBox.innerText = result.error || "Không thể đổi mật khẩu!";
+                msgBox.classList.remove('d-none');
+            }
+        } catch (error) {
+            console.error("Lỗi đổi mật khẩu:", error);
+            msgBox.className = "alert alert-danger py-2 small mb-3";
+            msgBox.innerText = "Lỗi kết nối đến server!";
+            msgBox.classList.remove('d-none');
+        }
     }
 </script>
 </body>
