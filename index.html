@@ -210,6 +210,56 @@
         .chart-panel h5 { font-size: 13.5px; font-weight: 700; color: var(--ink); letter-spacing: 0.01em; }
         .executive-chart-container { position: relative; height: 340px; }
 
+        /* ---------- LINH THÚ ĐỒNG HÀNH ---------- */
+        .linh-thu-intro { font-size: 13.5px; color: var(--slate); }
+        .pet-card {
+            background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+            padding: 11px 13px; height: 100%; position: relative; overflow: hidden;
+        }
+        .pet-card.has-pet {
+            border-color: #E8D9A8;
+            background: linear-gradient(165deg, #FFFCF3 0%, var(--card) 45%);
+        }
+        .pet-card .pet-subject { font-size: 10px; font-weight: 700; letter-spacing: 0.03em; color: var(--slate); text-transform: uppercase; }
+        .pet-card .pet-stage-name { font-size: 14px; font-weight: 700; color: var(--ink); margin: 2px 0 1px; }
+        .pet-card .pet-species-name { font-size: 10.5px; color: var(--slate); margin-bottom: 6px; }
+        .pet-card .pet-xp { font-size: 10.5px; color: var(--slate); margin-top: 3px; }
+        .pet-card .progress { height: 5px !important; }
+        .species-pick-btn {
+            border: 1px solid var(--line); background: var(--surface); border-radius: 20px;
+            padding: 2px 9px; font-size: 11px; color: var(--ink);
+        }
+        .species-pick-btn:hover { background: var(--brand-soft); border-color: var(--brand); }
+
+        .linh-thu-garden {
+            position: relative; height: 520px; border-radius: 12px; overflow: hidden;
+            background: linear-gradient(180deg, #EAF3DC 0%, #D9EAC4 100%);
+            border: 1px solid var(--line);
+        }
+        .garden-pet {
+            position: absolute; display: flex; flex-direction: column; align-items: center;
+            transform: translate(-50%, -50%);
+        }
+        .garden-pet .garden-xp-badge {
+            font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 700;
+            background: rgba(18,24,27,0.85); border-radius: 8px; padding: 1px 7px; margin-bottom: 2px; white-space: nowrap;
+        }
+        .garden-pet .garden-xp-badge.lvl-0 { color: #C7CCC5; }
+        .garden-pet .garden-xp-badge.lvl-1 { color: #F5C46B; }
+        .garden-pet .garden-xp-badge.lvl-2 { color: #9FD971; }
+        .garden-pet .garden-emoji {
+            font-size: 26px; display: inline-block;
+            animation: garden-hop 0.6s ease-in-out infinite;
+        }
+        .garden-pet .garden-label {
+            font-size: 10px; background: rgba(255,255,255,0.9); border-radius: 8px;
+            padding: 1px 7px; margin-top: 2px; white-space: nowrap; color: var(--ink); font-weight: 600;
+        }
+        @keyframes garden-hop {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
         /* ---------- CHAT NỘI BỘ ---------- */
         .chat-panel {
             background: var(--card); border: 1px solid var(--line); border-radius: 10px;
@@ -294,6 +344,7 @@
             <span class="text-end small me-1" style="color:#9AA39C;">Xin chào, <strong id="lblCurrentUsername" style="color:#fff;">--</strong></span>
             <span class="ops-pill" id="lblCurrentRole">Role: --</span>
             <span class="ops-pill is-brand" id="lblCurrentDoiTac">Đối tác: Tất cả</span>
+            <span class="ops-pill is-brand d-none" id="lblCurrentDoiTruong">Đội trưởng: --</span>
             <button class="ops-btn" id="btnManualRefresh" onclick="refreshData()" title="Làm mới dữ liệu ngay"><i class="bi bi-arrow-clockwise me-1"></i>Làm mới</button>
             <button class="ops-btn" onclick="openChangePasswordModal()"><i class="bi bi-key me-1"></i>Đổi mật khẩu</button>
             <button class="ops-btn is-danger" onclick="handleLogout()"><i class="bi bi-box-arrow-right me-1"></i>Đăng xuất</button>
@@ -368,6 +419,11 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chatContent" type="button" role="tab">
                 <i class="bi bi-chat-dots-fill me-1"></i> Trò chuyện <span id="badgeChatUnread" class="count-chip d-none">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="linhthu-tab" data-bs-toggle="tab" data-bs-target="#linhThuContent" type="button" role="tab">
+                <i class="bi bi-stars me-1" style="color:#C9A227;"></i> Linh Thú
             </button>
         </li>
     </ul>
@@ -559,6 +615,25 @@
                 </div>
             </div>
         </div>
+
+        <!-- TAB 5: LINH THÚ ĐỒNG HÀNH -->
+        <div class="tab-pane fade" id="linhThuContent" role="tabpanel">
+            <div class="linh-thu-intro mb-3">
+                <i class="bi bi-magic me-2" style="color:#C9A227;"></i>
+                Linh thú tiến hoá hoàn toàn tự động theo hiệu suất xử lý ca bảo trì thực tế — không cần nhập tay.
+            </div>
+
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="fw-bold small" style="color:var(--slate);">SÂN CHUNG — TOÀN BỘ LINH THÚ ĐANG HOẠT ĐỘNG</div>
+            </div>
+            <div id="linhThuGarden" class="linh-thu-garden mb-4">
+                <div class="text-center small py-4" style="color:var(--slate);">Đang tải sân chung...</div>
+            </div>
+
+            <div id="linhThuBody" class="row g-3">
+                <div class="col-12 text-center small py-4" style="color:var(--slate);">Đang tải dữ liệu Linh thú...</div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -622,6 +697,20 @@
         return String(v ?? '').replace(/[&<>"']/g, c => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
         }[c]));
+    }
+
+    // Tài khoản thường (role != admin) bị khoá vào đúng 1 Đối tác (doiTacQuanLy).
+    function isDoiTacLocked() {
+        return currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "";
+    }
+
+    // Tài khoản cấp Đội trưởng (role = 'doitruong') còn bị khoá hẹp hơn nữa,
+    // chỉ thấy đúng dữ liệu của Đội trưởng đó trong phạm vi Đối tác của họ.
+    // Chỉ cần cột doiTruong có giá trị là khoá hẹp — không phụ thuộc role
+    // (role vẫn là 'user' như các tài khoản khác, chỉ khác ở việc có gắn
+    // doiTruong hay không).
+    function isDoiTruongLocked() {
+        return currentUser && currentUser.doiTruong && currentUser.doiTruong.trim() !== "";
     }
 
     function debounceFilter() {
@@ -928,6 +1017,8 @@
         stopAutoRefresh();
         stopPingOnline();
         stopChatPolling();
+        gardenWanderTimers.forEach(t => clearInterval(t));
+        gardenWanderTimers = [];
         clearFilterSelections();
         localStorage.removeItem('tpkt_current_user');
         localStorage.removeItem('tpkt_last_sync_ts');
@@ -960,6 +1051,14 @@
         
         let dtLabel = (currentUser.doiTac && currentUser.doiTac.trim() !== "") ? currentUser.doiTac : "Tất cả (Full quyền)";
         document.getElementById('lblCurrentDoiTac').innerText = `Đối tác: ${dtLabel}`;
+
+        let dtrPill = document.getElementById('lblCurrentDoiTruong');
+        if (currentUser.doiTruong && currentUser.doiTruong.trim() !== "") {
+            dtrPill.innerText = `Đội trưởng: ${currentUser.doiTruong}`;
+            dtrPill.classList.remove('d-none');
+        } else {
+            dtrPill.classList.add('d-none');
+        }
     }
 
     // Parse linh hoạt nhiều định dạng ngày mà server/n8n có thể trả về.
@@ -1027,7 +1126,7 @@
         let doiTacs = [...new Set(data.map(item => item.doiTac))].filter(Boolean).sort();
         fillSelect('filterDoiTac', doiTacs);
 
-        if (currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "") {
+        if (isDoiTacLocked()) {
             doiTacSelect.value = currentUser.doiTac;
             doiTacSelect.disabled = true;
         } else {
@@ -1056,9 +1155,8 @@
         let doiTruong = document.getElementById('filterDoiTruong').value;
 
         return globalData.filter(item => {
-            if (currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "") {
-                if (item.doiTac !== currentUser.doiTac) return false;
-            }
+            if (isDoiTacLocked() && item.doiTac !== currentUser.doiTac) return false;
+            if (isDoiTruongLocked() && item.doiTruong !== currentUser.doiTruong) return false;
             if (level >= 1 && vung && item.vung !== vung) return false;
             if (level >= 2 && doiTac && item.doiTac !== doiTac) return false;
             if (level >= 3 && doiTruong && item.doiTruong !== doiTruong) return false;
@@ -1077,7 +1175,7 @@
         fillSelect('filterDoiTac', doiTacs, doiTacVal);
         
         let doiTacSelect = document.getElementById('filterDoiTac');
-        if (currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "") {
+        if (isDoiTacLocked()) {
             doiTacSelect.value = currentUser.doiTac;
             doiTacSelect.disabled = true;
         } else {
@@ -1088,6 +1186,14 @@
         let doiTruongs = [...new Set(dataForDoiTruong.map(i => i.doiTruong))].filter(Boolean).sort();
         fillSelect('filterDoiTruong', doiTruongs, doiTruongVal);
 
+        let doiTruongSelect = document.getElementById('filterDoiTruong');
+        if (isDoiTruongLocked()) {
+            doiTruongSelect.value = currentUser.doiTruong;
+            doiTruongSelect.disabled = true;
+        } else {
+            doiTruongSelect.disabled = false;
+        }
+
         let dataForNhanVien = getSubFilteredData(3);
         let nhanViens = [...new Set(dataForNhanVien.map(i => i.nhanVien))].filter(Boolean).sort();
         fillSelect('filterNhanVien', nhanViens, nhanVienVal);
@@ -1095,17 +1201,21 @@
 
     function onVungChange() {
         let doiTacSelect = document.getElementById('filterDoiTac');
-        if (currentUser && (currentUser.role === 'admin' || !currentUser.doiTac || currentUser.doiTac.trim() === "")) {
+        if (!isDoiTacLocked()) {
             doiTacSelect.value = "";
         }
-        document.getElementById('filterDoiTruong').value = "";
+        if (!isDoiTruongLocked()) {
+            document.getElementById('filterDoiTruong').value = "";
+        }
         document.getElementById('filterNhanVien').value = "";
         updateDependentFilters();
         filterData();
     }
 
     function onDoiTacChange() {
-        document.getElementById('filterDoiTruong').value = "";
+        if (!isDoiTruongLocked()) {
+            document.getElementById('filterDoiTruong').value = "";
+        }
         document.getElementById('filterNhanVien').value = "";
         updateDependentFilters();
         filterData();
@@ -1321,13 +1431,321 @@
         renderChatMessages();
     });
 
+    // ================== LINH THÚ ĐỒNG HÀNH ==================
+    // XP tính hoàn toàn từ dataBT đã tải sẵn (globalData) — không cần nhập tay,
+    // không tốn thêm lượt đọc D1. Chỉ "loài đã chọn" mới cần lưu ở server.
+    // tier 1 = Thường (mở ngay từ đầu), tier 2 = Hiếm (cần qua Cấp 2, >200 XP),
+    // tier 3 = Huyền Thoại (cần đạt Cấp 3, >600 XP). unlockXp dùng để khoá nút
+    // chọn ở cả 2 nơi: giao diện (ẩn/khoá nút) và Worker (chặn request thô).
+    const LINH_THU_SPECIES = [
+        // ===== Bậc 1 — Thường (mở ngay) =====
+        { key: 'ga',          name: 'Gà',           emoji: '🐔', tier: 1, unlockXp: 0, stages: ['Gà Con', 'Gà Trống Choai', 'Gà Chọi Vô Địch'] },
+        { key: 'vit',         name: 'Vịt',          emoji: '🦆', tier: 1, unlockXp: 0, stages: ['Vịt Con', 'Vịt Xiêm Lớn', 'Vịt Trời Kiêu Hãnh'] },
+        { key: 'cho',         name: 'Chó',          emoji: '🐕', tier: 1, unlockXp: 0, stages: ['Cún Con', 'Chó Vàng Trung Thành', 'Thần Khuyển Giữ Nhà'] },
+        { key: 'meo',         name: 'Mèo',          emoji: '🐈', tier: 1, unlockXp: 0, stages: ['Mèo Con', 'Miêu Tinh Ranh', 'Miêu Linh Cửu Mạng'] },
+        { key: 'heo',         name: 'Heo',          emoji: '🐖', tier: 1, unlockXp: 0, stages: ['Heo Sữa', 'Lợn Ỉ Núp', 'Heo Rừng Chúa Tể'] },
+        { key: 'trau',        name: 'Trâu',         emoji: '🐃', tier: 1, unlockXp: 0, stages: ['Nghé Con', 'Trâu Kéo Cày', 'Trâu Chiến Tây Nguyên'] },
+        // ===== Bậc 2 — Hiếm (cần đạt Cấp 2, >200 XP) =====
+        { key: 'co',          name: 'Cò',           emoji: '🦢', tier: 2, unlockXp: 201, stages: ['Cò Con', 'Cò Trắng Đồng Quê', 'Bạch Hạc Tiên Nga'] },
+        { key: 'ca_chep',     name: 'Cá Chép',      emoji: '🐟', tier: 2, unlockXp: 201, stages: ['Cá Chép Con', 'Cá Chép Vàng', 'Cá Chép Hoá Long'] },
+        { key: 'voi',         name: 'Voi',          emoji: '🐘', tier: 2, unlockXp: 201, stages: ['Voi Con Tây Nguyên', 'Voi Chiến', 'Bạch Tượng Thần Uy'] },
+        { key: 'huou_sao',    name: 'Hươu Sao',     emoji: '🦌', tier: 2, unlockXp: 201, stages: ['Hươu Sao Con', 'Hươu Vàng Ninh Bình', 'Lộc Thần Cửu Giác'] },
+        { key: 'cong',        name: 'Công',         emoji: '🦚', tier: 2, unlockXp: 201, stages: ['Công Con', 'Khổng Tước Lam Ngọc', 'Khổng Tước Ngũ Sắc'] },
+        { key: 'voc',         name: 'Voọc',         emoji: '🙊', tier: 2, unlockXp: 201, stages: ['Voọc Con', 'Voọc Chà Vá Ngũ Sắc', 'Sơn Tinh Voọc Vương'] },
+        { key: 'te_te',       name: 'Tê Tê',        emoji: '🦔', tier: 2, unlockXp: 201, stages: ['Tê Tê Con', 'Xuyên Sơn Giáp', 'Thiết Giáp Tê Vương'] },
+        { key: 'seu_dau_do',  name: 'Sếu Đầu Đỏ',   emoji: '🦩', tier: 2, unlockXp: 201, stages: ['Sếu Con Tràm Chim', 'Sếu Đầu Đỏ Kiêu Hùng', 'Hạc Đỏ Đồng Tháp Mười'] },
+        // ===== Bậc 3 — Huyền Thoại (cần đạt Cấp 3, >600 XP) =====
+        { key: 'hoa_ho_ly',     name: 'Hỏa Hồ Ly',     emoji: '🦊', tier: 3, unlockXp: 601, stages: ['Hồ Ly Lửa', 'Tam Vĩ Hồ', 'Cửu Vĩ Thiên Hồ'] },
+        { key: 'thanh_xa',      name: 'Thanh Xà',       emoji: '🐍', tier: 3, unlockXp: 601, stages: ['Rắn Xanh Nhỏ', 'Giao Long', 'Ứng Long Tiểu Tôn'] },
+        { key: 'linh_quy',      name: 'Linh Quy',       emoji: '🐢', tier: 3, unlockXp: 601, stages: ['Rùa Đất', 'Huyền Vũ Sơ Đại', 'Bắc Minh Thần Quy'] },
+        { key: 'u_minh_lang',   name: 'U Minh Lang',    emoji: '🐺', tier: 3, unlockXp: 601, stages: ['Sói Bóng Đêm', 'Cuồng Phong Lang', 'Bát Hoang Lang Vương'] },
+        { key: 'kim_si_dieu',   name: 'Kim Sí Điểu',    emoji: '🦅', tier: 3, unlockXp: 601, stages: ['Chim Sắt Vàng', 'Bằng Điểu', 'Côn Bằng Đại Thánh'] },
+        { key: 'thach_hau',     name: 'Thạch Hầu',      emoji: '🐒', tier: 3, unlockXp: 601, stages: ['Khỉ Đá Sơ Khai', 'Linh Minh Thạch Hầu', 'Tề Thiên Đại Thánh'] },
+        { key: 'bang_phuong',   name: 'Băng Phượng',    emoji: '🕊️', tier: 3, unlockXp: 601, stages: ['Chim Băng Nhỏ', 'Băng Băng Điểu', 'Cửu Thiên Băng Hoàng'] },
+        { key: 'loi_ho',        name: 'Lôi Hổ',         emoji: '🐯', tier: 3, unlockXp: 601, stages: ['Hổ Sấm Sét', 'Bôn Lôi Hổ', 'Lôi Đình Thánh Sư'] },
+        { key: 'moc_thu_nhan',  name: 'Mộc Thụ Nhân',   emoji: '🌳', tier: 3, unlockXp: 601, stages: ['Mầm Cây Linh', 'Sâm Lâm Cự Nhân', 'Mộc Thần Vĩnh Hằng'] },
+        { key: 'chan_long',     name: 'Chân Long',      emoji: '🐉', tier: 3, unlockXp: 601, stages: ['Long Ngâm Ấu Trùng', 'Giao Long Hoàng', 'Tổ Long Hồng Hoang'] }
+    ];
+    const LINH_THU_TIER_NAMES = { 1: 'Thường', 2: 'Hiếm', 3: 'Huyền Thoại' };
+    const LINH_THU_LEVEL_NAMES = ['Sơ khai', 'Trưởng thành', 'Thần thú tối thượng'];
+
+    let linhThuSelections = {}; // key: "subjectType::subjectKey" -> species key
+
+    function calcRowXp(item) {
+        if (normalizeVal(item.tpktCheck) === 'Bảo trì ok') return 1.5;
+        let xl = normalizeVal(item.xlLai);
+        if (xl === 'Đã xử lý lại') return 1;
+        if (xl === 'Checklist Onsite') return 0.2;
+        return 0;
+    }
+
+    function calcDoiTruongXp(doiTruongName, data) {
+        let sum = 0;
+        data.forEach(item => { if (item.doiTruong === doiTruongName) sum += calcRowXp(item); });
+        return sum;
+    }
+
+    // data cần đã được thu hẹp đúng phạm vi 1 Đối tác trước khi gọi hàm này
+    function calcDoiTacXp(data) {
+        let doiTruongNames = [...new Set(data.map(i => i.doiTruong))].filter(Boolean);
+        if (doiTruongNames.length === 0) return 0;
+        let total = 0;
+        doiTruongNames.forEach(name => { total += calcDoiTruongXp(name, data); });
+        return total / doiTruongNames.length;
+    }
+
+    function getLinhThuLevelIdx(xp) {
+        if (xp > 600) return 2;
+        if (xp > 200) return 1;
+        return 0;
+    }
+
+    function safeDomId(s) {
+        return String(s).replace(/[^a-zA-Z0-9]/g, '_');
+    }
+
+    let linhThuLeaderboard = []; // [{subjectType, subjectKey, xp}] — toàn hệ thống, dùng cho sân chung
+
+    async function fetchLinhThuSelections() {
+        try {
+            let [selRes, boardRes] = await Promise.all([
+                fetch(WEB_APP_URL + "api/linhthu/selections", { method: "GET" }),
+                fetch(WEB_APP_URL + "api/linhthu/leaderboard", { method: "GET" })
+            ]);
+            let selData = await selRes.json();
+            let boardData = await boardRes.json();
+
+            linhThuSelections = {};
+            (selData.selections || []).forEach(row => {
+                linhThuSelections[`${row.subject_type}::${row.subject_key}`] = row.species;
+            });
+            linhThuLeaderboard = boardData.leaderboard || [];
+        } catch (e) {
+            console.error("Lỗi tải dữ liệu Linh thú:", e);
+        }
+        renderLinhThuTab();
+        renderLinhThuGarden();
+    }
+
+    // Sân chung: hiện TẤT CẢ linh thú đã được chọn loài trên toàn hệ thống,
+    // chạy nhảy ngẫu nhiên trong 1 khung cỏ chung — không phụ thuộc phạm vi
+    // quyền xem dữ liệu của người dùng hiện tại (chỉ dùng điểm XP tổng hợp).
+    let gardenWanderTimers = []; // dọn sạch mỗi lần render lại, tránh rò rỉ timer
+
+    function renderLinhThuGarden() {
+        let garden = document.getElementById('linhThuGarden');
+        if (!garden) return;
+
+        // Dọn hết timer "đi lang thang" của lần render trước
+        gardenWanderTimers.forEach(t => clearInterval(t));
+        gardenWanderTimers = [];
+
+        let html = '';
+        linhThuLeaderboard.forEach(entry => {
+            let selKey = `${entry.subjectType}::${entry.subjectKey}`;
+            let speciesKey = linhThuSelections[selKey];
+            if (!speciesKey) return;
+            let species = LINH_THU_SPECIES.find(s => s.key === speciesKey);
+            if (!species) return;
+
+            let xp = entry.xp || 0;
+            let levelIdx = getLinhThuLevelIdx(xp);
+            let stageName = species.stages[levelIdx];
+            let hopDelay = (Math.random() * 0.6).toFixed(1);
+            let emojiSize = [22, 30, 42][levelIdx]; // linh thú càng cao cấp càng to trên sân
+
+            // Vị trí bắt đầu ngẫu nhiên trong sân (chừa lề để không sát viền)
+            let startLeft = (6 + Math.random() * 84).toFixed(0);
+            let startTop = (12 + Math.random() * 76).toFixed(0);
+
+            html += `
+                <div class="garden-pet" data-sel-key="${escapeHtml(selKey)}" style="left:${startLeft}%; top:${startTop}%;">
+                    <span class="garden-xp-badge lvl-${levelIdx}">Cấp ${levelIdx + 1} · ${xp.toFixed(1)} XP</span>
+                    <span class="garden-emoji" style="animation-delay:-${hopDelay}s; font-size:${emojiSize}px;">${species.emoji}</span>
+                    <span class="garden-label">${escapeHtml(entry.subjectKey)} · ${escapeHtml(stageName)}</span>
+                </div>
+            `;
+        });
+
+        garden.innerHTML = html || `<div class="text-center small py-4" style="color:var(--slate);">Chưa có Linh thú nào — hãy chọn 1 loài để xuất hiện ở sân chung!</div>`;
+
+        // Mỗi con tự "đi lang thang" ngẫu nhiên: sau 1 khoảng thời gian ngẫu
+        // nhiên, chọn 1 điểm đến ngẫu nhiên mới trong sân và lướt mượt tới đó
+        // (transition CSS) — không đi theo đường cố định nào, mỗi lần mỗi khác.
+        garden.querySelectorAll('.garden-pet').forEach(el => {
+            let wander = () => {
+                let toLeft = (6 + Math.random() * 84).toFixed(0);
+                let toTop = (12 + Math.random() * 76).toFixed(0);
+                let travelTime = (3 + Math.random() * 3.5).toFixed(1);
+                el.style.transition = `left ${travelTime}s ease-in-out, top ${travelTime}s ease-in-out`;
+                el.style.left = toLeft + '%';
+                el.style.top = toTop + '%';
+            };
+            let pace = 3500 + Math.random() * 3500;
+            let timer = setInterval(wander, pace);
+            gardenWanderTimers.push(timer);
+            // Bắt đầu di chuyển lần đầu sau 1 khoảng ngắn ngẫu nhiên, để các con
+            // không đồng loạt "khởi hành" cùng lúc.
+            setTimeout(wander, Math.random() * 2000);
+        });
+    }
+
+    async function selectLinhThuSpecies(subjectType, subjectKey, speciesKey) {
+        if (!currentUser || !currentUser.username) return;
+        try {
+            let res = await fetch(WEB_APP_URL + "api/linhthu/select", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: currentUser.username, subjectType, subjectKey, species: speciesKey })
+            });
+            let result = await res.json();
+            if (!result.success) {
+                alert(result.error || "Không chọn được Linh thú, vui lòng thử lại!");
+                return;
+            }
+            await fetchLinhThuSelections();
+        } catch (e) {
+            console.error("Lỗi chọn Linh thú:", e);
+            alert("Lỗi kết nối server!");
+        }
+    }
+
+    function renderSpeciesPickerHtml(subjectType, subjectKey, currentXp) {
+        let xp = currentXp || 0;
+        return [1, 2, 3].map(tier => {
+            let tierSpecies = LINH_THU_SPECIES.filter(s => s.tier === tier);
+            if (tierSpecies.length === 0) return '';
+            let minUnlockXp = Math.min(...tierSpecies.map(s => s.unlockXp));
+            let locked = xp < minUnlockXp;
+            let buttonsHtml = tierSpecies.map(s =>
+                `<button type="button" class="species-pick-btn linh-thu-pick-btn" ${locked ? 'disabled' : ''} data-subject-type="${escapeHtml(subjectType)}" data-subject-key="${escapeHtml(subjectKey)}" data-species="${s.key}">${s.emoji} ${escapeHtml(s.name)}</button>`
+            ).join('');
+            return `
+                <div class="mt-2">
+                    <div class="small fw-bold" style="color:${locked ? 'var(--slate-soft)' : 'var(--slate)'};">
+                        ${LINH_THU_TIER_NAMES[tier]}${locked ? ` — cần đạt ${minUnlockXp} XP để mở khoá (hiện có ${xp.toFixed(1)} XP)` : ''}
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mt-1" style="${locked ? 'opacity:0.4;' : ''}">${buttonsHtml}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderPetCard(subjectType, subjectKey, xp, editable) {
+        let selKey = `${subjectType}::${subjectKey}`;
+        let speciesKey = linhThuSelections[selKey];
+        let levelIdx = getLinhThuLevelIdx(xp);
+        let levelName = LINH_THU_LEVEL_NAMES[levelIdx];
+        let nextThreshold = levelIdx === 0 ? 200 : (levelIdx === 1 ? 600 : null);
+        let progressPct = nextThreshold ? Math.min(100, (xp / nextThreshold) * 100) : 100;
+        let subjectLabel = subjectType === 'doiTac' ? 'Đối tác' : 'Đội trưởng';
+        let domId = safeDomId(selKey);
+
+        let bodyHtml;
+        if (!speciesKey) {
+            bodyHtml = editable
+                ? `<div class="pet-xp mb-1">Chưa chọn Linh thú — chọn 1 loài để bắt đầu:</div>${renderSpeciesPickerHtml(subjectType, subjectKey, xp)}`
+                : `<div class="pet-xp">Chưa chọn Linh thú</div>`;
+        } else {
+            let species = LINH_THU_SPECIES.find(s => s.key === speciesKey);
+            let stageName = species ? species.stages[levelIdx] : speciesKey;
+            let tierName = species ? LINH_THU_TIER_NAMES[species.tier] : '';
+            bodyHtml = `
+                <div class="pet-stage-name">${escapeHtml(stageName)}</div>
+                <div class="pet-species-name">${species ? escapeHtml(species.name) : ''} · ${tierName} · Cấp ${levelIdx + 1}: ${levelName}</div>
+                <div class="progress mb-1" style="height:7px; background:var(--line);">
+                    <div class="progress-bar" style="width:${progressPct}%; background:#C9A227;"></div>
+                </div>
+                <div class="pet-xp">${xp.toFixed(1)} XP${nextThreshold ? ' / ' + nextThreshold : ' · Đã đạt tối đa'}</div>
+                ${editable ? `
+                    <button type="button" class="btn btn-sm mt-2 linh-thu-toggle-btn" data-target="picker_${domId}" style="background:var(--surface); border:1px solid var(--line); font-size:11.5px;">Đổi loài</button>
+                    <div id="picker_${domId}" class="d-none">${renderSpeciesPickerHtml(subjectType, subjectKey, xp)}</div>
+                ` : ''}
+            `;
+        }
+
+        return `
+            <div class="col-md-4">
+                <div class="pet-card ${speciesKey ? 'has-pet' : ''}">
+                    <div class="pet-subject">${subjectLabel}: ${escapeHtml(subjectKey)}</div>
+                    ${bodyHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderLinhThuTab() {
+        let container = document.getElementById('linhThuBody');
+        if (!currentUser) return;
+        let html = '';
+
+        if (currentUser.doiTruong && currentUser.doiTruong.trim() !== '') {
+            // Cấp Đội trưởng — chỉ có đúng 1 pet của chính họ
+            let xp = calcDoiTruongXp(currentUser.doiTruong, globalData);
+            html += renderPetCard('doiTruong', currentUser.doiTruong, xp, true);
+
+        } else if (currentUser.role !== 'admin') {
+            // Cấp Đối tác quản lý — pet của họ + danh sách các Đội trưởng trực thuộc
+            let xpDoiTac = calcDoiTacXp(globalData);
+            html += renderPetCard('doiTac', currentUser.doiTac, xpDoiTac, true);
+
+            let doiTruongNames = [...new Set(globalData.map(i => i.doiTruong))].filter(Boolean).sort();
+            if (doiTruongNames.length > 0) {
+                html += `<div class="col-12 mt-2 mb-1 fw-bold small" style="color:var(--slate);">Linh thú các Đội trưởng trực thuộc</div>`;
+                doiTruongNames.forEach(name => {
+                    html += renderPetCard('doiTruong', name, calcDoiTruongXp(name, globalData), false);
+                });
+            }
+
+        } else {
+            // Admin — xem tổng quan toàn hệ thống, không có pet riêng
+            let doiTacs = [...new Set(globalData.map(i => i.doiTac))].filter(Boolean).sort();
+            html += `<div class="col-12 mb-1 fw-bold small" style="color:var(--slate);">Linh thú các Đối tác</div>`;
+            doiTacs.forEach(dt => {
+                let scoped = globalData.filter(i => i.doiTac === dt);
+                html += renderPetCard('doiTac', dt, calcDoiTacXp(scoped), false);
+            });
+
+            let doiTruongNames = [...new Set(globalData.map(i => i.doiTruong))].filter(Boolean).sort();
+            if (doiTruongNames.length > 0) {
+                html += `<div class="col-12 mt-2 mb-1 fw-bold small" style="color:var(--slate);">Linh thú các Đội trưởng</div>`;
+                doiTruongNames.forEach(name => {
+                    html += renderPetCard('doiTruong', name, calcDoiTruongXp(name, globalData), false);
+                });
+            }
+        }
+
+        container.innerHTML = html || `<div class="col-12 text-center small py-4" style="color:var(--slate);">Chưa có dữ liệu.</div>`;
+    }
+
+    // Uỷ quyền sự kiện (event delegation) cho toàn bộ nút trong tab Linh Thú —
+    // tránh phải nhúng dữ liệu (tên Đội trưởng có dấu, khoảng trắng...) trực tiếp
+    // vào thuộc tính onclick, dễ gây lỗi hoặc rủi ro chèn mã.
+    document.getElementById('linhThuBody').addEventListener('click', (e) => {
+        let pickBtn = e.target.closest('.linh-thu-pick-btn');
+        if (pickBtn) {
+            selectLinhThuSpecies(pickBtn.dataset.subjectType, pickBtn.dataset.subjectKey, pickBtn.dataset.species);
+            return;
+        }
+        let toggleBtn = e.target.closest('.linh-thu-toggle-btn');
+        if (toggleBtn) {
+            document.getElementById(toggleBtn.dataset.target)?.classList.toggle('d-none');
+        }
+    });
+
+    document.getElementById('linhthu-tab').addEventListener('shown.bs.tab', () => {
+        fetchLinhThuSelections();
+    });
+
     function resetFilters() {
         document.getElementById('filterVung').value = "";
         let doiTacSelect = document.getElementById('filterDoiTac');
-        if (currentUser && (currentUser.role === 'admin' || !currentUser.doiTac || currentUser.doiTac.trim() === "")) {
+        if (!isDoiTacLocked()) {
             doiTacSelect.value = "";
         }
-        document.getElementById('filterDoiTruong').value = "";
+        if (!isDoiTruongLocked()) {
+            document.getElementById('filterDoiTruong').value = "";
+        }
         document.getElementById('filterTpktCheck').value = "";
         document.getElementById('filterNhanVien').value = "";
         document.getElementById('searchSoHopDong').value = "";
