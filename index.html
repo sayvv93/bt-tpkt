@@ -681,6 +681,9 @@
         if (cachedData) {
             try { globalData = JSON.parse(cachedData); } catch(e){}
         }
+        // Khôi phục mốc đồng bộ cuối cùng (cùng phiên/trình duyệt) để lần
+        // refreshData() đầu tiên vẫn là incremental, không tải lại toàn bộ.
+        lastSyncTimestamp = localStorage.getItem('tpkt_last_sync_ts') || null;
 
         let savedUser = localStorage.getItem('tpkt_current_user');
         if (savedUser) {
@@ -691,6 +694,7 @@
 
                 document.getElementById('loginOverlay').style.display = 'none';
                 initSessionUI();
+                clearFilterSelections();
                 initFilters(globalData);
                 filterData();
                 checkDuplicateContracts(globalData);
@@ -705,7 +709,7 @@
         document.getElementById('loginOverlay').style.display = 'flex';
     };
 
-    const AUTO_REFRESH_INTERVAL_MS = 2 * 60 * 1000; // 2 phút
+    const AUTO_REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 phút (trước là 2 phút — giảm ~60% số lượt gọi/ngày, quan trọng vì D1 free tier giới hạn row đọc/ngày)
     const PING_INTERVAL_MS = 45 * 1000; // 45 giây — phải ngắn hơn nhiều so với
     // ngưỡng "online" 2 phút mà Worker đang dùng, để không bị rớt trạng thái oan.
     let autoRefreshTimer = null;
@@ -781,16 +785,27 @@
     });
 
     // Gọi lại dữ liệu từ server (đã được Worker lọc sẵn theo doiTacQuanLy của user)
+    // Timestamp (ngayCapNhat) mới nhất đã tải — dùng để chỉ hỏi Worker những dòng
+    // THAY ĐỔI kể từ lần trước, thay vì tải lại toàn bộ bảng dataBT mỗi lần.
+    // Đây là tối ưu quan trọng để không vượt hạn mức đọc row/ngày của D1 free tier.
+    let lastSyncTimestamp = null;
+
     async function refreshData() {
         if (!currentUser || !currentUser.username) return;
         try {
-            const response = await fetch(WEB_APP_URL + "?username=" + encodeURIComponent(currentUser.username), { method: "GET" });
+            let url = WEB_APP_URL + "?username=" + encodeURIComponent(currentUser.username);
+            if (lastSyncTimestamp) {
+                url += "&since=" + encodeURIComponent(lastSyncTimestamp);
+            }
+            const response = await fetch(url, { method: "GET" });
             const res = await response.json();
 
             if (res.error) {
                 console.error("Lỗi xác thực / lấy dữ liệu:", res.error);
                 return;
             }
+
+            let incoming = res.dataBT || [];
 
             // Giữ lại các dòng đang thao tác dở (đã chọn TPKT Check nhưng CHƯA bấm
             // Gửi — row._modified) thay vì để bản mới từ server ghi đè mất lựa chọn
@@ -799,10 +814,15 @@
             let pendingLocalEdits = {};
             globalData.forEach(item => { if (item._modified) pendingLocalEdits[item.id] = item; });
 
-            globalData = (res.dataBT || []).map(item => {
-                if (pendingLocalEdits[item.id]) return pendingLocalEdits[item.id];
+            // Merge (upsert) thay vì thay thế toàn bộ mảng — vì "incoming" giờ chỉ
+            // là phần THAY ĐỔI, không phải toàn bộ dữ liệu.
+            let existingById = {};
+            globalData.forEach(item => { existingById[item.id] = item; });
+
+            incoming.forEach(item => {
+                if (pendingLocalEdits[item.id]) return;
                 let tpktCheckVal = normalizeVal(item.tpktCheck);
-                return {
+                existingById[item.id] = {
                     id: item.id,
                     vung: item.vung || "",
                     doiTac: item.doiTacQuanLy || "",
@@ -816,9 +836,15 @@
                     ngayCapNhat: item.ngayCapNhat || "",
                     userSelectedTpkt: tpktCheckVal ? tpktCheckVal : "Chưa kiểm tra"
                 };
+                if (item.ngayCapNhat && (!lastSyncTimestamp || item.ngayCapNhat > lastSyncTimestamp)) {
+                    lastSyncTimestamp = item.ngayCapNhat;
+                }
             });
 
+            globalData = Object.values(existingById);
+
             localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
+            localStorage.setItem('tpkt_last_sync_ts', lastSyncTimestamp || '');
             updateLastSyncedLabel();
 
             initFilters(globalData);
@@ -868,12 +894,25 @@
 
                 document.getElementById('loginOverlay').style.display = 'none';
                 initSessionUI();
+                clearFilterSelections();
+                // Luôn ép tải FULL lại khi đăng nhập qua form (có thể là tài khoản
+                // khác với phạm vi doiTacQuanLy khác) — tránh lẫn dữ liệu cũ của
+                // tài khoản trước còn sót trong bộ nhớ khi chuyển sang incremental sync.
+                globalData = [];
+                lastSyncTimestamp = null;
                 await refreshData();
                 startAutoRefresh();
                 startPingOnline();
                 startChatPolling();
             } else {
-                errBox.innerText = result.message || "Tên đăng nhập hoặc mật khẩu không chính xác!";
+                // response.status 401 = sai tài khoản/mật khẩu thật (server đã xác nhận rõ).
+                // Các mã lỗi khác (vd 500 do D1 quota, mất kết nối DB...) không phải do
+                // sai thông tin đăng nhập — hiển thị đúng bản chất để tránh gây hiểu nhầm.
+                if (response.status === 401) {
+                    errBox.innerText = result.message || "Tên đăng nhập hoặc mật khẩu không chính xác!";
+                } else {
+                    errBox.innerText = result.error || result.message || "Lỗi hệ thống, vui lòng thử lại sau ít phút!";
+                }
                 errBox.classList.remove('d-none');
             }
         } catch (error) {
@@ -889,11 +928,29 @@
         stopAutoRefresh();
         stopPingOnline();
         stopChatPolling();
+        clearFilterSelections();
         localStorage.removeItem('tpkt_current_user');
+        localStorage.removeItem('tpkt_last_sync_ts');
+        lastSyncTimestamp = null;
         currentUser = null;
         document.getElementById('loginUser').value = "";
         document.getElementById('loginPass').value = "";
         document.getElementById('loginOverlay').style.display = 'flex';
+    }
+
+    // Xoá trắng mọi lựa chọn bộ lọc còn sót từ phiên/tài khoản trước — bắt buộc
+    // gọi trước khi build lại danh sách filter mỗi lần đăng nhập. Nếu không, khi
+    // đổi tài khoản trong CÙNG 1 tab (không tải lại trang), các dropdown sẽ giữ
+    // nguyên giá trị đã chọn của tài khoản cũ (do updateDependentFilters cố "giữ
+    // lại" lựa chọn hiện tại khi build lại option), dẫn đến bộ lọc bị khoá vào tổ
+    // hợp không còn khớp dữ liệu của tài khoản mới → hiện "Không có dữ liệu phù hợp".
+    function clearFilterSelections() {
+        document.getElementById('filterVung').value = "";
+        document.getElementById('filterDoiTac').value = "";
+        document.getElementById('filterDoiTruong').value = "";
+        document.getElementById('filterTpktCheck').value = "";
+        document.getElementById('filterNhanVien').value = "";
+        document.getElementById('searchSoHopDong').value = "";
     }
 
     function initSessionUI() {
@@ -1632,22 +1689,30 @@
         let dtStatsRaw = {};
         data.forEach(item => {
             let key = item.doiTac ? item.doiTac.trim() : "Khác";
-            if (!dtStatsRaw[key]) dtStatsRaw[key] = { total: 0, khongDutDiem: 0 };
+            if (!dtStatsRaw[key]) dtStatsRaw[key] = { total: 0, khongDutDiem: 0, chuaKiemTra: 0, daKiemTra: 0 };
             dtStatsRaw[key].total += 1;
-            if (classifyRow(item).isCountedAsLoi) {
-                dtStatsRaw[key].khongDutDiem += 1;
+            let cls = classifyRow(item);
+            if (cls.isCountedAsLoi) dtStatsRaw[key].khongDutDiem += 1;
+            if (cls.category === "CHUA_KIEM_TRA") {
+                dtStatsRaw[key].chuaKiemTra += 1;
+            } else {
+                dtStatsRaw[key].daKiemTra += 1;
             }
         });
 
-        let dtLabels = [], dtTotalData = [], dtErrorData = [], dtPercentData = [];
+        let dtLabels = [], dtTotalData = [], dtErrorData = [], dtPercentData = [], dtChuaKiemTraData = [], dtDaKiemTraData = [], dtChuaKiemTraPct = [], dtDaKiemTraPct = [];
 
         fixedDoiTacOrder.forEach(partner => {
             dtLabels.push(partner);
-            let obj = dtStatsRaw[partner] || { total: 0, khongDutDiem: 0 };
+            let obj = dtStatsRaw[partner] || { total: 0, khongDutDiem: 0, chuaKiemTra: 0, daKiemTra: 0 };
             dtTotalData.push(obj.total);
             dtErrorData.push(obj.khongDutDiem);
+            dtChuaKiemTraData.push(obj.chuaKiemTra);
+            dtDaKiemTraData.push(obj.daKiemTra);
             let pct = obj.total > 0 ? ((obj.khongDutDiem / obj.total) * 100).toFixed(1) : 0;
             dtPercentData.push(pct + '%');
+            dtChuaKiemTraPct.push((obj.total > 0 ? ((obj.chuaKiemTra / obj.total) * 100).toFixed(1) : 0) + '%');
+            dtDaKiemTraPct.push((obj.total > 0 ? ((obj.daKiemTra / obj.total) * 100).toFixed(1) : 0) + '%');
         });
 
         Object.keys(dtStatsRaw).forEach(partner => {
@@ -1656,27 +1721,45 @@
                 let obj = dtStatsRaw[partner];
                 dtTotalData.push(obj.total);
                 dtErrorData.push(obj.khongDutDiem);
+                dtChuaKiemTraData.push(obj.chuaKiemTra);
+                dtDaKiemTraData.push(obj.daKiemTra);
                 let pct = obj.total > 0 ? ((obj.khongDutDiem / obj.total) * 100).toFixed(1) : 0;
                 dtPercentData.push(pct + '%');
+                dtChuaKiemTraPct.push((obj.total > 0 ? ((obj.chuaKiemTra / obj.total) * 100).toFixed(1) : 0) + '%');
+                dtDaKiemTraPct.push((obj.total > 0 ? ((obj.daKiemTra / obj.total) * 100).toFixed(1) : 0) + '%');
             }
         });
 
         let dtrStats = {};
         data.forEach(item => {
             let key = item.doiTruong || "Khác";
-            if (!dtrStats[key]) dtrStats[key] = { total: 0, khongDutDiem: 0 };
+            if (!dtrStats[key]) dtrStats[key] = { total: 0, khongDutDiem: 0, chuaKiemTra: 0, daKiemTra: 0 };
             dtrStats[key].total += 1;
-            if (classifyRow(item).isCountedAsLoi) {
-                dtrStats[key].khongDutDiem += 1;
+            let cls = classifyRow(item);
+            if (cls.isCountedAsLoi) dtrStats[key].khongDutDiem += 1;
+            if (cls.category === "CHUA_KIEM_TRA") {
+                dtrStats[key].chuaKiemTra += 1;
+            } else {
+                dtrStats[key].daKiemTra += 1;
             }
         });
 
         let dtrLabels = Object.keys(dtrStats);
         let dtrTotalData = dtrLabels.map(k => dtrStats[k].total);
         let dtrErrorData = dtrLabels.map(k => dtrStats[k].khongDutDiem);
+        let dtrChuaKiemTraData = dtrLabels.map(k => dtrStats[k].chuaKiemTra);
+        let dtrDaKiemTraData = dtrLabels.map(k => dtrStats[k].daKiemTra);
         let dtrPercentData = dtrLabels.map(k => {
             let obj = dtrStats[k];
             return obj.total > 0 ? ((obj.khongDutDiem / obj.total) * 100).toFixed(1) + '%' : '0%';
+        });
+        let dtrChuaKiemTraPct = dtrLabels.map(k => {
+            let obj = dtrStats[k];
+            return (obj.total > 0 ? ((obj.chuaKiemTra / obj.total) * 100).toFixed(1) : 0) + '%';
+        });
+        let dtrDaKiemTraPct = dtrLabels.map(k => {
+            let obj = dtrStats[k];
+            return (obj.total > 0 ? ((obj.daKiemTra / obj.total) * 100).toFixed(1) : 0) + '%';
         });
 
         if (chartDoiTacInstance) chartDoiTacInstance.destroy();
@@ -1685,8 +1768,14 @@
             data: {
                 labels: dtLabels,
                 datasets: [
-                    { label: 'Tổng ca', data: dtTotalData, backgroundColor: '#12181B', borderRadius: 3 },
-                    { label: 'Ca lỗi', data: dtErrorData, backgroundColor: '#AC2B22', borderRadius: 3 }
+                    { label: 'Tổng ca', data: dtTotalData, backgroundColor: '#12181B', borderRadius: 3,
+                      datalabels: { display: false } },
+                    { label: 'Chưa kiểm tra', data: dtChuaKiemTraData, backgroundColor: '#8B948D', borderRadius: 3,
+                      datalabels: { formatter: (v, ctx) => dtChuaKiemTraPct[ctx.dataIndex], color: '#5C6660' } },
+                    { label: 'Đã kiểm tra', data: dtDaKiemTraData, backgroundColor: '#3F7D1F', borderRadius: 3,
+                      datalabels: { formatter: (v, ctx) => dtDaKiemTraPct[ctx.dataIndex], color: '#2E5D16' } },
+                    { label: 'Ca lỗi', data: dtErrorData, backgroundColor: '#AC2B22', borderRadius: 3,
+                      datalabels: { formatter: (v, ctx) => dtPercentData[ctx.dataIndex], color: '#AC2B22' } }
                 ]
             },
             options: { 
@@ -1695,8 +1784,7 @@
                     legend: { position: 'bottom', labels: { font: { family: "'IBM Plex Sans'", size: 12 } } },
                     datalabels: {
                         anchor: 'end', align: 'top',
-                        formatter: (value, context) => context.datasetIndex === 1 ? dtPercentData[context.dataIndex] : '',
-                        font: { family: "'IBM Plex Mono'", weight: 'bold', size: 11 }, color: '#AC2B22'
+                        font: { family: "'IBM Plex Mono'", weight: 'bold', size: 10 }
                     }
                 },
                 scales: { x: { ticks: { font: { family: "'IBM Plex Sans'" } } }, y: { ticks: { font: { family: "'IBM Plex Mono'" } } } }
@@ -1710,8 +1798,14 @@
             data: {
                 labels: dtrLabels,
                 datasets: [
-                    { label: 'Tổng ca', data: dtrTotalData, backgroundColor: '#3F7D1F', borderRadius: 3 },
-                    { label: 'Ca lỗi', data: dtrErrorData, backgroundColor: '#A6620A', borderRadius: 3 }
+                    { label: 'Tổng ca', data: dtrTotalData, backgroundColor: '#12181B', borderRadius: 3,
+                      datalabels: { display: false } },
+                    { label: 'Chưa kiểm tra', data: dtrChuaKiemTraData, backgroundColor: '#8B948D', borderRadius: 3,
+                      datalabels: { formatter: (v, ctx) => dtrChuaKiemTraPct[ctx.dataIndex], color: '#5C6660' } },
+                    { label: 'Đã kiểm tra', data: dtrDaKiemTraData, backgroundColor: '#3F7D1F', borderRadius: 3,
+                      datalabels: { formatter: (v, ctx) => dtrDaKiemTraPct[ctx.dataIndex], color: '#2E5D16' } },
+                    { label: 'Ca lỗi', data: dtrErrorData, backgroundColor: '#A6620A', borderRadius: 3,
+                      datalabels: { formatter: (v, ctx) => dtrPercentData[ctx.dataIndex], color: '#A6620A' } }
                 ]
             },
             options: { 
@@ -1720,8 +1814,7 @@
                     legend: { position: 'bottom', labels: { font: { family: "'IBM Plex Sans'", size: 12 } } },
                     datalabels: {
                         anchor: 'end', align: 'top',
-                        formatter: (value, context) => context.datasetIndex === 1 ? dtrPercentData[context.dataIndex] : '',
-                        font: { family: "'IBM Plex Mono'", weight: 'bold', size: 11 }, color: '#A6620A'
+                        font: { family: "'IBM Plex Mono'", weight: 'bold', size: 10 }
                     }
                 },
                 scales: { x: { ticks: { font: { family: "'IBM Plex Sans'" } } }, y: { ticks: { font: { family: "'IBM Plex Mono'" } } } }
