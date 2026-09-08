@@ -462,7 +462,10 @@
                 </div>
             </div>
 
-            <div class="d-flex justify-content-end mb-2">
+            <div class="d-flex justify-content-end gap-2 mb-2">
+                <button class="filter-reset-btn" onclick="downloadImportTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu</button>
+                <button class="filter-reset-btn" onclick="triggerImportFile()"><i class="bi bi-file-earmark-arrow-up me-1"></i>Nhập Excel</button>
+                <input type="file" id="importFileInput" accept=".xlsx,.xls" class="d-none" onchange="handleImportFile(event)">
                 <button class="filter-reset-btn" onclick="exportFilteredToExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Xuất Excel</button>
             </div>
 
@@ -744,6 +747,10 @@
                 "Đối tác": item.doiTac || "",
                 "Đội trưởng": item.doiTruong || "",
                 "Số HĐ": item.soHopDong || "",
+                // Tên cột giữ nguyên "tgTao" (không dịch) để khớp thẳng với file mẫu
+                // Nhập Excel — người dùng có thể copy nguyên 2 cột Số HĐ + tgTao từ
+                // đây sang file import mà không cần sửa gì.
+                "tgTao": item.tgTao || "",
                 "Nhân viên": item.nhanVien || "",
                 "TG Hoàn Tất": formatDate(item.tgHoanTat),
                 "Ghi chú": item.ghiChu || "",
@@ -754,13 +761,152 @@
         });
 
         let ws = XLSX.utils.json_to_sheet(rows);
-        ws['!cols'] = [ {wch:10},{wch:10},{wch:16},{wch:14},{wch:16},{wch:12},{wch:50},{wch:22},{wch:20},{wch:16} ];
+        ws['!cols'] = [ {wch:10},{wch:10},{wch:16},{wch:14},{wch:20},{wch:16},{wch:12},{wch:50},{wch:22},{wch:20},{wch:16} ];
         let wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "TPKT Check");
 
         let now = new Date();
         let stamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
         XLSX.writeFile(wb, `TPKT_export_${stamp}.xlsx`);
+    }
+
+    // ================== NHẬP EXCEL (IMPORT HÀNG LOẠT) ==================
+    // Khớp CHÍNH XÁC theo cặp khoá (soHopDong, tgTao) — đúng khoá UNIQUE thật
+    // của bảng dataBT — để không bao giờ bị nhầm giữa các dòng trùng số hợp đồng.
+    const IMPORT_MAX_ROWS = 100;
+    const IMPORT_VALID_TPKT = ["Bảo trì ok", "Suy hao", "Không tín hiệu", "Rớt kết nối", "Vùng phủ không đảm bảo"];
+    const IMPORT_VALID_XLLAI = ["", "Chuyển KTV XL lại", "Đã xử lý lại", "Checklist Onsite"];
+
+    function downloadImportTemplate() {
+        if (typeof XLSX === 'undefined') {
+            alert("Thư viện Excel chưa tải xong, vui lòng thử lại sau giây lát.");
+            return;
+        }
+
+        // Liệt kê đủ mọi tổ hợp hợp lệ của TPKT Check x XL Lại để người dùng thấy
+        // chính xác cần gõ gì (tránh gõ sai chính tả bị hệ thống từ chối khi import).
+        let sampleRows = [];
+        let n = 1;
+        const addSample = (tpktCheck, xlLai) => {
+            sampleRows.push({
+                soHopDong: `DNAAA000${n}`,
+                tgTao: `01/09/2026 ${String(9 + n).padStart(2, '0')}:00:00`,
+                tpktCheck, xlLai
+            });
+            n++;
+        };
+
+        addSample("Bảo trì ok", "");
+        ["Suy hao", "Không tín hiệu", "Rớt kết nối", "Vùng phủ không đảm bảo"].forEach(tpkt => {
+            ["Chuyển KTV XL lại", "Đã xử lý lại", "Checklist Onsite"].forEach(xl => {
+                addSample(tpkt, xl);
+            });
+        });
+
+        let ws = XLSX.utils.json_to_sheet(sampleRows);
+        ws['!cols'] = [{ wch: 16 }, { wch: 22 }, { wch: 24 }, { wch: 20 }];
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Mau Import");
+        XLSX.writeFile(wb, "mau_import_checklist.xlsx");
+    }
+
+    function triggerImportFile() {
+        document.getElementById('importFileInput').click();
+    }
+
+    async function handleImportFile(event) {
+        let file = event.target.files[0];
+        event.target.value = ""; // cho phép chọn lại cùng 1 file lần sau vẫn kích hoạt onchange
+        if (!file) return;
+
+        if (typeof XLSX === 'undefined') {
+            alert("Thư viện Excel chưa tải xong, vui lòng thử lại sau giây lát.");
+            return;
+        }
+
+        try {
+            let buf = await file.arrayBuffer();
+            let wb = XLSX.read(buf, { type: 'array' });
+            let sheet = wb.Sheets[wb.SheetNames[0]];
+            let rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+            if (rawRows.length === 0) {
+                alert("File không có dữ liệu!");
+                return;
+            }
+            if (rawRows.length > IMPORT_MAX_ROWS) {
+                alert(`File có ${rawRows.length} dòng, vượt quá giới hạn tối đa ${IMPORT_MAX_ROWS} dòng/lần import. Vui lòng chia nhỏ file ra và import nhiều lần.`);
+                return;
+            }
+
+            let parsedRows = [];
+            let errors = [];
+            rawRows.forEach((r, idx) => {
+                let soHopDong = String(r.soHopDong || "").trim();
+                let tgTao = String(r.tgTao || "").trim();
+                let tpktCheck = String(r.tpktCheck || "").trim();
+                let xlLai = String(r.xlLai || "").trim();
+                let rowNum = idx + 2; // +2: hàng 1 là header, Excel đếm từ 1
+
+                if (!soHopDong || !tgTao) {
+                    errors.push(`Dòng ${rowNum}: thiếu soHopDong hoặc tgTao`);
+                    return;
+                }
+                if (!IMPORT_VALID_TPKT.includes(tpktCheck)) {
+                    errors.push(`Dòng ${rowNum} (${soHopDong}): TPKT Check "${tpktCheck}" không hợp lệ`);
+                    return;
+                }
+                if (!IMPORT_VALID_XLLAI.includes(xlLai)) {
+                    errors.push(`Dòng ${rowNum} (${soHopDong}): XL Lại "${xlLai}" không hợp lệ`);
+                    return;
+                }
+                parsedRows.push({ soHopDong, tgTao, tpktCheck, xlLai });
+            });
+
+            if (errors.length > 0) {
+                alert(`File có ${errors.length} dòng lỗi định dạng, vui lòng sửa lại rồi import lại:\n\n` +
+                    errors.slice(0, 15).join('\n') +
+                    (errors.length > 15 ? `\n... và ${errors.length - 15} dòng lỗi khác` : ''));
+                return;
+            }
+            if (parsedRows.length === 0) {
+                alert("Không có dòng hợp lệ để import!");
+                return;
+            }
+
+            if (!confirm(`Xác nhận import ${parsedRows.length} dòng?\nHệ thống chỉ cập nhật những dòng khớp ĐÚNG cả Số HĐ và Thời gian tạo (tgTao) với dữ liệu đang có.`)) {
+                return;
+            }
+
+            let res = await fetch(WEB_APP_URL + "api/import/checklist", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: currentUser.username, rows: parsedRows })
+            });
+            let result = await res.json();
+
+            if (!result.success) {
+                alert(result.error || "Import thất bại, vui lòng thử lại!");
+                return;
+            }
+
+            let notFoundList = (result.details || [])
+                .filter(d => d.status === 'not_found')
+                .map(d => `${d.soHopDong} (${d.tgTao})`);
+
+            let msg = `Import hoàn tất: ${result.matched} dòng cập nhật thành công / ${result.total} dòng gửi lên`;
+            if (result.notFound > 0) msg += `\n${result.notFound} dòng KHÔNG khớp được cả 2 khoá (kiểm tra lại đúng Số HĐ + Thời gian tạo).`;
+            if (notFoundList.length > 0) {
+                msg += `\n\nCác dòng không khớp:\n` + notFoundList.slice(0, 20).join('\n');
+                if (notFoundList.length > 20) msg += `\n... và ${notFoundList.length - 20} dòng khác`;
+            }
+            alert(msg);
+
+            await refreshData();
+        } catch (e) {
+            console.error("Lỗi import Excel:", e);
+            alert("Lỗi đọc file Excel — vui lòng dùng đúng file mẫu đã tải, không đổi tên cột!");
+        }
     }
 
     // Danh sách tài khoản KHÔNG còn được tải về client nữa.
@@ -918,6 +1064,7 @@
                     doiTruong: item.doiTruong || "",
                     soHopDong: item.soHopDong || "",
                     nhanVien: item.nhanVien || "",
+                    tgTao: item.tgTao || "",
                     tgHoanTat: item.tgHoanTat || "",
                     ghiChu: item.ghiChu || "",
                     tpktCheck: tpktCheckVal,
