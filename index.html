@@ -657,6 +657,7 @@
 
             <div class="d-flex align-items-center justify-content-between mb-2">
                 <div class="fw-bold small" style="color:var(--slate);">SÂN CHUNG — TOÀN BỘ LINH THÚ ĐANG HOẠT ĐỘNG</div>
+                <button id="btnAlignGarden" class="filter-reset-btn d-none" onclick="toggleGardenAlign()"><i class="bi bi-grid-3x3-gap me-1"></i>Sắp xếp ngay hàng</button>
             </div>
             <div id="linhThuGarden" class="linh-thu-garden mb-4">
                 <div class="text-center small py-4" style="color:var(--slate);">Đang tải sân chung...</div>
@@ -1195,6 +1196,7 @@
         stopChatPolling();
         gardenWanderTimers.forEach(t => clearInterval(t));
         gardenWanderTimers = [];
+        gardenAligned = false;
         clearFilterSelections();
         localStorage.removeItem('tpkt_current_user');
         localStorage.removeItem('tpkt_last_sync_ts');
@@ -1235,6 +1237,10 @@
         } else {
             dtrPill.classList.add('d-none');
         }
+
+        // Nút "Sắp xếp ngay hàng" trong tab Linh Thú — chỉ dành riêng cho tài
+        // khoản sayvv (quyền cao nhất), phục vụ mục đích chụp ảnh báo cáo.
+        document.getElementById('btnAlignGarden').classList.toggle('d-none', currentUser.username !== 'sayvv');
     }
 
     // Parse linh hoạt nhiều định dạng ngày mà server/n8n có thể trả về.
@@ -1725,6 +1731,34 @@
     // đi lang thang ngẫu nhiên trong 1 khung cỏ chung — không phụ thuộc phạm vi
     // quyền xem dữ liệu của người dùng hiện tại (chỉ dùng điểm XP tổng hợp).
     let gardenWanderTimers = []; // dọn sạch mỗi lần render lại, tránh rò rỉ timer
+    let gardenAligned = false; // true = đang "xếp ngay hàng" (chỉ tài khoản sayvv bật được)
+    const GARDEN_DOITAC_ORDER = ["BHA1", "BHA2", "DNI02", "DNI03", "DNI04", "DNI05"];
+
+    // Chỉ tài khoản sayvv mới thấy nút này (đã ẩn ở initSessionUI), nhưng vẫn
+    // chặn thêm ở đây cho chắc — tránh gọi được hàm qua console nếu không đúng quyền.
+    function toggleGardenAlign() {
+        if (!currentUser || currentUser.username !== 'sayvv') return;
+        gardenAligned = !gardenAligned;
+        let btn = document.getElementById('btnAlignGarden');
+        btn.innerHTML = gardenAligned
+            ? '<i class="bi bi-shuffle me-1"></i>Thả tự do lại'
+            : '<i class="bi bi-grid-3x3-gap me-1"></i>Sắp xếp ngay hàng';
+        renderLinhThuGarden();
+    }
+
+    // Tính vị trí % (left, top) cho 1 dãy phần tử, tự xuống dòng nếu quá nhiều
+    // trong 1 hàng — dùng khi xếp ngay hàng để chụp ảnh.
+    function computeFormationPositions(count, startTopPct, maxPerRow, rowGapPct) {
+        let positions = [];
+        for (let idx = 0; idx < count; idx++) {
+            let row = Math.floor(idx / maxPerRow);
+            let col = idx % maxPerRow;
+            let itemsInThisRow = Math.min(maxPerRow, count - row * maxPerRow);
+            let leftPct = itemsInThisRow === 1 ? 50 : 8 + (col * (84 / (itemsInThisRow - 1)));
+            positions.push({ left: leftPct, top: startTopPct + row * rowGapPct });
+        }
+        return positions;
+    }
 
     function renderLinhThuGarden() {
         let garden = document.getElementById('linhThuGarden');
@@ -1733,7 +1767,7 @@
         gardenWanderTimers.forEach(t => clearInterval(t));
         gardenWanderTimers = [];
 
-        let html = '';
+        let entries = [];
         linhThuLeaderboard.forEach(entry => {
             let selKey = `${entry.subjectType}::${entry.subjectKey}`;
             let speciesKey = linhThuSelections[selKey];
@@ -1743,23 +1777,58 @@
 
             let xp = entry.xp || 0;
             let levelIdx = getLinhThuLevelIdx(xp);
-            let stageName = species.stages[levelIdx];
-            let hopDelay = (Math.random() * 0.6).toFixed(1);
-            let emojiSize = [22, 30, 42][levelIdx]; // linh thú càng cao cấp càng to trên sân
+            entries.push({
+                selKey, subjectType: entry.subjectType, subjectKey: entry.subjectKey,
+                xp, levelIdx, species, stageName: species.stages[levelIdx],
+                emojiSize: [22, 30, 42][levelIdx],
+                hopDelay: (Math.random() * 0.6).toFixed(1)
+            });
+        });
 
-            let startLeft = (6 + Math.random() * 84).toFixed(0);
-            let startTop = (12 + Math.random() * 76).toFixed(0);
+        if (entries.length === 0) {
+            garden.innerHTML = `<div class="text-center small py-4" style="color:var(--slate);">Chưa có Linh thú nào — hãy chọn 1 loài để xuất hiện ở sân chung!</div>`;
+            return;
+        }
 
+        let positionsByKey = {};
+        if (gardenAligned) {
+            // Hàng trên: Đối tác theo đúng thứ tự cố định BHA1→BHA2→DNI02...→DNI05
+            // Hàng dưới: Đội trưởng theo thứ tự tên (A-Z)
+            let doiTacEntries = entries.filter(e => e.subjectType === 'doiTac')
+                .sort((a, b) => {
+                    let ia = GARDEN_DOITAC_ORDER.indexOf(a.subjectKey);
+                    let ib = GARDEN_DOITAC_ORDER.indexOf(b.subjectKey);
+                    if (ia === -1) ia = 999; if (ib === -1) ib = 999;
+                    return ia - ib;
+                });
+            let doiTruongEntries = entries.filter(e => e.subjectType === 'doiTruong')
+                .sort((a, b) => a.subjectKey.localeCompare(b.subjectKey, 'vi'));
+
+            let dtPositions = computeFormationPositions(doiTacEntries.length, 16, 6, 14);
+            doiTacEntries.forEach((e, i) => { positionsByKey[e.selKey] = dtPositions[i]; });
+
+            let dtrPositions = computeFormationPositions(doiTruongEntries.length, 46, 8, 15);
+            doiTruongEntries.forEach((e, i) => { positionsByKey[e.selKey] = dtrPositions[i]; });
+        }
+
+        let html = '';
+        entries.forEach(e => {
+            let pos = gardenAligned ? positionsByKey[e.selKey] : {
+                left: (6 + Math.random() * 84).toFixed(0),
+                top: (12 + Math.random() * 76).toFixed(0)
+            };
             html += `
-                <div class="garden-pet" data-sel-key="${escapeHtml(selKey)}" style="left:${startLeft}%; top:${startTop}%;">
-                    <span class="garden-xp-badge lvl-${levelIdx}">Cấp ${levelIdx + 1} · ${xp.toFixed(1)} XP</span>
-                    <span class="garden-emoji" style="animation-delay:-${hopDelay}s; font-size:${emojiSize}px;">${species.emoji}</span>
-                    <span class="garden-label">${entry.subjectType === 'doiTac' ? `<span class="sparkle-name">${escapeHtml(entry.subjectKey)}</span>` : escapeHtml(entry.subjectKey)} · ${escapeHtml(stageName)}</span>
+                <div class="garden-pet" data-sel-key="${escapeHtml(e.selKey)}" style="left:${pos.left}%; top:${pos.top}%;">
+                    <span class="garden-xp-badge lvl-${e.levelIdx}">Cấp ${e.levelIdx + 1} · ${e.xp.toFixed(1)} XP</span>
+                    <span class="garden-emoji" style="${gardenAligned ? 'animation:none;' : `animation-delay:-${e.hopDelay}s;`} font-size:${e.emojiSize}px;">${e.species.emoji}</span>
+                    <span class="garden-label">${e.subjectType === 'doiTac' ? `<span class="sparkle-name">${escapeHtml(e.subjectKey)}</span>` : escapeHtml(e.subjectKey)} · ${escapeHtml(e.stageName)}</span>
                 </div>
             `;
         });
 
-        garden.innerHTML = html || `<div class="text-center small py-4" style="color:var(--slate);">Chưa có Linh thú nào — hãy chọn 1 loài để xuất hiện ở sân chung!</div>`;
+        garden.innerHTML = html;
+
+        if (gardenAligned) return; // đứng yên hẳn, không gắn wander timer
 
         garden.querySelectorAll('.garden-pet').forEach(el => {
             let wander = () => {
