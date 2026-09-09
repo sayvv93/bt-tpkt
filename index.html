@@ -232,10 +232,11 @@
         .species-pick-btn:hover { background: var(--brand-soft); border-color: var(--brand); }
 
         .linh-thu-garden {
-            position: relative; height: 520px; border-radius: 12px; overflow: hidden;
+            position: relative; height: 480px; border-radius: 12px; overflow: hidden;
             background: linear-gradient(180deg, #EAF3DC 0%, #D9EAC4 100%);
             border: 1px solid var(--line);
         }
+        .linh-thu-weekly-panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
         .garden-pet {
             position: absolute; display: flex; flex-direction: column; align-items: center;
             transform: translate(-50%, -50%);
@@ -254,6 +255,18 @@
         .garden-pet .garden-label {
             font-size: 10px; background: rgba(255,255,255,0.9); border-radius: 8px;
             padding: 1px 7px; margin-top: 2px; white-space: nowrap; color: var(--ink); font-weight: 600;
+        }
+        /* Tên Đối tác được làm nổi bật lấp lánh — phân biệt với Đội trưởng */
+        .sparkle-name {
+            background: linear-gradient(90deg, #C9A227 0%, #F5E27A 25%, #C9A227 50%, #F5E27A 75%, #C9A227 100%);
+            background-size: 250% auto;
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            animation: sparkle-shine 3.5s linear infinite;
+            font-weight: 800 !important;
+        }
+        @keyframes sparkle-shine {
+            0% { background-position: 0% center; }
+            100% { background-position: -250% center; }
         }
         @keyframes garden-hop {
             0%, 100% { transform: translateY(0); }
@@ -583,6 +596,12 @@
 
         <!-- TAB 3: CẢNH BÁO TRÙNG SỐ HỢP ĐỒNG -->
         <div class="tab-pane fade" id="cllContent" role="tabpanel">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <label class="small mb-0 fw-bold" style="color:var(--slate);">Lọc theo Đối tác:</label>
+                <select id="cllFilterDoiTac" class="form-select form-select-sm" style="width:180px;" onchange="renderCllTable()">
+                    <option value="">Tất cả Đối tác</option>
+                </select>
+            </div>
             <div class="alert-console">
                 <div class="alert-console-head">
                     <span><i class="bi bi-exclamation-octagon-fill me-2"></i>Số Hợp Đồng bị Trùng Lặp (CLL2 &amp; 3)</span>
@@ -624,6 +643,16 @@
             <div class="linh-thu-intro mb-3">
                 <i class="bi bi-magic me-2" style="color:#C9A227;"></i>
                 Linh thú tiến hoá hoàn toàn tự động theo hiệu suất xử lý ca bảo trì thực tế — không cần nhập tay.
+            </div>
+
+            <div class="linh-thu-weekly-panel mb-4">
+                <div class="fw-bold small mb-2" style="color:var(--slate);">
+                    🏆 BẢNG XẾP HẠNG TUẦN
+                    <span class="fw-normal" style="color:var(--slate-soft);">(reset 00:00 mỗi Thứ 2 — không ảnh hưởng tới cấp tiến hoá, chỉ để tranh Top mỗi tuần)</span>
+                </div>
+                <div id="linhThuWeeklyBoard">
+                    <div class="text-center small py-3" style="color:var(--slate);">Đang tải bảng xếp hạng...</div>
+                </div>
             </div>
 
             <div class="d-flex align-items-center justify-content-between mb-2">
@@ -1517,6 +1546,15 @@
         }
         body.innerHTML = chatMessages.map(m => {
             let isOwn = currentUser && m.username === currentUser.username;
+            let isSystem = m.username === 'Hệ Thống Linh Thú';
+            if (isSystem) {
+                return `
+                    <div class="chat-bubble" style="align-self:center; max-width:90%; text-align:center;">
+                        <div class="chat-meta">✨ ${escapeHtml(m.username)} · ${formatDateTime(m.created_at)}</div>
+                        <div class="chat-text" style="background:#FFFBEA; border-color:#E8D9A8; font-weight:600;">${escapeHtml(m.message)}</div>
+                    </div>
+                `;
+            }
             return `
                 <div class="chat-bubble ${isOwn ? 'is-own' : ''}">
                     <div class="chat-meta">${escapeHtml(m.username)} · ${formatDateTime(m.created_at)}</div>
@@ -1592,6 +1630,9 @@
         { key: 'meo',         name: 'Mèo',          emoji: '🐈', tier: 1, unlockXp: 0, stages: ['Mèo Con', 'Miêu Tinh Ranh', 'Miêu Linh Cửu Mạng'] },
         { key: 'heo',         name: 'Heo',          emoji: '🐖', tier: 1, unlockXp: 0, stages: ['Heo Sữa', 'Lợn Ỉ Núp', 'Heo Rừng Chúa Tể'] },
         { key: 'trau',        name: 'Trâu',         emoji: '🐃', tier: 1, unlockXp: 0, stages: ['Nghé Con', 'Trâu Kéo Cày', 'Trâu Chiến Tây Nguyên'] },
+        { key: 'cop',         name: 'Cọp',          emoji: '🐅', tier: 1, unlockXp: 0, stages: ['Cọp Con', 'Cọp Trưởng Thành', 'Cọp Vương Rừng Xanh'] },
+        { key: 'cho_soi',     name: 'Chó Sói',      emoji: '🐺', tier: 1, unlockXp: 0, stages: ['Sói Con', 'Sói Đầu Đàn', 'Sói Vương Tuyết Nguyên'] },
+        { key: 'gau_truc',    name: 'Gấu Trúc',     emoji: '🐼', tier: 1, unlockXp: 0, stages: ['Gấu Trúc Con', 'Gấu Trúc Trưởng Thành', 'Trúc Lâm Gấu Thánh'] },
         // ===== Bậc 2 — Hiếm (cần đạt Cấp 2, >200 XP) =====
         { key: 'co',          name: 'Cò',           emoji: '🦢', tier: 2, unlockXp: 201, stages: ['Cò Con', 'Cò Trắng Đồng Quê', 'Bạch Hạc Tiên Nga'] },
         { key: 'ca_chep',     name: 'Cá Chép',      emoji: '🐟', tier: 2, unlockXp: 201, stages: ['Cá Chép Con', 'Cá Chép Vàng', 'Cá Chép Hoá Long'] },
@@ -1601,6 +1642,9 @@
         { key: 'voc',         name: 'Voọc',         emoji: '🙊', tier: 2, unlockXp: 201, stages: ['Voọc Con', 'Voọc Chà Vá Ngũ Sắc', 'Sơn Tinh Voọc Vương'] },
         { key: 'te_te',       name: 'Tê Tê',        emoji: '🦔', tier: 2, unlockXp: 201, stages: ['Tê Tê Con', 'Xuyên Sơn Giáp', 'Thiết Giáp Tê Vương'] },
         { key: 'seu_dau_do',  name: 'Sếu Đầu Đỏ',   emoji: '🦩', tier: 2, unlockXp: 201, stages: ['Sếu Con Tràm Chim', 'Sếu Đầu Đỏ Kiêu Hùng', 'Hạc Đỏ Đồng Tháp Mười'] },
+        { key: 'ca_heo',      name: 'Cá Heo',       emoji: '🐬', tier: 2, unlockXp: 201, stages: ['Cá Heo Con', 'Cá Heo Nhào Lộn', 'Hải Đình Linh Ngư'] },
+        { key: 'bach_tuoc',   name: 'Bạch Tuộc',    emoji: '🐙', tier: 2, unlockXp: 201, stages: ['Bạch Tuộc Con', 'Bạch Tuộc Tám Vòi', 'Hắc Hải Bát Túc Vương'] },
+        { key: 'dai_bang',    name: 'Đại Bàng',     emoji: '🦅', tier: 2, unlockXp: 201, stages: ['Đại Bàng Con', 'Đại Bàng Săn Mồi', 'Thiên Ưng Chúa Tể Bầu Trời'] },
         // ===== Bậc 3 — Huyền Thoại (cần đạt Cấp 3, >600 XP) =====
         { key: 'hoa_ho_ly',     name: 'Hỏa Hồ Ly',     emoji: '🦊', tier: 3, unlockXp: 601, stages: ['Hồ Ly Lửa', 'Tam Vĩ Hồ', 'Cửu Vĩ Thiên Hồ'] },
         { key: 'thanh_xa',      name: 'Thanh Xà',       emoji: '🐍', tier: 3, unlockXp: 601, stages: ['Rắn Xanh Nhỏ', 'Giao Long', 'Ứng Long Tiểu Tôn'] },
@@ -1611,7 +1655,9 @@
         { key: 'bang_phuong',   name: 'Băng Phượng',    emoji: '🕊️', tier: 3, unlockXp: 601, stages: ['Chim Băng Nhỏ', 'Băng Băng Điểu', 'Cửu Thiên Băng Hoàng'] },
         { key: 'loi_ho',        name: 'Lôi Hổ',         emoji: '🐯', tier: 3, unlockXp: 601, stages: ['Hổ Sấm Sét', 'Bôn Lôi Hổ', 'Lôi Đình Thánh Sư'] },
         { key: 'moc_thu_nhan',  name: 'Mộc Thụ Nhân',   emoji: '🌳', tier: 3, unlockXp: 601, stages: ['Mầm Cây Linh', 'Sâm Lâm Cự Nhân', 'Mộc Thần Vĩnh Hằng'] },
-        { key: 'chan_long',     name: 'Chân Long',      emoji: '🐉', tier: 3, unlockXp: 601, stages: ['Long Ngâm Ấu Trùng', 'Giao Long Hoàng', 'Tổ Long Hồng Hoang'] }
+        { key: 'chan_long',     name: 'Chân Long',      emoji: '🐉', tier: 3, unlockXp: 601, stages: ['Long Ngâm Ấu Trùng', 'Giao Long Hoàng', 'Tổ Long Hồng Hoang'] },
+        { key: 'ho',            name: 'Hổ',             emoji: '🐯', tier: 3, unlockXp: 601, stages: ['Hổ Con', 'Chúa Sơn Lâm', 'Kim Hổ Tối Thượng'] },
+        { key: 'su_tu',         name: 'Sư Tử',          emoji: '🦁', tier: 3, unlockXp: 601, stages: ['Sư Tử Con', 'Sư Tử Đầu Đàn', 'Sư Tử Vương Thảo Nguyên'] }
     ];
     const LINH_THU_TIER_NAMES = { 1: 'Thường', 2: 'Hiếm', 3: 'Huyền Thoại' };
     const LINH_THU_LEVEL_NAMES = ['Sơ khai', 'Trưởng thành', 'Thần thú tối thượng'];
@@ -1672,10 +1718,11 @@
         }
         renderLinhThuTab();
         renderLinhThuGarden();
+        renderLinhThuWeeklyLeaderboard();
     }
 
     // Sân chung: hiện TẤT CẢ linh thú đã được chọn loài trên toàn hệ thống,
-    // chạy nhảy ngẫu nhiên trong 1 khung cỏ chung — không phụ thuộc phạm vi
+    // đi lang thang ngẫu nhiên trong 1 khung cỏ chung — không phụ thuộc phạm vi
     // quyền xem dữ liệu của người dùng hiện tại (chỉ dùng điểm XP tổng hợp).
     let gardenWanderTimers = []; // dọn sạch mỗi lần render lại, tránh rò rỉ timer
 
@@ -1683,7 +1730,6 @@
         let garden = document.getElementById('linhThuGarden');
         if (!garden) return;
 
-        // Dọn hết timer "đi lang thang" của lần render trước
         gardenWanderTimers.forEach(t => clearInterval(t));
         gardenWanderTimers = [];
 
@@ -1701,7 +1747,6 @@
             let hopDelay = (Math.random() * 0.6).toFixed(1);
             let emojiSize = [22, 30, 42][levelIdx]; // linh thú càng cao cấp càng to trên sân
 
-            // Vị trí bắt đầu ngẫu nhiên trong sân (chừa lề để không sát viền)
             let startLeft = (6 + Math.random() * 84).toFixed(0);
             let startTop = (12 + Math.random() * 76).toFixed(0);
 
@@ -1709,16 +1754,13 @@
                 <div class="garden-pet" data-sel-key="${escapeHtml(selKey)}" style="left:${startLeft}%; top:${startTop}%;">
                     <span class="garden-xp-badge lvl-${levelIdx}">Cấp ${levelIdx + 1} · ${xp.toFixed(1)} XP</span>
                     <span class="garden-emoji" style="animation-delay:-${hopDelay}s; font-size:${emojiSize}px;">${species.emoji}</span>
-                    <span class="garden-label">${escapeHtml(entry.subjectKey)} · ${escapeHtml(stageName)}</span>
+                    <span class="garden-label">${entry.subjectType === 'doiTac' ? `<span class="sparkle-name">${escapeHtml(entry.subjectKey)}</span>` : escapeHtml(entry.subjectKey)} · ${escapeHtml(stageName)}</span>
                 </div>
             `;
         });
 
         garden.innerHTML = html || `<div class="text-center small py-4" style="color:var(--slate);">Chưa có Linh thú nào — hãy chọn 1 loài để xuất hiện ở sân chung!</div>`;
 
-        // Mỗi con tự "đi lang thang" ngẫu nhiên: sau 1 khoảng thời gian ngẫu
-        // nhiên, chọn 1 điểm đến ngẫu nhiên mới trong sân và lướt mượt tới đó
-        // (transition CSS) — không đi theo đường cố định nào, mỗi lần mỗi khác.
         garden.querySelectorAll('.garden-pet').forEach(el => {
             let wander = () => {
                 let toLeft = (6 + Math.random() * 84).toFixed(0);
@@ -1731,10 +1773,61 @@
             let pace = 3500 + Math.random() * 3500;
             let timer = setInterval(wander, pace);
             gardenWanderTimers.push(timer);
-            // Bắt đầu di chuyển lần đầu sau 1 khoảng ngắn ngẫu nhiên, để các con
-            // không đồng loạt "khởi hành" cùng lúc.
             setTimeout(wander, Math.random() * 2000);
         });
+    }
+
+    // Bảng xếp hạng TUẦN: dùng entry.xpWeek (Worker tính riêng, reset theo lịch
+    // Thứ 2 hàng tuần) — KHÔNG liên quan tới entry.xp (cộng dồn vĩnh viễn, dùng
+    // để tính cấp tiến hoá). Chỉ để tạo cuộc đua mới mỗi tuần, không ảnh hưởng
+    // hình thái linh thú đã đạt được.
+    function renderLinhThuWeeklyLeaderboard() {
+        let container = document.getElementById('linhThuWeeklyBoard');
+        if (!container) return;
+
+        let withSpecies = linhThuLeaderboard.map(entry => {
+            let selKey = `${entry.subjectType}::${entry.subjectKey}`;
+            let speciesKey = linhThuSelections[selKey];
+            let species = speciesKey ? LINH_THU_SPECIES.find(s => s.key === speciesKey) : null;
+            return { ...entry, species };
+        }).filter(e => e.species);
+
+        let topDoiTruong = withSpecies.filter(e => e.subjectType === 'doiTruong')
+            .sort((a, b) => (b.xpWeek || 0) - (a.xpWeek || 0)).slice(0, 5);
+        let topDoiTac = withSpecies.filter(e => e.subjectType === 'doiTac')
+            .sort((a, b) => (b.xpWeek || 0) - (a.xpWeek || 0)).slice(0, 3);
+
+        const renderList = (list) => {
+            if (list.length === 0 || list.every(e => (e.xpWeek || 0) === 0)) {
+                return `<div class="small py-2" style="color:var(--slate-soft);">Chưa có XP nào trong tuần này.</div>`;
+            }
+            return list.map((e, idx) => {
+                let medal = ['🥇', '🥈', '🥉'][idx] || `#${idx + 1}`;
+                return `
+                    <div class="d-flex align-items-center justify-content-between py-1" style="border-bottom:1px solid var(--line);">
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="width:22px; text-align:center;">${medal}</span>
+                            <span style="font-size:17px;">${e.species.emoji}</span>
+                            <span class="small fw-bold">${e.subjectType === 'doiTac' ? `<span class="sparkle-name">${escapeHtml(e.subjectKey)}</span>` : escapeHtml(e.subjectKey)}</span>
+                        </div>
+                        <span class="mono small fw-bold" style="color:var(--brand-dark);">${(e.xpWeek || 0).toFixed(1)} XP</span>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        container.innerHTML = `
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="small fw-bold mb-1" style="color:var(--ink);">Top Đội trưởng</div>
+                    ${renderList(topDoiTruong)}
+                </div>
+                <div class="col-md-6">
+                    <div class="small fw-bold mb-1" style="color:var(--ink);">Top Đối tác</div>
+                    ${renderList(topDoiTac)}
+                </div>
+            </div>
+        `;
     }
 
     async function selectLinhThuSpecies(subjectType, subjectKey, speciesKey) {
@@ -1814,7 +1907,7 @@
         return `
             <div class="col-md-4">
                 <div class="pet-card ${speciesKey ? 'has-pet' : ''}">
-                    <div class="pet-subject">${subjectLabel}: ${escapeHtml(subjectKey)}</div>
+                    <div class="pet-subject">${subjectLabel}: ${subjectType === 'doiTac' ? `<span class="sparkle-name" style="font-size:12px;">${escapeHtml(subjectKey)}</span>` : escapeHtml(subjectKey)}</div>
                     ${bodyHtml}
                 </div>
             </div>
@@ -1900,6 +1993,8 @@
         filterData();
     }
 
+    let cllDuplicateEntriesAll = []; // lưu toàn bộ (không lọc), để renderCllTable() áp filter riêng
+
     function checkDuplicateContracts(data) {
         let contractMap = {};
         data.forEach(item => {
@@ -1909,9 +2004,31 @@
             contractMap[soHD].push(item);
         });
 
-        let duplicateEntries = Object.entries(contractMap).filter(([soHD, items]) => items.length > 1);
-        
-        document.getElementById('badgeDuplicateCount').innerText = duplicateEntries.length;
+        cllDuplicateEntriesAll = Object.entries(contractMap).filter(([soHD, items]) => items.length > 1);
+        document.getElementById('badgeDuplicateCount').innerText = cllDuplicateEntriesAll.length;
+
+        // Build dropdown lọc Đối tác từ chính các đối tác có xuất hiện trong danh sách trùng
+        let doiTacSet = new Set();
+        cllDuplicateEntriesAll.forEach(([, items]) => items.forEach(i => { if (i.doiTac) doiTacSet.add(i.doiTac); }));
+        let cllSelect = document.getElementById('cllFilterDoiTac');
+        let currentVal = cllSelect.value;
+        let doiTacList = [...doiTacSet].sort();
+        cllSelect.innerHTML = '<option value="">Tất cả Đối tác</option>' +
+            doiTacList.map(dt => `<option value="${escapeHtml(dt)}">${escapeHtml(dt)}</option>`).join('');
+        if (doiTacList.includes(currentVal)) cllSelect.value = currentVal;
+
+        renderCllTable();
+    }
+
+    function renderCllTable() {
+        let selectedDoiTac = document.getElementById('cllFilterDoiTac').value;
+
+        let duplicateEntries = selectedDoiTac
+            ? cllDuplicateEntriesAll
+                .map(([soHD, items]) => [soHD, items.filter(i => i.doiTac === selectedDoiTac)])
+                .filter(([, items]) => items.length > 1)
+            : cllDuplicateEntriesAll;
+
         document.getElementById('cllDuplicateBadge').innerText = duplicateEntries.length + ' số hợp đồng trùng';
 
         let cllBody = document.getElementById('cllTableBody');
