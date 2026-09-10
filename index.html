@@ -389,7 +389,7 @@
             <select id="filterTpktCheck" class="form-select form-select-sm" onchange="filterData()">
                 <option value="">Tất cả TPKT Check</option>
                 <option value="Chưa kiểm tra">Chưa kiểm tra</option>
-                <option value="Bảo trì ok">Bảo trì ok</option>
+                <option value="__DOI_TRUONG_XU_LY__">Đội trưởng xử lý (tất cả lỗi)</option>
                 <option value="Suy hao">Suy hao</option>
                 <option value="Không tín hiệu">Không tín hiệu</option>
                 <option value="Rớt kết nối">Rớt kết nối</option>
@@ -1480,7 +1480,11 @@
             if (nhanVien && item.nhanVien !== nhanVien) return false;
 
             let currentItemTpkt = normalizeVal(item.userSelectedTpkt) || normalizeVal(item.tpktCheck) || "Chưa kiểm tra";
-            if (tpktCheckVal && currentItemTpkt !== tpktCheckVal) return false;
+            if (tpktCheckVal === "__DOI_TRUONG_XU_LY__") {
+                if (!LOI_VALUES.includes(currentItemTpkt)) return false;
+            } else if (tpktCheckVal && currentItemTpkt !== tpktCheckVal) {
+                return false;
+            }
 
             if (searchHDSmooth) {
                 let soHD = item.soHopDong ? String(item.soHopDong).trim().toLowerCase() : "";
@@ -2113,7 +2117,7 @@
             let tr = document.createElement('tr');
             let detailsHtml = '<ul class="mb-0 ps-3 small" style="color:var(--slate);">';
             items.forEach(subItem => {
-                detailsHtml += `<li><b>Vùng:</b> ${escapeHtml(subItem.vung) || '--'} | <b>Đối tác:</b> ${escapeHtml(subItem.doiTac) || '--'} | <b>Đội trưởng:</b> ${escapeHtml(subItem.doiTruong) || '--'} | <b>Nhân viên:</b> ${escapeHtml(subItem.nhanVien) || '--'} | <b>TG Hoàn Tất:</b> ${formatDate(subItem.tgHoanTat)}</li>`;
+                detailsHtml += `<li><b>Đối tác:</b> ${escapeHtml(subItem.doiTac) || '--'} | <b>Đội trưởng:</b> ${escapeHtml(subItem.doiTruong) || '--'} | <b>Nhân viên:</b> ${escapeHtml(subItem.nhanVien) || '--'} | <b>TG Hoàn Tất:</b> ${formatDate(subItem.tgHoanTat)}<br><b>Ghi chú:</b> ${escapeHtml(subItem.ghiChu) || '--'}</li>`;
             });
             detailsHtml += '</ul>';
 
