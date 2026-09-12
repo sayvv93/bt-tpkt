@@ -232,7 +232,7 @@
         .species-pick-btn:hover { background: var(--brand-soft); border-color: var(--brand); }
 
         .linh-thu-garden {
-            position: relative; height: 480px; border-radius: 12px; overflow: hidden;
+            position: relative; height: 560px; border-radius: 12px; overflow: hidden;
             background: linear-gradient(180deg, #EAF3DC 0%, #D9EAC4 100%);
             border: 1px solid var(--line);
         }
@@ -254,8 +254,11 @@
         }
         .garden-pet .garden-label {
             font-size: 10px; background: rgba(255,255,255,0.9); border-radius: 8px;
-            padding: 1px 7px; margin-top: 2px; white-space: nowrap; color: var(--ink); font-weight: 600;
+            padding: 2px 7px; margin-top: 2px; color: var(--ink); font-weight: 600;
+            white-space: normal; text-align: center; max-width: 92px; line-height: 1.35;
         }
+        .garden-pet .garden-label .label-name { display: block; }
+        .garden-pet .garden-label .label-stage { display: block; font-weight: 500; color: var(--slate); }
         /* Tên Đối tác được làm nổi bật lấp lánh — phân biệt với Đội trưởng */
         .sparkle-name {
             background: linear-gradient(90deg, #C9A227 0%, #F5E27A 25%, #C9A227 50%, #F5E27A 75%, #C9A227 100%);
@@ -1942,10 +1945,10 @@
             let doiTruongEntries = entries.filter(e => e.subjectType === 'doiTruong')
                 .sort((a, b) => a.subjectKey.localeCompare(b.subjectKey, 'vi'));
 
-            let dtPositions = computeFormationPositions(doiTacEntries.length, 16, 6, 14);
+            let dtPositions = computeFormationPositions(doiTacEntries.length, 14, 6, 16);
             doiTacEntries.forEach((e, i) => { positionsByKey[e.selKey] = dtPositions[i]; });
 
-            let dtrPositions = computeFormationPositions(doiTruongEntries.length, 46, 8, 15);
+            let dtrPositions = computeFormationPositions(doiTruongEntries.length, 42, 10, 20);
             doiTruongEntries.forEach((e, i) => { positionsByKey[e.selKey] = dtrPositions[i]; });
         }
 
@@ -1959,7 +1962,7 @@
                 <div class="garden-pet" data-sel-key="${escapeHtml(e.selKey)}" style="left:${pos.left}%; top:${pos.top}%;">
                     <span class="garden-xp-badge lvl-${e.levelIdx}">Cấp ${e.levelIdx + 1} · ${e.xp.toFixed(1)} XP</span>
                     <span class="garden-emoji" style="${gardenAligned ? 'animation:none;' : `animation-delay:-${e.hopDelay}s;`} font-size:${e.emojiSize}px;">${e.species.emoji}</span>
-                    <span class="garden-label">${e.subjectType === 'doiTac' ? `<span class="sparkle-name">${escapeHtml(e.subjectKey)}</span>` : escapeHtml(e.subjectKey)} · ${escapeHtml(e.stageName)}</span>
+                    <span class="garden-label"><span class="label-name">${e.subjectType === 'doiTac' ? `<span class="sparkle-name">${escapeHtml(e.subjectKey)}</span>` : escapeHtml(e.subjectKey)}</span><span class="label-stage">${escapeHtml(e.stageName)}</span></span>
                 </div>
             `;
         });
