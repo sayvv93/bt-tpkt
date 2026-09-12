@@ -482,6 +482,13 @@
                 <button class="filter-reset-btn" onclick="exportFilteredToExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Xuất Excel</button>
             </div>
 
+            <div id="superAdminImportBar" class="d-flex justify-content-end align-items-center gap-2 mb-2 d-none" style="background:#FFF8E6; border:1px solid #E8D9A8; border-radius:8px; padding:8px 12px;">
+                <span class="small fw-bold me-auto" style="color:#8A6A1E;"><i class="bi bi-shield-lock-fill me-1"></i>SuperAdmin — Nhập dữ liệu MỚI (song song N8N)</span>
+                <button class="filter-reset-btn" onclick="downloadNewDataTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu (Dữ liệu mới)</button>
+                <button class="filter-reset-btn" onclick="triggerImportNewData()"><i class="bi bi-database-add me-1"></i>Nhập dữ liệu mới</button>
+                <input type="file" id="importNewDataFileInput" accept=".xlsx,.xls" class="d-none" onchange="handleImportNewData(event)">
+            </div>
+
             <div class="table-panel">
                 <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="dataTable">
@@ -732,9 +739,12 @@
         }[c]));
     }
 
-    // Tài khoản thường (role != admin) bị khoá vào đúng 1 Đối tác (doiTacQuanLy).
+    // Tài khoản thường (role != admin/superadmin, và không phải doiTac='ALL')
+    // bị khoá vào đúng 1 Đối tác (doiTacQuanLy).
     function isDoiTacLocked() {
-        return currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "";
+        return currentUser
+            && currentUser.role !== 'admin' && currentUser.role !== 'superadmin'
+            && currentUser.doiTac && currentUser.doiTac.trim() !== "" && currentUser.doiTac !== "ALL";
     }
 
     // Tài khoản cấp Đội trưởng (role = 'doitruong') còn bị khoá hẹp hơn nữa,
@@ -803,7 +813,12 @@
     // ================== NHẬP EXCEL (IMPORT HÀNG LOẠT) ==================
     // Khớp CHÍNH XÁC theo cặp khoá (soHopDong, tgTao) — đúng khoá UNIQUE thật
     // của bảng dataBT — để không bao giờ bị nhầm giữa các dòng trùng số hợp đồng.
-    const IMPORT_MAX_ROWS = 100;
+    // SuperAdmin được import tối đa 500 dòng/lần, còn lại giới hạn 100.
+    // Đây chỉ là kiểm tra sớm phía client cho gọn — Worker vẫn tự kiểm tra lại
+    // role thật từ D1, không tin số này do client tự khai.
+    function getImportMaxRows() {
+        return (currentUser && currentUser.role === 'superadmin') ? 500 : 100;
+    }
     const IMPORT_VALID_TPKT = ["Bảo trì ok", "Suy hao", "Không tín hiệu", "Rớt kết nối", "Vùng phủ không đảm bảo"];
     const IMPORT_VALID_XLLAI = ["", "Chuyển KTV XL lại", "Đã xử lý lại", "Checklist Onsite"];
 
@@ -864,8 +879,8 @@
                 alert("File không có dữ liệu!");
                 return;
             }
-            if (rawRows.length > IMPORT_MAX_ROWS) {
-                alert(`File có ${rawRows.length} dòng, vượt quá giới hạn tối đa ${IMPORT_MAX_ROWS} dòng/lần import. Vui lòng chia nhỏ file ra và import nhiều lần.`);
+            if (rawRows.length > getImportMaxRows()) {
+                alert(`File có ${rawRows.length} dòng, vượt quá giới hạn tối đa ${getImportMaxRows()} dòng/lần import. Vui lòng chia nhỏ file ra và import nhiều lần.`);
                 return;
             }
 
@@ -935,6 +950,124 @@
             await refreshData();
         } catch (e) {
             console.error("Lỗi import Excel:", e);
+            alert("Lỗi đọc file Excel — vui lòng dùng đúng file mẫu đã tải, không đổi tên cột!");
+        }
+    }
+
+    // ================== SUPERADMIN: NHẬP DỮ LIỆU CA BẢO TRÌ MỚI ==================
+    // Khác với "Nhập Excel" ở trên (chỉ cập nhật tpktCheck/xlLai cho dòng đã có),
+    // đây là kênh tạo THÊM dòng mới trong dataBT — chạy song song với n8n, dùng
+    // đúng khoá UNIQUE (soHopDong, tgTao) + ON CONFLICT DO NOTHING để không đè
+    // mất dữ liệu đã có nếu lỡ import trùng ca cũ.
+    function downloadNewDataTemplate() {
+        if (typeof XLSX === 'undefined') {
+            alert("Thư viện Excel chưa tải xong, vui lòng thử lại sau giây lát.");
+            return;
+        }
+        let ws = XLSX.utils.json_to_sheet([
+            {
+                vung: "08.Dong Nai", doiTacQuanLy: "DNI02", doiTruong: "Bùi Công Chi", blockQuanLy: "",
+                soHopDong: "DNAAA0099", nhanVien: "DNI02.PHUOCND", tgTao: "01/09/2026 09:00:00",
+                tgHoanTat: "01/09/2026 10:00:00", ghiChu: "Ví dụ ghi chú ca bảo trì", tpktCheck: "", xlLai: ""
+            }
+        ]);
+        ws['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 18 }, { wch: 12 }, { wch: 14 }, { wch: 16 }, { wch: 20 }, { wch: 20 }, { wch: 40 }, { wch: 16 }, { wch: 18 }];
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Mau Du Lieu Moi");
+        XLSX.writeFile(wb, "mau_import_du_lieu_moi.xlsx");
+    }
+
+    function triggerImportNewData() {
+        document.getElementById('importNewDataFileInput').click();
+    }
+
+    async function handleImportNewData(event) {
+        let file = event.target.files[0];
+        event.target.value = "";
+        if (!file) return;
+
+        if (!currentUser || currentUser.role !== 'superadmin') {
+            alert("Chỉ SuperAdmin mới được dùng tính năng này!");
+            return;
+        }
+        if (typeof XLSX === 'undefined') {
+            alert("Thư viện Excel chưa tải xong, vui lòng thử lại sau giây lát.");
+            return;
+        }
+
+        try {
+            let buf = await file.arrayBuffer();
+            let wb = XLSX.read(buf, { type: 'array' });
+            let sheet = wb.Sheets[wb.SheetNames[0]];
+            let rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+            if (rawRows.length === 0) {
+                alert("File không có dữ liệu!");
+                return;
+            }
+            if (rawRows.length > getImportMaxRows()) {
+                alert(`File có ${rawRows.length} dòng, vượt quá giới hạn tối đa ${getImportMaxRows()} dòng/lần import.`);
+                return;
+            }
+
+            let rows = [];
+            let errors = [];
+            rawRows.forEach((r, idx) => {
+                let soHopDong = String(r.soHopDong || "").trim();
+                let tgTao = String(r.tgTao || "").trim();
+                let rowNum = idx + 2;
+                if (!soHopDong || !tgTao) {
+                    errors.push(`Dòng ${rowNum}: thiếu soHopDong hoặc tgTao (2 khoá bắt buộc)`);
+                    return;
+                }
+                rows.push({
+                    vung: String(r.vung || "").trim(),
+                    doiTacQuanLy: String(r.doiTacQuanLy || "").trim(),
+                    doiTruong: String(r.doiTruong || "").trim(),
+                    blockQuanLy: String(r.blockQuanLy || "").trim(),
+                    soHopDong, tgTao,
+                    nhanVien: String(r.nhanVien || "").trim(),
+                    tgHoanTat: String(r.tgHoanTat || "").trim(),
+                    ghiChu: String(r.ghiChu || "").trim(),
+                    tpktCheck: String(r.tpktCheck || "").trim(),
+                    xlLai: String(r.xlLai || "").trim()
+                });
+            });
+
+            if (errors.length > 0) {
+                alert(`File có ${errors.length} dòng lỗi, vui lòng sửa lại rồi import lại:\n\n` +
+                    errors.slice(0, 15).join('\n') +
+                    (errors.length > 15 ? `\n... và ${errors.length - 15} dòng lỗi khác` : ''));
+                return;
+            }
+            if (rows.length === 0) {
+                alert("Không có dòng hợp lệ để import!");
+                return;
+            }
+
+            if (!confirm(`Xác nhận NHẬP MỚI ${rows.length} ca bảo trì vào hệ thống?\nCa nào đã tồn tại (trùng Số HĐ + tgTao) sẽ tự động bị bỏ qua, không ghi đè.`)) {
+                return;
+            }
+
+            let res = await fetch(WEB_APP_URL + "api/import/newdata", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: currentUser.username, rows })
+            });
+            let result = await res.json();
+
+            if (!result.success) {
+                alert(result.error || "Import thất bại, vui lòng thử lại!");
+                return;
+            }
+
+            let msg = `Nhập dữ liệu mới hoàn tất:\n${result.inserted} ca được thêm mới\n${result.skippedExisting} ca đã tồn tại (bỏ qua, không ghi đè)`;
+            if (result.skippedNoKey > 0) msg += `\n${result.skippedNoKey} dòng thiếu khoá (đã bỏ qua)`;
+            alert(msg);
+
+            await refreshData();
+        } catch (e) {
+            console.error("Lỗi import dữ liệu mới:", e);
             alert("Lỗi đọc file Excel — vui lòng dùng đúng file mẫu đã tải, không đổi tên cột!");
         }
     }
@@ -1227,7 +1360,7 @@
         document.getElementById('lblCurrentUsername').innerText = currentUser.username;
         document.getElementById('lblCurrentRole').innerText = `Role: ${currentUser.role}`;
         
-        let dtLabel = (currentUser.doiTac && currentUser.doiTac.trim() !== "") ? currentUser.doiTac : "Tất cả (Full quyền)";
+        let dtLabel = (currentUser.doiTac && currentUser.doiTac.trim() !== "" && currentUser.doiTac !== "ALL") ? currentUser.doiTac : "Tất cả (Full quyền)";
         document.getElementById('lblCurrentDoiTac').innerText = `Đối tác: ${dtLabel}`;
 
         let dtrPill = document.getElementById('lblCurrentDoiTruong');
@@ -1238,9 +1371,10 @@
             dtrPill.classList.add('d-none');
         }
 
-        // Nút "Sắp xếp ngay hàng" trong tab Linh Thú — chỉ dành riêng cho tài
-        // khoản sayvv (quyền cao nhất), phục vụ mục đích chụp ảnh báo cáo.
-        document.getElementById('btnAlignGarden').classList.toggle('d-none', currentUser.username !== 'sayvv');
+        // Nút "Sắp xếp ngay hàng" trong tab Linh Thú — chỉ dành riêng cho
+        // role SuperAdmin, phục vụ mục đích chụp ảnh báo cáo.
+        document.getElementById('btnAlignGarden').classList.toggle('d-none', currentUser.role !== 'superadmin');
+        document.getElementById('superAdminImportBar').classList.toggle('d-none', currentUser.role !== 'superadmin');
     }
 
     // Parse linh hoạt nhiều định dạng ngày mà server/n8n có thể trả về.
@@ -1470,7 +1604,7 @@
         let searchHDSmooth = document.getElementById('searchSoHopDong').value.trim().toLowerCase();
 
         filteredDataCache = globalData.filter(item => {
-            if (currentUser && currentUser.role !== 'admin' && currentUser.doiTac && currentUser.doiTac.trim() !== "") {
+            if (isDoiTacLocked()) {
                 if (item.doiTac !== currentUser.doiTac) return false;
             }
 
@@ -1741,7 +1875,7 @@
     // Chỉ tài khoản sayvv mới thấy nút này (đã ẩn ở initSessionUI), nhưng vẫn
     // chặn thêm ở đây cho chắc — tránh gọi được hàm qua console nếu không đúng quyền.
     function toggleGardenAlign() {
-        if (!currentUser || currentUser.username !== 'sayvv') return;
+        if (!currentUser || currentUser.role !== 'superadmin') return;
         gardenAligned = !gardenAligned;
         let btn = document.getElementById('btnAlignGarden');
         btn.innerHTML = gardenAligned
@@ -1997,7 +2131,7 @@
             let xp = calcDoiTruongXp(currentUser.doiTruong, globalData);
             html += renderPetCard('doiTruong', currentUser.doiTruong, xp, true);
 
-        } else if (currentUser.role !== 'admin') {
+        } else if (currentUser.role !== 'admin' && currentUser.role !== 'superadmin') {
             // Cấp Đối tác quản lý — pet của họ + danh sách các Đội trưởng trực thuộc
             let xpDoiTac = calcDoiTacXp(globalData);
             html += renderPetCard('doiTac', currentUser.doiTac, xpDoiTac, true);
