@@ -560,6 +560,48 @@
                 </div>
             </div>
 
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="chart-panel">
+                        <h5 class="mb-3"><i class="bi bi-bar-chart-fill me-2" style="color:var(--brand);"></i>Hiệu suất theo Đối tác</h5>
+                        <div class="executive-chart-container"><canvas id="chartDoiTac"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-panel">
+                        <h5 class="mb-3"><i class="bi bi-bar-chart-fill me-2" style="color:var(--amber);"></i>Hiệu suất theo Đội trưởng</h5>
+                        <div class="executive-chart-container"><canvas id="chartDoiTruong"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="alert-console">
+                        <div class="alert-console-head">
+                            <span><i class="bi bi-hourglass-split me-2"></i>Cảnh báo Đội trưởng — Ca còn tồn CHƯA XỬ LÝ (gộp tất cả loại lỗi)</span>
+                            <span class="count-pill" id="pendingByLeadBadge">0 đội trưởng</span>
+                        </div>
+                        <div class="table-responsive mb-0">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Đội trưởng</th>
+                                        <th>Đối tác</th>
+                                        <th class="text-center">Số ca tồn chưa xử lý</th>
+                                        <th class="text-center">Tồn lâu nhất (ngày)</th>
+                                        <th class="text-center">Mức độ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingByLeadTableBody">
+                                    <tr><td colspan="5" class="text-center py-3" style="color:var(--slate);">Không có ca nào tồn đọng.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row mb-4">
                 <div class="col-md-12">
                     <div class="alert-console">
@@ -584,21 +626,6 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="chart-panel">
-                        <h5 class="mb-3"><i class="bi bi-bar-chart-fill me-2" style="color:var(--brand);"></i>Hiệu suất theo Đối tác</h5>
-                        <div class="executive-chart-container"><canvas id="chartDoiTac"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="chart-panel">
-                        <h5 class="mb-3"><i class="bi bi-bar-chart-fill me-2" style="color:var(--amber);"></i>Hiệu suất theo Đội trưởng</h5>
-                        <div class="executive-chart-container"><canvas id="chartDoiTruong"></canvas></div>
                     </div>
                 </div>
             </div>
@@ -2572,6 +2599,7 @@
         let totalOk = 0;    // = SUM ĐÃ HOÀN THÀNH (Bảo trì ok + Đã xử lý lại + Checklist Onsite)
 
         let nvStats = {};
+        let dtrPendingStats = {};
         data.forEach(item => {
             let { category, isCountedAsLoi } = classifyRow(item);
 
@@ -2585,6 +2613,20 @@
             }
             nvStats[nv].totalCa += 1;
             if (isCountedAsLoi) nvStats[nv].khongDutDiem += 1;
+
+            // Cảnh báo tồn đọng theo Đội trưởng — gộp CẢ 4 loại lỗi, chỉ tính
+            // ca đang ở trạng thái "Chưa xử lý" (chưa chọn XL Lại cuối cùng).
+            if (category === "CHUA_XU_LY" && item.doiTruong) {
+                let dt = item.doiTruong;
+                if (!dtrPendingStats[dt]) {
+                    dtrPendingStats[dt] = { doiTruong: dt, doiTac: item.doiTac || "", count: 0, oldestDays: 0 };
+                }
+                dtrPendingStats[dt].count += 1;
+                let days = daysSince(item.tgHoanTat);
+                if (days !== null && days > dtrPendingStats[dt].oldestDays) {
+                    dtrPendingStats[dt].oldestDays = days;
+                }
+            }
         });
 
         let globalRate = totalCa > 0 ? ((totalCaLoi / totalCa) * 100).toFixed(1) : 0;
@@ -2594,6 +2636,36 @@
         document.getElementById('kpiTotalLoi').innerText = totalCaLoi;
         document.getElementById('kpiRateLoi').innerText = globalRate + '%';
         document.getElementById('kpiTotalOk').innerText = totalOk;
+
+        // ---- Cảnh báo Đội trưởng còn tồn ca chưa xử lý ----
+        let pendingBody = document.getElementById('pendingByLeadTableBody');
+        pendingBody.innerHTML = "";
+        let pendingList = Object.values(dtrPendingStats).sort((a, b) => b.count - a.count);
+        document.getElementById('pendingByLeadBadge').innerText = pendingList.length + ' đội trưởng';
+
+        if (pendingList.length === 0) {
+            pendingBody.innerHTML = `<tr><td colspan="5" class="text-center py-3" style="color:var(--slate);">Tuyệt vời! Không có ca nào tồn đọng.</td></tr>`;
+        } else {
+            const fragment = document.createDocumentFragment();
+            pendingList.forEach(stat => {
+                let isHigh = stat.count >= 10 || stat.oldestDays > OVERDUE_DAYS_THRESHOLD;
+                let severityClass = isHigh ? "is-high" : "is-watch";
+                let statusText = isHigh ? "Cần xử lý gấp" : "Cần theo dõi";
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="fw-bold"></td>
+                    <td></td>
+                    <td class="text-center op-code fw-bold" style="color:var(--red);">${stat.count}</td>
+                    <td class="text-center mono">${stat.oldestDays} ngày</td>
+                    <td class="text-center"><span class="severity-dot ${severityClass}">${statusText}</span></td>
+                `;
+                tr.cells[0].textContent = stat.doiTruong;
+                tr.cells[1].textContent = stat.doiTac;
+                fragment.appendChild(tr);
+            });
+            pendingBody.appendChild(fragment);
+        }
 
         let warningBody = document.getElementById('warningTableBody');
         warningBody.innerHTML = "";
