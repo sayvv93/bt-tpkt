@@ -1103,6 +1103,7 @@
                 startAutoRefresh();
                 startPingOnline();
                 startChatPolling();
+                startIdleWatcher();
                 return;
             } catch(e) {}
         }
@@ -1111,8 +1112,8 @@
     };
 
     const AUTO_REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 phút (trước là 2 phút — giảm ~60% số lượt gọi/ngày, quan trọng vì D1 free tier giới hạn row đọc/ngày)
-    const PING_INTERVAL_MS = 45 * 1000; // 45 giây — phải ngắn hơn nhiều so với
-    // ngưỡng "online" 2 phút mà Worker đang dùng, để không bị rớt trạng thái oan.
+    const PING_INTERVAL_MS = 15 * 1000; // 15 giây — ngưỡng "online" bên Worker
+    // là 40 giây, đủ dư 1-2 nhịp ping lỡ mất mà không bị rớt trạng thái oan.
     let autoRefreshTimer = null;
     let pingTimer = null;
 
@@ -1133,14 +1134,16 @@
     }
 
     // Báo "đang online" lên Worker (bảng active_sessions có sẵn) và cập nhật
-    // số lượng + danh sách người đang hoạt động trong 2 phút gần nhất.
-    async function pingOnline() {
+    // số lượng + danh sách người đang hoạt động trong 40 giây gần nhất.
+    // offline=true: báo NGAY LẬP TỨC là đã rời đi (đăng xuất) — xoá thẳng khỏi
+    // danh sách thay vì chờ hết hạn tự nhiên.
+    async function pingOnline(offline = false) {
         if (!currentUser || !currentUser.username) return;
         try {
             let response = await fetch(WEB_APP_URL + "api/ping", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: currentUser.username, role: currentUser.role })
+                body: JSON.stringify({ username: currentUser.username, role: currentUser.role, offline })
             });
             let list = await response.json();
             if (!Array.isArray(list)) return;
@@ -1169,6 +1172,44 @@
     function stopPingOnline() {
         if (pingTimer) { clearInterval(pingTimer); pingTimer = null; }
         document.getElementById('lblOnlineCount').textContent = '--';
+    }
+
+    // Đóng tab / tắt trình duyệt (không kịp bấm Đăng xuất) — vẫn cố báo offline
+    // bằng sendBeacon, vì fetch thường không đảm bảo hoàn tất khi trang đang đóng.
+    window.addEventListener('pagehide', () => {
+        if (currentUser && currentUser.username && navigator.sendBeacon) {
+            let payload = JSON.stringify({ username: currentUser.username, offline: true });
+            navigator.sendBeacon(WEB_APP_URL + "api/ping", new Blob([payload], { type: 'application/json' }));
+        }
+    });
+
+    // ================== TỰ ĐỘNG ĐĂNG XUẤT KHI IM LẶNG QUÁ LÂU ==================
+    const IDLE_TIMEOUT_MS = 20 * 60 * 1000; // 20 phút không thao tác gì
+    const IDLE_CHECK_INTERVAL_MS = 30 * 1000;
+    let lastActivityTime = Date.now();
+    let idleCheckTimer = null;
+
+    function markUserActivity() {
+        lastActivityTime = Date.now();
+    }
+    ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt =>
+        document.addEventListener(evt, markUserActivity, { passive: true })
+    );
+
+    function startIdleWatcher() {
+        stopIdleWatcher();
+        lastActivityTime = Date.now();
+        idleCheckTimer = setInterval(() => {
+            if (Date.now() - lastActivityTime > IDLE_TIMEOUT_MS) {
+                stopIdleWatcher();
+                alert("Bạn đã không thao tác trong 20 phút — hệ thống tự động đăng xuất để bảo mật.");
+                handleLogout();
+            }
+        }, IDLE_CHECK_INTERVAL_MS);
+    }
+
+    function stopIdleWatcher() {
+        if (idleCheckTimer) { clearInterval(idleCheckTimer); idleCheckTimer = null; }
     }
 
     function toggleOnlinePanel() {
@@ -1306,6 +1347,7 @@
                 startAutoRefresh();
                 startPingOnline();
                 startChatPolling();
+                startIdleWatcher();
             } else {
                 // response.status 401 = sai tài khoản/mật khẩu thật (server đã xác nhận rõ).
                 // Các mã lỗi khác (vd 500 do D1 quota, mất kết nối DB...) không phải do
@@ -1327,9 +1369,11 @@
     }
 
     function handleLogout() {
+        pingOnline(true); // báo offline ngay lập tức, không chờ hết hạn tự nhiên
         stopAutoRefresh();
         stopPingOnline();
         stopChatPolling();
+        stopIdleWatcher();
         gardenWanderTimers.forEach(t => clearInterval(t));
         gardenWanderTimers = [];
         gardenAligned = false;
