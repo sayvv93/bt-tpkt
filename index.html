@@ -369,11 +369,12 @@
 
     <!-- THANH BỘ LỌC -->
     <div class="filter-strip row g-2 mb-3 align-items-end">
-        <div class="col-md-2 f-group">
-            <label>Vùng</label>
-            <select id="filterVung" class="form-select form-select-sm" onchange="onVungChange()">
-                <option value="">Tất cả Vùng</option>
-            </select>
+        <div class="col-md-3 f-group">
+            <label>TG Hoàn Tất (từ - đến)</label>
+            <div class="d-flex gap-1">
+                <input type="date" id="filterTgHoanTatFrom" lang="vi" class="form-control form-control-sm" onchange="filterData()">
+                <input type="date" id="filterTgHoanTatTo" lang="vi" class="form-control form-control-sm" onchange="filterData()">
+            </div>
         </div>
         <div class="col-md-2 f-group">
             <label>Đối tác</label>
@@ -405,8 +406,8 @@
                 <option value="">Tất cả Nhân viên</option>
             </select>
         </div>
-        <div class="col-md-2">
-            <button class="filter-reset-btn w-100" onclick="resetFilters()">Đặt lại bộ lọc</button>
+        <div class="col-md-1">
+            <button class="filter-reset-btn w-100" onclick="resetFilters()">Đặt lại</button>
         </div>
 
         <div class="col-md-5 mt-3">
@@ -1421,12 +1422,13 @@
     // lại" lựa chọn hiện tại khi build lại option), dẫn đến bộ lọc bị khoá vào tổ
     // hợp không còn khớp dữ liệu của tài khoản mới → hiện "Không có dữ liệu phù hợp".
     function clearFilterSelections() {
-        document.getElementById('filterVung').value = "";
         document.getElementById('filterDoiTac').value = "";
         document.getElementById('filterDoiTruong').value = "";
         document.getElementById('filterTpktCheck').value = "";
         document.getElementById('filterNhanVien').value = "";
         document.getElementById('searchSoHopDong').value = "";
+        document.getElementById('filterTgHoanTatFrom').value = "";
+        document.getElementById('filterTgHoanTatTo').value = "";
     }
 
     function initSessionUI() {
@@ -1509,9 +1511,6 @@
     const OVERDUE_DAYS_THRESHOLD = 3;
 
     function initFilters(data) {
-        let vungs = [...new Set(data.map(item => item.vung))].filter(Boolean).sort();
-        fillSelect('filterVung', vungs);
-        
         let doiTacSelect = document.getElementById('filterDoiTac');
         let doiTacs = [...new Set(data.map(item => item.doiTac))].filter(Boolean).sort();
         fillSelect('filterDoiTac', doiTacs);
@@ -1540,27 +1539,24 @@
     }
 
     function getSubFilteredData(level) {
-        let vung = document.getElementById('filterVung').value;
         let doiTac = document.getElementById('filterDoiTac').value;
         let doiTruong = document.getElementById('filterDoiTruong').value;
 
         return globalData.filter(item => {
             if (isDoiTacLocked() && item.doiTac !== currentUser.doiTac) return false;
             if (isDoiTruongLocked() && item.doiTruong !== currentUser.doiTruong) return false;
-            if (level >= 1 && vung && item.vung !== vung) return false;
-            if (level >= 2 && doiTac && item.doiTac !== doiTac) return false;
-            if (level >= 3 && doiTruong && item.doiTruong !== doiTruong) return false;
+            if (level >= 1 && doiTac && item.doiTac !== doiTac) return false;
+            if (level >= 2 && doiTruong && item.doiTruong !== doiTruong) return false;
             return true;
         });
     }
 
     function updateDependentFilters() {
-        let vungVal = document.getElementById('filterVung').value;
         let doiTacVal = document.getElementById('filterDoiTac').value;
         let doiTruongVal = document.getElementById('filterDoiTruong').value;
         let nhanVienVal = document.getElementById('filterNhanVien').value;
 
-        let dataForDoiTac = getSubFilteredData(1);
+        let dataForDoiTac = getSubFilteredData(0);
         let doiTacs = [...new Set(dataForDoiTac.map(i => i.doiTac))].filter(Boolean).sort();
         fillSelect('filterDoiTac', doiTacs, doiTacVal);
         
@@ -1572,7 +1568,7 @@
             doiTacSelect.disabled = false;
         }
 
-        let dataForDoiTruong = getSubFilteredData(2);
+        let dataForDoiTruong = getSubFilteredData(1);
         let doiTruongs = [...new Set(dataForDoiTruong.map(i => i.doiTruong))].filter(Boolean).sort();
         fillSelect('filterDoiTruong', doiTruongs, doiTruongVal);
 
@@ -1584,22 +1580,9 @@
             doiTruongSelect.disabled = false;
         }
 
-        let dataForNhanVien = getSubFilteredData(3);
+        let dataForNhanVien = getSubFilteredData(2);
         let nhanViens = [...new Set(dataForNhanVien.map(i => i.nhanVien))].filter(Boolean).sort();
         fillSelect('filterNhanVien', nhanViens, nhanVienVal);
-    }
-
-    function onVungChange() {
-        let doiTacSelect = document.getElementById('filterDoiTac');
-        if (!isDoiTacLocked()) {
-            doiTacSelect.value = "";
-        }
-        if (!isDoiTruongLocked()) {
-            document.getElementById('filterDoiTruong').value = "";
-        }
-        document.getElementById('filterNhanVien').value = "";
-        updateDependentFilters();
-        filterData();
     }
 
     function onDoiTacChange() {
@@ -1670,22 +1653,30 @@
 
     function filterData() {
         currentPage = 1;
-        let vung = document.getElementById('filterVung').value;
         let doiTac = document.getElementById('filterDoiTac').value;
         let doiTruong = document.getElementById('filterDoiTruong').value;
         let tpktCheckVal = document.getElementById('filterTpktCheck').value;
         let nhanVien = document.getElementById('filterNhanVien').value;
         let searchHDSmooth = document.getElementById('searchSoHopDong').value.trim().toLowerCase();
+        let tgHoanTatFrom = document.getElementById('filterTgHoanTatFrom').value; // "YYYY-MM-DD" hoặc ""
+        let tgHoanTatTo = document.getElementById('filterTgHoanTatTo').value;
 
         filteredDataCache = globalData.filter(item => {
             if (isDoiTacLocked()) {
                 if (item.doiTac !== currentUser.doiTac) return false;
             }
 
-            if (vung && item.vung !== vung) return false;
             if (doiTac && item.doiTac !== doiTac) return false;
             if (doiTruong && item.doiTruong !== doiTruong) return false;
             if (nhanVien && item.nhanVien !== nhanVien) return false;
+
+            if (tgHoanTatFrom || tgHoanTatTo) {
+                let d = parseFlexibleDate(item.tgHoanTat);
+                if (!d) return false; // đang lọc theo ngày mà dòng không có ngày hợp lệ thì loại
+                let iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                if (tgHoanTatFrom && iso < tgHoanTatFrom) return false;
+                if (tgHoanTatTo && iso > tgHoanTatTo) return false;
+            }
 
             let currentItemTpkt = normalizeVal(item.userSelectedTpkt) || normalizeVal(item.tpktCheck) || "Chưa kiểm tra";
             if (tpktCheckVal === "__DOI_TRUONG_XU_LY__") {
@@ -2274,7 +2265,6 @@
     });
 
     function resetFilters() {
-        document.getElementById('filterVung').value = "";
         let doiTacSelect = document.getElementById('filterDoiTac');
         if (!isDoiTacLocked()) {
             doiTacSelect.value = "";
@@ -2285,6 +2275,8 @@
         document.getElementById('filterTpktCheck').value = "";
         document.getElementById('filterNhanVien').value = "";
         document.getElementById('searchSoHopDong').value = "";
+        document.getElementById('filterTgHoanTatFrom').value = "";
+        document.getElementById('filterTgHoanTatTo').value = "";
         updateDependentFilters();
         filterData();
     }
