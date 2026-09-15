@@ -843,11 +843,11 @@
     // ================== NHẬP EXCEL (IMPORT HÀNG LOẠT) ==================
     // Khớp CHÍNH XÁC theo cặp khoá (soHopDong, tgTao) — đúng khoá UNIQUE thật
     // của bảng dataBT — để không bao giờ bị nhầm giữa các dòng trùng số hợp đồng.
-    // SuperAdmin được import tối đa 500 dòng/lần, còn lại giới hạn 100.
+    // SuperAdmin được import tối đa 1000 dòng/lần, admin/user còn lại 300.
     // Đây chỉ là kiểm tra sớm phía client cho gọn — Worker vẫn tự kiểm tra lại
     // role thật từ D1, không tin số này do client tự khai.
     function getImportMaxRows() {
-        return (currentUser && currentUser.role === 'superadmin') ? 500 : 100;
+        return (currentUser && currentUser.role === 'superadmin') ? 1000 : 300;
     }
     const IMPORT_VALID_TPKT = ["Bảo trì ok", "Suy hao", "Không tín hiệu", "Rớt kết nối", "Vùng phủ không đảm bảo"];
     const IMPORT_VALID_XLLAI = ["", "Chuyển KTV XL lại", "Đã xử lý lại", "Checklist Onsite"];
