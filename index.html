@@ -448,6 +448,11 @@
                 <i class="bi bi-cpu me-1"></i> Phân tích SHD
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="huongdan-tab" data-bs-toggle="tab" data-bs-target="#huongDanContent" type="button" role="tab">
+                <i class="bi bi-question-circle me-1"></i> Hướng dẫn
+            </button>
+        </li>
     </ul>
 
     <div class="tab-content" id="mainTabsContent">
@@ -727,6 +732,206 @@
                 </a>
             </div>
         </div>
+
+        <!-- TAB 7: HƯỚNG DẪN SỬ DỤNG -->
+        <div class="tab-pane fade" id="huongDanContent" role="tabpanel">
+            <div class="table-panel p-4 mb-3">
+                <h5 class="fw-bold mb-1"><i class="bi bi-book me-2" style="color:var(--brand);"></i>Hướng dẫn sử dụng hệ thống</h5>
+                <p class="small mb-0" style="color:var(--slate);">Bấm vào từng mục bên dưới để xem chi tiết. Nội dung áp dụng cho tất cả tài khoản — mục 8 tóm tắt riêng ai được dùng gì.</p>
+            </div>
+
+            <div class="accordion" id="guideAccordion">
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#g1">
+                            1. Bộ lọc &amp; tìm kiếm
+                        </button>
+                    </h2>
+                    <div id="g1" class="accordion-collapse collapse show" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small">
+                            <ul class="mb-0">
+                                <li><b>Đối tác / Đội trưởng / Nhân viên</b>: lọc theo cấp bậc — chọn Đối tác trước sẽ tự thu hẹp danh sách Đội trưởng, chọn Đội trưởng sẽ thu hẹp Nhân viên. Tài khoản bị giới hạn phạm vi (Đối tác quản lý / Đội trưởng) sẽ thấy ô tương ứng bị khoá xám, không đổi được.</li>
+                                <li><b>TG Hoàn Tất (từ - đến)</b>: lọc theo khoảng ngày hoàn tất ca bảo trì, để trống 1 hoặc cả 2 đầu đều được.</li>
+                                <li><b>TPKT CHECK</b>: có thêm lựa chọn <b>"Đội trưởng xử lý (tất cả lỗi)"</b> — gộp cả 4 loại lỗi (Suy hao/Không tín hiệu/Rớt kết nối/Vùng phủ không đảm bảo) vào 1 lượt lọc, tiện xem hết ca cần xử lý mà không phải đổi qua lại từng loại.</li>
+                                <li><b>Tìm số hợp đồng</b>: gõ là lọc ngay (có độ trễ nhỏ để đỡ giật khi gõ nhanh).</li>
+                                <li><b>Đặt lại</b>: xoá hết bộ lọc đang chọn (trừ các ô đang bị khoá theo quyền tài khoản).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g2">
+                            2. Xử lý checklist (tab TPKT Check)
+                        </button>
+                    </h2>
+                    <div id="g2" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small">
+                            <ul class="mb-0">
+                                <li><b>Chưa kiểm tra</b> → chọn 1 trong 5 giá trị TPKT Check.</li>
+                                <li>Chọn <b>"Bảo trì ok"</b> → bấm Gửi → dòng biến mất khỏi bảng (coi như xong).</li>
+                                <li>Chọn 1 trong 4 loại lỗi → chọn tiếp <b>XL Lại</b> (Chuyển KTV XL lại / Đã xử lý lại / Checklist Onsite) → bấm Gửi. Chỉ "Đã xử lý lại" và "Checklist Onsite" mới ẩn dòng; "Chuyển KTV XL lại" vẫn hiển thị để theo dõi tiếp.</li>
+                                <li>Nút <b>[Chọn lại]</b> chỉ dùng được khi chưa gửi lên server — sau khi Gửi, muốn đổi phải chọn lại XL Lại rồi Gửi tiếp.</li>
+                                <li>Dòng có nền <span style="color:var(--red);">đỏ nhạt</span> kèm dòng chữ "Quá X ngày chưa xử lý" là ca đang tồn đọng lâu (quá 3 ngày kể từ TG Hoàn Tất mà chưa xử lý xong).</li>
+                                <li><b>Chọn hàng loạt</b>: tick tối đa 20 dòng → thanh công cụ hiện ra để áp dụng TPKT Check (và XL Lại nếu là lỗi) cho tất cả cùng lúc. Dòng đã tự thao tác riêng sẽ không tick được nữa.</li>
+                                <li><b>Xuất Excel</b>: xuất toàn bộ danh sách đang lọc (có cả cột <code>tgTao</code> để dùng lại cho việc nhập lại nếu cần).</li>
+                                <li><b>Nhập Excel</b>: cập nhật hàng loạt TPKT Check/XL Lại cho các dòng đã tồn tại, khớp chính xác theo Số HĐ + tgTao (tải file mẫu trước để biết đúng định dạng, có sẵn ví dụ đủ mọi tổ hợp giá trị hợp lệ).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g3">
+                            3. Báo cáo Tổng quan
+                        </button>
+                    </h2>
+                    <div id="g3" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small">
+                            <ul class="mb-0">
+                                <li>5 chỉ số tổng: Tổng ca, Chưa kiểm tra, Chưa xử lý, Tỉ lệ chưa xử lý, Bảo trì OK/Đã xử lý — tính theo đúng bộ lọc đang áp dụng ở tab TPKT Check.</li>
+                                <li>2 biểu đồ Hiệu suất theo Đối tác/Đội trưởng — cột "Ca lỗi" không tính các ca đã xử lý qua "Checklist Onsite" (vì đã xong ngay tại chỗ, không cần theo dõi thêm).</li>
+                                <li><b>Cảnh báo Đội trưởng — Ca còn tồn CHƯA XỬ LÝ</b>: gộp cả 4 loại lỗi, cho biết Đội trưởng nào đang tồn nhiều ca nhất và ca cũ nhất đã để bao lâu.</li>
+                                <li><b>Cảnh báo Nhân sự Bảo trì không đứt điểm</b>: theo dõi tỷ lệ lỗi từng nhân viên — ≥5 ca lỗi hoặc tỷ lệ ≥30% bị đánh dấu "Rủi ro cao".</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g4">
+                            4. Cảnh báo CLL2 &amp; 3 (số hợp đồng trùng)
+                        </button>
+                    </h2>
+                    <div id="g4" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small">
+                            <ul class="mb-0">
+                                <li>Liệt kê số hợp đồng xuất hiện từ 2 lần trở lên trong dữ liệu — thường do n8n đồng bộ trùng hoặc nhập liệu 2 lần.</li>
+                                <li>Có dropdown lọc riêng theo Đối tác ngay trong tab này.</li>
+                                <li>Chi tiết mỗi dòng trùng hiện Đối tác, Đội trưởng, Nhân viên, TG Hoàn Tất và Ghi chú — so sánh nội dung ghi chú để biết dòng nào mới/đúng hơn trước khi báo lại bộ phận dữ liệu xử lý.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g5">
+                            5. Trò chuyện nội bộ
+                        </button>
+                    </h2>
+                    <div id="g5" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small">
+                            <ul class="mb-0">
+                                <li>Chat chung cho toàn bộ người dùng đang đăng nhập, tự tải tin nhắn mới mỗi vài giây.</li>
+                                <li>Tin của chính bạn hiện bên phải (nền xanh), người khác hiện bên trái.</li>
+                                <li>Tin nền vàng, căn giữa, tên gửi là <b>"Hệ Thống Linh Thú"</b> là thông báo tự động (lên cấp Linh thú / vinh danh tuần) — không phải người thật gửi.</li>
+                                <li>Số đỏ trên tên tab là số tin nhắn mới chưa đọc kể từ lần cuối bạn mở tab này.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g6">
+                            6. Linh Thú đồng hành
+                        </button>
+                    </h2>
+                    <div id="g6" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small">
+                            <ul class="mb-0">
+                                <li>Mỗi <b>Đội trưởng</b> và mỗi <b>Đối tác</b> có 1 Linh thú riêng, chọn 1 trong 32 loài — chọn được ngay từ đầu, không cần đạt điều kiện gì.</li>
+                                <li><b>XP tính hoàn toàn tự động</b> từ kết quả xử lý ca thật: "Bảo trì ok" = 1.5 XP, "Đã xử lý lại" = 1 XP, "Checklist Onsite" = 0.2 XP — không có cách nhập tay để "ăn gian" điểm.</li>
+                                <li>XP của Đối tác = trung bình XP của các Đội trưởng trực thuộc (công bằng dù đội nhiều hay ít người).</li>
+                                <li><b>10 cấp bậc</b>, mỗi cấp cách nhau 85 XP (~3 ngày làm việc bình thường/cấp) — hình thái linh thú đổi ở Cấp 4 (Trưởng thành) và Cấp 8 (Thần thú tối thượng).</li>
+                                <li><b>Bảng Xếp Hạng Tuần</b> (Top Đội trưởng/Đối tác) reset vào 00:00 mỗi Thứ 2 — tách riêng khỏi cấp tiến hoá, không mất thành quả đã đạt.</li>
+                                <li><b>Sân chung</b>: xem toàn bộ linh thú đang "đi dạo" ngẫu nhiên, kèm cấp + XP hiện tại trên đầu mỗi con.</li>
+                                <li>Mỗi lần lên cấp hoặc mỗi tuần vinh danh, hệ thống tự đăng thông báo vào tab <b>Trò chuyện</b>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g7">
+                            7. Phân tích SHD (công cụ n8n)
+                        </button>
+                    </h2>
+                    <div id="g7" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small">
+                            <ul class="mb-0">
+                                <li>Công cụ chẩn đoán tự động chạy trên n8n riêng (không phải một phần của web này) — bấm nút để mở ở tab mới.</li>
+                                <li>Cần đăng nhập MyPT bằng OTP rồi dán danh sách Số HĐ cần phân tích, hệ thống sẽ trả về nguyên nhân + hướng xử lý gợi ý cho từng hợp đồng.</li>
+                                <li>Tab này chỉ hiện cho Admin, SuperAdmin và Đối tác quản lý — Đội trưởng không thấy tab này.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g8">
+                            8. Phân quyền theo tài khoản
+                        </button>
+                    </h2>
+                    <div id="g8" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered align-middle mb-0">
+                                    <thead>
+                                        <tr class="text-center">
+                                            <th style="min-width:140px;">Cấp tài khoản</th>
+                                            <th>Phạm vi dữ liệu thấy được</th>
+                                            <th class="text-center">Tab Phân tích SHD</th>
+                                            <th class="text-center">Giới hạn Nhập Excel</th>
+                                            <th class="text-center">Đặc quyền riêng</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><b>Đội trưởng</b><br><span style="color:var(--slate-soft);">(user + có doiTruong)</span></td>
+                                            <td>Chỉ dữ liệu của đúng đội mình</td>
+                                            <td class="text-center">✗</td>
+                                            <td class="text-center">300 dòng</td>
+                                            <td class="text-center">--</td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Đối tác quản lý</b><br><span style="color:var(--slate-soft);">(user, không có doiTruong)</span></td>
+                                            <td>Toàn bộ đối tác mình quản lý (mọi đội trưởng trực thuộc)</td>
+                                            <td class="text-center">✓</td>
+                                            <td class="text-center">300 dòng</td>
+                                            <td class="text-center">Sử dụng công cụ Phân tích SHD (n8n)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Admin</b><br><span style="color:var(--slate-soft);">(cấp quản trị hệ thống)</span></td>
+                                            <td>Toàn bộ dữ liệu, mọi đối tác</td>
+                                            <td class="text-center">✓</td>
+                                            <td class="text-center">300 dòng</td>
+                                            <td class="text-center">Sử dụng công cụ Phân tích SHD (n8n)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>SuperAdmin</b><br><span style="color:var(--slate-soft);">(quản trị cấp cao nhất)</span></td>
+                                            <td>Toàn bộ dữ liệu, mọi đối tác</td>
+                                            <td class="text-center">✓</td>
+                                            <td class="text-center">1000 dòng</td>
+                                            <td class="text-center">Sử dụng công cụ Phân tích SHD (n8n) · Nhập dữ liệu MỚI song song n8n · Sắp xếp Linh thú ngay hàng để chụp ảnh</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -737,6 +942,7 @@
       <h5 class="fw-bold m-0" style="color:var(--ink);"><i class="bi bi-key-fill me-2" style="color:var(--amber);"></i>Đổi Mật Khẩu</h5>
       <button type="button" class="btn-close" onclick="closeChangePasswordModal()"></button>
     </div>
+
 
     <div class="mb-3">
       <label class="form-label small fw-bold" style="color:var(--slate);">Mật khẩu mới</label>
