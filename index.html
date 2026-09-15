@@ -443,6 +443,11 @@
                 <i class="bi bi-stars me-1" style="color:#C9A227;"></i> Linh Thú
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="phantich-tab" data-bs-toggle="tab" data-bs-target="#phanTichContent" type="button" role="tab">
+                <i class="bi bi-cpu me-1"></i> Phân tích SHD
+            </button>
+        </li>
     </ul>
 
     <div class="tab-content" id="mainTabsContent">
@@ -703,6 +708,23 @@
 
             <div id="linhThuBody" class="row g-3">
                 <div class="col-12 text-center small py-4" style="color:var(--slate);">Đang tải dữ liệu Linh thú...</div>
+            </div>
+        </div>
+
+        <!-- TAB 6: PHÂN TÍCH SHD (n8n MyPT - AUTO) -->
+        <div class="tab-pane fade" id="phanTichContent" role="tabpanel">
+            <div class="table-panel text-center py-5" style="max-width:560px; margin:40px auto;">
+                <i class="bi bi-cpu" style="font-size:42px; color:var(--brand);"></i>
+                <h5 class="fw-bold mt-3 mb-2">Phân tích SHD tự động (MyPT AUTO)</h5>
+                <p class="small px-4" style="color:var(--slate);">
+                    Đăng nhập MyPT bằng OTP, dán danh sách Số HĐ cần phân tích — hệ thống n8n sẽ tự chẩn đoán nguyên nhân và gợi ý hướng xử lý cho từng hợp đồng.
+                </p>
+                <p class="small px-4" style="color:var(--slate-soft);">
+                    Công cụ này chạy trên nền tảng n8n riêng, không nhúng được trực tiếp vào trang (n8n Cloud chặn hiển thị dạng khung lồng) — bấm nút bên dưới để mở ở tab mới.
+                </p>
+                <a href="https://say3.app.n8n.cloud/form/mypt-analyze" target="_blank" rel="noopener" class="btn fw-bold mt-2" style="background:var(--brand); color:#fff; padding:10px 24px;">
+                    <i class="bi bi-box-arrow-up-right me-2"></i>Mở Phân tích SHD
+                </a>
             </div>
         </div>
     </div>
@@ -1451,6 +1473,10 @@
         // role SuperAdmin, phục vụ mục đích chụp ảnh báo cáo.
         document.getElementById('btnAlignGarden').classList.toggle('d-none', currentUser.role !== 'superadmin');
         document.getElementById('superAdminImportBar').classList.toggle('d-none', currentUser.role !== 'superadmin');
+
+        // Tab "Phân tích SHD" chỉ dành cho admin, superadmin và Đối tác quản lý
+        // (tài khoản user không gắn doiTruong) — Đội trưởng không thấy tab này.
+        document.getElementById('phantich-tab').classList.toggle('d-none', isDoiTruongLocked());
     }
 
     // Parse linh hoạt nhiều định dạng ngày mà server/n8n có thể trả về.
