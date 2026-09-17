@@ -945,6 +945,11 @@
 
 
     <div class="mb-3">
+      <label class="form-label small fw-bold" style="color:var(--slate);">Mật khẩu hiện tại</label>
+      <input type="password" id="txtCurrentPassword" class="form-control" placeholder="Nhập mật khẩu hiện tại...">
+    </div>
+
+    <div class="mb-3">
       <label class="form-label small fw-bold" style="color:var(--slate);">Mật khẩu mới</label>
       <input type="password" id="txtNewPassword" class="form-control" placeholder="Nhập mật khẩu mới...">
     </div>
@@ -963,8 +968,23 @@
     const WEB_APP_URL = "https://tpkt-backend.sayvv93.workers.dev/";
 
     let currentUser = null;
+    let sessionToken = null; // token phiên đăng nhập — đính kèm mọi request sau khi login
     let globalData = [];
     let filteredDataCache = [];
+
+    // Gọi API dùng chung — tự đính kèm token xác thực vào mọi request, và tự
+    // đưa về màn hình đăng nhập nếu server báo phiên hết hạn/không hợp lệ (401).
+    async function apiFetch(path, options = {}) {
+        let headers = Object.assign({ "Content-Type": "application/json" }, options.headers || {});
+        if (sessionToken) headers["Authorization"] = "Bearer " + sessionToken;
+        let response = await fetch(WEB_APP_URL + path, Object.assign({}, options, { headers }));
+        if (response.status === 401 && path !== "api/login") {
+            alert("Phiên đăng nhập đã hết hạn hoặc không hợp lệ, vui lòng đăng nhập lại.");
+            handleLogout();
+            throw new Error("Unauthorized");
+        }
+        return response;
+    }
     
     let currentPage = 1;
     let rowsPerPage = 100;
@@ -1182,10 +1202,9 @@
                 return;
             }
 
-            let res = await fetch(WEB_APP_URL + "api/import/checklist", {
+            let res = await apiFetch("api/import/checklist", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: currentUser.username, rows: parsedRows })
+                body: JSON.stringify({ rows: parsedRows })
             });
             let result = await res.json();
 
@@ -1308,10 +1327,9 @@
                 return;
             }
 
-            let res = await fetch(WEB_APP_URL + "api/import/newdata", {
+            let res = await apiFetch("api/import/newdata", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: currentUser.username, rows })
+                body: JSON.stringify({ rows })
             });
             let result = await res.json();
 
@@ -1343,9 +1361,11 @@
         lastSyncTimestamp = localStorage.getItem('tpkt_last_sync_ts') || null;
 
         let savedUser = localStorage.getItem('tpkt_current_user');
-        if (savedUser) {
+        let savedToken = localStorage.getItem('tpkt_session_token');
+        if (savedUser && savedToken) {
             try {
                 currentUser = JSON.parse(savedUser);
+                sessionToken = savedToken;
                 // alias để toàn bộ logic filter cũ (dùng field "doiTac") vẫn chạy đúng
                 currentUser.doiTac = currentUser.doiTacQuanLy || "";
 
@@ -1396,10 +1416,9 @@
     async function pingOnline(offline = false) {
         if (!currentUser || !currentUser.username) return;
         try {
-            let response = await fetch(WEB_APP_URL + "api/ping", {
+            let response = await apiFetch("api/ping", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: currentUser.username, role: currentUser.role, offline })
+                body: JSON.stringify({ offline })
             });
             let list = await response.json();
             if (!Array.isArray(list)) return;
@@ -1433,8 +1452,8 @@
     // Đóng tab / tắt trình duyệt (không kịp bấm Đăng xuất) — vẫn cố báo offline
     // bằng sendBeacon, vì fetch thường không đảm bảo hoàn tất khi trang đang đóng.
     window.addEventListener('pagehide', () => {
-        if (currentUser && currentUser.username && navigator.sendBeacon) {
-            let payload = JSON.stringify({ username: currentUser.username, offline: true });
+        if (currentUser && currentUser.username && sessionToken && navigator.sendBeacon) {
+            let payload = JSON.stringify({ offline: true, token: sessionToken });
             navigator.sendBeacon(WEB_APP_URL + "api/ping", new Blob([payload], { type: 'application/json' }));
         }
     });
@@ -1491,11 +1510,11 @@
     async function refreshData() {
         if (!currentUser || !currentUser.username) return;
         try {
-            let url = WEB_APP_URL + "?username=" + encodeURIComponent(currentUser.username);
+            let path = "api/get-data";
             if (lastSyncTimestamp) {
-                url += "&since=" + encodeURIComponent(lastSyncTimestamp);
+                path += "?since=" + encodeURIComponent(lastSyncTimestamp);
             }
-            const response = await fetch(url, { method: "GET" });
+            const response = await apiFetch(path, { method: "GET" });
             const res = await response.json();
 
             if (res.error) {
@@ -1556,12 +1575,9 @@
 
     async function updateRecord(rowId, tpktCheck, xlLai) {
         try {
-            let username = (currentUser && currentUser.username) ? currentUser.username : "unknown";
-
-            fetch(WEB_APP_URL, {
+            apiFetch("", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ rowId, username, tpktCheck, xlLai })
+                body: JSON.stringify({ rowId, tpktCheck, xlLai })
             }).catch(err => console.error("Lỗi lưu:", err));
         } catch (error) {
             console.error("Lỗi cập nhật record:", error);
@@ -1579,9 +1595,8 @@
         btn.disabled = true;
 
         try {
-            let response = await fetch(WEB_APP_URL + "api/login", {
+            let response = await apiFetch("api/login", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username: uInput, password: pInput })
             });
             let result = await response.json();
@@ -1589,7 +1604,9 @@
             if (result.success) {
                 currentUser = result.user;
                 currentUser.doiTac = currentUser.doiTacQuanLy || "";
+                sessionToken = result.token;
                 localStorage.setItem('tpkt_current_user', JSON.stringify(currentUser));
+                localStorage.setItem('tpkt_session_token', sessionToken);
 
                 document.getElementById('loginOverlay').style.display = 'none';
                 initSessionUI();
@@ -1635,9 +1652,11 @@
         gardenAligned = false;
         clearFilterSelections();
         localStorage.removeItem('tpkt_current_user');
+        localStorage.removeItem('tpkt_session_token');
         localStorage.removeItem('tpkt_last_sync_ts');
         lastSyncTimestamp = null;
         currentUser = null;
+        sessionToken = null;
         document.getElementById('loginUser').value = "";
         document.getElementById('loginPass').value = "";
         document.getElementById('loginOverlay').style.display = 'flex';
@@ -1960,7 +1979,7 @@
     async function fetchChatMessages() {
         if (!currentUser || !currentUser.username) return;
         try {
-            let response = await fetch(WEB_APP_URL + "api/chat/messages?since_id=" + lastChatId, { method: "GET" });
+            let response = await apiFetch("api/chat/messages?since_id=" + lastChatId, { method: "GET" });
             let res = await response.json();
             let newMsgs = (res && res.messages) ? res.messages : [];
             if (newMsgs.length === 0) return;
@@ -2023,10 +2042,9 @@
 
         input.value = "";
         try {
-            let response = await fetch(WEB_APP_URL + "api/chat/send", {
+            let response = await apiFetch("api/chat/send", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: currentUser.username, message: text })
+                body: JSON.stringify({ message: text })
             });
             let result = await response.json();
             if (!result.success) {
@@ -2159,8 +2177,8 @@
     async function fetchLinhThuSelections() {
         try {
             let [selRes, boardRes] = await Promise.all([
-                fetch(WEB_APP_URL + "api/linhthu/selections", { method: "GET" }),
-                fetch(WEB_APP_URL + "api/linhthu/leaderboard", { method: "GET" })
+                apiFetch("api/linhthu/selections", { method: "GET" }),
+                apiFetch("api/linhthu/leaderboard", { method: "GET" })
             ]);
             let selData = await selRes.json();
             let boardData = await boardRes.json();
@@ -2354,10 +2372,9 @@
     async function selectLinhThuSpecies(subjectType, subjectKey, speciesKey) {
         if (!currentUser || !currentUser.username) return;
         try {
-            let res = await fetch(WEB_APP_URL + "api/linhthu/select", {
+            let res = await apiFetch("api/linhthu/select", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: currentUser.username, subjectType, subjectKey, species: speciesKey })
+                body: JSON.stringify({ subjectType, subjectKey, species: speciesKey })
             });
             let result = await res.json();
             if (!result.success) {
@@ -3242,6 +3259,7 @@
     }
 
     function openChangePasswordModal() {
+        document.getElementById('txtCurrentPassword').value = "";
         document.getElementById('txtNewPassword').value = "";
         let msgBox = document.getElementById('changePassMessage');
         msgBox.classList.add('d-none');
@@ -3254,12 +3272,13 @@
     }
 
     async function submitChangePassword() {
+        let currentPassword = document.getElementById('txtCurrentPassword').value.trim();
         let newPassword = document.getElementById('txtNewPassword').value.trim();
         let msgBox = document.getElementById('changePassMessage');
 
-        if (!newPassword) {
+        if (!currentPassword || !newPassword) {
             msgBox.className = "alert alert-danger py-2 small mb-3";
-            msgBox.innerText = "Vui lòng nhập mật khẩu mới!";
+            msgBox.innerText = "Vui lòng nhập đủ mật khẩu hiện tại và mật khẩu mới!";
             msgBox.classList.remove('d-none');
             return;
         }
@@ -3270,11 +3289,10 @@
         }
 
         try {
-            let response = await fetch(WEB_APP_URL + "api/change-password", {
+            let response = await apiFetch("api/change-password", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    username: currentUser.username,
+                    currentPassword: currentPassword,
                     newPassword: newPassword
                 })
             });
