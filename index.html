@@ -845,11 +845,12 @@
                     <div id="g6" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
                         <div class="accordion-body small">
                             <ul class="mb-0">
-                                <li>Mỗi <b>Đội trưởng</b> và mỗi <b>Đối tác</b> có 1 Linh thú riêng, chọn 1 trong 32 loài — chọn được ngay từ đầu, không cần đạt điều kiện gì.</li>
-                                <li><b>XP tính hoàn toàn tự động</b> từ kết quả xử lý ca thật: "Bảo trì ok" = 1.5 XP, "Đã xử lý lại" = 1 XP, "Checklist Onsite" = 0.2 XP — không có cách nhập tay để "ăn gian" điểm.</li>
-                                <li>XP của Đối tác = trung bình XP của các Đội trưởng trực thuộc (công bằng dù đội nhiều hay ít người).</li>
-                                <li><b>10 cấp bậc</b>, mỗi cấp cách nhau 85 XP (~3 ngày làm việc bình thường/cấp) — hình thái linh thú đổi ở Cấp 4 (Trưởng thành) và Cấp 8 (Thần thú tối thượng).</li>
-                                <li><b>Bảng Xếp Hạng Tuần</b> (Top Đội trưởng/Đối tác) reset vào 00:00 mỗi Thứ 2 — tách riêng khỏi cấp tiến hoá, không mất thành quả đã đạt.</li>
+                                <li>Mỗi <b>Đội trưởng</b>, mỗi <b>Đối tác</b>, và mỗi tài khoản <b>Admin/SuperAdmin</b> đều có 1 Linh thú riêng, chọn 1 trong 32 loài — chọn được ngay từ đầu, không cần đạt điều kiện gì.</li>
+                                <li>Riêng <b>Admin/SuperAdmin</b>: Cấp tính theo <b>số ngày đăng nhập hệ thống</b> (1 ngày đăng nhập = 1 cấp), không liên quan tới khối lượng ca xử lý.</li>
+                                <li><b>XP tính hoàn toàn tự động, đúng người đúng việc</b>: Đội trưởng chỉ tính công <b>xử lý lỗi</b> ("Đã xử lý lại" = 3 XP, "Checklist Onsite" = 0.6 XP) — đúng phần việc họ tự bấm. Đối tác quản lý chỉ tính công <b>phân loại</b> ("Bảo trì ok" = 0.05 XP/ca) — đúng phần việc họ tự bấm, trọng số thấp hơn nhiều vì khối lượng phân loại (gộp cả các đội) lớn hơn hẳn khối lượng xử lý lỗi của 1 đội — cân bằng lại để 2 cấp lên cấp cùng nhịp. Không có cách nhập tay để "ăn gian" điểm.</li>
+                                <li><b>90 cấp bậc</b>, mỗi cấp cách nhau 10 XP (~3 ngày làm việc bình thường/cấp), cộng dồn <b>vĩnh viễn không reset theo tháng</b> — hình thái linh thú đổi ở Cấp 31 (Trưởng thành) và Cấp 61 (Thần thú tối thượng). Ngoài ra còn chia nhỏ hơn thành <b>9 Nhóm</b> (mỗi Nhóm đúng 10 cấp) hiện trong thẻ pet để thấy tiến độ chi tiết hơn.</li>
+                                <li><b>Cấp 25</b>: được đặt tên riêng cho Linh thú (tối đa 20 ký tự). <b>Cấp 50</b>: được chọn thêm 1 Thú con — Thú con có XP riêng bằng <b>1/10 thú chính</b>, lên cấp/tiến hoá chậm hơn hẳn.</li>
+                                <li><b>Bảng Xếp Hạng Tuần</b> (Top Đội trưởng/Đối tác) reset vào 00:00 mỗi Thứ 2 — tách riêng hoàn toàn khỏi cấp tiến hoá, không mất thành quả đã đạt.</li>
                                 <li><b>Sân chung</b>: xem toàn bộ linh thú đang "đi dạo" ngẫu nhiên, kèm cấp + XP hiện tại trên đầu mỗi con.</li>
                                 <li>Mỗi lần lên cấp hoặc mỗi tuần vinh danh, hệ thống tự đăng thông báo vào tab <b>Trò chuyện</b>.</li>
                             </ul>
@@ -2119,53 +2120,71 @@
     ];
     const LINH_THU_TIER_NAMES = { 1: 'Thường', 2: 'Hiếm', 3: 'Huyền Thoại' };
 
-    // ================== HỆ THỐNG 10 CẤP BẬC ==================
-    // Hiệu chỉnh từ dữ liệu thật (ngày tính: 13/09/2026, ~6113 dòng, 17 Đội
-    // trưởng, trải dài 32 ngày) → trung bình ~11.4 XP/đội/ngày → chọn 35 XP/cấp
-    // để "3 ngày làm việc bình thường = lên 1 cấp", 10 cấp ≈ 1 tháng (30 ngày).
-    // Hiệu chỉnh lại từ dữ liệu THẬT (13 ngày hoạt động thật, 31/08→13/09/2026,
-    // loại bỏ ~44 dòng nhiễu rải rác trước đó không đại diện nhịp làm việc):
-    // ~27.85 XP/đội/ngày → 85 XP/cấp cho "3 ngày làm việc bình thường = 1 cấp".
-    const LINH_THU_XP_PER_LEVEL = 85;
-    const LINH_THU_MAX_LEVEL = 10;
-    // Cấp 1-3: hình thái Sơ khai · Cấp 4-7: Trưởng thành · Cấp 8-10: Thần thú
+    // Hệ 90 CẤP — XP cộng dồn VĨNH VIỄN, không reset theo tháng (chỉ bảng xếp
+    // hạng TUẦN — xpWeek — mới reset, không ảnh hưởng cấp/tiến hoá này).
+    // Hiệu chỉnh lần 2 từ dữ liệu thật (19/09/2026): khối lượng "Bảo trì ok"
+    // (toàn đối tác) gấp ~99 lần khối lượng "XL Lại" (1 đội trưởng), nên phải
+    // đổi hẳn trọng số/case để 2 cấp lên cấp cùng nhịp — xem calcRowXpDoiTruong
+    // / calcDoiTacXp bên dưới. Nhịp mục tiêu vẫn giữ "3 ngày/cấp".
+    const LINH_THU_XP_PER_LEVEL = 10;
+    const LINH_THU_MAX_LEVEL = 90;
+    const LINH_THU_RENAME_UNLOCK_LEVEL = 25;    // Cấp 25: được đổi tên thú
+    const LINH_THU_COMPANION_UNLOCK_LEVEL = 50; // Cấp 50: được chọn thêm thú con
+    // Cấp 1-30: hình thái Sơ khai · 31-60: Trưởng thành · 61-90: Thần thú
     // (vẫn dùng đúng 3 tên hình thái có sẵn của từng loài, chỉ đổi mốc lên cấp)
     function getLinhThuStageIndex(level) {
-        if (level <= 3) return 0;
-        if (level <= 7) return 1;
+        if (level <= 30) return 0;
+        if (level <= 60) return 1;
         return 2;
     }
     const LINH_THU_STAGE_LABELS = ['Sơ khai', 'Trưởng thành', 'Thần thú tối thượng'];
 
-    let linhThuSelections = {}; // key: "subjectType::subjectKey" -> species key
+    // Chia nhỏ hơn nữa thành 9 NHÓM, mỗi nhóm đúng 10 cấp — mốc tiến độ chi
+    // tiết hơn 3 hình thái ở trên (vì mỗi loài chỉ có sẵn 3 tên hình thái,
+    // không đủ viết riêng 9 tên) — hiện kèm trong thẻ pet để thấy tiến độ rõ hơn.
+    const LINH_THU_GROUP_COUNT = 9;
+    function getLinhThuGroupIndex(level) {
+        return Math.min(LINH_THU_GROUP_COUNT, Math.ceil(level / 10));
+    }
 
-    function calcRowXp(item) {
-        if (normalizeVal(item.tpktCheck) === 'Bảo trì ok') return 1.5;
+    // key: "subjectType::subjectKey" -> { 1: {species, petName}, 2: {species, petName} }
+    // slot 1 = thú chính (luôn có), slot 2 = thú con (chỉ có khi đã đạt Cấp 50)
+    let linhThuSelections = {};
+
+    // Đội trưởng CHỈ tự tay bấm bước 2 (XL Lại — xử lý lỗi, khối lượng ít) —
+    // trọng số cao để bù lại. Đối tác quản lý tự tay phân loại (khối lượng
+    // rất lớn, gộp cả các đội) — trọng số thấp để không lệch cấp.
+    function calcRowXpDoiTruong(item) {
         let xl = normalizeVal(item.xlLai);
-        if (xl === 'Đã xử lý lại') return 1;
-        if (xl === 'Checklist Onsite') return 0.2;
+        if (xl === 'Đã xử lý lại') return 3;
+        if (xl === 'Checklist Onsite') return 0.6;
         return 0;
     }
 
     function calcDoiTruongXp(doiTruongName, data) {
         let sum = 0;
-        data.forEach(item => { if (item.doiTruong === doiTruongName) sum += calcRowXp(item); });
+        data.forEach(item => { if (item.doiTruong === doiTruongName) sum += calcRowXpDoiTruong(item); });
         return sum;
     }
 
     // data cần đã được thu hẹp đúng phạm vi 1 Đối tác trước khi gọi hàm này
     function calcDoiTacXp(data) {
-        let doiTruongNames = [...new Set(data.map(i => i.doiTruong))].filter(Boolean);
-        if (doiTruongNames.length === 0) return 0;
-        let total = 0;
-        doiTruongNames.forEach(name => { total += calcDoiTruongXp(name, data); });
-        return total / doiTruongNames.length;
+        let sum = 0;
+        data.forEach(item => { if (normalizeVal(item.tpktCheck) === 'Bảo trì ok') sum += 0.05; });
+        return sum;
     }
 
-    // Trả về cấp 1-10 dựa trên XP (mỗi 35 XP lên 1 cấp, tối đa Cấp 10)
+    // Trả về cấp 1-90 dựa trên XP (mỗi 100 XP lên 1 cấp, tối đa Cấp 90)
     function getLinhThuLevel(xp) {
         let level = 1 + Math.floor(xp / LINH_THU_XP_PER_LEVEL);
         return Math.min(level, LINH_THU_MAX_LEVEL);
+    }
+
+    // Admin/SuperAdmin: Cấp tính theo SỐ NGÀY ĐĂNG NHẬP (server trả sẵn trong
+    // entry.level) — quy đổi ngược thành 1 con "XP" giả lập để tái dùng nguyên
+    // vẹn renderPetCard/renderCompanionBlock/sân chung (vốn xây quanh xp→cấp).
+    function adminLevelToXp(level) {
+        return (level - 1) * LINH_THU_XP_PER_LEVEL;
     }
 
     function safeDomId(s) {
@@ -2185,7 +2204,9 @@
 
             linhThuSelections = {};
             (selData.selections || []).forEach(row => {
-                linhThuSelections[`${row.subject_type}::${row.subject_key}`] = row.species;
+                let key = `${row.subject_type}::${row.subject_key}`;
+                if (!linhThuSelections[key]) linhThuSelections[key] = {};
+                linhThuSelections[key][row.slot || 1] = { species: row.species, petName: row.pet_name || "" };
             });
             linhThuLeaderboard = boardData.leaderboard || [];
         } catch (e) {
@@ -2239,19 +2260,27 @@
         let entries = [];
         linhThuLeaderboard.forEach(entry => {
             let selKey = `${entry.subjectType}::${entry.subjectKey}`;
-            let speciesKey = linhThuSelections[selKey];
-            if (!speciesKey) return;
-            let species = LINH_THU_SPECIES.find(s => s.key === speciesKey);
-            if (!species) return;
+            let slots = linhThuSelections[selKey];
+            if (!slots || !slots[1]) return;
+            let mainXp = entry.subjectType === 'admin' ? adminLevelToXp(entry.level || 1) : (entry.xp || 0);
 
-            let xp = entry.xp || 0;
-            let level = getLinhThuLevel(xp);
-            let stageIdx = getLinhThuStageIndex(level);
-            entries.push({
-                selKey, subjectType: entry.subjectType, subjectKey: entry.subjectKey,
-                xp, level, stageIdx, species, stageName: species.stages[stageIdx],
-                emojiSize: Math.round(20 + (level - 1) * 2.5), // càng cao cấp càng to, mượt theo 10 cấp
-                hopDelay: (Math.random() * 0.6).toFixed(1)
+            [1, 2].forEach(slotNum => {
+                let slotData = slots[slotNum];
+                if (!slotData || !slotData.species) return;
+                let species = LINH_THU_SPECIES.find(s => s.key === slotData.species);
+                if (!species) return;
+                // Thú con (slot 2) có XP riêng = 1/10 thú chính — lên cấp/tiến
+                // hoá chậm hơn hẳn, đúng vai trò "con".
+                let xp = slotNum === 2 ? mainXp / 10 : mainXp;
+                let level = getLinhThuLevel(xp);
+                let stageIdx = getLinhThuStageIndex(level);
+                entries.push({
+                    selKey: `${selKey}::${slotNum}`, subjectType: entry.subjectType, subjectKey: entry.subjectKey,
+                    petName: slotData.petName || "",
+                    xp, level, stageIdx, species, stageName: species.stages[stageIdx],
+                    emojiSize: Math.round(20 + (level - 1) * 0.3), // càng cao cấp càng to, mượt theo 90 cấp
+                    hopDelay: (Math.random() * 0.6).toFixed(1)
+                });
             });
         });
 
@@ -2283,15 +2312,15 @@
 
         let html = '';
         entries.forEach(e => {
-            let pos = gardenAligned ? positionsByKey[e.selKey] : {
+            let pos = (gardenAligned && positionsByKey[e.selKey]) ? positionsByKey[e.selKey] : {
                 left: (6 + Math.random() * 84).toFixed(0),
                 top: (12 + Math.random() * 76).toFixed(0)
             };
             html += `
                 <div class="garden-pet" data-sel-key="${escapeHtml(e.selKey)}" style="left:${pos.left}%; top:${pos.top}%;">
-                    <span class="garden-xp-badge lvl-${e.stageIdx}">Cấp ${e.level}/10 · ${e.xp.toFixed(1)} XP</span>
+                    <span class="garden-xp-badge lvl-${e.stageIdx}">Cấp ${e.level}/${LINH_THU_MAX_LEVEL} · ${e.xp.toFixed(1)} XP</span>
                     <span class="garden-emoji" style="${gardenAligned ? 'animation:none;' : `animation-delay:-${e.hopDelay}s;`} font-size:${e.emojiSize}px;">${e.species.emoji}</span>
-                    <span class="garden-label"><span class="label-name">${e.subjectType === 'doiTac' ? `<span class="sparkle-name">${escapeHtml(e.subjectKey)}</span>` : escapeHtml(e.subjectKey)}</span><span class="label-stage">${escapeHtml(e.stageName)}</span></span>
+                    <span class="garden-label"><span class="label-name">${e.subjectType === 'doiTac' ? `<span class="sparkle-name">${escapeHtml(e.subjectKey)}</span>` : escapeHtml(e.subjectKey)}</span><span class="label-stage">${e.petName ? escapeHtml(e.petName) + ' · ' : ''}${escapeHtml(e.stageName)}</span></span>
                 </div>
             `;
         });
@@ -2326,8 +2355,8 @@
 
         let withSpecies = linhThuLeaderboard.map(entry => {
             let selKey = `${entry.subjectType}::${entry.subjectKey}`;
-            let speciesKey = linhThuSelections[selKey];
-            let species = speciesKey ? LINH_THU_SPECIES.find(s => s.key === speciesKey) : null;
+            let mainPet = linhThuSelections[selKey] && linhThuSelections[selKey][1];
+            let species = mainPet && mainPet.species ? LINH_THU_SPECIES.find(s => s.key === mainPet.species) : null;
             return { ...entry, species };
         }).filter(e => e.species);
 
@@ -2369,12 +2398,12 @@
         `;
     }
 
-    async function selectLinhThuSpecies(subjectType, subjectKey, speciesKey) {
+    async function selectLinhThuSpecies(subjectType, subjectKey, speciesKey, slot) {
         if (!currentUser || !currentUser.username) return;
         try {
             let res = await apiFetch("api/linhthu/select", {
                 method: "POST",
-                body: JSON.stringify({ subjectType, subjectKey, species: speciesKey })
+                body: JSON.stringify({ subjectType, subjectKey, species: speciesKey, slot: slot || 1 })
             });
             let result = await res.json();
             if (!result.success) {
@@ -2388,12 +2417,31 @@
         }
     }
 
-    function renderSpeciesPickerHtml(subjectType, subjectKey) {
+    async function renameLinhThuPet(subjectType, subjectKey, slot, newName) {
+        if (!currentUser || !currentUser.username) return;
+        try {
+            let res = await apiFetch("api/linhthu/rename", {
+                method: "POST",
+                body: JSON.stringify({ subjectType, subjectKey, slot: slot || 1, petName: newName })
+            });
+            let result = await res.json();
+            if (!result.success) {
+                alert(result.error || "Không đổi được tên, vui lòng thử lại!");
+                return;
+            }
+            await fetchLinhThuSelections();
+        } catch (e) {
+            console.error("Lỗi đổi tên Linh thú:", e);
+            alert("Lỗi kết nối server!");
+        }
+    }
+
+    function renderSpeciesPickerHtml(subjectType, subjectKey, slot) {
         return [1, 2, 3].map(tier => {
             let tierSpecies = LINH_THU_SPECIES.filter(s => s.tier === tier);
             if (tierSpecies.length === 0) return '';
             let buttonsHtml = tierSpecies.map(s =>
-                `<button type="button" class="species-pick-btn linh-thu-pick-btn" data-subject-type="${escapeHtml(subjectType)}" data-subject-key="${escapeHtml(subjectKey)}" data-species="${s.key}">${s.emoji} ${escapeHtml(s.name)}</button>`
+                `<button type="button" class="species-pick-btn linh-thu-pick-btn" data-subject-type="${escapeHtml(subjectType)}" data-subject-key="${escapeHtml(subjectKey)}" data-species="${s.key}" data-slot="${slot || 1}">${s.emoji} ${escapeHtml(s.name)}</button>`
             ).join('');
             return `
                 <div class="mt-2">
@@ -2404,38 +2452,103 @@
         }).join('');
     }
 
+    // Khối "Đổi tên riêng" — chỉ hiện khi editable và đã đạt Cấp mở khoá
+    function renderRenameBlock(subjectType, subjectKey, slot, level, petName, domId) {
+        if (level < LINH_THU_RENAME_UNLOCK_LEVEL) return '';
+        return `
+            <div class="mt-2 d-flex gap-2 align-items-center">
+                <input type="text" class="form-control form-control-sm linh-thu-rename-input" id="renameInput_${domId}" placeholder="Đặt tên riêng cho thú..." value="${escapeHtml(petName || '')}" maxlength="20" style="max-width:170px;">
+                <button type="button" class="btn btn-sm linh-thu-rename-btn" data-subject-type="${escapeHtml(subjectType)}" data-subject-key="${escapeHtml(subjectKey)}" data-slot="${slot}" data-input="renameInput_${domId}" style="background:var(--surface); border:1px solid var(--line); font-size:11.5px;">Lưu tên</button>
+            </div>
+        `;
+    }
+
+    // Khối "Thú con" — chỉ hiện trong thẻ editable. Dùng chung Cấp/XP với thú
+    // chính (cùng 1 chủ, cùng 1 công việc thật, chỉ là thêm 1 con để nuôi).
+    function renderCompanionBlock(subjectType, subjectKey, mainXp, mainLevel, companionSlotData, domIdBase) {
+        if (mainLevel < LINH_THU_COMPANION_UNLOCK_LEVEL) {
+            return `
+                <div class="mt-3 pt-2" style="border-top:1px dashed var(--line);">
+                    <div class="small" style="color:var(--slate-soft);">🔒 Thú con — cần đạt Cấp ${LINH_THU_COMPANION_UNLOCK_LEVEL} mới được chọn thêm (hiện Cấp ${mainLevel}).</div>
+                </div>
+            `;
+        }
+        // Thú con có kinh nghiệm riêng = 1/10 thú chính — lên cấp/tiến hoá
+        // chậm hơn hẳn, đúng vai trò "con", không "ăn theo" ngang thú chính.
+        let companionXp = mainXp / 10;
+        let companionLevel = getLinhThuLevel(companionXp);
+        let stageIdx = getLinhThuStageIndex(companionLevel);
+        let groupIdx = getLinhThuGroupIndex(companionLevel);
+        let companionSpecies = companionSlotData && companionSlotData.species ? LINH_THU_SPECIES.find(s => s.key === companionSlotData.species) : null;
+        let domId = domIdBase + '_slot2';
+
+        if (!companionSpecies) {
+            return `
+                <div class="mt-3 pt-2" style="border-top:1px dashed var(--line);">
+                    <div class="small fw-bold mb-1" style="color:var(--ink);">🐣 Thú con — đã mở khoá! Chọn 1 loài:</div>
+                    ${renderSpeciesPickerHtml(subjectType, subjectKey, 2)}
+                </div>
+            `;
+        }
+        let stageName = companionSpecies.stages[stageIdx];
+        return `
+            <div class="mt-3 pt-2" style="border-top:1px dashed var(--line);">
+                <div class="small fw-bold mb-1" style="color:var(--ink);">🐣 Thú con · Cấp ${companionLevel}/${LINH_THU_MAX_LEVEL} (Nhóm ${groupIdx}/${LINH_THU_GROUP_COUNT}) · ${companionXp.toFixed(1)} XP <span style="color:var(--slate-soft); font-weight:400;">(= 1/10 XP thú chính)</span></div>
+                <div class="d-flex align-items-center gap-2">
+                    <span style="font-size:22px;">${companionSpecies.emoji}</span>
+                    <div>
+                        <div class="small fw-bold">${companionSlotData.petName ? escapeHtml(companionSlotData.petName) + ' · ' : ''}${escapeHtml(stageName)}</div>
+                        <div class="small" style="color:var(--slate-soft);">${escapeHtml(companionSpecies.name)}</div>
+                    </div>
+                </div>
+                ${renderRenameBlock(subjectType, subjectKey, 2, companionLevel, companionSlotData.petName, domId)}
+                <button type="button" class="btn btn-sm mt-2 linh-thu-toggle-btn" data-target="picker_${domId}" style="background:var(--surface); border:1px solid var(--line); font-size:11.5px;">Đổi loài thú con</button>
+                <div id="picker_${domId}" class="d-none">${renderSpeciesPickerHtml(subjectType, subjectKey, 2)}</div>
+            </div>
+        `;
+    }
+
     function renderPetCard(subjectType, subjectKey, xp, editable) {
         let selKey = `${subjectType}::${subjectKey}`;
-        let speciesKey = linhThuSelections[selKey];
+        let slots = linhThuSelections[selKey] || {};
+        let mainSlot = slots[1] || {};
+        let speciesKey = mainSlot.species;
+        let isAdminType = subjectType === 'admin';
         let level = getLinhThuLevel(xp);
         let stageIdx = getLinhThuStageIndex(level);
         let stageLabel = LINH_THU_STAGE_LABELS[stageIdx];
+        let groupIdx = getLinhThuGroupIndex(level);
         let isMaxLevel = level >= LINH_THU_MAX_LEVEL;
         let levelFloor = (level - 1) * LINH_THU_XP_PER_LEVEL;
         let levelCeil = level * LINH_THU_XP_PER_LEVEL;
         let progressPct = isMaxLevel ? 100 : Math.min(100, ((xp - levelFloor) / LINH_THU_XP_PER_LEVEL) * 100);
-        let subjectLabel = subjectType === 'doiTac' ? 'Đối tác' : 'Đội trưởng';
+        let subjectLabel = subjectType === 'doiTac' ? 'Đối tác' : (isAdminType ? 'Quản trị viên' : 'Đội trưởng');
         let domId = safeDomId(selKey);
+        // Với admin, "XP" thực chất là số NGÀY ĐĂNG NHẬP quy đổi (1 ngày = 1
+        // cấp) — hiện đúng đơn vị ngày cho dễ hiểu, không hiện "XP" gây hiểu nhầm.
+        let unitLabel = isAdminType ? 'ngày đăng nhập' : 'XP';
 
         let bodyHtml;
         if (!speciesKey) {
             bodyHtml = editable
-                ? `<div class="pet-xp mb-1">Chưa chọn Linh thú — chọn 1 loài để bắt đầu:</div>${renderSpeciesPickerHtml(subjectType, subjectKey)}`
+                ? `<div class="pet-xp mb-1">Chưa chọn Linh thú — chọn 1 loài để bắt đầu:</div>${renderSpeciesPickerHtml(subjectType, subjectKey, 1)}`
                 : `<div class="pet-xp">Chưa chọn Linh thú</div>`;
         } else {
             let species = LINH_THU_SPECIES.find(s => s.key === speciesKey);
             let stageName = species ? species.stages[stageIdx] : speciesKey;
             let tierName = species ? LINH_THU_TIER_NAMES[species.tier] : '';
             bodyHtml = `
-                <div class="pet-stage-name">${escapeHtml(stageName)}</div>
-                <div class="pet-species-name">${species ? escapeHtml(species.name) : ''} · ${tierName} · Cấp ${level}/${LINH_THU_MAX_LEVEL}: ${stageLabel}</div>
+                <div class="pet-stage-name">${mainSlot.petName ? escapeHtml(mainSlot.petName) + ' · ' : ''}${escapeHtml(stageName)}</div>
+                <div class="pet-species-name">${species ? escapeHtml(species.name) : ''} · ${tierName} · Cấp ${level}/${LINH_THU_MAX_LEVEL} (Nhóm ${groupIdx}/${LINH_THU_GROUP_COUNT}): ${stageLabel}</div>
                 <div class="progress mb-1" style="height:7px; background:var(--line);">
                     <div class="progress-bar" style="width:${progressPct}%; background:#C9A227;"></div>
                 </div>
-                <div class="pet-xp">${xp.toFixed(1)} XP${isMaxLevel ? ' · Đã đạt Cấp tối đa' : ` / ${levelCeil} (lên Cấp ${level + 1})`}</div>
+                <div class="pet-xp">${isAdminType ? level : xp.toFixed(1)} ${unitLabel}${isMaxLevel ? ' · Đã đạt Cấp tối đa' : ` / ${isAdminType ? level + 1 : levelCeil} (lên Cấp ${level + 1})`}</div>
                 ${editable ? `
+                    ${renderRenameBlock(subjectType, subjectKey, 1, level, mainSlot.petName, domId)}
                     <button type="button" class="btn btn-sm mt-2 linh-thu-toggle-btn" data-target="picker_${domId}" style="background:var(--surface); border:1px solid var(--line); font-size:11.5px;">Đổi loài</button>
-                    <div id="picker_${domId}" class="d-none">${renderSpeciesPickerHtml(subjectType, subjectKey)}</div>
+                    <div id="picker_${domId}" class="d-none">${renderSpeciesPickerHtml(subjectType, subjectKey, 1)}</div>
+                    ${renderCompanionBlock(subjectType, subjectKey, xp, level, slots[2], domId)}
                 ` : ''}
             `;
         }
@@ -2474,9 +2587,14 @@
             }
 
         } else {
-            // Admin — xem tổng quan toàn hệ thống, không có pet riêng
+            // Admin/SuperAdmin — có pet riêng, Cấp tính theo số ngày đăng nhập
+            // (server trả sẵn qua linhThuLeaderboard, subjectType='admin')
+            let myAdminEntry = linhThuLeaderboard.find(e => e.subjectType === 'admin' && e.subjectKey === currentUser.username);
+            let myAdminXp = adminLevelToXp(myAdminEntry ? myAdminEntry.level : 1);
+            html += renderPetCard('admin', currentUser.username, myAdminXp, true);
+
             let doiTacs = [...new Set(globalData.map(i => i.doiTac))].filter(Boolean).sort();
-            html += `<div class="col-12 mb-1 fw-bold small" style="color:var(--slate);">Linh thú các Đối tác</div>`;
+            html += `<div class="col-12 mt-2 mb-1 fw-bold small" style="color:var(--slate);">Linh thú các Đối tác</div>`;
             doiTacs.forEach(dt => {
                 let scoped = globalData.filter(i => i.doiTac === dt);
                 html += renderPetCard('doiTac', dt, calcDoiTacXp(scoped), false);
@@ -2500,7 +2618,14 @@
     document.getElementById('linhThuBody').addEventListener('click', (e) => {
         let pickBtn = e.target.closest('.linh-thu-pick-btn');
         if (pickBtn) {
-            selectLinhThuSpecies(pickBtn.dataset.subjectType, pickBtn.dataset.subjectKey, pickBtn.dataset.species);
+            selectLinhThuSpecies(pickBtn.dataset.subjectType, pickBtn.dataset.subjectKey, pickBtn.dataset.species, parseInt(pickBtn.dataset.slot || '1', 10));
+            return;
+        }
+        let renameBtn = e.target.closest('.linh-thu-rename-btn');
+        if (renameBtn) {
+            let input = document.getElementById(renameBtn.dataset.input);
+            let newName = input ? input.value.trim() : '';
+            renameLinhThuPet(renameBtn.dataset.subjectType, renameBtn.dataset.subjectKey, parseInt(renameBtn.dataset.slot || '1', 10), newName);
             return;
         }
         let toggleBtn = e.target.closest('.linh-thu-toggle-btn');
