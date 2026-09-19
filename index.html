@@ -367,59 +367,6 @@
         </div>
     </div>
 
-    <!-- THANH BỘ LỌC -->
-    <div class="filter-strip row g-2 mb-3 align-items-end">
-        <div class="col-md-3 f-group">
-            <label>TG Hoàn Tất (từ - đến)</label>
-            <div class="d-flex gap-1">
-                <input type="date" id="filterTgHoanTatFrom" lang="vi" class="form-control form-control-sm" onchange="filterData()">
-                <input type="date" id="filterTgHoanTatTo" lang="vi" class="form-control form-control-sm" onchange="filterData()">
-            </div>
-        </div>
-        <div class="col-md-2 f-group">
-            <label>Đối tác</label>
-            <select id="filterDoiTac" class="form-select form-select-sm" onchange="onDoiTacChange()">
-                <option value="">Tất cả Đối tác</option>
-            </select>
-        </div>
-        <div class="col-md-2 f-group">
-            <label>Đội trưởng</label>
-            <select id="filterDoiTruong" class="form-select form-select-sm" onchange="onDoiTruongChange()">
-                <option value="">Tất cả Đội trưởng</option>
-            </select>
-        </div>
-        <div class="col-md-2 f-group">
-            <label>TPKT CHECK</label>
-            <select id="filterTpktCheck" class="form-select form-select-sm" onchange="filterData()">
-                <option value="">Tất cả TPKT Check</option>
-                <option value="Chưa kiểm tra">Chưa kiểm tra</option>
-                <option value="__DOI_TRUONG_XU_LY__">Đội trưởng xử lý (tất cả lỗi)</option>
-                <option value="Suy hao">Suy hao</option>
-                <option value="Không tín hiệu">Không tín hiệu</option>
-                <option value="Rớt kết nối">Rớt kết nối</option>
-                <option value="Vùng phủ không đảm bảo">Vùng phủ không đảm bảo</option>
-            </select>
-        </div>
-        <div class="col-md-2 f-group">
-            <label>Nhân viên</label>
-            <select id="filterNhanVien" class="form-select form-select-sm" onchange="filterData()">
-                <option value="">Tất cả Nhân viên</option>
-            </select>
-        </div>
-        <div class="col-md-1">
-            <button class="filter-reset-btn w-100" onclick="resetFilters()">Đặt lại</button>
-        </div>
-
-        <div class="col-md-5 mt-3">
-            <label style="font-size:10.5px;font-weight:600;letter-spacing:.03em;color:var(--slate);">TÌM KIẾM SỐ HỢP ĐỒNG</label>
-            <div class="input-group input-group-sm">
-                <span class="input-group-text bg-transparent border-0 border-bottom" style="border-bottom:2px solid var(--line) !important; color:var(--slate);"><i class="bi bi-search"></i></span>
-                <input type="text" id="searchSoHopDong" class="form-control" placeholder="Nhập số hợp đồng cần tìm..." oninput="debounceFilter()" style="border:none; border-bottom:2px solid var(--line); border-radius:0;">
-                <button class="btn btn-sm" type="button" onclick="clearSearchHopDong()" style="border:none; border-bottom:2px solid var(--line); border-radius:0; color:var(--slate);"><i class="bi bi-x-lg"></i></button>
-            </div>
-        </div>
-    </div>
-
     <!-- TABS -->
     <ul class="nav seg-tabs mb-3" id="mainTabs" role="tablist">
         <li class="nav-item" role="presentation">
@@ -458,6 +405,59 @@
     <div class="tab-content" id="mainTabsContent">
         <!-- TAB 1: TPKT CHECK -->
         <div class="tab-pane fade show active" id="dashboardContent" role="tabpanel">
+            <!-- THANH BỘ LỌC -->
+            <div class="filter-strip row g-2 mb-3 align-items-end">
+                <div class="col-md-3 f-group">
+                    <label>TG Hoàn Tất (từ - đến)</label>
+                    <div class="d-flex gap-1">
+                        <input type="date" id="filterTgHoanTatFrom" lang="vi" class="form-control form-control-sm" onchange="filterData()">
+                        <input type="date" id="filterTgHoanTatTo" lang="vi" class="form-control form-control-sm" onchange="filterData()">
+                    </div>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>Đối tác</label>
+                    <select id="filterDoiTac" class="form-select form-select-sm" onchange="onDoiTacChange()">
+                        <option value="">Tất cả Đối tác</option>
+                    </select>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>Đội trưởng</label>
+                    <select id="filterDoiTruong" class="form-select form-select-sm" onchange="onDoiTruongChange()">
+                        <option value="">Tất cả Đội trưởng</option>
+                    </select>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>TPKT CHECK</label>
+                    <select id="filterTpktCheck" class="form-select form-select-sm" onchange="filterData()">
+                        <option value="">Tất cả TPKT Check</option>
+                        <option value="Chưa kiểm tra">Chưa kiểm tra</option>
+                        <option value="__DOI_TRUONG_XU_LY__">Đội trưởng xử lý (tất cả lỗi)</option>
+                        <option value="Suy hao">Suy hao</option>
+                        <option value="Không tín hiệu">Không tín hiệu</option>
+                        <option value="Rớt kết nối">Rớt kết nối</option>
+                        <option value="Vùng phủ không đảm bảo">Vùng phủ không đảm bảo</option>
+                    </select>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>Nhân viên</label>
+                    <select id="filterNhanVien" class="form-select form-select-sm" onchange="filterData()">
+                        <option value="">Tất cả Nhân viên</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button class="filter-reset-btn w-100" onclick="resetFilters()">Đặt lại</button>
+                </div>
+
+                <div class="col-md-5 mt-3">
+                    <label style="font-size:10.5px;font-weight:600;letter-spacing:.03em;color:var(--slate);">TÌM KIẾM SỐ HỢP ĐỒNG</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-transparent border-0 border-bottom" style="border-bottom:2px solid var(--line) !important; color:var(--slate);"><i class="bi bi-search"></i></span>
+                        <input type="text" id="searchSoHopDong" class="form-control" placeholder="Nhập số hợp đồng cần tìm..." oninput="debounceFilter()" style="border:none; border-bottom:2px solid var(--line); border-radius:0;">
+                        <button class="btn btn-sm" type="button" onclick="clearSearchHopDong()" style="border:none; border-bottom:2px solid var(--line); border-radius:0; color:var(--slate);"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                </div>
+            </div>
+
             <div id="batchActionBar" class="card batch-bar mb-3" style="display: none;">
                 <div class="card-body py-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
                     <div>
@@ -694,9 +694,9 @@
             </div>
 
             <div class="linh-thu-weekly-panel mb-4">
-                <div class="fw-bold small mb-2" style="color:var(--slate);">
-                    🏆 BẢNG XẾP HẠNG TUẦN
-                    <span class="fw-normal" style="color:var(--slate-soft);">(reset 00:00 mỗi Thứ 2 — không ảnh hưởng tới cấp tiến hoá, chỉ để tranh Top mỗi tuần)</span>
+                <div class="fw-bold small mb-3" style="color:var(--slate);">
+                    🏆 BẢNG XẾP HẠNG
+                    <span class="fw-normal" style="color:var(--slate-soft);">(Đội trưởng/Đối tác reset 00:00 mỗi Thứ 2, không ảnh hưởng cấp tiến hoá · Nuôi thú tính theo số ngày đăng nhập, không reset)</span>
                 </div>
                 <div id="linhThuWeeklyBoard">
                     <div class="text-center small py-3" style="color:var(--slate);">Đang tải bảng xếp hạng...</div>
@@ -845,8 +845,8 @@
                     <div id="g6" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
                         <div class="accordion-body small">
                             <ul class="mb-0">
-                                <li>Mỗi <b>Đội trưởng</b>, mỗi <b>Đối tác</b>, và mỗi tài khoản <b>Admin/SuperAdmin</b> đều có 1 Linh thú riêng, chọn 1 trong 32 loài — chọn được ngay từ đầu, không cần đạt điều kiện gì.</li>
-                                <li>Riêng <b>Admin/SuperAdmin</b>: Cấp tính theo <b>số ngày đăng nhập hệ thống</b> (1 ngày đăng nhập = 1 cấp), không liên quan tới khối lượng ca xử lý.</li>
+                                <li>Mỗi <b>Đội trưởng</b>, mỗi <b>Đối tác</b>, mỗi tài khoản <b>Admin</b>, và mỗi tài khoản <b>Nuôi thú</b> đều có 1 Linh thú riêng, chọn 1 trong 32 loài — chọn được ngay từ đầu, không cần đạt điều kiện gì. (SuperAdmin là tài khoản thuần quản trị, không tham gia nuôi thú/xếp hạng.)</li>
+                                <li>Riêng <b>Admin/Nuôi thú</b>: Cấp tính theo <b>số ngày đăng nhập hệ thống</b> (1 ngày đăng nhập = 1 cấp), không liên quan tới khối lượng ca xử lý.</li>
                                 <li><b>XP tính hoàn toàn tự động, đúng người đúng việc</b>: Đội trưởng chỉ tính công <b>xử lý lỗi</b> ("Đã xử lý lại" = 3 XP, "Checklist Onsite" = 0.6 XP) — đúng phần việc họ tự bấm. Đối tác quản lý chỉ tính công <b>phân loại</b> ("Bảo trì ok" = 0.05 XP/ca) — đúng phần việc họ tự bấm, trọng số thấp hơn nhiều vì khối lượng phân loại (gộp cả các đội) lớn hơn hẳn khối lượng xử lý lỗi của 1 đội — cân bằng lại để 2 cấp lên cấp cùng nhịp. Không có cách nhập tay để "ăn gian" điểm.</li>
                                 <li><b>90 cấp bậc</b>, mỗi cấp cách nhau 10 XP (~3 ngày làm việc bình thường/cấp), cộng dồn <b>vĩnh viễn không reset theo tháng</b> — hình thái linh thú đổi ở Cấp 31 (Trưởng thành) và Cấp 61 (Thần thú tối thượng). Ngoài ra còn chia nhỏ hơn thành <b>9 Nhóm</b> (mỗi Nhóm đúng 10 cấp) hiện trong thẻ pet để thấy tiến độ chi tiết hơn.</li>
                                 <li><b>Cấp 25</b>: được đặt tên riêng cho Linh thú (tối đa 20 ký tự). <b>Cấp 50</b>: được chọn thêm 1 Thú con — Thú con có XP riêng bằng <b>1/10 thú chính</b>, lên cấp/tiến hoá chậm hơn hẳn.</li>
@@ -2400,10 +2400,15 @@
             .sort((a, b) => (b.xpWeek || 0) - (a.xpWeek || 0)).slice(0, 5);
         let topDoiTac = withSpecies.filter(e => e.subjectType === 'doiTac')
             .sort((a, b) => (b.xpWeek || 0) - (a.xpWeek || 0)).slice(0, 3);
+        // Nuôi thú: Admin/petonly — dùng entry.level (số ngày đăng nhập, server
+        // tính sẵn), KHÔNG reset theo tuần. SuperAdmin không tham gia xếp hạng
+        // (tài khoản thuần quản trị).
+        let topNuoiThu = withSpecies.filter(e => e.subjectType === 'admin')
+            .sort((a, b) => (b.level || 0) - (a.level || 0)).slice(0, 5);
 
-        const renderList = (list) => {
+        const renderXpList = (list, emptyMsg) => {
             if (list.length === 0 || list.every(e => (e.xpWeek || 0) === 0)) {
-                return `<div class="small py-2" style="color:var(--slate-soft);">Chưa có XP nào trong tuần này.</div>`;
+                return `<div class="small py-2" style="color:var(--slate-soft);">${emptyMsg}</div>`;
             }
             return list.map((e, idx) => {
                 let medal = ['🥇', '🥈', '🥉'][idx] || `#${idx + 1}`;
@@ -2420,15 +2425,38 @@
             }).join('');
         };
 
+        const renderLevelList = (list) => {
+            if (list.length === 0) {
+                return `<div class="small py-2" style="color:var(--slate-soft);">Chưa có ai trong nhóm này chọn Linh thú.</div>`;
+            }
+            return list.map((e, idx) => {
+                let medal = ['🥇', '🥈', '🥉'][idx] || `#${idx + 1}`;
+                return `
+                    <div class="d-flex align-items-center justify-content-between py-1" style="border-bottom:1px solid var(--line);">
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="width:22px; text-align:center;">${medal}</span>
+                            <span style="font-size:17px;">${e.species.emoji}</span>
+                            <span class="small fw-bold">${escapeHtml(e.subjectKey)}</span>
+                        </div>
+                        <span class="mono small fw-bold" style="color:var(--brand-dark);">Cấp ${e.level}/${LINH_THU_MAX_LEVEL}</span>
+                    </div>
+                `;
+            }).join('');
+        };
+
         container.innerHTML = `
             <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="small fw-bold mb-1" style="color:var(--ink);">Top Đội trưởng</div>
-                    ${renderList(topDoiTruong)}
+                <div class="col-md-4">
+                    <div class="small fw-bold mb-1" style="color:var(--ink);">Top Đội trưởng (tuần)</div>
+                    ${renderXpList(topDoiTruong, 'Chưa có XP nào trong tuần này.')}
                 </div>
-                <div class="col-md-6">
-                    <div class="small fw-bold mb-1" style="color:var(--ink);">Top Đối tác</div>
-                    ${renderList(topDoiTac)}
+                <div class="col-md-4">
+                    <div class="small fw-bold mb-1" style="color:var(--ink);">Top Đối tác (tuần)</div>
+                    ${renderXpList(topDoiTac, 'Chưa có XP nào trong tuần này.')}
+                </div>
+                <div class="col-md-4">
+                    <div class="small fw-bold mb-1" style="color:var(--ink);">🔑 Top Nuôi Thú (không reset)</div>
+                    ${renderLevelList(topNuoiThu)}
                 </div>
             </div>
         `;
