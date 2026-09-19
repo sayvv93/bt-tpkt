@@ -400,6 +400,11 @@
                 <i class="bi bi-question-circle me-1"></i> Hướng dẫn
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link d-none" id="petaccounts-tab" data-bs-toggle="tab" data-bs-target="#petAccountsContent" type="button" role="tab">
+                <i class="bi bi-person-plus me-1"></i> Tài khoản Nuôi thú
+            </button>
+        </li>
     </ul>
 
     <div class="tab-content" id="mainTabsContent">
@@ -877,8 +882,26 @@
 
                 <div class="accordion-item">
                     <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g8pet">
+                            8. Tài khoản Nuôi thú (chỉ Đối tác quản lý)
+                        </button>
+                    </h2>
+                    <div id="g8pet" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small">
+                            <ul class="mb-0">
+                                <li>Cho phép Đối tác quản lý tự tạo tài khoản Nuôi thú (role petonly) cho nhân sự không thuộc Đội trưởng/KTV nhưng muốn tham gia nuôi Linh thú.</li>
+                                <li>Tải file mẫu (2 cột: username, password) → điền → Nhập Excel — tối đa 50 tài khoản/lần. Bỏ trống cột password thì mật khẩu mặc định trùng username.</li>
+                                <li>Tài khoản tạo ra <b>không có quyền truy cập dữ liệu vận hành dưới bất kỳ hình thức nào</b> — kể cả khi cố gọi thẳng API, Worker vẫn chặn ở tầng server. Chỉ thấy 3 tab: Trò chuyện, Linh Thú, Hướng dẫn.</li>
+                                <li>Danh sách bên dưới chỉ hiện tài khoản do đúng Đối tác quản lý này tạo.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g8">
-                            8. Phân quyền theo tài khoản
+                            9. Phân quyền theo tài khoản
                         </button>
                     </h2>
                     <div id="g8" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
@@ -937,6 +960,42 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+
+        <!-- TAB 8: TÀI KHOẢN NUÔI THÚ (chỉ Đối tác quản lý) -->
+        <div class="tab-pane fade" id="petAccountsContent" role="tabpanel">
+            <div class="table-panel p-4 mb-3">
+                <h5 class="fw-bold mb-1"><i class="bi bi-person-plus me-2" style="color:var(--brand);"></i>Tạo tài khoản Nuôi thú cho nhân sự</h5>
+                <p class="small mb-0" style="color:var(--slate);">
+                    Dành cho nhân sự không thuộc Đội trưởng/KTV nhưng muốn tham gia nuôi Linh thú (tính theo số ngày đăng nhập). Tài khoản tạo ra <b>không có quyền truy cập bất kỳ dữ liệu vận hành nào</b>, chỉ thấy 3 tab: Trò chuyện, Linh Thú, Hướng dẫn.
+                </p>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <button class="filter-reset-btn" onclick="downloadPetAccountTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu</button>
+                <button class="filter-reset-btn" onclick="triggerImportPetAccounts()"><i class="bi bi-file-earmark-arrow-up me-1"></i>Nhập Excel (tối đa 50 tài khoản/lần)</button>
+                <input type="file" id="importPetAccountsFileInput" accept=".xlsx,.xls" class="d-none" onchange="handleImportPetAccounts(event)">
+            </div>
+
+            <div class="alert-console">
+                <div class="alert-console-head">
+                    <span><i class="bi bi-people-fill me-2"></i>Danh sách tài khoản Nuôi thú đã tạo</span>
+                    <span class="count-pill" id="petAccountsCountBadge">0 tài khoản</span>
+                </div>
+                <div class="table-responsive mb-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Ngày tạo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="petAccountsTableBody">
+                            <tr><td colspan="2" class="text-center py-4" style="color:var(--slate);">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -1357,6 +1416,118 @@
         }
     }
 
+    // ================== ĐỐI TÁC QUẢN LÝ: IMPORT TÀI KHOẢN NUÔI THÚ ==================
+    function downloadPetAccountTemplate() {
+        if (typeof XLSX === 'undefined') {
+            alert("Thư viện Excel chưa tải xong, vui lòng thử lại sau giây lát.");
+            return;
+        }
+        let ws = XLSX.utils.json_to_sheet([
+            { username: "nv_vidu1", password: "" },
+            { username: "nv_vidu2", password: "matkhaurieng123" }
+        ]);
+        ws['!cols'] = [{ wch: 20 }, { wch: 22 }];
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Mau Tai Khoan");
+        XLSX.writeFile(wb, "mau_import_tai_khoan_nuoi_thu.xlsx");
+    }
+
+    function triggerImportPetAccounts() {
+        document.getElementById('importPetAccountsFileInput').click();
+    }
+
+    async function handleImportPetAccounts(event) {
+        let file = event.target.files[0];
+        event.target.value = "";
+        if (!file) return;
+
+        if (typeof XLSX === 'undefined') {
+            alert("Thư viện Excel chưa tải xong, vui lòng thử lại sau giây lát.");
+            return;
+        }
+
+        try {
+            let buf = await file.arrayBuffer();
+            let wb = XLSX.read(buf, { type: 'array' });
+            let sheet = wb.Sheets[wb.SheetNames[0]];
+            let rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+            if (rawRows.length === 0) {
+                alert("File không có dữ liệu!");
+                return;
+            }
+            if (rawRows.length > 50) {
+                alert(`File có ${rawRows.length} dòng, vượt quá giới hạn tối đa 50 tài khoản/lần import.`);
+                return;
+            }
+
+            let rows = rawRows.map(r => ({
+                username: String(r.username || "").trim(),
+                password: String(r.password || "").trim()
+            })).filter(r => r.username);
+
+            if (rows.length === 0) {
+                alert("Không có username hợp lệ nào trong file!");
+                return;
+            }
+
+            if (!confirm(`Xác nhận tạo ${rows.length} tài khoản Nuôi thú mới?\nMật khẩu mặc định (nếu để trống trong file) sẽ trùng với username — nên báo nhân sự đổi lại sau khi đăng nhập lần đầu.`)) {
+                return;
+            }
+
+            let res = await apiFetch("api/accounts/import-petonly", {
+                method: "POST",
+                body: JSON.stringify({ rows })
+            });
+            let result = await res.json();
+
+            if (!result.success) {
+                alert(result.error || "Import thất bại, vui lòng thử lại!");
+                return;
+            }
+
+            let msg = `Import hoàn tất:\n${result.created} tài khoản được tạo mới`;
+            if (result.skippedExists > 0) msg += `\n${result.skippedExists} username đã tồn tại (bị bỏ qua)`;
+            if (result.skippedInvalid > 0) msg += `\n${result.skippedInvalid} username không hợp lệ (bị bỏ qua)`;
+            alert(msg);
+
+            await fetchPetAccountsList();
+        } catch (e) {
+            console.error("Lỗi import tài khoản Nuôi thú:", e);
+            alert("Lỗi đọc file Excel — vui lòng dùng đúng file mẫu đã tải, không đổi tên cột!");
+        }
+    }
+
+    async function fetchPetAccountsList() {
+        let tbody = document.getElementById('petAccountsTableBody');
+        if (!tbody) return;
+        try {
+            let res = await apiFetch("api/accounts/petonly-list", { method: "GET" });
+            let result = await res.json();
+            let accounts = result.accounts || [];
+
+            document.getElementById('petAccountsCountBadge').innerText = accounts.length + ' tài khoản';
+
+            if (accounts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" class="text-center py-4" style="color:var(--slate);">Chưa tạo tài khoản Nuôi thú nào.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = accounts.map(a => `
+                <tr>
+                    <td class="fw-bold">${escapeHtml(a.username)}</td>
+                    <td>${a.created_at ? formatDateTime(a.created_at) : '--'}</td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            console.error("Lỗi tải danh sách tài khoản Nuôi thú:", e);
+            tbody.innerHTML = `<tr><td colspan="2" class="text-center py-4" style="color:var(--slate);">Lỗi tải danh sách.</td></tr>`;
+        }
+    }
+
+    document.getElementById('petaccounts-tab').addEventListener('shown.bs.tab', () => {
+        fetchPetAccountsList();
+    });
+
     // Danh sách tài khoản KHÔNG còn được tải về client nữa.
     // Việc xác thực đăng nhập và phân quyền dữ liệu đều xử lý ở Worker (D1).
     window.onload = function() {
@@ -1723,6 +1894,12 @@
         // Tab "Phân tích SHD" chỉ dành cho admin, superadmin và Đối tác quản lý
         // (tài khoản user không gắn doiTruong) — Đội trưởng không thấy tab này.
         document.getElementById('phantich-tab').classList.toggle('d-none', isDoiTruongLocked());
+
+        // Tab "Tài khoản Nuôi thú" — CHỈ dành riêng cho Đối tác quản lý (role
+        // 'user', không gắn doiTruong) — không phải Đội trưởng, không phải
+        // Admin/SuperAdmin/petonly.
+        let isDoiTacQuanLyTier = currentUser.role === 'user' && !isDoiTruongLocked();
+        document.getElementById('petaccounts-tab').classList.toggle('d-none', !isDoiTacQuanLyTier);
 
         // Role "petonly" — chỉ nuôi thú qua đăng nhập hằng ngày, KHÔNG được
         // đụng vào dataBT ở bất kỳ hình thức nào — ẩn hết các tab liên quan
