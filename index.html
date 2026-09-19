@@ -232,7 +232,7 @@
         .species-pick-btn:hover { background: var(--brand-soft); border-color: var(--brand); }
 
         .linh-thu-garden {
-            position: relative; height: 560px; border-radius: 12px; overflow: hidden;
+            position: relative; height: 2240px; border-radius: 12px; overflow: hidden;
             background: linear-gradient(180deg, #EAF3DC 0%, #D9EAC4 100%);
             border: 1px solid var(--line);
         }
@@ -923,6 +923,13 @@
                                             <td class="text-center">1000 dòng</td>
                                             <td class="text-center">Sử dụng công cụ Phân tích SHD (n8n) · Nhập dữ liệu MỚI song song n8n · Sắp xếp Linh thú ngay hàng để chụp ảnh</td>
                                         </tr>
+                                        <tr>
+                                            <td><b>Nuôi thú</b><br><span style="color:var(--slate-soft);">(role petonly)</span></td>
+                                            <td>Không có — không truy cập được dữ liệu vận hành dưới bất kỳ hình thức nào</td>
+                                            <td class="text-center">✗</td>
+                                            <td class="text-center">--</td>
+                                            <td class="text-center">Chỉ thấy 3 tab: Trò chuyện, Linh Thú, Hướng dẫn. Linh thú lên cấp theo số ngày đăng nhập (giống Admin/SuperAdmin), không liên quan khối lượng ca xử lý</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -1372,12 +1379,19 @@
 
                 document.getElementById('loginOverlay').style.display = 'none';
                 initSessionUI();
-                clearFilterSelections();
-                initFilters(globalData);
-                filterData();
-                checkDuplicateContracts(globalData);
-                refreshData();
-                startAutoRefresh();
+                if (currentUser.role === 'petonly') {
+                    // Không đụng dataBT dưới bất kỳ hình thức nào — chỉ tải Linh
+                    // Thú trực tiếp (chuyển tab bằng JS không tự bắn sự kiện
+                    // shown.bs.tab nên phải gọi tay).
+                    fetchLinhThuSelections();
+                } else {
+                    clearFilterSelections();
+                    initFilters(globalData);
+                    filterData();
+                    checkDuplicateContracts(globalData);
+                    refreshData();
+                    startAutoRefresh();
+                }
                 startPingOnline();
                 startChatPolling();
                 startIdleWatcher();
@@ -1611,14 +1625,18 @@
 
                 document.getElementById('loginOverlay').style.display = 'none';
                 initSessionUI();
-                clearFilterSelections();
-                // Luôn ép tải FULL lại khi đăng nhập qua form (có thể là tài khoản
-                // khác với phạm vi doiTacQuanLy khác) — tránh lẫn dữ liệu cũ của
-                // tài khoản trước còn sót trong bộ nhớ khi chuyển sang incremental sync.
-                globalData = [];
-                lastSyncTimestamp = null;
-                await refreshData();
-                startAutoRefresh();
+                if (currentUser.role === 'petonly') {
+                    fetchLinhThuSelections();
+                } else {
+                    clearFilterSelections();
+                    // Luôn ép tải FULL lại khi đăng nhập qua form (có thể là tài khoản
+                    // khác với phạm vi doiTacQuanLy khác) — tránh lẫn dữ liệu cũ của
+                    // tài khoản trước còn sót trong bộ nhớ khi chuyển sang incremental sync.
+                    globalData = [];
+                    lastSyncTimestamp = null;
+                    await refreshData();
+                    startAutoRefresh();
+                }
                 startPingOnline();
                 startChatPolling();
                 startIdleWatcher();
@@ -1684,7 +1702,9 @@
         document.getElementById('lblCurrentUsername').innerText = currentUser.username;
         document.getElementById('lblCurrentRole').innerText = `Role: ${currentUser.role}`;
         
-        let dtLabel = (currentUser.doiTac && currentUser.doiTac.trim() !== "" && currentUser.doiTac !== "ALL") ? currentUser.doiTac : "Tất cả (Full quyền)";
+        let dtLabel = currentUser.role === 'petonly'
+            ? "Không áp dụng (chỉ nuôi thú)"
+            : (currentUser.doiTac && currentUser.doiTac.trim() !== "" && currentUser.doiTac !== "ALL") ? currentUser.doiTac : "Tất cả (Full quyền)";
         document.getElementById('lblCurrentDoiTac').innerText = `Đối tác: ${dtLabel}`;
 
         let dtrPill = document.getElementById('lblCurrentDoiTruong');
@@ -1703,6 +1723,22 @@
         // Tab "Phân tích SHD" chỉ dành cho admin, superadmin và Đối tác quản lý
         // (tài khoản user không gắn doiTruong) — Đội trưởng không thấy tab này.
         document.getElementById('phantich-tab').classList.toggle('d-none', isDoiTruongLocked());
+
+        // Role "petonly" — chỉ nuôi thú qua đăng nhập hằng ngày, KHÔNG được
+        // đụng vào dataBT ở bất kỳ hình thức nào — ẩn hết các tab liên quan
+        // dữ liệu vận hành, chỉ còn Trò chuyện / Linh Thú / Hướng dẫn.
+        let isPetOnly = currentUser.role === 'petonly';
+        document.getElementById('dashboard-tab').classList.toggle('d-none', isPetOnly);
+        document.getElementById('report-tab').classList.toggle('d-none', isPetOnly);
+        document.getElementById('cll-tab').classList.toggle('d-none', isPetOnly);
+        if (isPetOnly) {
+            document.getElementById('phantich-tab').classList.add('d-none'); // luôn ẩn, bất kể isDoiTruongLocked()
+            // Tab mặc định (TPKT Check) đang bị ẩn — chuyển sang tab Linh Thú.
+            document.getElementById('dashboard-tab').classList.remove('active');
+            document.getElementById('dashboardContent').classList.remove('show', 'active');
+            document.getElementById('linhthu-tab').classList.add('active');
+            document.getElementById('linhThuContent').classList.add('show', 'active');
+        }
     }
 
     // Parse linh hoạt nhiều định dạng ngày mà server/n8n có thể trả về.
@@ -2568,7 +2604,14 @@
         if (!currentUser) return;
         let html = '';
 
-        if (currentUser.doiTruong && currentUser.doiTruong.trim() !== '') {
+        if (currentUser.role === 'petonly') {
+            // Chỉ nuôi thú qua đăng nhập hằng ngày — KHÔNG có dataBT nên
+            // không hiện được phần tổng quan Đối tác/Đội trưởng.
+            let myEntry = linhThuLeaderboard.find(e => e.subjectType === 'admin' && e.subjectKey === currentUser.username);
+            let myXp = adminLevelToXp(myEntry ? myEntry.level : 1);
+            html += renderPetCard('admin', currentUser.username, myXp, true);
+
+        } else if (currentUser.doiTruong && currentUser.doiTruong.trim() !== '') {
             // Cấp Đội trưởng — chỉ có đúng 1 pet của chính họ
             let xp = calcDoiTruongXp(currentUser.doiTruong, globalData);
             html += renderPetCard('doiTruong', currentUser.doiTruong, xp, true);
