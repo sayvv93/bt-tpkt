@@ -407,62 +407,63 @@
         </li>
     </ul>
 
+    <!-- THANH BỘ LỌC — chỉ hiện ở tab TPKT Check + Báo Cáo Tổng Quan, JS tự
+         ẩn/hiện theo tab đang active (xem toggleFilterStripVisibility) -->
+    <div class="filter-strip row g-2 mb-3 align-items-end" id="filterStripBar">
+        <div class="col-md-3 f-group">
+            <label>TG Hoàn Tất (từ - đến)</label>
+            <div class="d-flex gap-1">
+                <input type="date" id="filterTgHoanTatFrom" lang="vi" class="form-control form-control-sm" onchange="filterData()">
+                <input type="date" id="filterTgHoanTatTo" lang="vi" class="form-control form-control-sm" onchange="filterData()">
+            </div>
+        </div>
+        <div class="col-md-2 f-group">
+            <label>Đối tác</label>
+            <select id="filterDoiTac" class="form-select form-select-sm" onchange="onDoiTacChange()">
+                <option value="">Tất cả Đối tác</option>
+            </select>
+        </div>
+        <div class="col-md-2 f-group">
+            <label>Đội trưởng</label>
+            <select id="filterDoiTruong" class="form-select form-select-sm" onchange="onDoiTruongChange()">
+                <option value="">Tất cả Đội trưởng</option>
+            </select>
+        </div>
+        <div class="col-md-2 f-group">
+            <label>TPKT CHECK</label>
+            <select id="filterTpktCheck" class="form-select form-select-sm" onchange="filterData()">
+                <option value="">Tất cả TPKT Check</option>
+                <option value="Chưa kiểm tra">Chưa kiểm tra</option>
+                <option value="__DOI_TRUONG_XU_LY__">Đội trưởng xử lý (tất cả lỗi)</option>
+                <option value="Suy hao">Suy hao</option>
+                <option value="Không tín hiệu">Không tín hiệu</option>
+                <option value="Rớt kết nối">Rớt kết nối</option>
+                <option value="Vùng phủ không đảm bảo">Vùng phủ không đảm bảo</option>
+            </select>
+        </div>
+        <div class="col-md-2 f-group">
+            <label>Nhân viên</label>
+            <select id="filterNhanVien" class="form-select form-select-sm" onchange="filterData()">
+                <option value="">Tất cả Nhân viên</option>
+            </select>
+        </div>
+        <div class="col-md-1">
+            <button class="filter-reset-btn w-100" onclick="resetFilters()">Đặt lại</button>
+        </div>
+
+        <div class="col-md-5 mt-3">
+            <label style="font-size:10.5px;font-weight:600;letter-spacing:.03em;color:var(--slate);">TÌM KIẾM SỐ HỢP ĐỒNG</label>
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-transparent border-0 border-bottom" style="border-bottom:2px solid var(--line) !important; color:var(--slate);"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchSoHopDong" class="form-control" placeholder="Nhập số hợp đồng cần tìm..." oninput="debounceFilter()" style="border:none; border-bottom:2px solid var(--line); border-radius:0;">
+                <button class="btn btn-sm" type="button" onclick="clearSearchHopDong()" style="border:none; border-bottom:2px solid var(--line); border-radius:0; color:var(--slate);"><i class="bi bi-x-lg"></i></button>
+            </div>
+        </div>
+    </div>
+
     <div class="tab-content" id="mainTabsContent">
         <!-- TAB 1: TPKT CHECK -->
         <div class="tab-pane fade show active" id="dashboardContent" role="tabpanel">
-            <!-- THANH BỘ LỌC -->
-            <div class="filter-strip row g-2 mb-3 align-items-end">
-                <div class="col-md-3 f-group">
-                    <label>TG Hoàn Tất (từ - đến)</label>
-                    <div class="d-flex gap-1">
-                        <input type="date" id="filterTgHoanTatFrom" lang="vi" class="form-control form-control-sm" onchange="filterData()">
-                        <input type="date" id="filterTgHoanTatTo" lang="vi" class="form-control form-control-sm" onchange="filterData()">
-                    </div>
-                </div>
-                <div class="col-md-2 f-group">
-                    <label>Đối tác</label>
-                    <select id="filterDoiTac" class="form-select form-select-sm" onchange="onDoiTacChange()">
-                        <option value="">Tất cả Đối tác</option>
-                    </select>
-                </div>
-                <div class="col-md-2 f-group">
-                    <label>Đội trưởng</label>
-                    <select id="filterDoiTruong" class="form-select form-select-sm" onchange="onDoiTruongChange()">
-                        <option value="">Tất cả Đội trưởng</option>
-                    </select>
-                </div>
-                <div class="col-md-2 f-group">
-                    <label>TPKT CHECK</label>
-                    <select id="filterTpktCheck" class="form-select form-select-sm" onchange="filterData()">
-                        <option value="">Tất cả TPKT Check</option>
-                        <option value="Chưa kiểm tra">Chưa kiểm tra</option>
-                        <option value="__DOI_TRUONG_XU_LY__">Đội trưởng xử lý (tất cả lỗi)</option>
-                        <option value="Suy hao">Suy hao</option>
-                        <option value="Không tín hiệu">Không tín hiệu</option>
-                        <option value="Rớt kết nối">Rớt kết nối</option>
-                        <option value="Vùng phủ không đảm bảo">Vùng phủ không đảm bảo</option>
-                    </select>
-                </div>
-                <div class="col-md-2 f-group">
-                    <label>Nhân viên</label>
-                    <select id="filterNhanVien" class="form-select form-select-sm" onchange="filterData()">
-                        <option value="">Tất cả Nhân viên</option>
-                    </select>
-                </div>
-                <div class="col-md-1">
-                    <button class="filter-reset-btn w-100" onclick="resetFilters()">Đặt lại</button>
-                </div>
-
-                <div class="col-md-5 mt-3">
-                    <label style="font-size:10.5px;font-weight:600;letter-spacing:.03em;color:var(--slate);">TÌM KIẾM SỐ HỢP ĐỒNG</label>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-transparent border-0 border-bottom" style="border-bottom:2px solid var(--line) !important; color:var(--slate);"><i class="bi bi-search"></i></span>
-                        <input type="text" id="searchSoHopDong" class="form-control" placeholder="Nhập số hợp đồng cần tìm..." oninput="debounceFilter()" style="border:none; border-bottom:2px solid var(--line); border-radius:0;">
-                        <button class="btn btn-sm" type="button" onclick="clearSearchHopDong()" style="border:none; border-bottom:2px solid var(--line); border-radius:0; color:var(--slate);"><i class="bi bi-x-lg"></i></button>
-                    </div>
-                </div>
-            </div>
-
             <div id="batchActionBar" class="card batch-bar mb-3" style="display: none;">
                 <div class="card-body py-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
                     <div>
@@ -732,7 +733,7 @@
                 <p class="small px-4" style="color:var(--slate-soft);">
                     Công cụ này chạy trên nền tảng n8n riêng, không nhúng được trực tiếp vào trang (n8n Cloud chặn hiển thị dạng khung lồng) — bấm nút bên dưới để mở ở tab mới.
                 </p>
-                <a href="https://say3.app.n8n.cloud/form/mypt-analyze" target="_blank" rel="noopener" class="btn fw-bold mt-2" style="background:var(--brand); color:#fff; padding:10px 24px;">
+                <a href="https://say5.app.n8n.cloud/form/mypt-analyze" target="_blank" rel="noopener" class="btn fw-bold mt-2" style="background:var(--brand); color:#fff; padding:10px 24px;">
                     <i class="bi bi-box-arrow-up-right me-2"></i>Mở Phân tích SHD
                 </a>
             </div>
@@ -1528,6 +1529,16 @@
         fetchPetAccountsList();
     });
 
+    // Thanh bộ lọc CHỈ hiện ở đúng 2 tab TPKT Check + Báo Cáo Tổng Quan (2 tab
+    // này dùng chung 1 bộ lọc) — ẩn hoàn toàn ở mọi tab khác.
+    const FILTER_VISIBLE_TABS = ['dashboard-tab', 'report-tab'];
+    function toggleFilterStripVisibility(activeTabId) {
+        document.getElementById('filterStripBar').classList.toggle('d-none', !FILTER_VISIBLE_TABS.includes(activeTabId));
+    }
+    document.getElementById('mainTabs').addEventListener('shown.bs.tab', (e) => {
+        toggleFilterStripVisibility(e.target.id);
+    });
+
     // Danh sách tài khoản KHÔNG còn được tải về client nữa.
     // Việc xác thực đăng nhập và phân quyền dữ liệu đều xử lý ở Worker (D1).
     window.onload = function() {
@@ -1915,6 +1926,7 @@
             document.getElementById('dashboardContent').classList.remove('show', 'active');
             document.getElementById('linhthu-tab').classList.add('active');
             document.getElementById('linhThuContent').classList.add('show', 'active');
+            toggleFilterStripVisibility('linhthu-tab'); // ẩn luôn (không nằm trong FILTER_VISIBLE_TABS)
         }
     }
 
