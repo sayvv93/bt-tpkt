@@ -308,23 +308,26 @@
         #loginOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background:
-                radial-gradient(ellipse at 78% 18%, rgba(255,224,130,0.22) 0%, rgba(18,24,27,0) 38%),
-                linear-gradient(180deg, #0B1224 0%, #1B2A4A 55%, #12181B 100%);
+                radial-gradient(ellipse at 50% 0%, rgba(232,93,4,0.28) 0%, rgba(18,24,27,0) 55%),
+                linear-gradient(180deg, #14181B 0%, #1F1410 60%, #12181B 100%);
             backdrop-filter: blur(2px); z-index: 9999; display: flex; align-items: center; justify-content: center;
             overflow: hidden;
         }
-        .tt-moon {
-            position: absolute; top: 9%; right: 11%; width: 92px; height: 92px; border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #FFF7D6, #FFE9A8 60%, #F5D067 100%);
-            box-shadow: 0 0 70px 24px rgba(255, 224, 130, 0.32);
+        /* Vạch đích ca-rô chạy dọc mép trên + dưới màn hình đăng nhập */
+        .q4-finish-strip {
+            position: absolute; left: 0; width: 100%; height: 18px;
+            background: repeating-conic-gradient(#F5F5F0 0% 25%, #12181B 0% 50%) 0 0 / 18px 18px;
+            opacity: 0.85;
         }
-        .tt-lantern {
-            position: absolute; font-size: 26px; animation: tt-float 6s ease-in-out infinite;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));
+        .q4-finish-strip.top { top: 0; }
+        .q4-finish-strip.bottom { bottom: 0; }
+        .q4-badge {
+            display: inline-block; background: #E85D04; color: #fff; font-size: 11px; font-weight: 800;
+            letter-spacing: 0.06em; padding: 3px 10px; border-radius: 4px; text-transform: uppercase;
         }
-        @keyframes tt-float {
-            0%, 100% { transform: translateY(0) rotate(-3deg); }
-            50% { transform: translateY(-14px) rotate(3deg); }
+        .q4-countdown-pill {
+            background: rgba(232,93,4,0.14); border: 1px solid rgba(232,93,4,0.55); color: #FFB27A;
+            font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 3px 10px; border-radius: 4px; white-space: nowrap;
         }
     </style>
 </head>
@@ -332,17 +335,14 @@
 
 <!-- MÀN HÌNH ĐĂNG NHẬP -->
 <div id="loginOverlay">
-  <div class="tt-moon"></div>
-  <span class="tt-lantern" style="top:14%; left:9%; animation-delay:0s;">🏮</span>
-  <span class="tt-lantern" style="top:68%; left:13%; animation-delay:1.2s; font-size:21px;">🏮</span>
-  <span class="tt-lantern" style="top:24%; left:86%; animation-delay:2s; font-size:23px;">🏮</span>
-  <span class="tt-lantern" style="top:78%; left:82%; animation-delay:0.6s; font-size:19px;">🏮</span>
-  <span class="tt-lantern" style="top:50%; left:5%; animation-delay:2.6s; font-size:22px;">🐰</span>
+  <div class="q4-finish-strip top"></div>
+  <div class="q4-finish-strip bottom"></div>
   <div style="position: relative; width: 100%; max-width: 400px; background: var(--ink); border-radius: 10px; box-shadow: 0 24px 60px rgba(0,0,0,0.45); padding: 32px 34px; border-top: 3px solid var(--brand);">
 
     <span class="ops-mark">TPKT · OPS</span>
     <div style="margin: 14px 0 26px;">
-      <div style="color:#F5D067; font-size:12.5px; font-weight:700; letter-spacing:0.02em; margin-bottom:4px;">🏮 Chúc mừng Tết Trung Thu 🌕</div>
+      <div style="margin-bottom:8px;"><span class="q4-badge">🏁 Nước rút Quý 4</span></div>
+      <div style="color:#FFB27A; font-size:12.5px; font-weight:600; margin-bottom:6px;">Tập trung cao độ — về đích năm <span id="loginYear">2026</span> · <span id="loginCountdown">--</span></div>
       <h3 style="color: #fff; font-weight: 700; font-size: 19px; margin: 0; letter-spacing: -0.01em;">Hệ thống Check ca vụ Bảo trì</h3>
       <p style="color: #9AA39C; font-size: 13px; margin-top: 6px;">Đăng nhập để tiếp tục vận hành</p>
     </div>
@@ -369,12 +369,13 @@
     <div class="ops-header d-flex flex-wrap align-items-center justify-content-between mb-3">
         <div>
             <span class="ops-mark mb-2 d-inline-block">TPKT · OPS</span>
-            <h2 class="fw-bold mb-0 fs-4">🏮 Vận hành &amp; Kiểm tra checklist Bảo trì 🏮</h2>
+            <h2 class="fw-bold mb-0 fs-4">Vận hành &amp; Kiểm tra checklist Bảo trì</h2>
             <div class="d-flex align-items-center gap-3 mt-2" style="position:relative;">
                 <div style="position:relative;">
                     <button class="ops-pill" id="btnOnlineCount" onclick="toggleOnlinePanel()" style="cursor:pointer;">
                         <span class="online-dot"></span> <span id="lblOnlineCount">--</span> online
                     </button>
+                    <span class="q4-countdown-pill ms-2" id="lblYearCountdown">🏁 --</span>
                     <div id="onlinePanel" class="d-none" style="position:absolute; top:130%; left:0; min-width:200px; background:var(--ink); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:10px; z-index:2000; box-shadow:0 12px 30px rgba(0,0,0,0.4);">
                         <div class="small fw-bold mb-2" style="color:#9AA39C;">Đang online</div>
                         <div id="onlineListBody" class="small" style="color:#E7E9E5;">--</div>
@@ -1568,6 +1569,23 @@
 
     // Danh sách tài khoản KHÔNG còn được tải về client nữa.
     // Việc xác thực đăng nhập và phân quyền dữ liệu đều xử lý ở Worker (D1).
+    // Đếm ngược "về đích năm" — tự tính theo ngày hiện tại, không hardcode.
+    function updateYearCountdown() {
+        let now = new Date();
+        let year = now.getFullYear();
+        let endOfYear = new Date(year, 11, 31, 23, 59, 59);
+        let days = Math.max(0, Math.ceil((endOfYear - now) / 86400000));
+        let text = days === 0 ? 'Hôm nay là ngày cuối năm!' : `Còn ${days} ngày`;
+        let headerPill = document.getElementById('lblYearCountdown');
+        if (headerPill) headerPill.textContent = `🏁 ${text} về đích ${year}`;
+        let loginCd = document.getElementById('loginCountdown');
+        if (loginCd) loginCd.textContent = text;
+        let loginYear = document.getElementById('loginYear');
+        if (loginYear) loginYear.textContent = year;
+    }
+    updateYearCountdown();
+    setInterval(updateYearCountdown, 60 * 60 * 1000); // làm mới mỗi giờ (qua nửa đêm tự đổi ngày)
+
     window.onload = function() {
         let cachedData = localStorage.getItem('tpkt_cached_dataBT');
         if (cachedData) {
