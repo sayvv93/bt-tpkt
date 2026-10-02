@@ -289,6 +289,51 @@
             100% { background-position: -250% center; }
         }
 
+        /* ---------- HI FPT ---------- */
+        .hi-admin-bar { background:#FFF8E6; border:1px solid #E8D9A8; border-radius:8px; padding:8px 12px; }
+        .hi-seg { display:inline-flex; background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:3px; gap:3px; }
+        .hi-seg button { border:none; background:transparent; border-radius:6px; padding:4px 12px; font-size:12.5px; font-weight:600; color:var(--slate); }
+        .hi-seg button.active { background:var(--ink); color:#fff; }
+        .hi-rate { display:flex; align-items:center; gap:8px; min-width:120px; }
+        .hi-rate .bar { flex:1; height:6px; background:var(--line); border-radius:4px; overflow:hidden; }
+        .hi-rate .bar > span { display:block; height:100%; border-radius:4px; }
+        .hi-rate .val { font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:700; min-width:46px; text-align:right; }
+        .hi-good { color:var(--brand-dark); } .hi-good-bg { background:var(--brand); }
+        .hi-mid { color:var(--amber); } .hi-mid-bg { background:#E3A23B; }
+        .hi-bad { color:var(--red); } .hi-bad-bg { background:var(--red); }
+        .hi-group-row { cursor:pointer; }
+        .hi-group-row:hover td { background:var(--brand-soft) !important; }
+        .hi-total-row td { font-weight:700; background:var(--surface) !important; }
+        .hi-tag { display:inline-block; font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; white-space:nowrap; }
+        .hi-tag.ok { background:var(--brand-soft); color:var(--brand-dark); }
+        .hi-tag.no { background:var(--red-soft); color:var(--red); }
+        .hi-tag.neutral { background:var(--surface); color:var(--slate); border:1px solid var(--line); }
+        #hiFptContent th.sortable { cursor:pointer; white-space:nowrap; }
+        #hiFptContent th.sortable:hover { color:var(--brand-dark); }
+        #hiFptContent .table td, #hiFptContent .table th { font-size:12.5px; }
+
+        .hi-report-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; }
+        .hi-report-title { font-size:17px; font-weight:800; color:var(--ink); letter-spacing:-0.01em; }
+        .hi-scope-chip { display:inline-block; font-size:11.5px; font-weight:600; color:var(--brand-dark); background:var(--brand-soft); border-radius:12px; padding:2px 10px; margin-left:6px; }
+        .hi-card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; height:100%; }
+        .hi-card-title { font-size:12px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--slate); margin-bottom:6px; }
+        .hi-gauge { position:relative; height:150px; }
+        .hi-gauge-center { position:absolute; left:0; right:0; bottom:8px; text-align:center; pointer-events:none; }
+        .hi-gauge-center .big { font-family:'IBM Plex Mono', monospace; font-size:34px; font-weight:800; line-height:1; }
+        .hi-gauge-center .sub { font-size:11.5px; color:var(--slate); margin-top:4px; }
+        .hi-gauge-foot { display:flex; justify-content:space-between; font-size:12px; color:var(--slate); border-top:1px dashed var(--line); padding-top:8px; margin-top:6px; }
+        .hi-gauge-foot b { color:var(--ink); font-family:'IBM Plex Mono', monospace; }
+        .hi-chart-box { position:relative; height:260px; }
+        .hi-rank-scroll { max-height:520px; overflow-y:auto; }
+        .hi-spot-list { list-style:none; padding:0; margin:0; }
+        .hi-spot-list li { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--line); font-size:13px; }
+        .hi-spot-list li:last-child { border-bottom:none; }
+        .hi-spot-medal { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; background:var(--surface); }
+        .hi-spot-name { flex:1; min-width:0; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .hi-spot-name small { display:block; font-weight:400; color:var(--slate-soft); font-size:11px; }
+        .hi-spot-val { font-family:'IBM Plex Mono', monospace; font-weight:800; font-size:14px; }
+        .hi-spot-head { font-size:12px; font-weight:800; margin:2px 0 4px; }
+
         /* ---------- CHAT NỘI BỘ ---------- */
         .chat-panel {
             background: var(--card); border: 1px solid var(--line); border-radius: 10px;
@@ -422,6 +467,11 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link" id="hifpt-tab" data-bs-toggle="tab" data-bs-target="#hiFptContent" type="button" role="tab">
+                <i class="bi bi-phone-fill me-1" style="color:#F37021;"></i> HI FPT
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chatContent" type="button" role="tab">
                 <i class="bi bi-chat-dots-fill me-1"></i> Trò chuyện <span id="badgeChatUnread" class="count-chip d-none">0</span>
             </button>
@@ -544,7 +594,7 @@
             </div>
 
             <div id="superAdminImportBar" class="d-flex justify-content-end align-items-center gap-2 mb-2 d-none" style="background:#FFF8E6; border:1px solid #E8D9A8; border-radius:8px; padding:8px 12px;">
-                <span class="small fw-bold me-auto" style="color:#8A6A1E;"><i class="bi bi-shield-lock-fill me-1"></i>SuperAdmin — Nhập dữ liệu MỚI (song song N8N)</span>
+                <span class="small fw-bold me-auto" style="color:#8A6A1E;"><i class="bi bi-shield-lock-fill me-1"></i>SuperAdmin — Nhập dữ liệu MỚI</span>
                 <button class="filter-reset-btn" onclick="downloadNewDataTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu (Dữ liệu mới)</button>
                 <button class="filter-reset-btn" onclick="triggerImportNewData()"><i class="bi bi-database-add me-1"></i>Nhập dữ liệu mới</button>
                 <input type="file" id="importNewDataFileInput" accept=".xlsx,.xls" class="d-none" onchange="handleImportNewData(event)">
@@ -733,6 +783,156 @@
             </div>
         </div>
 
+        <!-- TAB: HI FPT -->
+        <div class="tab-pane fade" id="hiFptContent" role="tabpanel">
+            <div id="hiAdminBar" class="hi-admin-bar d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 d-none">
+                <span class="fw-bold small" style="color:#8A6A12;"><i class="bi bi-shield-lock-fill me-1"></i>SuperAdmin — Quản lý dữ liệu HI FPT (dataHI)</span>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="filter-reset-btn" onclick="hiDownloadTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu</button>
+                    <label class="filter-reset-btn mb-0" style="cursor:pointer;"><i class="bi bi-upload me-1"></i>Nhập Excel
+                        <input type="file" accept=".xlsx,.xls,.csv" class="d-none" onchange="hiHandleImportFile(event)">
+                    </label>
+                    <button class="filter-reset-btn" onclick="hiOpenEditModal(null)"><i class="bi bi-plus-lg me-1"></i>Thêm dòng</button>
+                </div>
+            </div>
+
+            <div class="filter-strip row g-2 mb-3 align-items-end">
+                <div class="col-md-3 f-group">
+                    <label>Ngày hoàn tất (từ - đến)</label>
+                    <div class="d-flex gap-1">
+                        <input type="date" id="hiFilterFrom" class="form-control form-control-sm" onchange="hiApplyFilters()">
+                        <input type="date" id="hiFilterTo" class="form-control form-control-sm" onchange="hiApplyFilters()">
+                    </div>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>Đối tác</label>
+                    <select id="hiFilterDoiTac" class="form-select form-select-sm" onchange="hiOnFilterChange('doiTac')"></select>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>Đội trưởng</label>
+                    <select id="hiFilterDoiTruong" class="form-select form-select-sm" onchange="hiOnFilterChange('doiTruong')"></select>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>Nhân viên</label>
+                    <select id="hiFilterNhanVien" class="form-select form-select-sm" onchange="hiApplyFilters()"></select>
+                </div>
+                <div class="col-md-3 f-group">
+                    <label>Tình trạng kích hoạt</label>
+                    <select id="hiFilterTinhTrang" class="form-select form-select-sm" onchange="hiApplyFilters()"></select>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>Tương tác</label>
+                    <select id="hiFilterTuongTac" class="form-select form-select-sm" onchange="hiApplyFilters()"></select>
+                </div>
+                <div class="col-md-4 f-group">
+                    <label>Tìm số hợp đồng</label>
+                    <input type="text" id="hiSearch" class="form-control form-control-sm" placeholder="Nhập số hợp đồng..." oninput="clearTimeout(window._hiSearchT); window._hiSearchT = setTimeout(hiApplyFilters, 250);">
+                </div>
+                <div class="col-md-6 f-group d-flex justify-content-end gap-2">
+                    <span class="small align-self-center me-auto" id="hiLastLoaded" style="color:var(--slate-soft);"></span>
+                    <button class="filter-reset-btn" onclick="hiResetFilters()"><i class="bi bi-x-circle me-1"></i>Xoá lọc</button>
+                    <button class="filter-reset-btn" onclick="hiFetchData(true)"><i class="bi bi-arrow-clockwise me-1"></i>Tải lại</button>
+                    <button class="filter-reset-btn" onclick="hiExportExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Xuất Excel</button>
+                </div>
+            </div>
+
+            <div class="stat-strip">
+                <div class="stat-item accent-neutral"><div class="stat-label">TỔNG CA</div><div class="stat-value" id="hiKpiTotal">0</div></div>
+                <div class="stat-item accent-brand"><div class="stat-label">ĐÃ CÀI HI FPT</div><div class="stat-value" id="hiKpiInstalled">0</div></div>
+                <div class="stat-item accent-brand"><div class="stat-label">TỈ LỆ CÀI ĐẶT</div><div class="stat-value" id="hiKpiInstallRate">0%</div></div>
+                <div class="stat-item accent-neutral"><div class="stat-label">CA CÓ GỬI</div><div class="stat-value" id="hiKpiSent">0</div></div>
+                <div class="stat-item accent-amber"><div class="stat-label">CÓ TƯƠNG TÁC</div><div class="stat-value" id="hiKpiInteract">0</div></div>
+                <div class="stat-item accent-amber"><div class="stat-label">TỈ LỆ TƯƠNG TÁC</div><div class="stat-value" id="hiKpiInteractRate">0%</div></div>
+            </div>
+
+            <div class="mb-4" id="hiReport">
+                <div class="hi-report-head">
+                    <div>
+                        <span class="hi-report-title"><i class="bi bi-speedometer2 me-2" style="color:#F37021;"></i>Báo cáo HI FPT</span>
+                        <span class="hi-scope-chip" id="hiScopeChip">Toàn bộ</span>
+                    </div>
+                    <div class="hi-seg" id="hiGroupSeg">
+                        <button type="button" data-group="doiTacQuanLy" class="active">Theo Đối tác</button>
+                        <button type="button" data-group="doiTruong">Theo Đội trưởng</button>
+                        <button type="button" data-group="nhanVien">Theo Nhân viên</button>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-lg-4 col-md-6">
+                        <div class="hi-card">
+                            <div class="hi-card-title"><i class="bi bi-phone me-1"></i>Tỉ lệ cài đặt HI FPT</div>
+                            <div class="hi-gauge"><canvas id="hiGaugeInstall"></canvas>
+                                <div class="hi-gauge-center"><div class="big" id="hiGaugeInstallVal">--</div><div class="sub">đã cài / tổng ca</div></div></div>
+                            <div class="hi-gauge-foot"><span>Đã cài <b id="hiGInstOk">0</b></span><span>Chưa cài <b id="hiGInstNo" style="color:var(--red);">0</b></span><span>Tổng <b id="hiGInstTotal">0</b></span></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="hi-card">
+                            <div class="hi-card-title"><i class="bi bi-hand-thumbs-up me-1"></i>Tỉ lệ tương tác</div>
+                            <div class="hi-gauge"><canvas id="hiGaugeInteract"></canvas>
+                                <div class="hi-gauge-center"><div class="big" id="hiGaugeInteractVal">--</div><div class="sub">có tương tác / ca có gửi</div></div></div>
+                            <div class="hi-gauge-foot"><span>Có tương tác <b id="hiGIntOk">0</b></span><span>Chưa <b id="hiGIntNo" style="color:var(--red);">0</b></span><span>Có gửi <b id="hiGIntSent">0</b></span></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-12">
+                        <div class="hi-card">
+                            <div class="hi-card-title"><i class="bi bi-pie-chart me-1"></i>Cơ cấu tình trạng kích hoạt</div>
+                            <div class="hi-chart-box" style="height:190px;"><canvas id="hiDonutStatus"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hi-card mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="hi-card-title mb-0"><i class="bi bi-graph-up-arrow me-1"></i>Diễn biến theo ngày hoàn tất</div>
+                        <span class="small" id="hiTrendNote" style="color:var(--slate-soft);"></span>
+                    </div>
+                    <div class="hi-chart-box mt-2"><canvas id="hiTrendChart"></canvas></div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-lg-8">
+                        <div class="hi-card">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="hi-card-title mb-0" id="hiRankTitle">Xếp hạng tỉ lệ tương tác</div>
+                                <div class="hi-seg" id="hiRankMetricSeg">
+                                    <button type="button" data-metric="interactRate" class="active">Tương tác</button>
+                                    <button type="button" data-metric="installRate">Cài đặt</button>
+                                </div>
+                            </div>
+                            <div class="hi-rank-scroll"><div id="hiRankBox" style="position:relative;"><canvas id="hiRankChart"></canvas></div></div>
+                            <div class="small mt-2" style="color:var(--slate-soft);">Bấm vào 1 cột để xem chi tiết cấp dưới · Vạch đứt = trung bình chung</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="hi-card" id="hiSpotlight"></div>
+                    </div>
+                </div>
+
+                <div class="table-panel">
+                    <div class="d-flex justify-content-between align-items-center p-3 pb-2">
+                        <div class="fw-bold"><i class="bi bi-table me-2" style="color:var(--brand);"></i>Bảng số liệu <span class="small fw-normal" style="color:var(--slate-soft);">— bấm 1 dòng để xem chi tiết cấp dưới</span></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="hiGroupTable"></table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-panel">
+                <div class="d-flex justify-content-between align-items-center p-3 pb-2">
+                    <div class="fw-bold"><i class="bi bi-list-ul me-2" style="color:var(--brand);"></i>Chi tiết <span class="small fw-normal" id="hiDetailCount" style="color:var(--slate-soft);"></span></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="hiDetailTable"></table>
+                </div>
+                <div class="d-flex justify-content-end p-3">
+                    <nav><ul class="pagination pagination-sm mb-0" id="hiPagination"></ul></nav>
+                </div>
+            </div>
+        </div>
+
         <!-- TAB 5: LINH THÚ — KHU DÂN CƯ -->
         <div class="tab-pane fade" id="linhThuContent" role="tabpanel">
             <div id="linhThuMe" class="lt-me-panel mb-3">
@@ -768,9 +968,19 @@
                 <p class="small px-4" style="color:var(--slate-soft);">
                     Công cụ này chạy trên nền tảng n8n riêng, không nhúng được trực tiếp vào trang (n8n Cloud chặn hiển thị dạng khung lồng) — bấm nút bên dưới để mở ở tab mới.
                 </p>
-                <a href="https://say6.app.n8n.cloud/form/mypt-analyze" target="_blank" rel="noopener" class="btn fw-bold mt-2" style="background:var(--brand); color:#fff; padding:10px 24px;">
+                <a id="shdLinkBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn fw-bold mt-2 disabled" style="background:var(--brand); color:#fff; padding:10px 24px;">
                     <i class="bi bi-box-arrow-up-right me-2"></i>Mở Phân tích SHD
                 </a>
+                <div class="small mt-2" id="shdLinkInfo" style="color:var(--slate-soft);">Đang tải link...</div>
+
+                <div id="shdAdminBox" class="text-start mt-4 p-3 d-none" style="background:#FFF8E6; border:1px solid #E8D9A8; border-radius:8px;">
+                    <div class="small fw-bold mb-2" style="color:#8A6A12;"><i class="bi bi-shield-lock-fill me-1"></i>SuperAdmin — Đổi link khi instance n8n hết hạn</div>
+                    <div class="d-flex gap-2">
+                        <input type="url" id="shdLinkInput" class="form-control form-control-sm" placeholder="https://...app.n8n.cloud/form/mypt-analyze">
+                        <button class="btn btn-sm text-white text-nowrap" style="background:var(--brand);" id="shdLinkSaveBtn" onclick="saveShdLink()">Lưu link</button>
+                    </div>
+                    <div class="small mt-1" style="color:var(--slate-soft);">Lưu xong mọi người dùng thấy link mới ngay, không cần sửa index.html.</div>
+                </div>
             </div>
         </div>
 
@@ -782,6 +992,24 @@
             </div>
 
             <div class="accordion" id="guideAccordion">
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gsec">
+                            Đăng nhập &amp; bảo mật
+                        </button>
+                    </h2>
+                    <div id="gsec" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small">
+                            <ul class="mb-0">
+                                <li>Mật khẩu được mã hoá một chiều trong hệ thống — quản trị viên cũng không xem được mật khẩu của bạn. Quên mật khẩu thì liên hệ SuperAdmin để đặt lại.</li>
+                                <li>Nhập sai mật khẩu <b>5 lần trong 15 phút</b> → tài khoản tạm khoá <b>15 phút</b>.</li>
+                                <li><b>Đổi mật khẩu</b> sẽ tự đăng xuất tài khoản đó trên mọi máy khác. Mật khẩu mới tối thiểu 6 ký tự.</li>
+                                <li>Phiên đăng nhập kéo dài tối đa 12 giờ và tự đăng xuất sau 20 phút không thao tác.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="accordion-item">
                     <h2 class="accordion-header">
@@ -851,7 +1079,7 @@
                     <div id="g4" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
                         <div class="accordion-body small">
                             <ul class="mb-0">
-                                <li>Liệt kê số hợp đồng xuất hiện từ 2 lần trở lên trong dữ liệu — thường do n8n đồng bộ trùng hoặc nhập liệu 2 lần.</li>
+                                <li>Liệt kê số hợp đồng xuất hiện từ 2 lần trở lên trong dữ liệu — thường do nhập liệu 2 lần.</li>
                                 <li>Có dropdown lọc riêng theo Đối tác ngay trong tab này.</li>
                                 <li>Chi tiết mỗi dòng trùng hiện Đối tác, Đội trưởng, Nhân viên, TG Hoàn Tất và Ghi chú — so sánh nội dung ghi chú để biết dòng nào mới/đúng hơn trước khi báo lại bộ phận dữ liệu xử lý.</li>
                             </ul>
@@ -908,6 +1136,27 @@
                                 <li>Công cụ chẩn đoán tự động chạy trên n8n riêng (không phải một phần của web này) — bấm nút để mở ở tab mới.</li>
                                 <li>Cần đăng nhập MyPT bằng OTP rồi dán danh sách Số HĐ cần phân tích, hệ thống sẽ trả về nguyên nhân + hướng xử lý gợi ý cho từng hợp đồng.</li>
                                 <li>Tab này chỉ hiện cho Admin, SuperAdmin và Đối tác quản lý — Đội trưởng không thấy tab này.</li>
+                                <li>Link công cụ lưu trong hệ thống. Khi instance n8n hết hạn, <b>SuperAdmin</b> dán link mới vào ô "Đổi link" ngay trong tab này — mọi người thấy link mới ngay.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ghifpt">
+                            HI FPT — Tỉ lệ cài đặt &amp; tương tác
+                        </button>
+                    </h2>
+                    <div id="ghifpt" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small">
+                            <ul class="mb-0">
+                                <li><b>Tỉ lệ cài đặt</b> = số ca có Tình trạng kích hoạt <b>khác</b> "Chua kich hoat" / tổng số ca.</li>
+                                <li><b>Tỉ lệ tương tác</b> = số ca "Có Gửi" có Tương tác = "Có" / tổng số ca "Có Gửi". Ca "Không Gửi" không tính vào tỉ lệ này.</li>
+                                <li><b>Tự động</b>: ca có Tương tác = "Có" mà Tình trạng kích hoạt đang là "Chua kich hoat" (hoặc trống) sẽ tự chuyển thành <b>"Kich hoat khi Trien Khai"</b> khi nhập Excel, thêm hoặc sửa dòng — vì khách đã tương tác thì chắc chắn đã cài HI FPT.</li>
+                                <li>Xem báo cáo theo <b>Đối tác / Đội trưởng / Nhân viên</b>; bấm 1 dòng để lọc xuống cấp dưới, bấm tiêu đề cột để sắp xếp. Màu tỉ lệ: xanh ≥ 80%, cam 50–80%, đỏ &lt; 50%.</li>
+                                <li>Phân quyền xem giống tab TPKT Check: Đội trưởng chỉ thấy đội mình, Đối tác thấy đối tác mình, Admin/SuperAdmin thấy tất cả; tài khoản Nuôi thú không thấy tab này.</li>
+                                <li><b>SuperAdmin</b>: nhập Excel (đúng tiêu đề cột như sheet "Import" — có thể tải file mẫu), xem trước trước khi nhập; dòng trùng Số HĐ + Ngày hoàn tất sẽ được <b>cập nhật</b> theo file mới. Sửa/xoá từng dòng ngay trên bảng chi tiết hoặc thêm dòng thủ công.</li>
                             </ul>
                         </div>
                     </div>
@@ -977,7 +1226,7 @@
                                             <td>Toàn bộ dữ liệu, mọi đối tác</td>
                                             <td class="text-center">✓</td>
                                             <td class="text-center">1000 dòng</td>
-                                            <td class="text-center">Sử dụng công cụ Phân tích SHD (n8n) · Nhập dữ liệu MỚI song song n8n</td>
+                                            <td class="text-center">Sử dụng công cụ Phân tích SHD (n8n) · Nhập dữ liệu MỚI (nguồn dữ liệu duy nhất) · Đổi link Phân tích SHD · Quản lý dữ liệu HI FPT</td>
                                         </tr>
                                         <tr>
                                             <td><b>Nuôi thú</b><br><span style="color:var(--slate-soft);">(role petonly)</span></td>
@@ -1063,21 +1312,94 @@
   </div>
 </div>
 
+    <!-- MODAL: Sửa / thêm dòng HI FPT (SuperAdmin) -->
+    <div class="modal fade" id="hiEditModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold" id="hiEditTitle">Sửa dòng HI FPT</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-2" id="hiEditFields"></div>
+                    <datalist id="hiDlTinhTrang"></datalist>
+                    <datalist id="hiDlLoaiGD"></datalist>
+                    <datalist id="hiDlPhanLoai"></datalist>
+                    <datalist id="hiDlTuongTac"></datalist>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="button" class="btn btn-sm text-white" style="background:var(--brand);" id="hiEditSaveBtn" onclick="hiSaveEdit()">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Xem trước file import HI FPT -->
+    <div class="modal fade" id="hiImportModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold">Xem trước dữ liệu HI FPT trước khi nhập</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="hiImportPreview"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="button" class="btn btn-sm text-white" style="background:var(--brand);" id="hiImportConfirmBtn" onclick="hiConfirmImport()">Nhập vào hệ thống</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const WEB_APP_URL = "https://tpkt-backend.sayvv93.workers.dev/";
 
     let currentUser = null;
-    let sessionToken = null; // token phiên đăng nhập — đính kèm mọi request sau khi login
+    // Phiên đăng nhập: ưu tiên cookie HttpOnly do Worker đặt (JS không đọc được,
+    // an toàn hơn trước khi XSS). Chỉ khi trình duyệt chặn cookie bên thứ ba
+    // (VD Safari) mới giữ token trong sessionStorage (mất khi đóng tab), không
+    // còn lưu token ở localStorage.
+    let sessionToken = null;
+    const AUTH_MODE_KEY = 'tpkt_auth_mode';     // 'cookie' | 'token' (localStorage)
+    const SESSION_TOKEN_KEY = 'tpkt_session_token'; // chỉ dùng ở sessionStorage
+    localStorage.removeItem('tpkt_session_token'); // dọn token cũ từ bản trước
+    // Mở file trực tiếp trên máy (file://) thì trình duyệt gửi Origin "null" —
+    // không dùng được cookie phiên, tự chuyển sang chế độ token để vẫn test được.
+    const USE_COOKIE_AUTH = location.protocol === 'https:';
+    const CRED_MODE = USE_COOKIE_AUTH ? 'include' : 'omit';
     let globalData = [];
     let filteredDataCache = [];
 
     // Gọi API dùng chung — tự đính kèm token xác thực vào mọi request, và tự
     // đưa về màn hình đăng nhập nếu server báo phiên hết hạn/không hợp lệ (401).
+    // Sau khi đăng nhập: thử gọi API chỉ bằng cookie. Được → dùng cookie;
+    // không được (trình duyệt chặn cookie) → dùng token trong sessionStorage.
+    async function setupAuthAfterLogin(token) {
+        sessionToken = null;
+        let cookieOk = false;
+        if (USE_COOKIE_AUTH) try {
+            let r = await fetch(WEB_APP_URL + "api/ping", {
+                method: "POST", credentials: 'include',
+                headers: { "Content-Type": "application/json", "X-TPKT": "1" }, body: "{}"
+            });
+            cookieOk = r.ok;
+        } catch (e) { cookieOk = false; }
+        if (cookieOk) {
+            localStorage.setItem(AUTH_MODE_KEY, 'cookie');
+            sessionStorage.removeItem(SESSION_TOKEN_KEY);
+        } else {
+            sessionToken = token;
+            localStorage.setItem(AUTH_MODE_KEY, 'token');
+            sessionStorage.setItem(SESSION_TOKEN_KEY, token);
+        }
+    }
+
     async function apiFetch(path, options = {}) {
-        let headers = Object.assign({ "Content-Type": "application/json" }, options.headers || {});
+        let headers = Object.assign({ "Content-Type": "application/json", "X-TPKT": "1" }, options.headers || {});
         if (sessionToken) headers["Authorization"] = "Bearer " + sessionToken;
-        let response = await fetch(WEB_APP_URL + path, Object.assign({}, options, { headers }));
+        let response = await fetch(WEB_APP_URL + path, Object.assign({}, options, { headers, credentials: CRED_MODE }));
         if (response.status === 401 && path !== "api/login") {
             alert("Phiên đăng nhập đã hết hạn hoặc không hợp lệ, vui lòng đăng nhập lại.");
             handleLogout();
@@ -1334,7 +1656,7 @@
 
     // ================== SUPERADMIN: NHẬP DỮ LIỆU CA BẢO TRÌ MỚI ==================
     // Khác với "Nhập Excel" ở trên (chỉ cập nhật tpktCheck/xlLai cho dòng đã có),
-    // đây là kênh tạo THÊM dòng mới trong dataBT — chạy song song với n8n, dùng
+    // đây là kênh DUY NHẤT tạo thêm dòng mới trong dataBT (đã bỏ đồng bộ n8n), dùng
     // đúng khoá UNIQUE (soHopDong, tgTao) + ON CONFLICT DO NOTHING để không đè
     // mất dữ liệu đã có nếu lỡ import trùng ca cũ.
     function downloadNewDataTemplate() {
@@ -1508,15 +1830,21 @@
                 return;
             }
 
-            let res = await apiFetch("api/accounts/import-petonly", {
-                method: "POST",
-                body: JSON.stringify({ rows })
-            });
-            let result = await res.json();
-
-            if (!result.success) {
-                alert(result.error || "Import thất bại, vui lòng thử lại!");
-                return;
+            // Gửi từng tài khoản 1 request: mỗi mật khẩu phải băm PBKDF2 ở Worker,
+            // gộp 50 tài khoản/request dễ vượt giới hạn CPU của Cloudflare.
+            let result = { success: true, created: 0, skippedExists: 0, skippedInvalid: 0 };
+            for (let row of rows) {
+                let res = await apiFetch("api/accounts/import-petonly", {
+                    method: "POST",
+                    body: JSON.stringify({ rows: [row] })
+                });
+                let r = await res.json();
+                if (!r.success) {
+                    alert((r.error || "Import thất bại") + `\nĐã tạo trước đó: ${result.created} tài khoản.`);
+                    await fetchPetAccountsList();
+                    return;
+                }
+                result.created += r.created; result.skippedExists += r.skippedExists; result.skippedInvalid += r.skippedInvalid;
             }
 
             let msg = `Import hoàn tất:\n${result.created} tài khoản được tạo mới`;
@@ -1600,11 +1928,12 @@
         lastSyncTimestamp = localStorage.getItem('tpkt_last_sync_ts') || null;
 
         let savedUser = localStorage.getItem('tpkt_current_user');
-        let savedToken = localStorage.getItem('tpkt_session_token');
-        if (savedUser && savedToken) {
+        let savedMode = localStorage.getItem(AUTH_MODE_KEY);
+        let savedToken = sessionStorage.getItem(SESSION_TOKEN_KEY);
+        if (savedUser && (savedMode === 'cookie' || savedToken)) {
             try {
                 currentUser = JSON.parse(savedUser);
-                sessionToken = savedToken;
+                sessionToken = savedMode === 'cookie' ? null : savedToken;
                 // alias để toàn bộ logic filter cũ (dùng field "doiTac") vẫn chạy đúng
                 currentUser.doiTac = currentUser.doiTacQuanLy || "";
 
@@ -1698,8 +2027,8 @@
     // Đóng tab / tắt trình duyệt (không kịp bấm Đăng xuất) — vẫn cố báo offline
     // bằng sendBeacon, vì fetch thường không đảm bảo hoàn tất khi trang đang đóng.
     window.addEventListener('pagehide', () => {
-        if (currentUser && currentUser.username && sessionToken && navigator.sendBeacon) {
-            let payload = JSON.stringify({ offline: true, token: sessionToken });
+        if (currentUser && currentUser.username && navigator.sendBeacon) {
+            let payload = JSON.stringify(sessionToken ? { offline: true, token: sessionToken } : { offline: true });
             navigator.sendBeacon(WEB_APP_URL + "api/ping", new Blob([payload], { type: 'application/json' }));
         }
     });
@@ -1850,9 +2179,8 @@
             if (result.success) {
                 currentUser = result.user;
                 currentUser.doiTac = currentUser.doiTacQuanLy || "";
-                sessionToken = result.token;
+                await setupAuthAfterLogin(result.token);
                 localStorage.setItem('tpkt_current_user', JSON.stringify(currentUser));
-                localStorage.setItem('tpkt_session_token', sessionToken);
 
                 document.getElementById('loginOverlay').style.display = 'none';
                 initSessionUI();
@@ -1899,8 +2227,11 @@
         stopIdleWatcher();
         ltResetOnLogout();
         clearFilterSelections();
+        // Xoá cookie phiên ở server (cookie HttpOnly, JS không tự xoá được)
+        if (USE_COOKIE_AUTH) fetch(WEB_APP_URL + "api/logout", { method: "POST", credentials: 'include', keepalive: true }).catch(() => {});
         localStorage.removeItem('tpkt_current_user');
-        localStorage.removeItem('tpkt_session_token');
+        localStorage.removeItem(AUTH_MODE_KEY);
+        sessionStorage.removeItem(SESSION_TOKEN_KEY);
         localStorage.removeItem('tpkt_last_sync_ts');
         lastSyncTimestamp = null;
         currentUser = null;
@@ -1963,6 +2294,7 @@
         document.getElementById('dashboard-tab').classList.toggle('d-none', isPetOnly);
         document.getElementById('report-tab').classList.toggle('d-none', isPetOnly);
         document.getElementById('cll-tab').classList.toggle('d-none', isPetOnly);
+        document.getElementById('hifpt-tab').classList.toggle('d-none', isPetOnly);
         if (isPetOnly) {
             document.getElementById('phantich-tab').classList.add('d-none'); // luôn ẩn, bất kể isDoiTruongLocked()
             // Tab mặc định (TPKT Check) đang bị ẩn — chuyển sang tab Linh Thú.
@@ -2234,8 +2566,7 @@
     });
 
     // ================== TRÒ CHUYỆN NỘI BỘ ==================
-    // Cần Worker có thêm 2 route: GET /api/chat/messages?since_id=N và
-    // POST /api/chat/send { username, message } — xem hướng dẫn kèm theo.
+    // Chat: GET /api/chat/messages?since_id=N (Worker lọc nhật ký theo phạm vi) · POST /api/chat/send { message }
     const CHAT_POLL_INTERVAL_MS = 8 * 1000; // 8 giây
     let chatMessages = [];
     let lastChatId = 0;
@@ -2283,15 +2614,6 @@
                     <div class="chat-bubble" style="align-self:center; max-width:92%; width:100%;">
                         <div class="chat-meta"><i class="bi bi-journal-text me-1"></i>${escapeHtml(m.username)} · ${formatDateTime(m.created_at)}</div>
                         <div class="chat-text" style="display:block; background:#EEF4FB; border-color:#C9DAEE; font-family:'IBM Plex Mono', monospace; font-size:12px;">${escapeHtml(m.message)}</div>
-                    </div>
-                `;
-            }
-            let isSystem = m.username === 'Hệ Thống Linh Thú';
-            if (isSystem) {
-                return `
-                    <div class="chat-bubble" style="align-self:center; max-width:90%; text-align:center;">
-                        <div class="chat-meta">✨ ${escapeHtml(m.username)} · ${formatDateTime(m.created_at)}</div>
-                        <div class="chat-text" style="background:#FFFBEA; border-color:#E8D9A8; font-weight:600;">${escapeHtml(m.message)}</div>
                     </div>
                 `;
             }
@@ -2361,40 +2683,38 @@
     // (<= 50 ký tự), tự chọn 1 lô đất trống trong khu dân cư, và tự kéo thả thú
     // đi khắp sân — vị trí được lưu ở server nên mọi người cùng thấy.
     const LINH_THU_SPECIES = [
-        // Bậc chỉ còn mang tính PHÂN LOẠI/hiển thị nhóm — KHÔNG khoá chọn nữa,
-        // ai cũng chọn được cả 32 loài ngay từ Cấp 1.
-        { key: 'ga',          name: 'Gà',           emoji: '🐔', tier: 1, stages: ['Gà Con', 'Gà Trống Choai', 'Gà Chọi Vô Địch'] },
-        { key: 'vit',         name: 'Vịt',          emoji: '🦆', tier: 1, stages: ['Vịt Con', 'Vịt Xiêm Lớn', 'Vịt Trời Kiêu Hãnh'] },
-        { key: 'cho',         name: 'Chó',          emoji: '🐕', tier: 1, stages: ['Cún Con', 'Chó Vàng Trung Thành', 'Thần Khuyển Giữ Nhà'] },
-        { key: 'meo',         name: 'Mèo',          emoji: '🐈', tier: 1, stages: ['Mèo Con', 'Miêu Tinh Ranh', 'Miêu Linh Cửu Mạng'] },
-        { key: 'heo',         name: 'Heo',          emoji: '🐖', tier: 1, stages: ['Heo Sữa', 'Lợn Ỉ Núp', 'Heo Rừng Chúa Tể'] },
-        { key: 'trau',        name: 'Trâu',         emoji: '🐃', tier: 1, stages: ['Nghé Con', 'Trâu Kéo Cày', 'Trâu Chiến Tây Nguyên'] },
-        { key: 'cop',         name: 'Cọp',          emoji: '🐅', tier: 1, stages: ['Cọp Con', 'Cọp Trưởng Thành', 'Cọp Vương Rừng Xanh'] },
-        { key: 'cho_soi',     name: 'Chó Sói',      emoji: '🐺', tier: 1, stages: ['Sói Con', 'Sói Đầu Đàn', 'Sói Vương Tuyết Nguyên'] },
-        { key: 'gau_truc',    name: 'Gấu Trúc',     emoji: '🐼', tier: 1, stages: ['Gấu Trúc Con', 'Gấu Trúc Trưởng Thành', 'Trúc Lâm Gấu Thánh'] },
-        { key: 'co',          name: 'Cò',           emoji: '🦢', tier: 2, stages: ['Cò Con', 'Cò Trắng Đồng Quê', 'Bạch Hạc Tiên Nga'] },
-        { key: 'ca_chep',     name: 'Cá Chép',      emoji: '🐟', tier: 2, stages: ['Cá Chép Con', 'Cá Chép Vàng', 'Cá Chép Hoá Long'] },
-        { key: 'voi',         name: 'Voi',          emoji: '🐘', tier: 2, stages: ['Voi Con Tây Nguyên', 'Voi Chiến', 'Bạch Tượng Thần Uy'] },
-        { key: 'huou_sao',    name: 'Hươu Sao',     emoji: '🦌', tier: 2, stages: ['Hươu Sao Con', 'Hươu Vàng Ninh Bình', 'Lộc Thần Cửu Giác'] },
-        { key: 'cong',        name: 'Công',         emoji: '🦚', tier: 2, stages: ['Công Con', 'Khổng Tước Lam Ngọc', 'Khổng Tước Ngũ Sắc'] },
-        { key: 'voc',         name: 'Voọc',         emoji: '🙊', tier: 2, stages: ['Voọc Con', 'Voọc Chà Vá Ngũ Sắc', 'Sơn Tinh Voọc Vương'] },
-        { key: 'te_te',       name: 'Tê Tê',        emoji: '🦔', tier: 2, stages: ['Tê Tê Con', 'Xuyên Sơn Giáp', 'Thiết Giáp Tê Vương'] },
-        { key: 'seu_dau_do',  name: 'Sếu Đầu Đỏ',   emoji: '🦩', tier: 2, stages: ['Sếu Con Tràm Chim', 'Sếu Đầu Đỏ Kiêu Hùng', 'Hạc Đỏ Đồng Tháp Mười'] },
-        { key: 'ca_heo',      name: 'Cá Heo',       emoji: '🐬', tier: 2, stages: ['Cá Heo Con', 'Cá Heo Nhào Lộn', 'Hải Đình Linh Ngư'] },
-        { key: 'bach_tuoc',   name: 'Bạch Tuộc',    emoji: '🐙', tier: 2, stages: ['Bạch Tuộc Con', 'Bạch Tuộc Tám Vòi', 'Hắc Hải Bát Túc Vương'] },
-        { key: 'dai_bang',    name: 'Đại Bàng',     emoji: '🦅', tier: 2, stages: ['Đại Bàng Con', 'Đại Bàng Săn Mồi', 'Thiên Ưng Chúa Tể Bầu Trời'] },
-        { key: 'hoa_ho_ly',     name: 'Hỏa Hồ Ly',     emoji: '🦊', tier: 3, stages: ['Hồ Ly Lửa', 'Tam Vĩ Hồ', 'Cửu Vĩ Thiên Hồ'] },
-        { key: 'thanh_xa',      name: 'Thanh Xà',       emoji: '🐍', tier: 3, stages: ['Rắn Xanh Nhỏ', 'Giao Long', 'Ứng Long Tiểu Tôn'] },
-        { key: 'linh_quy',      name: 'Linh Quy',       emoji: '🐢', tier: 3, stages: ['Rùa Đất', 'Huyền Vũ Sơ Đại', 'Bắc Minh Thần Quy'] },
-        { key: 'u_minh_lang',   name: 'U Minh Lang',    emoji: '🐺', tier: 3, stages: ['Sói Bóng Đêm', 'Cuồng Phong Lang', 'Bát Hoang Lang Vương'] },
-        { key: 'kim_si_dieu',   name: 'Kim Sí Điểu',    emoji: '🦅', tier: 3, stages: ['Chim Sắt Vàng', 'Bằng Điểu', 'Côn Bằng Đại Thánh'] },
-        { key: 'thach_hau',     name: 'Thạch Hầu',      emoji: '🐒', tier: 3, stages: ['Khỉ Đá Sơ Khai', 'Linh Minh Thạch Hầu', 'Tề Thiên Đại Thánh'] },
-        { key: 'bang_phuong',   name: 'Băng Phượng',    emoji: '🕊️', tier: 3, stages: ['Chim Băng Nhỏ', 'Băng Băng Điểu', 'Cửu Thiên Băng Hoàng'] },
-        { key: 'loi_ho',        name: 'Lôi Hổ',         emoji: '🐯', tier: 3, stages: ['Hổ Sấm Sét', 'Bôn Lôi Hổ', 'Lôi Đình Thánh Sư'] },
-        { key: 'moc_thu_nhan',  name: 'Mộc Thụ Nhân',   emoji: '🌳', tier: 3, stages: ['Mầm Cây Linh', 'Sâm Lâm Cự Nhân', 'Mộc Thần Vĩnh Hằng'] },
-        { key: 'chan_long',     name: 'Chân Long',      emoji: '🐉', tier: 3, stages: ['Long Ngâm Ấu Trùng', 'Giao Long Hoàng', 'Tổ Long Hồng Hoang'] },
-        { key: 'ho',            name: 'Hổ',             emoji: '🐯', tier: 3, stages: ['Hổ Con', 'Chúa Sơn Lâm', 'Kim Hổ Tối Thượng'] },
-        { key: 'su_tu',         name: 'Sư Tử',          emoji: '🦁', tier: 3, stages: ['Sư Tử Con', 'Sư Tử Đầu Đàn', 'Sư Tử Vương Thảo Nguyên'] }
+        { key: 'ga',          name: 'Gà',           emoji: '🐔', tier: 1 },
+        { key: 'vit',         name: 'Vịt',          emoji: '🦆', tier: 1 },
+        { key: 'cho',         name: 'Chó',          emoji: '🐕', tier: 1 },
+        { key: 'meo',         name: 'Mèo',          emoji: '🐈', tier: 1 },
+        { key: 'heo',         name: 'Heo',          emoji: '🐖', tier: 1 },
+        { key: 'trau',        name: 'Trâu',         emoji: '🐃', tier: 1 },
+        { key: 'cop',         name: 'Cọp',          emoji: '🐅', tier: 1 },
+        { key: 'cho_soi',     name: 'Chó Sói',      emoji: '🐺', tier: 1 },
+        { key: 'gau_truc',    name: 'Gấu Trúc',     emoji: '🐼', tier: 1 },
+        { key: 'co',          name: 'Cò',           emoji: '🦢', tier: 2 },
+        { key: 'ca_chep',     name: 'Cá Chép',      emoji: '🐟', tier: 2 },
+        { key: 'voi',         name: 'Voi',          emoji: '🐘', tier: 2 },
+        { key: 'huou_sao',    name: 'Hươu Sao',     emoji: '🦌', tier: 2 },
+        { key: 'cong',        name: 'Công',         emoji: '🦚', tier: 2 },
+        { key: 'voc',         name: 'Voọc',         emoji: '🙊', tier: 2 },
+        { key: 'te_te',       name: 'Tê Tê',        emoji: '🦔', tier: 2 },
+        { key: 'seu_dau_do',  name: 'Sếu Đầu Đỏ',   emoji: '🦩', tier: 2 },
+        { key: 'ca_heo',      name: 'Cá Heo',       emoji: '🐬', tier: 2 },
+        { key: 'bach_tuoc',   name: 'Bạch Tuộc',    emoji: '🐙', tier: 2 },
+        { key: 'dai_bang',    name: 'Đại Bàng',     emoji: '🦅', tier: 2 },
+        { key: 'hoa_ho_ly',     name: 'Hỏa Hồ Ly',     emoji: '🦊', tier: 3 },
+        { key: 'thanh_xa',      name: 'Thanh Xà',       emoji: '🐍', tier: 3 },
+        { key: 'linh_quy',      name: 'Linh Quy',       emoji: '🐢', tier: 3 },
+        { key: 'u_minh_lang',   name: 'U Minh Lang',    emoji: '🐺', tier: 3 },
+        { key: 'kim_si_dieu',   name: 'Kim Sí Điểu',    emoji: '🦅', tier: 3 },
+        { key: 'thach_hau',     name: 'Thạch Hầu',      emoji: '🐒', tier: 3 },
+        { key: 'bang_phuong',   name: 'Băng Phượng',    emoji: '🕊️', tier: 3 },
+        { key: 'loi_ho',        name: 'Lôi Hổ',         emoji: '🐯', tier: 3 },
+        { key: 'moc_thu_nhan',  name: 'Mộc Thụ Nhân',   emoji: '🌳', tier: 3 },
+        { key: 'chan_long',     name: 'Chân Long',      emoji: '🐉', tier: 3 },
+        { key: 'ho',            name: 'Hổ',             emoji: '🐯', tier: 3 },
+        { key: 'su_tu',         name: 'Sư Tử',          emoji: '🦁', tier: 3 }
     ];
     const LINH_THU_TIER_NAMES = { 1: 'Nhóm Thường', 2: 'Nhóm Hiếm', 3: 'Nhóm Huyền Thoại' };
     const LT_NAME_MAX = 20;
@@ -2503,7 +2823,7 @@
     function ltEnsurePolling() {
         if (ltPollTimer) return;
         ltPollTimer = setInterval(() => {
-            if (sessionToken && ltTabActive() && !ltDragging && !document.hidden) fetchLinhThuPets();
+            if (currentUser && ltTabActive() && !ltDragging && !document.hidden) fetchLinhThuPets();
         }, LT_POLL_MS);
     }
 
@@ -2846,6 +3166,751 @@
     document.getElementById('linhthu-tab').addEventListener('hidden.bs.tab', () => {
         if (ltPickMode) ltSetPickMode(false);
     });
+
+    // ================== HI FPT (dataHI) ==================
+    // Báo cáo theo Đối tác / Đội trưởng / Nhân viên:
+    //  - Tỉ lệ cài đặt  = số ca có "Tình trạng kích hoạt" KHÁC "Chua kich hoat" / tổng ca
+    //  - Tỉ lệ tương tác = số ca "Có Gửi" có "Tương tác" = "Có" / số ca "Có Gửi"
+    // Phân quyền xem do Worker lọc (giống dataBT). Chỉ SuperAdmin được nhập/sửa/xoá.
+    const HI_FIELDS = ['doiTacQuanLy', 'doiTruong', 'blockQuanLy', 'soHopDong', 'ngayHoanTat',
+                       'nhanVien', 'tinhTrangKichHoat', 'loaiGiaoDich', 'phanLoaiGui', 'tuongTac'];
+    const HI_LABELS = {
+        doiTacQuanLy: 'Đối tác quản lý', doiTruong: 'Đội trưởng', blockQuanLy: 'Block quản lý',
+        soHopDong: 'Số hợp đồng', ngayHoanTat: 'Ngày hoàn tất', nhanVien: 'Nhân viên',
+        tinhTrangKichHoat: 'Tình trạng kích hoạt', loaiGiaoDich: 'Loại giao dịch',
+        phanLoaiGui: 'Phân loại gửi', tuongTac: 'Tương tác'
+    };
+    const HI_PAGE_SIZE = 50;
+    const HI_IMPORT_CHUNK = 500;
+    const HI_STALE_MS = 5 * 60 * 1000;
+
+    let hiData = [];
+    let hiFiltered = [];
+    let hiLoadedFor = null, hiLoadedAt = 0;
+    let hiGroupBy = 'doiTacQuanLy';
+    let hiGroupSort = { key: 'total', dir: -1 };
+    let hiPage = 1;
+    let hiEditingId = null;
+    let hiPendingImport = [];
+
+    function hiNorm(s) {
+        return String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().replace(/\s+/g, ' ').trim();
+    }
+    const hiIsInstalled = r => hiNorm(r.tinhTrangKichHoat) !== 'chua kich hoat';
+    const hiIsSent = r => hiNorm(r.phanLoaiGui) === 'co gui';
+    const hiIsInteract = r => hiIsSent(r) && hiNorm(r.tuongTac) === 'co';
+    function hiPct(a, b) { return b > 0 ? (a / b * 100) : null; }
+    function hiRateHtml(p) {
+        if (p === null) return '<span style="color:var(--slate-soft);">--</span>';
+        let cls = p >= 80 ? 'hi-good' : (p >= 50 ? 'hi-mid' : 'hi-bad');
+        return `<div class="hi-rate"><div class="bar"><span class="${cls}-bg" style="width:${Math.min(100, p).toFixed(1)}%"></span></div><span class="val ${cls}">${p.toFixed(1)}%</span></div>`;
+    }
+
+    // ---------- Tải dữ liệu ----------
+    async function hiFetchData(force) {
+        if (!currentUser || currentUser.role === 'petonly') return;
+        if (!force && hiLoadedFor === currentUser.username && Date.now() - hiLoadedAt < HI_STALE_MS) {
+            hiRenderAll();
+            return;
+        }
+        document.getElementById('hiDetailTable').innerHTML = '<tbody><tr><td class="text-center py-4 small" style="color:var(--slate);">Đang tải dữ liệu HI FPT...</td></tr></tbody>';
+        try {
+            let res = await apiFetch("api/hi/data", { method: "GET" });
+            let data = await res.json();
+            if (!res.ok) { alert(data.error || "Không tải được dữ liệu HI FPT"); return; }
+            hiData = data.dataHI || [];
+            // Parse ngày 1 lần (dùng cho lọc, sắp xếp, biểu đồ diễn biến)
+            hiData.forEach(r => { let d = parseFlexibleDate(r.ngayHoanTat); r._t = d ? d.getTime() : null; });
+            hiLoadedFor = currentUser.username;
+            hiLoadedAt = Date.now();
+            document.getElementById('hiLastLoaded').textContent = `Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN')} · ${hiData.length} dòng`;
+        } catch (e) {
+            console.error("Lỗi tải HI FPT:", e);
+            return;
+        }
+        hiInitFilters();
+        hiRenderAll();
+    }
+
+    // ---------- Bộ lọc (khoá theo phạm vi giống tab TPKT Check) ----------
+    function hiFillSelect(id, values, allLabel, keep) {
+        let sel = document.getElementById(id);
+        let cur = keep ? sel.value : '';
+        sel.innerHTML = `<option value="">${allLabel}</option>` +
+            values.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+        if (values.includes(cur)) sel.value = cur;
+    }
+    function hiUniq(rows, f) {
+        return [...new Set(rows.map(r => (r[f] || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'vi'));
+    }
+    function hiInitFilters() {
+        hiFillSelect('hiFilterDoiTac', hiUniq(hiData, 'doiTacQuanLy'), 'Tất cả Đối tác', true);
+        let dtSel = document.getElementById('hiFilterDoiTac');
+        if (isDoiTacLocked()) { dtSel.value = currentUser.doiTac; dtSel.disabled = true; } else dtSel.disabled = false;
+        hiFillSelect('hiFilterTinhTrang', hiUniq(hiData, 'tinhTrangKichHoat'), 'Tất cả tình trạng', true);
+        hiFillSelect('hiFilterTuongTac', hiUniq(hiData, 'tuongTac'), 'Tất cả', true);
+        hiOnFilterChange('init');
+    }
+    function hiOnFilterChange(level) {
+        let dt = document.getElementById('hiFilterDoiTac').value;
+        let base = hiData.filter(r => !dt || r.doiTacQuanLy === dt);
+        if (level !== 'doiTruong') {
+            hiFillSelect('hiFilterDoiTruong', hiUniq(base, 'doiTruong'), 'Tất cả Đội trưởng', true);
+        }
+        let dtrSel = document.getElementById('hiFilterDoiTruong');
+        if (isDoiTruongLocked()) {
+            if (![...dtrSel.options].some(o => o.value === currentUser.doiTruong)) dtrSel.add(new Option(currentUser.doiTruong, currentUser.doiTruong));
+            dtrSel.value = currentUser.doiTruong; dtrSel.disabled = true;
+        } else dtrSel.disabled = false;
+        let dtr = dtrSel.value;
+        hiFillSelect('hiFilterNhanVien', hiUniq(base.filter(r => !dtr || r.doiTruong === dtr), 'nhanVien'), 'Tất cả Nhân viên', true);
+        hiApplyFilters();
+    }
+    function hiResetFilters() {
+        ['hiFilterFrom', 'hiFilterTo', 'hiSearch'].forEach(id => document.getElementById(id).value = '');
+        ['hiFilterNhanVien', 'hiFilterTinhTrang', 'hiFilterTuongTac'].forEach(id => document.getElementById(id).value = '');
+        if (!isDoiTacLocked()) document.getElementById('hiFilterDoiTac').value = '';
+        if (!isDoiTruongLocked()) document.getElementById('hiFilterDoiTruong').value = '';
+        hiGroupBy = 'doiTacQuanLy';
+        hiOnFilterChange('doiTac');
+    }
+    function hiApplyFilters() {
+        let dt = document.getElementById('hiFilterDoiTac').value;
+        let dtr = document.getElementById('hiFilterDoiTruong').value;
+        let nv = document.getElementById('hiFilterNhanVien').value;
+        let tt = document.getElementById('hiFilterTinhTrang').value;
+        let tg = document.getElementById('hiFilterTuongTac').value;
+        let q = document.getElementById('hiSearch').value.trim().toUpperCase();
+        let from = document.getElementById('hiFilterFrom').value;
+        let to = document.getElementById('hiFilterTo').value;
+        let fromD = from ? new Date(from + 'T00:00:00') : null;
+        let toD = to ? new Date(to + 'T23:59:59') : null;
+        hiFiltered = hiData.filter(r => {
+            if (dt && r.doiTacQuanLy !== dt) return false;
+            if (dtr && r.doiTruong !== dtr) return false;
+            if (nv && r.nhanVien !== nv) return false;
+            if (tt && r.tinhTrangKichHoat !== tt) return false;
+            if (tg && r.tuongTac !== tg) return false;
+            if (q && !String(r.soHopDong || '').toUpperCase().includes(q)) return false;
+            if (fromD || toD) {
+                if (!r._t) return false;
+                if (fromD && r._t < fromD.getTime()) return false;
+                if (toD && r._t > toD.getTime()) return false;
+            }
+            return true;
+        });
+        hiPage = 1;
+        hiRenderAll();
+    }
+
+    // ---------- Render ----------
+    function hiRenderAll() {
+        document.getElementById('hiAdminBar').classList.toggle('d-none', !(currentUser && currentUser.role === 'superadmin'));
+        document.querySelectorAll('#hiGroupSeg button').forEach(b => b.classList.toggle('active', b.dataset.group === hiGroupBy));
+        hiRenderKpis();
+        hiRenderCharts();
+        hiRenderGroupTable();
+        hiRenderDetail();
+    }
+    function hiStats(rows) {
+        let total = rows.length, installed = 0, sent = 0, interact = 0;
+        rows.forEach(r => { if (hiIsInstalled(r)) installed++; if (hiIsSent(r)) { sent++; if (hiIsInteract(r)) interact++; } });
+        return { total, installed, notInstalled: total - installed, installRate: hiPct(installed, total), sent, interact, interactRate: hiPct(interact, sent) };
+    }
+    function hiRenderKpis() {
+        let s = hiStats(hiFiltered);
+        document.getElementById('hiKpiTotal').textContent = s.total.toLocaleString('vi-VN');
+        document.getElementById('hiKpiInstalled').textContent = s.installed.toLocaleString('vi-VN');
+        document.getElementById('hiKpiInstallRate').textContent = s.installRate === null ? '--' : s.installRate.toFixed(1) + '%';
+        document.getElementById('hiKpiSent').textContent = s.sent.toLocaleString('vi-VN');
+        document.getElementById('hiKpiInteract').textContent = s.interact.toLocaleString('vi-VN');
+        document.getElementById('hiKpiInteractRate').textContent = s.interactRate === null ? '--' : s.interactRate.toFixed(1) + '%';
+    }
+    function hiRenderGroupTable() {
+        let groups = new Map();
+        hiFiltered.forEach(r => {
+            let key = (r[hiGroupBy] || '').trim() || '(trống)';
+            if (!groups.has(key)) groups.set(key, { key, rows: [], doiTruong: r.doiTruong, doiTac: r.doiTacQuanLy });
+            groups.get(key).rows.push(r);
+        });
+        let list = [...groups.values()].map(g => Object.assign(g, hiStats(g.rows)));
+        let k = hiGroupSort.key, dir = hiGroupSort.dir;
+        list.sort((a, b) => {
+            let va = a[k], vb = b[k];
+            if (k === 'key') return dir * String(va).localeCompare(String(vb), 'vi');
+            return dir * ((va ?? -1) - (vb ?? -1));
+        });
+        let isNv = hiGroupBy === 'nhanVien';
+        let firstLabel = { doiTacQuanLy: 'Đối tác', doiTruong: 'Đội trưởng', nhanVien: 'Nhân viên' }[hiGroupBy];
+        const th = (key, label, cls = '') => {
+            let arrow = hiGroupSort.key === key ? (hiGroupSort.dir > 0 ? ' ▲' : ' ▼') : '';
+            return `<th class="sortable ${cls}" data-sort="${key}">${label}${arrow}</th>`;
+        };
+        let head = `<thead><tr>${th('key', firstLabel)}${isNv ? '<th>Đội trưởng</th>' : ''}
+            ${th('total', 'Tổng ca', 'text-end')}${th('installed', 'Đã cài', 'text-end')}${th('notInstalled', 'Chưa cài', 'text-end')}
+            ${th('installRate', 'Tỉ lệ cài đặt')}${th('sent', 'Có gửi', 'text-end')}${th('interact', 'Có tương tác', 'text-end')}
+            ${th('interactRate', 'Tỉ lệ tương tác')}</tr></thead>`;
+        if (list.length === 0) {
+            document.getElementById('hiGroupTable').innerHTML = head + `<tbody><tr><td colspan="${isNv ? 9 : 8}" class="text-center py-4 small" style="color:var(--slate);">Không có dữ liệu phù hợp bộ lọc.</td></tr></tbody>`;
+            return;
+        }
+        let canDrill = hiGroupBy !== 'nhanVien';
+        let body = list.map(g => `
+            <tr class="${canDrill ? 'hi-group-row' : ''}" data-key="${escapeHtml(g.key)}">
+                <td class="fw-semibold">${escapeHtml(g.key)}</td>${isNv ? `<td class="small">${escapeHtml(g.doiTruong || '')}</td>` : ''}
+                <td class="text-end mono">${g.total}</td><td class="text-end mono">${g.installed}</td>
+                <td class="text-end mono" style="color:${g.notInstalled ? 'var(--red)' : 'inherit'};">${g.notInstalled}</td>
+                <td>${hiRateHtml(g.installRate)}</td>
+                <td class="text-end mono">${g.sent}</td><td class="text-end mono">${g.interact}</td>
+                <td>${hiRateHtml(g.interactRate)}</td>
+            </tr>`).join('');
+        let t = hiStats(hiFiltered);
+        let foot = `<tr class="hi-total-row"><td>TỔNG</td>${isNv ? '<td></td>' : ''}<td class="text-end mono">${t.total}</td><td class="text-end mono">${t.installed}</td>
+            <td class="text-end mono">${t.notInstalled}</td><td>${hiRateHtml(t.installRate)}</td><td class="text-end mono">${t.sent}</td>
+            <td class="text-end mono">${t.interact}</td><td>${hiRateHtml(t.interactRate)}</td></tr>`;
+        document.getElementById('hiGroupTable').innerHTML = head + `<tbody>${body}${foot}</tbody>`;
+    }
+    function hiTag(text, kind) { return text ? `<span class="hi-tag ${kind}">${escapeHtml(text)}</span>` : ''; }
+    function hiRenderDetail() {
+        let isSA = currentUser && currentUser.role === 'superadmin';
+        let rows = hiFiltered.slice().sort((a, b) => (b._t || 0) - (a._t || 0));
+        let pages = Math.max(1, Math.ceil(rows.length / HI_PAGE_SIZE));
+        hiPage = Math.min(hiPage, pages);
+        let slice = rows.slice((hiPage - 1) * HI_PAGE_SIZE, hiPage * HI_PAGE_SIZE);
+        document.getElementById('hiDetailCount').textContent = `— ${rows.length.toLocaleString('vi-VN')} dòng`;
+        let head = `<thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Block</th><th>Số HĐ</th><th>Ngày hoàn tất</th><th>Nhân viên</th>
+            <th>Tình trạng kích hoạt</th><th>Loại giao dịch</th><th>Phân loại gửi</th><th>Tương tác</th>${isSA ? '<th class="text-end">Thao tác</th>' : ''}</tr></thead>`;
+        let body = slice.length === 0
+            ? `<tr><td colspan="${isSA ? 11 : 10}" class="text-center py-4 small" style="color:var(--slate);">Không có dữ liệu.</td></tr>`
+            : slice.map(r => `
+                <tr>
+                    <td>${escapeHtml(r.doiTacQuanLy || '')}</td><td>${escapeHtml(r.doiTruong || '')}</td>
+                    <td class="small">${escapeHtml(r.blockQuanLy || '')}</td><td class="fw-bold mono">${escapeHtml(r.soHopDong || '')}</td>
+                    <td class="mono small">${escapeHtml(r.ngayHoanTat || '')}</td><td class="small">${escapeHtml(r.nhanVien || '')}</td>
+                    <td>${hiTag(r.tinhTrangKichHoat, hiIsInstalled(r) ? 'ok' : 'no')}</td>
+                    <td class="small">${escapeHtml(r.loaiGiaoDich || '')}</td>
+                    <td>${hiTag(r.phanLoaiGui, hiIsSent(r) ? 'ok' : 'neutral')}</td>
+                    <td>${hiTag(r.tuongTac, hiIsInteract(r) ? 'ok' : (hiIsSent(r) ? 'no' : 'neutral'))}</td>
+                    ${isSA ? `<td class="text-end text-nowrap">
+                        <button class="btn btn-sm btn-link p-0 me-2" title="Sửa" onclick="hiOpenEditModal(${r.id})"><i class="bi bi-pencil-square"></i></button>
+                        <button class="btn btn-sm btn-link p-0 text-danger" title="Xoá" onclick="hiDeleteRow(${r.id})"><i class="bi bi-trash"></i></button>
+                    </td>` : ''}
+                </tr>`).join('');
+        document.getElementById('hiDetailTable').innerHTML = head + `<tbody>${body}</tbody>`;
+        // Phân trang gọn: đầu, cuối, và quanh trang hiện tại
+        let pg = document.getElementById('hiPagination');
+        let nums = [...new Set([1, pages, hiPage - 1, hiPage, hiPage + 1].filter(n => n >= 1 && n <= pages))].sort((a, b) => a - b);
+        let html = '', prev = 0;
+        nums.forEach(n => {
+            if (n - prev > 1) html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+            html += `<li class="page-item ${n === hiPage ? 'active' : ''}"><a class="page-link" href="#" data-hipage="${n}">${n}</a></li>`;
+            prev = n;
+        });
+        pg.innerHTML = pages > 1 ? html : '';
+    }
+
+    document.getElementById('hiPagination').addEventListener('click', e => {
+        let a = e.target.closest('[data-hipage]');
+        if (!a) return;
+        e.preventDefault();
+        hiPage = parseInt(a.dataset.hipage, 10);
+        hiRenderDetail();
+    });
+    document.getElementById('hiGroupSeg').addEventListener('click', e => {
+        let b = e.target.closest('button[data-group]');
+        if (!b) return;
+        hiGroupBy = b.dataset.group;
+        hiRenderAll();
+    });
+    document.getElementById('hiGroupTable').addEventListener('click', e => {
+        let th = e.target.closest('th[data-sort]');
+        if (th) {
+            let k = th.dataset.sort;
+            hiGroupSort = { key: k, dir: hiGroupSort.key === k ? -hiGroupSort.dir : (k === 'key' ? 1 : -1) };
+            hiRenderGroupTable();
+            return;
+        }
+        // Bấm 1 dòng: lọc xuống cấp dưới (Đối tác → Đội trưởng → Nhân viên)
+        let tr = e.target.closest('tr.hi-group-row');
+        if (tr) hiDrillDown(tr.dataset.key);
+    });
+
+    // Lọc xuống cấp dưới: Đối tác → Đội trưởng → Nhân viên (dùng chung cho bảng và biểu đồ xếp hạng)
+    function hiDrillDown(key) {
+        if (!key || key === '(trống)') return;
+        if (hiGroupBy === 'doiTacQuanLy') {
+            if (!isDoiTacLocked()) document.getElementById('hiFilterDoiTac').value = key;
+            hiGroupBy = 'doiTruong';
+            hiOnFilterChange('doiTac');
+        } else if (hiGroupBy === 'doiTruong') {
+            if (!isDoiTruongLocked()) document.getElementById('hiFilterDoiTruong').value = key;
+            hiGroupBy = 'nhanVien';
+            hiOnFilterChange('doiTruong');
+        }
+    }
+
+    // ---------- Xuất Excel (theo bộ lọc hiện tại) ----------
+    function hiExportExcel() {
+        if (typeof XLSX === 'undefined') { alert("Thư viện Excel chưa tải xong."); return; }
+        let wb = XLSX.utils.book_new();
+        let detail = hiFiltered.map(r => { let o = {}; HI_FIELDS.forEach(f => o[HI_LABELS[f]] = r[f] || ''); return o; });
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detail), 'Chi tiết');
+        [['doiTacQuanLy', 'Theo Đối tác'], ['doiTruong', 'Theo Đội trưởng'], ['nhanVien', 'Theo Nhân viên']].forEach(([f, name]) => {
+            let g = new Map();
+            hiFiltered.forEach(r => { let k = r[f] || '(trống)'; if (!g.has(k)) g.set(k, []); g.get(k).push(r); });
+            let rows = [...g.entries()].map(([k, rs]) => {
+                let s = hiStats(rs);
+                return { [HI_LABELS[f]]: k, 'Tổng ca': s.total, 'Đã cài': s.installed, 'Chưa cài': s.notInstalled,
+                    'Tỉ lệ cài (%)': s.installRate === null ? '' : +s.installRate.toFixed(1),
+                    'Có gửi': s.sent, 'Có tương tác': s.interact,
+                    'Tỉ lệ tương tác (%)': s.interactRate === null ? '' : +s.interactRate.toFixed(1) };
+            }).sort((a, b) => b['Tổng ca'] - a['Tổng ca']);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), name);
+        });
+        XLSX.writeFile(wb, `HI_FPT_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    }
+
+    // ---------- SuperAdmin: file mẫu + nhập Excel ----------
+    function hiDownloadTemplate() {
+        let sample = [
+            { 'Đối tác quản lý': 'DNI05', 'Đội trưởng': 'Nguyễn Minh Tân', 'Block quản lý': 'Phuong Binh Phuoc-001', 'Số hợp đồng': 'BPAAA0201',
+              'Ngày hoàn tất': '27/09/2026 09:43:43', 'Nhân viên': 'BPCPN.PHUNT3', 'Tình trạng kích hoạt': 'Kich hoat truoc Trien Khai',
+              'Loại giao dịch': 'Khôi phục dịch vụ', 'Phân loại gửi': 'Không Gửi', 'Tương tác': 'Loại' },
+            { 'Đối tác quản lý': 'DNI05', 'Đội trưởng': 'Nguyễn Minh Tân', 'Block quản lý': 'TPDong Xoai-003', 'Số hợp đồng': 'BPAAA0372',
+              'Ngày hoàn tất': '19/09/2026 16:20:34', 'Nhân viên': 'BPCPN.MANHD', 'Tình trạng kích hoạt': 'Chua kich hoat',
+              'Loại giao dịch': 'KH nâng cấp dịch vụ gia tăng', 'Phân loại gửi': 'Có Gửi', 'Tương tác': 'Không' }
+        ];
+        let ws = XLSX.utils.json_to_sheet(sample);
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Import');
+        XLSX.writeFile(wb, 'mau_import_HI_FPT.xlsx');
+    }
+
+    // Tiêu đề cột: nhận cả tiếng Việt có dấu (đúng như sheet "Import") lẫn tên trường camelCase.
+    const HI_HEADER_MAP = {
+        doitacquanly: 'doiTacQuanLy', doitac: 'doiTacQuanLy', doitruong: 'doiTruong', blockquanly: 'blockQuanLy',
+        sohopdong: 'soHopDong', sohd: 'soHopDong', ngayhoantat: 'ngayHoanTat', nhanvien: 'nhanVien',
+        tinhtrangkichhoat: 'tinhTrangKichHoat', loaigiaodich: 'loaiGiaoDich', phanloaigui: 'phanLoaiGui', tuongtac: 'tuongTac'
+    };
+    const hiPad = n => String(n).padStart(2, '0');
+    // Ngày: ô kiểu ngày thật của Excel/Google Sheet (số serial) đổi thẳng sang
+    // dd/mm/yyyy hh:mm:ss; ô dạng chữ dd/mm/yyyy được chuẩn hoá lại cho đủ số.
+    function hiNormalizeDate(v) {
+        if (typeof v === 'number' && isFinite(v)) {
+            let p = XLSX.SSF.parse_date_code(v);
+            if (!p) return '';
+            return `${hiPad(p.d)}/${hiPad(p.m)}/${p.y} ${hiPad(p.H)}:${hiPad(p.M)}:${hiPad(Math.floor(p.S))}`;
+        }
+        let s = String(v ?? '').trim();
+        let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+        if (!m) return s;
+        return `${hiPad(m[1])}/${hiPad(m[2])}/${m[3]} ${hiPad(m[4] || 0)}:${m[5] || '00'}:${m[6] || '00'}`;
+    }
+
+    // Giống quy tắc ở Worker (Worker mới là nơi áp dụng thật) — làm ở đây để màn
+    // xem trước hiện đúng số liệu sẽ được ghi.
+    function hiAutoFixRow(row) {
+        let st = hiNorm(row.tinhTrangKichHoat);
+        if (hiNorm(row.tuongTac) === 'co' && (st === 'chua kich hoat' || st === '')) {
+            row.tinhTrangKichHoat = 'Kich hoat khi Trien Khai';
+            return true;
+        }
+        return false;
+    }
+
+    async function hiHandleImportFile(event) {
+        let file = event.target.files[0];
+        event.target.value = '';
+        if (!file) return;
+        if (typeof XLSX === 'undefined') { alert("Thư viện Excel chưa tải xong, vui lòng thử lại."); return; }
+        let wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+        let sheet = wb.Sheets[wb.SheetNames[0]];
+        let raw = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: true });
+        if (raw.length === 0) { alert("File không có dữ liệu!"); return; }
+
+        let headerKeys = Object.keys(raw[0]);
+        let colMap = {};
+        headerKeys.forEach(h => { let f = HI_HEADER_MAP[hiNorm(h).replace(/[^a-z0-9]/g, '')]; if (f) colMap[h] = f; });
+        let missing = ['doiTacQuanLy', 'soHopDong', 'ngayHoanTat'].filter(f => !Object.values(colMap).includes(f));
+        if (missing.length) {
+            alert(`File thiếu cột bắt buộc: ${missing.map(f => HI_LABELS[f]).join(', ')}.\nHãy dùng "Tải file mẫu" để xem đúng tiêu đề cột.`);
+            return;
+        }
+
+        let errors = [], byKey = new Map(), dupInFile = 0;
+        raw.forEach((r, i) => {
+            let row = {};
+            HI_FIELDS.forEach(f => row[f] = '');
+            Object.entries(colMap).forEach(([h, f]) => {
+                row[f] = f === 'ngayHoanTat' ? hiNormalizeDate(r[h]) : String(r[h] ?? '').trim();
+            });
+            if (!row.soHopDong && !row.doiTacQuanLy && !row.ngayHoanTat) return; // dòng trống
+            if (!row.soHopDong || !row.doiTacQuanLy || !row.ngayHoanTat) { errors.push(`Dòng ${i + 2}: thiếu Số HĐ / Đối tác / Ngày hoàn tất`); return; }
+            if (!/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/.test(row.ngayHoanTat)) { errors.push(`Dòng ${i + 2} (${row.soHopDong}): Ngày hoàn tất "${row.ngayHoanTat}" không đọc được`); return; }
+            let key = row.soHopDong + '||' + row.ngayHoanTat;
+            if (byKey.has(key)) dupInFile++;
+            hiAutoFixRow(row);
+            byKey.set(key, row);
+        });
+        hiPendingImport = [...byKey.values()];
+
+        let existingKeys = new Set(hiData.map(r => r.soHopDong + '||' + r.ngayHoanTat));
+        let willUpdate = hiPendingImport.filter(r => existingKeys.has(r.soHopDong + '||' + r.ngayHoanTat)).length;
+        let st = hiStats(hiPendingImport);
+        let byDt = {};
+        hiPendingImport.forEach(r => byDt[r.doiTacQuanLy] = (byDt[r.doiTacQuanLy] || 0) + 1);
+        let ignored = headerKeys.filter(h => !colMap[h]);
+
+        document.getElementById('hiImportPreview').innerHTML = `
+            <div class="row g-2 mb-3 small">
+                <div class="col-md-3"><b>${hiPendingImport.length.toLocaleString('vi-VN')}</b> dòng hợp lệ</div>
+                <div class="col-md-3">≈ <b>${(hiPendingImport.length - willUpdate).toLocaleString('vi-VN')}</b> thêm mới · <b>${willUpdate.toLocaleString('vi-VN')}</b> cập nhật</div>
+                <div class="col-md-3">Tỉ lệ cài: <b>${st.installRate === null ? '--' : st.installRate.toFixed(1) + '%'}</b></div>
+                <div class="col-md-3">Tỉ lệ tương tác: <b>${st.interactRate === null ? '--' : st.interactRate.toFixed(1) + '%'}</b></div>
+            </div>
+            <div class="small mb-2"><b>Theo đối tác:</b> ${Object.entries(byDt).map(([k, v]) => `${escapeHtml(k)} (${v})`).join(' · ')}</div>
+            ${dupInFile ? `<div class="small mb-2" style="color:var(--amber);">${dupInFile} dòng trùng Số HĐ + Ngày hoàn tất trong file — chỉ giữ dòng cuối.</div>` : ''}
+            ${ignored.length ? `<div class="small mb-2" style="color:var(--slate-soft);">Bỏ qua cột không dùng: ${ignored.map(escapeHtml).join(', ')}</div>` : ''}
+            ${errors.length ? `<div class="alert alert-danger small py-2"><b>${errors.length} dòng lỗi (sẽ không nhập):</b><br>${errors.slice(0, 10).map(escapeHtml).join('<br>')}${errors.length > 10 ? `<br>… và ${errors.length - 10} dòng khác` : ''}</div>` : ''}
+            <div class="small fw-bold mb-1">5 dòng đầu — kiểm tra kỹ cột Ngày hoàn tất (phải đúng ngày/tháng):</div>
+            <div class="table-responsive"><table class="table table-sm table-bordered small mb-0">
+                <thead><tr>${HI_FIELDS.map(f => `<th>${HI_LABELS[f]}</th>`).join('')}</tr></thead>
+                <tbody>${hiPendingImport.slice(0, 5).map(r => `<tr>${HI_FIELDS.map(f => `<td>${escapeHtml(r[f])}</td>`).join('')}</tr>`).join('')}</tbody>
+            </table></div>`;
+        document.getElementById('hiImportConfirmBtn').disabled = hiPendingImport.length === 0;
+        document.getElementById('hiImportConfirmBtn').textContent = 'Nhập vào hệ thống';
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('hiImportModal')).show();
+    }
+
+    async function hiConfirmImport() {
+        if (hiPendingImport.length === 0) return;
+        let btn = document.getElementById('hiImportConfirmBtn');
+        btn.disabled = true;
+        let inserted = 0, updated = 0;
+        try {
+            for (let i = 0; i < hiPendingImport.length; i += HI_IMPORT_CHUNK) {
+                btn.textContent = `Đang nhập ${Math.min(i + HI_IMPORT_CHUNK, hiPendingImport.length)}/${hiPendingImport.length}...`;
+                let res = await apiFetch("api/hi/import", { method: "POST", body: JSON.stringify({ rows: hiPendingImport.slice(i, i + HI_IMPORT_CHUNK) }) });
+                let r = await res.json();
+                if (!r.success) {
+                    alert(`Dừng ở dòng ${i + 1}: ${r.error || 'lỗi không xác định'}\nĐã nhập trước đó: ${inserted} thêm mới, ${updated} cập nhật.`);
+                    break;
+                }
+                inserted += r.inserted; updated += r.updated;
+            }
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('hiImportModal')).hide();
+            alert(`Hoàn tất: ${inserted} dòng thêm mới, ${updated} dòng cập nhật.`);
+        } catch (e) {
+            console.error("Lỗi nhập HI FPT:", e);
+            alert("Lỗi kết nối khi nhập dữ liệu, vui lòng kiểm tra lại.");
+        } finally {
+            btn.disabled = false;
+            hiPendingImport = [];
+            hiFetchData(true);
+        }
+    }
+
+    // ---------- SuperAdmin: sửa / thêm / xoá 1 dòng ----------
+    function hiOpenEditModal(id) {
+        hiEditingId = id;
+        let row = id ? hiData.find(r => r.id === id) : null;
+        if (id && !row) return;
+        document.getElementById('hiEditTitle').textContent = row ? `Sửa dòng HI FPT — ${row.soHopDong}` : 'Thêm dòng HI FPT';
+        [['hiDlTinhTrang', 'tinhTrangKichHoat'], ['hiDlLoaiGD', 'loaiGiaoDich'], ['hiDlPhanLoai', 'phanLoaiGui'], ['hiDlTuongTac', 'tuongTac']]
+            .forEach(([dl, f]) => document.getElementById(dl).innerHTML = hiUniq(hiData, f).map(v => `<option value="${escapeHtml(v)}">`).join(''));
+        const lists = { tinhTrangKichHoat: 'hiDlTinhTrang', loaiGiaoDich: 'hiDlLoaiGD', phanLoaiGui: 'hiDlPhanLoai', tuongTac: 'hiDlTuongTac' };
+        document.getElementById('hiEditFields').innerHTML = HI_FIELDS.map(f => `
+            <div class="col-md-6">
+                <label class="small fw-bold mb-1" style="color:var(--slate);">${HI_LABELS[f]}${['doiTacQuanLy', 'soHopDong', 'ngayHoanTat'].includes(f) ? ' *' : ''}</label>
+                <input type="text" class="form-control form-control-sm" data-hifield="${f}" value="${escapeHtml(row ? row[f] || '' : '')}"
+                    ${lists[f] ? `list="${lists[f]}"` : ''} ${f === 'ngayHoanTat' ? 'placeholder="dd/mm/yyyy hh:mm:ss"' : ''}>
+            </div>`).join('');
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('hiEditModal')).show();
+    }
+
+    async function hiSaveEdit() {
+        let row = {};
+        document.querySelectorAll('#hiEditFields [data-hifield]').forEach(i => row[i.dataset.hifield] = i.value.trim());
+        row.ngayHoanTat = hiNormalizeDate(row.ngayHoanTat);
+        if (!row.soHopDong || !row.doiTacQuanLy || !/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/.test(row.ngayHoanTat)) {
+            alert("Cần nhập Đối tác, Số HĐ và Ngày hoàn tất đúng dạng dd/mm/yyyy hh:mm:ss");
+            return;
+        }
+        let btn = document.getElementById('hiEditSaveBtn');
+        btn.disabled = true;
+        try {
+            let res = hiEditingId
+                ? await apiFetch("api/hi/update", { method: "POST", body: JSON.stringify({ id: hiEditingId, row }) })
+                : await apiFetch("api/hi/import", { method: "POST", body: JSON.stringify({ rows: [row] }) });
+            let r = await res.json();
+            if (!r.success) { alert(r.error || "Không lưu được!"); return; }
+            if (!hiEditingId && r.updated > 0) alert("Đã có dòng cùng Số HĐ + Ngày hoàn tất — dòng đó đã được cập nhật theo nội dung mới.");
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('hiEditModal')).hide();
+            await hiFetchData(true);
+        } catch (e) {
+            console.error("Lỗi lưu HI FPT:", e);
+            alert("Lỗi kết nối, vui lòng thử lại!");
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    async function hiDeleteRow(id) {
+        let row = hiData.find(r => r.id === id);
+        if (!row || !confirm(`Xoá dòng ${row.soHopDong} (${row.ngayHoanTat})? Không thể hoàn tác.`)) return;
+        try {
+            let res = await apiFetch("api/hi/delete", { method: "POST", body: JSON.stringify({ id }) });
+            let r = await res.json();
+            if (!r.success) { alert(r.error || "Không xoá được!"); return; }
+            await hiFetchData(true);
+        } catch (e) { console.error("Lỗi xoá HI FPT:", e); }
+    }
+
+    // ---------- Biểu đồ báo cáo (dành cho Ban giám đốc xem) ----------
+    let hiCharts = {};
+    let hiRankMetric = 'interactRate';
+    const HI_COLOR_GOOD = '#3F7D1F', HI_COLOR_MID = '#E3A23B', HI_COLOR_BAD = '#AC2B22';
+    function hiRateColor(p) { return p === null ? '#C9CEC6' : (p >= 80 ? HI_COLOR_GOOD : (p >= 50 ? HI_COLOR_MID : HI_COLOR_BAD)); }
+    function hiDestroyChart(name) { if (hiCharts[name]) { hiCharts[name].destroy(); delete hiCharts[name]; } }
+    const hiGroupLabel = { doiTacQuanLy: 'Đối tác', doiTruong: 'Đội trưởng', nhanVien: 'Nhân viên' };
+
+    function hiGroupStats(rows, field) {
+        let m = new Map();
+        rows.forEach(r => {
+            let k = (r[field] || '').trim() || '(trống)';
+            if (!m.has(k)) m.set(k, { key: k, rows: [], doiTruong: r.doiTruong, doiTac: r.doiTacQuanLy });
+            m.get(k).rows.push(r);
+        });
+        return [...m.values()].map(g => Object.assign(g, hiStats(g.rows)));
+    }
+
+    function hiRenderScopeChip() {
+        let parts = [];
+        ['hiFilterDoiTac', 'hiFilterDoiTruong', 'hiFilterNhanVien', 'hiFilterTinhTrang', 'hiFilterTuongTac'].forEach(id => {
+            let v = document.getElementById(id).value; if (v) parts.push(v);
+        });
+        let f = document.getElementById('hiFilterFrom').value, t = document.getElementById('hiFilterTo').value;
+        const vn = d => d.split('-').reverse().join('/');
+        if (f || t) parts.push(`${f ? vn(f) : '…'} → ${t ? vn(t) : '…'}`);
+        let q = document.getElementById('hiSearch').value.trim(); if (q) parts.push(`HĐ "${q}"`);
+        document.getElementById('hiScopeChip').textContent = parts.length ? parts.join(' · ') : 'Toàn bộ phạm vi';
+    }
+
+    function hiGauge(name, canvasId, rate) {
+        hiDestroyChart(name);
+        let v = rate === null ? 0 : rate;
+        hiCharts[name] = new Chart(document.getElementById(canvasId), {
+            type: 'doughnut',
+            data: { datasets: [{ data: [v, 100 - v], backgroundColor: [hiRateColor(rate), '#EDEFEA'], borderWidth: 0, borderRadius: [6, 0] }] },
+            options: { responsive: true, maintainAspectRatio: false, rotation: -90, circumference: 180, cutout: '74%',
+                plugins: { legend: { display: false }, tooltip: { enabled: false } }, animation: { duration: 700 } }
+        });
+    }
+
+    // Vạch đứt "trung bình chung" trên biểu đồ xếp hạng (cột ngang)
+    const hiAvgLinePlugin = {
+        id: 'hiAvgLine',
+        afterDatasetsDraw(chart, args, opts) {
+            if (opts.value === null || opts.value === undefined) return;
+            let x = chart.scales.x.getPixelForValue(opts.value), { top, bottom } = chart.chartArea, c = chart.ctx;
+            c.save(); c.setLineDash([5, 4]); c.strokeStyle = '#12181B'; c.lineWidth = 1.3;
+            c.beginPath(); c.moveTo(x, top); c.lineTo(x, bottom); c.stroke();
+            c.setLineDash([]); c.fillStyle = '#12181B'; c.font = '600 11px IBM Plex Sans, sans-serif'; c.textAlign = 'center';
+            c.fillText(`TB ${opts.value.toFixed(1)}%`, x, top - 4);
+            c.restore();
+        }
+    };
+
+    function hiRenderCharts() {
+        if (typeof Chart === 'undefined') return;
+        let s = hiStats(hiFiltered);
+        hiRenderScopeChip();
+
+        // 1) Hai đồng hồ tỉ lệ
+        hiGauge('gInst', 'hiGaugeInstall', s.installRate);
+        hiGauge('gInt', 'hiGaugeInteract', s.interactRate);
+        let fmt = n => n.toLocaleString('vi-VN');
+        let setVal = (id, p) => { let el = document.getElementById(id); el.textContent = p === null ? '--' : p.toFixed(1) + '%'; el.style.color = hiRateColor(p); };
+        setVal('hiGaugeInstallVal', s.installRate); setVal('hiGaugeInteractVal', s.interactRate);
+        document.getElementById('hiGInstOk').textContent = fmt(s.installed);
+        document.getElementById('hiGInstNo').textContent = fmt(s.notInstalled);
+        document.getElementById('hiGInstTotal').textContent = fmt(s.total);
+        document.getElementById('hiGIntOk').textContent = fmt(s.interact);
+        document.getElementById('hiGIntNo').textContent = fmt(s.sent - s.interact);
+        document.getElementById('hiGIntSent').textContent = fmt(s.sent);
+
+        // 2) Cơ cấu tình trạng kích hoạt
+        let cnt = new Map();
+        hiFiltered.forEach(r => { let k = (r.tinhTrangKichHoat || '').trim() || '(trống)'; cnt.set(k, (cnt.get(k) || 0) + 1); });
+        let entries = [...cnt.entries()].sort((a, b) => b[1] - a[1]);
+        if (entries.length > 5) { let rest = entries.slice(4).reduce((a, e) => a + e[1], 0); entries = entries.slice(0, 4).concat([['Khác', rest]]); }
+        let palette = ['#3F7D1F', '#7FB04F', '#2C7DA0', '#9DB4C0', '#C9CEC6'], pi = 0;
+        let colors = entries.map(([k]) => hiNorm(k) === 'chua kich hoat' ? HI_COLOR_BAD : palette[pi++ % palette.length]);
+        hiDestroyChart('donut');
+        hiCharts.donut = new Chart(document.getElementById('hiDonutStatus'), {
+            type: 'doughnut',
+            data: { labels: entries.map(e => e[0]), datasets: [{ data: entries.map(e => e[1]), backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '58%',
+                plugins: {
+                    legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 },
+                        generateLabels: ch => ch.data.labels.map((l, i) => ({ text: `${l} (${(ch.data.datasets[0].data[i] / Math.max(1, s.total) * 100).toFixed(1)}%)`,
+                            fillStyle: colors[i], strokeStyle: colors[i], index: i })) } },
+                    tooltip: { callbacks: { label: c => ` ${c.label}: ${fmt(c.raw)} ca` } }
+                } }
+        });
+
+        // 3) Diễn biến theo ngày (≤ 45 ngày) hoặc theo tuần
+        let ts = hiFiltered.map(r => r._t).filter(Boolean);
+        hiDestroyChart('trend');
+        if (ts.length) {
+            let spanDays = (Math.max(...ts) - Math.min(...ts)) / 86400000;
+            let byWeek = spanDays > 45;
+            let buckets = new Map();
+            hiFiltered.forEach(r => {
+                if (!r._t) return;
+                let d = new Date(r._t); d.setHours(0, 0, 0, 0);
+                if (byWeek) d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); // về Thứ 2 đầu tuần
+                let k = d.getTime();
+                if (!buckets.has(k)) buckets.set(k, []);
+                buckets.get(k).push(r);
+            });
+            let keys = [...buckets.keys()].sort((a, b) => a - b);
+            let st = keys.map(k => hiStats(buckets.get(k)));
+            let labels = keys.map(k => { let d = new Date(k); return (byWeek ? 'Tuần ' : '') + `${hiPad(d.getDate())}/${hiPad(d.getMonth() + 1)}`; });
+            document.getElementById('hiTrendNote').textContent = byWeek ? 'Gộp theo tuần (từ Thứ 2)' : 'Theo từng ngày';
+            hiCharts.trend = new Chart(document.getElementById('hiTrendChart'), {
+                data: { labels, datasets: [
+                    { type: 'line', label: 'Tỉ lệ tương tác (%)', data: st.map(x => x.interactRate), yAxisID: 'y1', borderColor: '#E3A23B', backgroundColor: '#E3A23B',
+                      tension: 0.35, pointRadius: 2.5, borderWidth: 2.5, spanGaps: true, order: 1 },
+                    { type: 'line', label: 'Tỉ lệ cài đặt (%)', data: st.map(x => x.installRate), yAxisID: 'y1', borderColor: '#3F7D1F', backgroundColor: '#3F7D1F',
+                      tension: 0.35, pointRadius: 2.5, borderWidth: 2.5, spanGaps: true, order: 2 },
+                    { type: 'bar', label: 'Số ca', data: st.map(x => x.total), yAxisID: 'y', backgroundColor: 'rgba(92,102,96,0.18)', borderRadius: 4, order: 3 }
+                ] },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 10, font: { size: 11 } } },
+                        tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y1' ? ` ${c.dataset.label}: ${c.raw === null ? '--' : c.raw.toFixed(1) + '%'}` : ` Số ca: ${fmt(c.raw)}` } } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { size: 10.5 }, maxRotation: 0, autoSkip: true } },
+                        y: { position: 'left', beginAtZero: true, grid: { color: '#EEF0EB' }, ticks: { font: { size: 10.5 } }, title: { display: true, text: 'Số ca', font: { size: 10.5 } } },
+                        y1: { position: 'right', min: 0, max: 100, grid: { display: false }, ticks: { callback: v => v + '%', font: { size: 10.5 } } }
+                    } }
+            });
+        } else {
+            document.getElementById('hiTrendNote').textContent = 'Không có dữ liệu ngày';
+        }
+
+        // 4) Xếp hạng theo nhóm đang chọn
+        let isInt = hiRankMetric === 'interactRate';
+        let groups = hiGroupStats(hiFiltered, hiGroupBy).filter(g => g[hiRankMetric] !== null)
+            .sort((a, b) => b[hiRankMetric] - a[hiRankMetric] || b.total - a.total);
+        document.getElementById('hiRankTitle').textContent = `Xếp hạng tỉ lệ ${isInt ? 'tương tác' : 'cài đặt'} theo ${hiGroupLabel[hiGroupBy]} (${groups.length})`;
+        document.querySelectorAll('#hiRankMetricSeg button').forEach(b => b.classList.toggle('active', b.dataset.metric === hiRankMetric));
+        hiDestroyChart('rank');
+        let box = document.getElementById('hiRankBox');
+        box.style.height = Math.max(180, groups.length * 28 + 50) + 'px';
+        let minX = isInt ? 0 : Math.max(0, Math.floor(Math.min(...groups.map(g => g.installRate), 100) / 10) * 10 - 10);
+        hiCharts.rank = new Chart(document.getElementById('hiRankChart'), {
+            type: 'bar',
+            data: { labels: groups.map(g => g.key), datasets: [{ data: groups.map(g => +g[hiRankMetric].toFixed(1)),
+                backgroundColor: groups.map(g => hiRateColor(g[hiRankMetric])), borderRadius: 4, barThickness: 18 }] },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, layout: { padding: { top: 16, right: 56 } },
+                onClick: (e, els) => { if (els.length) hiDrillDown(groups[els[0].index].key); },
+                onHover: (e, els) => { e.native.target.style.cursor = (els.length && hiGroupBy !== 'nhanVien') ? 'pointer' : 'default'; },
+                plugins: {
+                    legend: { display: false },
+                    hiAvgLine: { value: s[hiRankMetric] },
+                    tooltip: { callbacks: { label: c => {
+                        let g = groups[c.dataIndex];
+                        return isInt ? ` ${g.interact}/${g.sent} ca có gửi có tương tác (${c.raw}%)` : ` ${g.installed}/${g.total} ca đã cài (${c.raw}%)`;
+                    } } },
+                    datalabels: { anchor: 'end', align: 'end', offset: 4, color: c => hiRateColor(c.dataset.data[c.dataIndex]),
+                        font: { weight: '800', size: 11, family: 'IBM Plex Mono' }, formatter: v => v.toFixed(1) + '%' }
+                },
+                scales: {
+                    x: { min: minX, max: 100, grid: { color: '#EEF0EB' }, ticks: { callback: v => v + '%', font: { size: 10.5 } } },
+                    y: { grid: { display: false }, ticks: { font: { size: 11.5, weight: '600' }, color: '#12181B' } }
+                } },
+            plugins: [ChartDataLabels, hiAvgLinePlugin]
+        });
+
+        hiRenderSpotlight();
+    }
+
+    // 5) Điểm sáng / cần cải thiện — chỉ xét nhóm đủ mẫu để tránh 1-2 ca làm lệch tỉ lệ
+    function hiRenderSpotlight() {
+        let minSent = hiGroupBy === 'nhanVien' ? 10 : 20;
+        let groups = hiGroupStats(hiFiltered, hiGroupBy);
+        let eligible = groups.filter(g => g.sent >= minSent && g.interactRate !== null);
+        let top = eligible.slice().sort((a, b) => b.interactRate - a.interactRate).slice(0, 3);
+        // Nhóm thấp nhất không lặp lại nhóm đã nằm trong top (khi có ít đơn vị, VD 3-5 đối tác)
+        let bottom = eligible.filter(g => !top.includes(g)).sort((a, b) => a.interactRate - b.interactRate).slice(0, 3);
+        let notInst = groups.filter(g => g.notInstalled > 0).sort((a, b) => b.notInstalled - a.notInstalled).slice(0, 3);
+        let sub = g => hiGroupBy === 'nhanVien' ? escapeHtml(g.doiTruong || '') : (hiGroupBy === 'doiTruong' ? escapeHtml(g.doiTac || '') : `${g.total.toLocaleString('vi-VN')} ca`);
+        const item = (g, icon, val, color) => `<li><span class="hi-spot-medal">${icon}</span>
+            <span class="hi-spot-name">${escapeHtml(g.key)}<small>${sub(g)}</small></span>
+            <span class="hi-spot-val" style="color:${color};">${val}</span></li>`;
+        const empty = '<li class="small" style="color:var(--slate-soft);">Chưa đủ dữ liệu</li>';
+        let medals = ['🥇', '🥈', '🥉'];
+        document.getElementById('hiSpotlight').innerHTML = `
+            <div class="hi-card-title">Điểm nhấn theo ${hiGroupLabel[hiGroupBy]}</div>
+            <div class="hi-spot-head" style="color:${HI_COLOR_GOOD};">🏆 Tương tác cao nhất</div>
+            <ul class="hi-spot-list mb-3">${top.length ? top.map((g, i) => item(g, medals[i], g.interactRate.toFixed(1) + '%', hiRateColor(g.interactRate))).join('') : empty}</ul>
+            <div class="hi-spot-head" style="color:${HI_COLOR_BAD};">⚠️ Tương tác thấp nhất — cần đôn đốc</div>
+            <ul class="hi-spot-list mb-3">${bottom.length ? bottom.map(g => item(g, '📉', g.interactRate.toFixed(1) + '%', hiRateColor(g.interactRate))).join('') : empty}</ul>
+            <div class="hi-spot-head" style="color:var(--amber);">📵 Nhiều ca chưa cài nhất</div>
+            <ul class="hi-spot-list">${notInst.length ? notInst.map(g => item(g, '🔧', g.notInstalled.toLocaleString('vi-VN') + ' ca', HI_COLOR_BAD)).join('') : '<li class="small" style="color:var(--slate-soft);">Không có ca chưa cài 🎉</li>'}</ul>
+            <div class="small mt-2" style="color:var(--slate-soft);">Chỉ xét ${hiGroupLabel[hiGroupBy].toLowerCase()} có từ ${minSent} ca có gửi trở lên.</div>`;
+    }
+
+    document.getElementById('hiRankMetricSeg').addEventListener('click', e => {
+        let b = e.target.closest('button[data-metric]');
+        if (!b) return;
+        hiRankMetric = b.dataset.metric;
+        hiRenderCharts();
+    });
+
+    document.getElementById('hifpt-tab').addEventListener('shown.bs.tab', () => hiFetchData(false));
+
+    // ================== PHÂN TÍCH SHD: link lấy từ D1 (app_settings.shd_link) ==================
+    async function loadShdLink() {
+        let btn = document.getElementById('shdLinkBtn'), info = document.getElementById('shdLinkInfo');
+        let isSA = currentUser && currentUser.role === 'superadmin';
+        document.getElementById('shdAdminBox').classList.toggle('d-none', !isSA);
+        try {
+            let res = await apiFetch("api/settings", { method: "GET" });
+            let data = await res.json();
+            let st = data.settings && data.settings.shd_link;
+            if (st && st.value) {
+                btn.href = st.value;
+                btn.classList.remove('disabled');
+                info.textContent = `Link cập nhật ${formatDateTime(st.updatedAt)}${st.updatedBy ? ' bởi ' + st.updatedBy : ''}`;
+                if (isSA) document.getElementById('shdLinkInput').value = st.value;
+            } else {
+                btn.classList.add('disabled');
+                info.textContent = 'Chưa cấu hình link — liên hệ SuperAdmin.';
+            }
+        } catch (e) {
+            console.error("Lỗi tải link Phân tích SHD:", e);
+            info.textContent = 'Không tải được link, thử lại sau.';
+        }
+    }
+    async function saveShdLink() {
+        let value = document.getElementById('shdLinkInput').value.trim();
+        if (!/^https:\/\//i.test(value)) { alert("Link phải bắt đầu bằng https://"); return; }
+        let btn = document.getElementById('shdLinkSaveBtn');
+        btn.disabled = true;
+        try {
+            let res = await apiFetch("api/settings/update", { method: "POST", body: JSON.stringify({ key: 'shd_link', value }) });
+            let r = await res.json();
+            if (!r.success) { alert(r.error || "Không lưu được link!"); return; }
+            await loadShdLink();
+        } catch (e) {
+            console.error("Lỗi lưu link:", e);
+            alert("Lỗi kết nối, vui lòng thử lại!");
+        } finally { btn.disabled = false; }
+    }
+    document.getElementById('phantich-tab').addEventListener('shown.bs.tab', loadShdLink);
 
     function resetFilters() {
         let doiTacSelect = document.getElementById('filterDoiTac');
@@ -3634,6 +4699,11 @@
             let result = await response.json();
 
             if (result.success) {
+                // Đổi mật khẩu làm mất hiệu lực mọi phiên cũ — cập nhật token mới (cookie do server tự đặt lại)
+                if (sessionToken && result.token) {
+                    sessionToken = result.token;
+                    sessionStorage.setItem(SESSION_TOKEN_KEY, sessionToken);
+                }
                 msgBox.className = "alert alert-success py-2 small mb-3";
                 msgBox.innerText = "Đổi mật khẩu thành công!";
                 msgBox.classList.remove('d-none');
