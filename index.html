@@ -870,7 +870,8 @@
                             <ul class="mb-0">
                                 <li>Chat chung cho toàn bộ người dùng đang đăng nhập, tự tải tin nhắn mới mỗi vài giây.</li>
                                 <li>Tin của chính bạn hiện bên phải (nền xanh), người khác hiện bên trái.</li>
-                                <li>Tin nền vàng, căn giữa, tên gửi là <b>"Hệ Thống Linh Thú"</b> là thông báo tự động (bản cũ trước đây — nay hệ Linh Thú không còn tự đăng thông báo) — không phải người thật gửi.</li>
+                                <li>Tin nền xanh nhạt, chữ đều, tên gửi <b>"Nhật ký XL Lại"</b> là nhật ký tự động: mỗi khi cột <b>XL Lại</b> của một ca đổi giá trị (sửa trực tiếp trên bảng hoặc qua Nhập Excel), hệ thống ghi lại ai đổi, số HĐ, giá trị cũ → mới. Mỗi người chỉ thấy nhật ký của các ca thuộc phạm vi dữ liệu của mình (Đội trưởng thấy đội mình, Đối tác thấy đối tác mình, Admin thấy tất cả, tài khoản Nuôi thú không thấy). Nhật ký không tính vào số tin chưa đọc.</li>
+                                <li>Tin nhắn (cả tin người gửi lẫn nhật ký) <b>tự động xoá sau 7 ngày</b>.</li>
                                 <li>Số đỏ trên tên tab là số tin nhắn mới chưa đọc kể từ lần cuối bạn mở tab này.</li>
                             </ul>
                         </div>
@@ -2240,6 +2241,7 @@
     let lastChatId = 0;
     let chatUnreadCount = 0;
     let chatPollTimer = null;
+    const CHAT_LOG_USER = 'Nhật ký XL Lại'; // tin tự động do Worker ghi khi XL Lại đổi giá trị
 
     function isChatTabActive() {
         return document.getElementById('chatContent').classList.contains('active');
@@ -2259,7 +2261,8 @@
             if (isChatTabActive()) {
                 renderChatMessages();
             } else {
-                chatUnreadCount += newMsgs.length;
+                // Nhật ký tự động không tính vào số tin chưa đọc, tránh badge nhảy liên tục
+                chatUnreadCount += newMsgs.filter(m => m.username !== CHAT_LOG_USER).length;
                 updateChatBadge();
             }
         } catch (error) {
@@ -2275,6 +2278,14 @@
         }
         body.innerHTML = chatMessages.map(m => {
             let isOwn = currentUser && m.username === currentUser.username;
+            if (m.username === CHAT_LOG_USER) {
+                return `
+                    <div class="chat-bubble" style="align-self:center; max-width:92%; width:100%;">
+                        <div class="chat-meta"><i class="bi bi-journal-text me-1"></i>${escapeHtml(m.username)} · ${formatDateTime(m.created_at)}</div>
+                        <div class="chat-text" style="display:block; background:#EEF4FB; border-color:#C9DAEE; font-family:'IBM Plex Mono', monospace; font-size:12px;">${escapeHtml(m.message)}</div>
+                    </div>
+                `;
+            }
             let isSystem = m.username === 'Hệ Thống Linh Thú';
             if (isSystem) {
                 return `
