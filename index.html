@@ -210,55 +210,72 @@
         .chart-panel h5 { font-size: 13.5px; font-weight: 700; color: var(--ink); letter-spacing: 0.01em; }
         .executive-chart-container { position: relative; height: 340px; }
 
-        /* ---------- LINH THÚ ĐỒNG HÀNH ---------- */
-        .linh-thu-intro { font-size: 13.5px; color: var(--slate); }
-        .pet-card {
-            background: var(--card); border: 1px solid var(--line); border-radius: 10px;
-            padding: 11px 13px; height: 100%; position: relative; overflow: hidden;
+        /* ---------- LINH THÚ — KHU DÂN CƯ ---------- */
+        .lt-me-panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+        .lt-me-preview {
+            width: 92px; height: 92px; border-radius: 50%; background: var(--brand-soft);
+            display: flex; align-items: center; justify-content: center; font-size: 50px; flex-shrink: 0;
         }
-        .pet-card.has-pet {
-            border-color: #E8D9A8;
-            background: linear-gradient(165deg, #FFFCF3 0%, var(--card) 45%);
+        .lt-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--slate); margin-bottom: 4px; }
+        .lt-species-group { font-size: 10.5px; font-weight: 700; color: var(--slate-soft); margin: 8px 0 4px; }
+        .lt-species-btn {
+            border: 1px solid var(--line); background: var(--surface); border-radius: 18px;
+            padding: 3px 10px; font-size: 12px; margin: 0 4px 4px 0; cursor: pointer; color: var(--ink);
         }
-        .pet-card .pet-subject { font-size: 10px; font-weight: 700; letter-spacing: 0.03em; color: var(--slate); text-transform: uppercase; }
-        .pet-card .pet-stage-name { font-size: 14px; font-weight: 700; color: var(--ink); margin: 2px 0 1px; }
-        .pet-card .pet-species-name { font-size: 10.5px; color: var(--slate); margin-bottom: 6px; }
-        .pet-card .pet-xp { font-size: 10.5px; color: var(--slate); margin-top: 3px; }
-        .pet-card .progress { height: 5px !important; }
-        .species-pick-btn {
-            border: 1px solid var(--line); background: var(--surface); border-radius: 20px;
-            padding: 2px 9px; font-size: 11px; color: var(--ink);
+        .lt-species-btn:hover { border-color: var(--brand); }
+        .lt-species-btn.active { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+        .lt-species-list { max-height: 210px; overflow-y: auto; padding-right: 4px; }
+        .lt-counter { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--slate-soft); }
+        .lt-counter.full { color: var(--red); font-weight: 700; }
+        .lt-lot-chip {
+            display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px;
+            background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px;
         }
-        .species-pick-btn:hover { background: var(--brand-soft); border-color: var(--brand); }
+        .lt-btn {
+            border: 1px solid var(--line); background: var(--card); border-radius: 8px;
+            padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--ink);
+        }
+        .lt-btn:hover:not(:disabled) { border-color: var(--brand); color: var(--brand-dark); }
+        .lt-btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+        .lt-btn.primary:hover:not(:disabled) { background: var(--brand-dark); color: #fff; }
+        .lt-btn:disabled { opacity: .5; cursor: not-allowed; }
 
-        .linh-thu-garden {
-            position: relative; height: 2240px; border-radius: 12px; overflow: hidden;
-            background: linear-gradient(180deg, #EAF3DC 0%, #D9EAC4 100%);
-            border: 1px solid var(--line);
+        .lt-pick-banner {
+            background: #FFF6DD; border: 1px solid #EBD38C; color: #6B4E06; border-radius: 8px;
+            padding: 8px 12px; font-size: 12.5px; font-weight: 600;
         }
-        .linh-thu-weekly-panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
-        .garden-pet {
-            position: absolute; display: flex; flex-direction: column; align-items: center;
-            transform: translate(-50%, -50%);
+        .lt-yard-scroll { overflow-x: auto; border-radius: 12px; border: 1px solid var(--line); }
+        .lt-yard { position: relative; width: 100%; min-width: 960px; aspect-ratio: 1200 / 1336; user-select: none; }
+        .lt-yard > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+        .lt-yard .lt-lot { cursor: default; transition: fill .15s; }
+        .lt-yard.picking .lt-lot.free { cursor: pointer; fill: #FFF3C4; stroke: #D9A520; stroke-width: 2.5; }
+        .lt-yard.picking .lt-lot.free:hover { fill: #FFE48A; }
+        .lt-pets { position: absolute; inset: 0; pointer-events: none; }
+        .lt-pet {
+            position: absolute; transform: translate(-50%, -78%);
+            display: flex; flex-direction: column; align-items: center; pointer-events: auto;
+            touch-action: none;
         }
-        .garden-pet .garden-xp-badge {
-            font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 700;
-            background: rgba(18,24,27,0.85); border-radius: 8px; padding: 1px 7px; margin-bottom: 2px; white-space: nowrap;
+        .lt-pet.mine { cursor: grab; }
+        .lt-pet.dragging { cursor: grabbing; z-index: 9999 !important; }
+        .lt-pet.dragging .lt-pet-emoji { transform: scale(1.18); filter: drop-shadow(0 6px 6px rgba(0,0,0,.35)); }
+        .lt-pet-status {
+            position: relative; max-width: 150px; background: #fff; color: var(--ink);
+            border: 1px solid #D5D9D2; border-radius: 10px; padding: 3px 8px; margin-bottom: 6px;
+            font-size: 10.5px; line-height: 1.3; text-align: center; word-break: break-word;
+            box-shadow: 0 2px 6px rgba(0,0,0,.12);
         }
-        .garden-pet .garden-xp-badge.lvl-0 { color: #C7CCC5; }
-        .garden-pet .garden-xp-badge.lvl-1 { color: #F5C46B; }
-        .garden-pet .garden-xp-badge.lvl-2 { color: #9FD971; }
-        .garden-pet .garden-emoji {
-            font-size: 26px; display: inline-block;
-            animation: garden-hop 0.6s ease-in-out infinite;
+        .lt-pet-status::after {
+            content: ''; position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%);
+            border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid #fff;
         }
-        .garden-pet .garden-label {
-            font-size: 10px; background: rgba(255,255,255,0.9); border-radius: 8px;
-            padding: 2px 7px; margin-top: 2px; color: var(--ink); font-weight: 600;
-            white-space: normal; text-align: center; max-width: 92px; line-height: 1.35;
+        .lt-pet.mine .lt-pet-status { border-color: var(--brand); }
+        .lt-pet-emoji { font-size: 32px; line-height: 1; transition: transform .12s; filter: drop-shadow(0 3px 2px rgba(0,0,0,.25)); }
+        .lt-pet-name {
+            margin-top: 2px; font-size: 10px; font-weight: 700; white-space: nowrap;
+            background: rgba(18,24,27,.78); color: #fff; border-radius: 8px; padding: 1px 7px;
         }
-        .garden-pet .garden-label .label-name { display: block; }
-        .garden-pet .garden-label .label-stage { display: block; font-weight: 500; color: var(--slate); }
+        .lt-pet.mine .lt-pet-name { background: var(--brand-dark); }
         /* Tên Đối tác được làm nổi bật lấp lánh — phân biệt với Đội trưởng */
         .sparkle-name {
             background: linear-gradient(90deg, #C9A227 0%, #F5E27A 25%, #C9A227 50%, #F5E27A 75%, #C9A227 100%);
@@ -270,10 +287,6 @@
         @keyframes sparkle-shine {
             0% { background-position: 0% center; }
             100% { background-position: -250% center; }
-        }
-        @keyframes garden-hop {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
         }
 
         /* ---------- CHAT NỘI BỘ ---------- */
@@ -720,33 +733,27 @@
             </div>
         </div>
 
-        <!-- TAB 5: LINH THÚ ĐỒNG HÀNH -->
+        <!-- TAB 5: LINH THÚ — KHU DÂN CƯ -->
         <div class="tab-pane fade" id="linhThuContent" role="tabpanel">
-            <div class="linh-thu-intro mb-3">
-                <i class="bi bi-magic me-2" style="color:#C9A227;"></i>
-                Linh thú tiến hoá hoàn toàn tự động theo hiệu suất xử lý ca bảo trì thực tế — không cần nhập tay.
+            <div id="linhThuMe" class="lt-me-panel mb-3">
+                <div class="text-center small py-3" style="color:var(--slate);">Đang tải Linh thú của bạn...</div>
             </div>
 
-            <div class="linh-thu-weekly-panel mb-4">
-                <div class="fw-bold small mb-3" style="color:var(--slate);">
-                    🏆 BẢNG XẾP HẠNG
-                    <span class="fw-normal" style="color:var(--slate-soft);">(Đội trưởng/Đối tác reset 00:00 mỗi Thứ 2, không ảnh hưởng cấp tiến hoá · Nuôi thú tính theo số ngày đăng nhập, không reset)</span>
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                <div class="fw-bold small" style="color:var(--slate);">
+                    KHU DÂN CƯ LINH THÚ <span id="linhThuLotStats" class="fw-normal" style="color:var(--slate-soft);"></span>
                 </div>
-                <div id="linhThuWeeklyBoard">
-                    <div class="text-center small py-3" style="color:var(--slate);">Đang tải bảng xếp hạng...</div>
+                <div class="small" style="color:var(--slate-soft);"><i class="bi bi-hand-index me-1"></i>Giữ chuột vào thú của bạn và kéo để di chuyển</div>
+            </div>
+            <div id="linhThuPickBanner" class="lt-pick-banner mb-2 d-none">
+                <i class="bi bi-geo-alt-fill me-1"></i>Bấm vào một lô đang tô vàng để nhận lô.
+                <button type="button" class="lt-btn ms-2" onclick="ltSetPickMode(false)">Huỷ</button>
+            </div>
+            <div class="lt-yard-scroll mb-4">
+                <div id="linhThuYard" class="lt-yard">
+                    <svg id="linhThuYardSvg" viewBox="0 0 1200 1336" preserveAspectRatio="none"></svg>
+                    <div id="linhThuPets" class="lt-pets"></div>
                 </div>
-            </div>
-
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <div class="fw-bold small" style="color:var(--slate);">SÂN CHUNG — TOÀN BỘ LINH THÚ ĐANG HOẠT ĐỘNG</div>
-                <button id="btnAlignGarden" class="filter-reset-btn d-none" onclick="toggleGardenAlign()"><i class="bi bi-grid-3x3-gap me-1"></i>Sắp xếp ngay hàng</button>
-            </div>
-            <div id="linhThuGarden" class="linh-thu-garden mb-4">
-                <div class="text-center small py-4" style="color:var(--slate);">Đang tải sân chung...</div>
-            </div>
-
-            <div id="linhThuBody" class="row g-3">
-                <div class="col-12 text-center small py-4" style="color:var(--slate);">Đang tải dữ liệu Linh thú...</div>
             </div>
         </div>
 
@@ -863,7 +870,7 @@
                             <ul class="mb-0">
                                 <li>Chat chung cho toàn bộ người dùng đang đăng nhập, tự tải tin nhắn mới mỗi vài giây.</li>
                                 <li>Tin của chính bạn hiện bên phải (nền xanh), người khác hiện bên trái.</li>
-                                <li>Tin nền vàng, căn giữa, tên gửi là <b>"Hệ Thống Linh Thú"</b> là thông báo tự động (lên cấp Linh thú / vinh danh tuần) — không phải người thật gửi.</li>
+                                <li>Tin nền vàng, căn giữa, tên gửi là <b>"Hệ Thống Linh Thú"</b> là thông báo tự động (bản cũ trước đây — nay hệ Linh Thú không còn tự đăng thông báo) — không phải người thật gửi.</li>
                                 <li>Số đỏ trên tên tab là số tin nhắn mới chưa đọc kể từ lần cuối bạn mở tab này.</li>
                             </ul>
                         </div>
@@ -879,14 +886,10 @@
                     <div id="g6" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
                         <div class="accordion-body small">
                             <ul class="mb-0">
-                                <li>Mỗi <b>Đội trưởng</b>, mỗi <b>Đối tác</b>, mỗi tài khoản <b>Admin</b>, và mỗi tài khoản <b>Nuôi thú</b> đều có 1 Linh thú riêng, chọn 1 trong 32 loài — chọn được ngay từ đầu, không cần đạt điều kiện gì. (SuperAdmin là tài khoản thuần quản trị, không tham gia nuôi thú/xếp hạng.)</li>
-                                <li>Riêng <b>Admin/Nuôi thú</b>: Cấp tính theo <b>số ngày đăng nhập hệ thống</b> (1 ngày đăng nhập = 1 cấp), không liên quan tới khối lượng ca xử lý.</li>
-                                <li><b>XP tính hoàn toàn tự động, đúng người đúng việc</b>: Đội trưởng chỉ tính công <b>xử lý lỗi</b> ("Đã xử lý lại" = 3 XP, "Checklist Onsite" = 0.6 XP) — đúng phần việc họ tự bấm. Đối tác quản lý chỉ tính công <b>phân loại</b> ("Bảo trì ok" = 0.05 XP/ca) — đúng phần việc họ tự bấm, trọng số thấp hơn nhiều vì khối lượng phân loại (gộp cả các đội) lớn hơn hẳn khối lượng xử lý lỗi của 1 đội — cân bằng lại để 2 cấp lên cấp cùng nhịp. Không có cách nhập tay để "ăn gian" điểm.</li>
-                                <li><b>90 cấp bậc</b>, mỗi cấp cách nhau 10 XP (~3 ngày làm việc bình thường/cấp), cộng dồn <b>vĩnh viễn không reset theo tháng</b> — hình thái linh thú đổi ở Cấp 31 (Trưởng thành) và Cấp 61 (Thần thú tối thượng). Ngoài ra còn chia nhỏ hơn thành <b>9 Nhóm</b> (mỗi Nhóm đúng 10 cấp) hiện trong thẻ pet để thấy tiến độ chi tiết hơn.</li>
-                                <li><b>Cấp 25</b>: được đặt tên riêng cho Linh thú (tối đa 20 ký tự). <b>Cấp 50</b>: được chọn thêm 1 Thú con — Thú con có XP riêng bằng <b>1/10 thú chính</b>, lên cấp/tiến hoá chậm hơn hẳn.</li>
-                                <li><b>Bảng Xếp Hạng Tuần</b> (Top Đội trưởng/Đối tác) reset vào 00:00 mỗi Thứ 2 — tách riêng hoàn toàn khỏi cấp tiến hoá, không mất thành quả đã đạt.</li>
-                                <li><b>Sân chung</b>: xem toàn bộ linh thú đang "đi dạo" ngẫu nhiên, kèm cấp + XP hiện tại trên đầu mỗi con.</li>
-                                <li>Mỗi lần lên cấp hoặc mỗi tuần vinh danh, hệ thống tự đăng thông báo vào tab <b>Trò chuyện</b>.</li>
+                                <li><b>Mọi tài khoản</b> (Đội trưởng, Đối tác, Admin, SuperAdmin, Nuôi thú) đều có đúng <b>1 Linh thú</b> riêng, chọn tự do 1 trong 32 loài, đổi loài bất cứ lúc nào. Không còn XP, cấp hay bảng xếp hạng.</li>
+                                <li><b>Tên thú</b> (tối đa 20 ký tự, không bắt buộc) và <b>Trạng thái</b> (tối đa 50 ký tự) — trạng thái hiện thành bong bóng trên đầu thú để mọi người cùng thấy. Bấm <b>Lưu</b> để cập nhật.</li>
+                                <li><b>Khu dân cư</b>: sân chung chia thành 112 lô đất dọc các tuyến đường, có công viên ở giữa. Bấm <b>Chọn lô</b> rồi bấm vào 1 lô tô vàng (còn trống) để nhận. Mỗi người giữ 1 lô; có thể <b>Đổi lô</b> hoặc <b>Trả lô</b>. Chưa nhận lô thì thú đứng chơi ở công viên.</li>
+                                <li>Thú <b>đứng yên</b>, không tự đi lại. Muốn di chuyển: <b>giữ chuột (hoặc giữ ngón tay) vào thú của mình và kéo</b> tới bất kỳ đâu trên sân — vị trí được lưu lại và mọi người cùng thấy. Chỉ kéo được thú của chính mình. Nút <b>Gọi thú về lô</b> đưa thú về giữa lô đất.</li>
                             </ul>
                         </div>
                     </div>
@@ -973,14 +976,14 @@
                                             <td>Toàn bộ dữ liệu, mọi đối tác</td>
                                             <td class="text-center">✓</td>
                                             <td class="text-center">1000 dòng</td>
-                                            <td class="text-center">Sử dụng công cụ Phân tích SHD (n8n) · Nhập dữ liệu MỚI song song n8n · Sắp xếp Linh thú ngay hàng để chụp ảnh</td>
+                                            <td class="text-center">Sử dụng công cụ Phân tích SHD (n8n) · Nhập dữ liệu MỚI song song n8n</td>
                                         </tr>
                                         <tr>
                                             <td><b>Nuôi thú</b><br><span style="color:var(--slate-soft);">(role petonly)</span></td>
                                             <td>Không có — không truy cập được dữ liệu vận hành dưới bất kỳ hình thức nào</td>
                                             <td class="text-center">✗</td>
                                             <td class="text-center">--</td>
-                                            <td class="text-center">Chỉ thấy 3 tab: Trò chuyện, Linh Thú, Hướng dẫn. Linh thú lên cấp theo số ngày đăng nhập (giống Admin/SuperAdmin), không liên quan khối lượng ca xử lý</td>
+                                            <td class="text-center">Chỉ thấy 3 tab: Trò chuyện, Linh Thú, Hướng dẫn</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -997,7 +1000,7 @@
             <div class="table-panel p-4 mb-3">
                 <h5 class="fw-bold mb-1"><i class="bi bi-person-plus me-2" style="color:var(--brand);"></i>Tạo tài khoản Nuôi thú cho nhân sự</h5>
                 <p class="small mb-0" style="color:var(--slate);">
-                    Dành cho nhân sự không thuộc Đội trưởng/KTV nhưng muốn tham gia nuôi Linh thú (tính theo số ngày đăng nhập). Tài khoản tạo ra <b>không có quyền truy cập bất kỳ dữ liệu vận hành nào</b>, chỉ thấy 3 tab: Trò chuyện, Linh Thú, Hướng dẫn.
+                    Dành cho nhân sự không thuộc Đội trưởng/KTV nhưng muốn tham gia nuôi Linh thú. Tài khoản tạo ra <b>không có quyền truy cập bất kỳ dữ liệu vận hành nào</b>, chỉ thấy 3 tab: Trò chuyện, Linh Thú, Hướng dẫn.
                 </p>
             </div>
 
@@ -1893,9 +1896,7 @@
         stopPingOnline();
         stopChatPolling();
         stopIdleWatcher();
-        gardenWanderTimers.forEach(t => clearInterval(t));
-        gardenWanderTimers = [];
-        gardenAligned = false;
+        ltResetOnLogout();
         clearFilterSelections();
         localStorage.removeItem('tpkt_current_user');
         localStorage.removeItem('tpkt_session_token');
@@ -1942,9 +1943,6 @@
             dtrPill.classList.add('d-none');
         }
 
-        // Nút "Sắp xếp ngay hàng" trong tab Linh Thú — chỉ dành riêng cho
-        // role SuperAdmin, phục vụ mục đích chụp ảnh báo cáo.
-        document.getElementById('btnAlignGarden').classList.toggle('d-none', currentUser.role !== 'superadmin');
         document.getElementById('superAdminImportBar').classList.toggle('d-none', currentUser.role !== 'superadmin');
 
         // Tab "Phân tích SHD" chỉ dành cho admin, superadmin và Đối tác quản lý
@@ -2346,12 +2344,11 @@
         renderChatMessages();
     });
 
-    // ================== LINH THÚ ĐỒNG HÀNH ==================
-    // XP tính hoàn toàn từ dataBT đã tải sẵn (globalData) — không cần nhập tay,
-    // không tốn thêm lượt đọc D1. Chỉ "loài đã chọn" mới cần lưu ở server.
-    // tier 1 = Thường (mở ngay từ đầu), tier 2 = Hiếm (cần qua Cấp 2, >200 XP),
-    // tier 3 = Huyền Thoại (cần đạt Cấp 3, >600 XP). unlockXp dùng để khoá nút
-    // chọn ở cả 2 nơi: giao diện (ẩn/khoá nút) và Worker (chặn request thô).
+    // ================== LINH THÚ — KHU DÂN CƯ ==================
+    // Bản làm lại: KHÔNG còn XP / cấp / xếp hạng. Mỗi tài khoản có đúng 1 thú,
+    // tự chọn loài, đặt tên (<= 20 ký tự), ghi trạng thái hiện trên đầu thú
+    // (<= 50 ký tự), tự chọn 1 lô đất trống trong khu dân cư, và tự kéo thả thú
+    // đi khắp sân — vị trí được lưu ở server nên mọi người cùng thấy.
     const LINH_THU_SPECIES = [
         // Bậc chỉ còn mang tính PHÂN LOẠI/hiển thị nhóm — KHÔNG khoá chọn nữa,
         // ai cũng chọn được cả 32 loài ngay từ Cấp 1.
@@ -2388,559 +2385,455 @@
         { key: 'ho',            name: 'Hổ',             emoji: '🐯', tier: 3, stages: ['Hổ Con', 'Chúa Sơn Lâm', 'Kim Hổ Tối Thượng'] },
         { key: 'su_tu',         name: 'Sư Tử',          emoji: '🦁', tier: 3, stages: ['Sư Tử Con', 'Sư Tử Đầu Đàn', 'Sư Tử Vương Thảo Nguyên'] }
     ];
-    const LINH_THU_TIER_NAMES = { 1: 'Thường', 2: 'Hiếm', 3: 'Huyền Thoại' };
+    const LINH_THU_TIER_NAMES = { 1: 'Nhóm Thường', 2: 'Nhóm Hiếm', 3: 'Nhóm Huyền Thoại' };
+    const LT_NAME_MAX = 20;
+    const LT_STATUS_MAX = 50;
+    const LT_POLL_MS = 15000;
 
-    // Hệ 90 CẤP — XP cộng dồn VĨNH VIỄN, không reset theo tháng (chỉ bảng xếp
-    // hạng TUẦN — xpWeek — mới reset, không ảnh hưởng cấp/tiến hoá này).
-    // Hiệu chỉnh lần 2 từ dữ liệu thật (19/09/2026): khối lượng "Bảo trì ok"
-    // (toàn đối tác) gấp ~99 lần khối lượng "XL Lại" (1 đội trưởng), nên phải
-    // đổi hẳn trọng số/case để 2 cấp lên cấp cùng nhịp — xem calcRowXpDoiTruong
-    // / calcDoiTacXp bên dưới. Nhịp mục tiêu vẫn giữ "3 ngày/cấp".
-    const LINH_THU_XP_PER_LEVEL = 10;
-    const LINH_THU_MAX_LEVEL = 90;
-    const LINH_THU_RENAME_UNLOCK_LEVEL = 25;    // Cấp 25: được đổi tên thú
-    const LINH_THU_COMPANION_UNLOCK_LEVEL = 50; // Cấp 50: được chọn thêm thú con
-    // Cấp 1-30: hình thái Sơ khai · 31-60: Trưởng thành · 61-90: Thần thú
-    // (vẫn dùng đúng 3 tên hình thái có sẵn của từng loài, chỉ đổi mốc lên cấp)
-    function getLinhThuStageIndex(level) {
-        if (level <= 30) return 0;
-        if (level <= 60) return 1;
-        return 2;
-    }
-    const LINH_THU_STAGE_LABELS = ['Sơ khai', 'Trưởng thành', 'Thần thú tối thượng'];
+    // ---- Bản đồ khu dân cư (toạ độ gốc 1200 x 1336, phải khớp viewBox SVG) ----
+    // Lưới 3 cột x 5 hàng block, xen giữa là đường. Block giữa hàng 3 là công
+    // viên; 14 block còn lại mỗi block 8 lô (4 lô mặt tiền trên + 4 lô mặt tiền
+    // dưới) => 112 lô. Đổi số lô ở đây thì phải đổi LT_LOT_COUNT trong worker.js.
+    const LT_W = 1200, LT_H = 1336, LT_ROAD = 56, LT_COLS = 3, LT_ROWS = 5, LT_WALK = 8;
+    const LT_BW = (LT_W - (LT_COLS + 1) * LT_ROAD) / LT_COLS;
+    const LT_BH = (LT_H - (LT_ROWS + 1) * LT_ROAD) / LT_ROWS;
+    const LT_PARK = { row: 2, col: 1 };
+    const LT_BLOCKS = [];
+    const LT_LOTS = [];
+    (function buildLtMap() {
+        let letterIdx = 0, lotId = 1;
+        for (let r = 0; r < LT_ROWS; r++) {
+            for (let c = 0; c < LT_COLS; c++) {
+                let x = LT_ROAD + c * (LT_BW + LT_ROAD);
+                let y = LT_ROAD + r * (LT_BH + LT_ROAD);
+                let isPark = (r === LT_PARK.row && c === LT_PARK.col);
+                let block = { x, y, w: LT_BW, h: LT_BH, isPark, letter: isPark ? '' : String.fromCharCode(65 + letterIdx++) };
+                LT_BLOCKS.push(block);
+                if (isPark) continue;
+                let ix = x + LT_WALK, iy = y + LT_WALK;
+                let lw = (LT_BW - 2 * LT_WALK) / 4, lh = (LT_BH - 2 * LT_WALK) / 2;
+                for (let row = 0; row < 2; row++) {
+                    for (let i = 0; i < 4; i++) {
+                        let n = row * 4 + i + 1;
+                        LT_LOTS.push({
+                            id: lotId++, code: `${block.letter}-${String(n).padStart(2, '0')}`,
+                            x: ix + i * lw, y: iy + row * lh, w: lw, h: lh
+                        });
+                    }
+                }
+            }
+        }
+    })();
+    const LT_PARK_BLOCK = LT_BLOCKS.find(b => b.isPark);
 
-    // Chia nhỏ hơn nữa thành 9 NHÓM, mỗi nhóm đúng 10 cấp — mốc tiến độ chi
-    // tiết hơn 3 hình thái ở trên (vì mỗi loài chỉ có sẵn 3 tên hình thái,
-    // không đủ viết riêng 9 tên) — hiện kèm trong thẻ pet để thấy tiến độ rõ hơn.
-    const LINH_THU_GROUP_COUNT = 9;
-    function getLinhThuGroupIndex(level) {
-        return Math.min(LINH_THU_GROUP_COUNT, Math.ceil(level / 10));
-    }
+    let ltPets = [];            // dữ liệu từ /api/linhthu/pets
+    let ltPickMode = false;     // đang ở chế độ chọn lô
+    let ltDragging = null;      // { el, username, startX, startY, moved }
+    let ltMePanelUser = null;   // form "Linh thú của tôi" đã dựng cho user nào (tránh xoá chữ đang gõ khi tự làm mới)
+    let ltDraftSpecies = null;
+    let ltPollTimer = null;
 
-    // key: "subjectType::subjectKey" -> { 1: {species, petName}, 2: {species, petName} }
-    // slot 1 = thú chính (luôn có), slot 2 = thú con (chỉ có khi đã đạt Cấp 50)
-    let linhThuSelections = {};
+    function ltSpecies(key) { return LINH_THU_SPECIES.find(s => s.key === key) || null; }
+    function ltLotById(id) { return LT_LOTS.find(l => l.id === Number(id)) || null; }
+    function ltMyPet() { return currentUser ? ltPets.find(p => p.username === currentUser.username) || null : null; }
+    function ltCodeLen(str) { return [...(str || '')].length; }
+    function ltCut(str, max) { return [...(str || '')].slice(0, max).join(''); }
 
-    // Đội trưởng CHỈ tự tay bấm bước 2 (XL Lại — xử lý lỗi, khối lượng ít) —
-    // trọng số cao để bù lại. Đối tác quản lý tự tay phân loại (khối lượng
-    // rất lớn, gộp cả các đội) — trọng số thấp để không lệch cấp.
-    function calcRowXpDoiTruong(item) {
-        let xl = normalizeVal(item.xlLai);
-        if (xl === 'Đã xử lý lại') return 3;
-        if (xl === 'Checklist Onsite') return 0.6;
-        return 0;
-    }
-
-    function calcDoiTruongXp(doiTruongName, data) {
-        let sum = 0;
-        data.forEach(item => { if (item.doiTruong === doiTruongName) sum += calcRowXpDoiTruong(item); });
-        return sum;
-    }
-
-    // data cần đã được thu hẹp đúng phạm vi 1 Đối tác trước khi gọi hàm này
-    function calcDoiTacXp(data) {
-        let sum = 0;
-        data.forEach(item => { if (normalizeVal(item.tpktCheck) === 'Bảo trì ok') sum += 0.05; });
-        return sum;
-    }
-
-    // Trả về cấp 1-90 dựa trên XP (mỗi 100 XP lên 1 cấp, tối đa Cấp 90)
-    function getLinhThuLevel(xp) {
-        let level = 1 + Math.floor(xp / LINH_THU_XP_PER_LEVEL);
-        return Math.min(level, LINH_THU_MAX_LEVEL);
+    function ltOwnerLabel(p) {
+        if (p.doiTruong && String(p.doiTruong).trim()) return { text: p.doiTruong, partner: false };
+        if (p.role === 'user' && p.doiTacQuanLy && p.doiTacQuanLy !== 'ALL') return { text: p.doiTacQuanLy, partner: true };
+        return { text: p.username, partner: false };
     }
 
-    // Admin/SuperAdmin: Cấp tính theo SỐ NGÀY ĐĂNG NHẬP (server trả sẵn trong
-    // entry.level) — quy đổi ngược thành 1 con "XP" giả lập để tái dùng nguyên
-    // vẹn renderPetCard/renderCompanionBlock/sân chung (vốn xây quanh xp→cấp).
-    function adminLevelToXp(level) {
-        return (level - 1) * LINH_THU_XP_PER_LEVEL;
+    function ltLotCenter(lot) {
+        return { x: (lot.x + lot.w / 2) / LT_W, y: (lot.y + lot.h / 2 + 10) / LT_H };
     }
 
-    function safeDomId(s) {
-        return String(s).replace(/[^a-zA-Z0-9]/g, '_');
+    // Thú chưa có vị trí lưu: về giữa lô của mình; chưa có lô thì đứng chơi
+    // trong công viên ở 1 điểm cố định suy ra từ username (không nhảy lung tung).
+    function ltPetPosition(p) {
+        if (p.pos_x !== null && p.pos_x !== undefined && p.pos_y !== null && p.pos_y !== undefined) {
+            return { x: Number(p.pos_x), y: Number(p.pos_y) };
+        }
+        let lot = ltLotById(p.lot_id);
+        if (lot) return ltLotCenter(lot);
+        let h = 0;
+        for (const ch of p.username) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+        let pb = LT_PARK_BLOCK;
+        let px = pb.x + 30 + (h % 1000) / 1000 * (pb.w - 60);
+        let py = pb.y + 50 + ((h >>> 10) % 1000) / 1000 * (pb.h - 70);
+        return { x: px / LT_W, y: py / LT_H };
     }
 
-    let linhThuLeaderboard = []; // [{subjectType, subjectKey, xp}] — toàn hệ thống, dùng cho sân chung
-
-    async function fetchLinhThuSelections() {
+    // ---------- Tải dữ liệu ----------
+    async function fetchLinhThuPets() {
         try {
-            let [selRes, boardRes] = await Promise.all([
-                apiFetch("api/linhthu/selections", { method: "GET" }),
-                apiFetch("api/linhthu/leaderboard", { method: "GET" })
-            ]);
-            let selData = await selRes.json();
-            let boardData = await boardRes.json();
-
-            linhThuSelections = {};
-            (selData.selections || []).forEach(row => {
-                let key = `${row.subject_type}::${row.subject_key}`;
-                if (!linhThuSelections[key]) linhThuSelections[key] = {};
-                linhThuSelections[key][row.slot || 1] = { species: row.species, petName: row.pet_name || "" };
-            });
-            linhThuLeaderboard = boardData.leaderboard || [];
+            let res = await apiFetch("api/linhthu/pets", { method: "GET" });
+            let data = await res.json();
+            ltPets = data.pets || [];
         } catch (e) {
-            console.error("Lỗi tải dữ liệu Linh thú:", e);
-        }
-        renderLinhThuTab();
-        renderLinhThuGarden();
-        renderLinhThuWeeklyLeaderboard();
-    }
-
-    // Sân chung: hiện TẤT CẢ linh thú đã được chọn loài trên toàn hệ thống,
-    // đi lang thang ngẫu nhiên trong 1 khung cỏ chung — không phụ thuộc phạm vi
-    // quyền xem dữ liệu của người dùng hiện tại (chỉ dùng điểm XP tổng hợp).
-    let gardenWanderTimers = []; // dọn sạch mỗi lần render lại, tránh rò rỉ timer
-    let gardenAligned = false; // true = đang "xếp ngay hàng" (chỉ tài khoản sayvv bật được)
-    const GARDEN_DOITAC_ORDER = ["BHA1", "BHA2", "DNI02", "DNI03", "DNI04", "DNI05"];
-
-    // Chỉ tài khoản sayvv mới thấy nút này (đã ẩn ở initSessionUI), nhưng vẫn
-    // chặn thêm ở đây cho chắc — tránh gọi được hàm qua console nếu không đúng quyền.
-    function toggleGardenAlign() {
-        if (!currentUser || currentUser.role !== 'superadmin') return;
-        gardenAligned = !gardenAligned;
-        let btn = document.getElementById('btnAlignGarden');
-        btn.innerHTML = gardenAligned
-            ? '<i class="bi bi-shuffle me-1"></i>Thả tự do lại'
-            : '<i class="bi bi-grid-3x3-gap me-1"></i>Sắp xếp ngay hàng';
-        renderLinhThuGarden();
-    }
-
-    // Tính vị trí % (left, top) cho 1 dãy phần tử, tự xuống dòng nếu quá nhiều
-    // trong 1 hàng — dùng khi xếp ngay hàng để chụp ảnh.
-    function computeFormationPositions(count, startTopPct, maxPerRow, rowGapPct) {
-        let positions = [];
-        for (let idx = 0; idx < count; idx++) {
-            let row = Math.floor(idx / maxPerRow);
-            let col = idx % maxPerRow;
-            let itemsInThisRow = Math.min(maxPerRow, count - row * maxPerRow);
-            let leftPct = itemsInThisRow === 1 ? 50 : 8 + (col * (84 / (itemsInThisRow - 1)));
-            positions.push({ left: leftPct, top: startTopPct + row * rowGapPct });
-        }
-        return positions;
-    }
-
-    function renderLinhThuGarden() {
-        let garden = document.getElementById('linhThuGarden');
-        if (!garden) return;
-
-        gardenWanderTimers.forEach(t => clearInterval(t));
-        gardenWanderTimers = [];
-
-        let entries = [];
-        linhThuLeaderboard.forEach(entry => {
-            let selKey = `${entry.subjectType}::${entry.subjectKey}`;
-            let slots = linhThuSelections[selKey];
-            if (!slots || !slots[1]) return;
-            let mainXp = entry.subjectType === 'admin' ? adminLevelToXp(entry.level || 1) : (entry.xp || 0);
-
-            [1, 2].forEach(slotNum => {
-                let slotData = slots[slotNum];
-                if (!slotData || !slotData.species) return;
-                let species = LINH_THU_SPECIES.find(s => s.key === slotData.species);
-                if (!species) return;
-                // Thú con (slot 2) có XP riêng = 1/10 thú chính — lên cấp/tiến
-                // hoá chậm hơn hẳn, đúng vai trò "con".
-                let xp = slotNum === 2 ? mainXp / 10 : mainXp;
-                let level = getLinhThuLevel(xp);
-                let stageIdx = getLinhThuStageIndex(level);
-                entries.push({
-                    selKey: `${selKey}::${slotNum}`, subjectType: entry.subjectType, subjectKey: entry.subjectKey,
-                    petName: slotData.petName || "",
-                    xp, level, stageIdx, species, stageName: species.stages[stageIdx],
-                    emojiSize: Math.round(20 + (level - 1) * 0.3), // càng cao cấp càng to, mượt theo 90 cấp
-                    hopDelay: (Math.random() * 0.6).toFixed(1)
-                });
-            });
-        });
-
-        if (entries.length === 0) {
-            garden.innerHTML = `<div class="text-center small py-4" style="color:var(--slate);">Chưa có Linh thú nào — hãy chọn 1 loài để xuất hiện ở sân chung!</div>`;
+            console.error("Lỗi tải Linh thú:", e);
             return;
         }
+        renderLinhThuAll();
+    }
+    // Giữ tên cũ vì luồng đăng nhập / petonly vẫn gọi tên này.
+    function fetchLinhThuSelections() { return fetchLinhThuPets(); }
 
-        let positionsByKey = {};
-        if (gardenAligned) {
-            // Hàng trên: Đối tác theo đúng thứ tự cố định BHA1→BHA2→DNI02...→DNI05
-            // Hàng dưới: Đội trưởng theo thứ tự tên (A-Z)
-            let doiTacEntries = entries.filter(e => e.subjectType === 'doiTac')
-                .sort((a, b) => {
-                    let ia = GARDEN_DOITAC_ORDER.indexOf(a.subjectKey);
-                    let ib = GARDEN_DOITAC_ORDER.indexOf(b.subjectKey);
-                    if (ia === -1) ia = 999; if (ib === -1) ib = 999;
-                    return ia - ib;
-                });
-            let doiTruongEntries = entries.filter(e => e.subjectType === 'doiTruong')
-                .sort((a, b) => a.subjectKey.localeCompare(b.subjectKey, 'vi'));
-
-            let dtPositions = computeFormationPositions(doiTacEntries.length, 14, 6, 16);
-            doiTacEntries.forEach((e, i) => { positionsByKey[e.selKey] = dtPositions[i]; });
-
-            let dtrPositions = computeFormationPositions(doiTruongEntries.length, 42, 10, 20);
-            doiTruongEntries.forEach((e, i) => { positionsByKey[e.selKey] = dtrPositions[i]; });
-        }
-
-        let html = '';
-        entries.forEach(e => {
-            let pos = (gardenAligned && positionsByKey[e.selKey]) ? positionsByKey[e.selKey] : {
-                left: (6 + Math.random() * 84).toFixed(0),
-                top: (12 + Math.random() * 76).toFixed(0)
-            };
-            html += `
-                <div class="garden-pet" data-sel-key="${escapeHtml(e.selKey)}" style="left:${pos.left}%; top:${pos.top}%;">
-                    <span class="garden-xp-badge lvl-${e.stageIdx}">Cấp ${e.level}/${LINH_THU_MAX_LEVEL} · ${e.xp.toFixed(1)} XP</span>
-                    <span class="garden-emoji" style="${gardenAligned ? 'animation:none;' : `animation-delay:-${e.hopDelay}s;`} font-size:${e.emojiSize}px;">${e.species.emoji}</span>
-                    <span class="garden-label"><span class="label-name">${e.subjectType === 'doiTac' ? `<span class="sparkle-name">${escapeHtml(e.subjectKey)}</span>` : escapeHtml(e.subjectKey)}</span><span class="label-stage">${e.petName ? escapeHtml(e.petName) + ' · ' : ''}${escapeHtml(e.stageName)}</span></span>
-                </div>
-            `;
-        });
-
-        garden.innerHTML = html;
-
-        if (gardenAligned) return; // đứng yên hẳn, không gắn wander timer
-
-        garden.querySelectorAll('.garden-pet').forEach(el => {
-            let wander = () => {
-                let toLeft = (6 + Math.random() * 84).toFixed(0);
-                let toTop = (12 + Math.random() * 76).toFixed(0);
-                let travelTime = (3 + Math.random() * 3.5).toFixed(1);
-                el.style.transition = `left ${travelTime}s ease-in-out, top ${travelTime}s ease-in-out`;
-                el.style.left = toLeft + '%';
-                el.style.top = toTop + '%';
-            };
-            let pace = 3500 + Math.random() * 3500;
-            let timer = setInterval(wander, pace);
-            gardenWanderTimers.push(timer);
-            setTimeout(wander, Math.random() * 2000);
-        });
+    // Gọi từ handleLogout — dọn trạng thái để tài khoản đăng nhập sau không thấy dữ liệu cũ.
+    function ltResetOnLogout() {
+        if (ltPollTimer) { clearInterval(ltPollTimer); ltPollTimer = null; }
+        ltPets = [];
+        ltDragging = null;
+        ltMePanelUser = null;
+        if (ltPickMode) ltSetPickMode(false);
     }
 
-    // Bảng xếp hạng TUẦN: dùng entry.xpWeek (Worker tính riêng, reset theo lịch
-    // Thứ 2 hàng tuần) — KHÔNG liên quan tới entry.xp (cộng dồn vĩnh viễn, dùng
-    // để tính cấp tiến hoá). Chỉ để tạo cuộc đua mới mỗi tuần, không ảnh hưởng
-    // hình thái linh thú đã đạt được.
-    function renderLinhThuWeeklyLeaderboard() {
-        let container = document.getElementById('linhThuWeeklyBoard');
-        if (!container) return;
-
-        let withSpecies = linhThuLeaderboard.map(entry => {
-            let selKey = `${entry.subjectType}::${entry.subjectKey}`;
-            let mainPet = linhThuSelections[selKey] && linhThuSelections[selKey][1];
-            let species = mainPet && mainPet.species ? LINH_THU_SPECIES.find(s => s.key === mainPet.species) : null;
-            return { ...entry, species };
-        }).filter(e => e.species);
-
-        let topDoiTruong = withSpecies.filter(e => e.subjectType === 'doiTruong')
-            .sort((a, b) => (b.xpWeek || 0) - (a.xpWeek || 0)).slice(0, 5);
-        let topDoiTac = withSpecies.filter(e => e.subjectType === 'doiTac')
-            .sort((a, b) => (b.xpWeek || 0) - (a.xpWeek || 0)).slice(0, 3);
-        // Nuôi thú: Admin/petonly — dùng entry.level (số ngày đăng nhập, server
-        // tính sẵn), KHÔNG reset theo tuần. SuperAdmin không tham gia xếp hạng
-        // (tài khoản thuần quản trị).
-        let topNuoiThu = withSpecies.filter(e => e.subjectType === 'admin')
-            .sort((a, b) => (b.level || 0) - (a.level || 0)).slice(0, 5);
-
-        const renderXpList = (list, emptyMsg) => {
-            if (list.length === 0 || list.every(e => (e.xpWeek || 0) === 0)) {
-                return `<div class="small py-2" style="color:var(--slate-soft);">${emptyMsg}</div>`;
-            }
-            return list.map((e, idx) => {
-                let medal = ['🥇', '🥈', '🥉'][idx] || `#${idx + 1}`;
-                return `
-                    <div class="d-flex align-items-center justify-content-between py-1" style="border-bottom:1px solid var(--line);">
-                        <div class="d-flex align-items-center gap-2">
-                            <span style="width:22px; text-align:center;">${medal}</span>
-                            <span style="font-size:17px;">${e.species.emoji}</span>
-                            <span class="small fw-bold">${e.subjectType === 'doiTac' ? `<span class="sparkle-name">${escapeHtml(e.subjectKey)}</span>` : escapeHtml(e.subjectKey)}</span>
-                        </div>
-                        <span class="mono small fw-bold" style="color:var(--brand-dark);">${(e.xpWeek || 0).toFixed(1)} XP</span>
-                    </div>
-                `;
-            }).join('');
-        };
-
-        const renderLevelList = (list) => {
-            if (list.length === 0) {
-                return `<div class="small py-2" style="color:var(--slate-soft);">Chưa có ai trong nhóm này chọn Linh thú.</div>`;
-            }
-            return list.map((e, idx) => {
-                let medal = ['🥇', '🥈', '🥉'][idx] || `#${idx + 1}`;
-                return `
-                    <div class="d-flex align-items-center justify-content-between py-1" style="border-bottom:1px solid var(--line);">
-                        <div class="d-flex align-items-center gap-2">
-                            <span style="width:22px; text-align:center;">${medal}</span>
-                            <span style="font-size:17px;">${e.species.emoji}</span>
-                            <span class="small fw-bold">${escapeHtml(e.subjectKey)}</span>
-                        </div>
-                        <span class="mono small fw-bold" style="color:var(--brand-dark);">Cấp ${e.level}/${LINH_THU_MAX_LEVEL}</span>
-                    </div>
-                `;
-            }).join('');
-        };
-
-        container.innerHTML = `
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="small fw-bold mb-1" style="color:var(--ink);">Top Đội trưởng (tuần)</div>
-                    ${renderXpList(topDoiTruong, 'Chưa có XP nào trong tuần này.')}
-                </div>
-                <div class="col-md-4">
-                    <div class="small fw-bold mb-1" style="color:var(--ink);">Top Đối tác (tuần)</div>
-                    ${renderXpList(topDoiTac, 'Chưa có XP nào trong tuần này.')}
-                </div>
-                <div class="col-md-4">
-                    <div class="small fw-bold mb-1" style="color:var(--ink);">🔑 Top Nuôi Thú (không reset)</div>
-                    ${renderLevelList(topNuoiThu)}
-                </div>
-            </div>
-        `;
+    function ltEnsurePolling() {
+        if (ltPollTimer) return;
+        ltPollTimer = setInterval(() => {
+            if (sessionToken && ltTabActive() && !ltDragging && !document.hidden) fetchLinhThuPets();
+        }, LT_POLL_MS);
     }
 
-    async function selectLinhThuSpecies(subjectType, subjectKey, speciesKey, slot) {
-        if (!currentUser || !currentUser.username) return;
-        try {
-            let res = await apiFetch("api/linhthu/select", {
-                method: "POST",
-                body: JSON.stringify({ subjectType, subjectKey, species: speciesKey, slot: slot || 1 })
-            });
-            let result = await res.json();
-            if (!result.success) {
-                alert(result.error || "Không chọn được Linh thú, vui lòng thử lại!");
-                return;
-            }
-            await fetchLinhThuSelections();
-        } catch (e) {
-            console.error("Lỗi chọn Linh thú:", e);
-            alert("Lỗi kết nối server!");
-        }
+    function renderLinhThuAll() {
+        if (!currentUser) return;
+        ltEnsurePolling();
+        if (ltMePanelUser !== currentUser.username) renderLinhThuMePanel();
+        renderLinhThuMyLot();
+        renderLinhThuYardSvg();
+        if (!ltDragging) renderLinhThuPets();
     }
 
-    async function renameLinhThuPet(subjectType, subjectKey, slot, newName) {
-        if (!currentUser || !currentUser.username) return;
-        try {
-            let res = await apiFetch("api/linhthu/rename", {
-                method: "POST",
-                body: JSON.stringify({ subjectType, subjectKey, slot: slot || 1, petName: newName })
-            });
-            let result = await res.json();
-            if (!result.success) {
-                alert(result.error || "Không đổi được tên, vui lòng thử lại!");
-                return;
-            }
-            await fetchLinhThuSelections();
-        } catch (e) {
-            console.error("Lỗi đổi tên Linh thú:", e);
-            alert("Lỗi kết nối server!");
-        }
-    }
-
-    function renderSpeciesPickerHtml(subjectType, subjectKey, slot) {
-        return [1, 2, 3].map(tier => {
-            let tierSpecies = LINH_THU_SPECIES.filter(s => s.tier === tier);
-            if (tierSpecies.length === 0) return '';
-            let buttonsHtml = tierSpecies.map(s =>
-                `<button type="button" class="species-pick-btn linh-thu-pick-btn" data-subject-type="${escapeHtml(subjectType)}" data-subject-key="${escapeHtml(subjectKey)}" data-species="${s.key}" data-slot="${slot || 1}">${s.emoji} ${escapeHtml(s.name)}</button>`
+    // ---------- Khung "Linh thú của tôi" ----------
+    function renderLinhThuMePanel() {
+        let box = document.getElementById('linhThuMe');
+        if (!box || !currentUser) return;
+        let me = ltMyPet();
+        ltDraftSpecies = me ? me.species : null;
+        let groups = [1, 2, 3].map(tier => {
+            let btns = LINH_THU_SPECIES.filter(s => s.tier === tier).map(s =>
+                `<button type="button" class="lt-species-btn ${s.key === ltDraftSpecies ? 'active' : ''}" data-species="${s.key}">${s.emoji} ${escapeHtml(s.name)}</button>`
             ).join('');
-            return `
-                <div class="mt-2">
-                    <div class="small fw-bold" style="color:var(--slate);">${LINH_THU_TIER_NAMES[tier]}</div>
-                    <div class="d-flex flex-wrap gap-2 mt-1">${buttonsHtml}</div>
+            return `<div class="lt-species-group">${LINH_THU_TIER_NAMES[tier]}</div><div>${btns}</div>`;
+        }).join('');
+        let sp = ltSpecies(ltDraftSpecies);
+        box.innerHTML = `
+            <div class="row g-3 align-items-start">
+                <div class="col-12 col-lg-auto d-flex flex-lg-column align-items-center gap-2">
+                    <div class="lt-me-preview" id="ltPreview">${sp ? sp.emoji : '❔'}</div>
+                    <div class="small fw-bold text-center" id="ltPreviewName" style="max-width:120px;">${me ? escapeHtml(me.pet_name || (sp ? sp.name : '')) : 'Chưa có thú'}</div>
                 </div>
-            `;
+                <div class="col-12 col-lg">
+                    <div class="lt-label">Chọn loài</div>
+                    <div class="lt-species-list" id="ltSpeciesList">${groups}</div>
+                    <div class="row g-2 mt-1">
+                        <div class="col-12 col-md-4">
+                            <div class="d-flex justify-content-between"><span class="lt-label">Tên thú</span><span class="lt-counter" id="ltNameCount"></span></div>
+                            <input type="text" id="ltNameInput" class="form-control form-control-sm" maxlength="${LT_NAME_MAX}" placeholder="Tên riêng (không bắt buộc)" value="${escapeHtml(me && me.pet_name ? me.pet_name : '')}">
+                        </div>
+                        <div class="col-12 col-md-8">
+                            <div class="d-flex justify-content-between"><span class="lt-label">Trạng thái (hiện trên đầu thú)</span><span class="lt-counter" id="ltStatusCount"></span></div>
+                            <div class="d-flex gap-2">
+                                <input type="text" id="ltStatusInput" class="form-control form-control-sm" maxlength="${LT_STATUS_MAX}" placeholder="VD: Hôm nay xử lý sạch tồn 💪" value="${escapeHtml(me && me.status ? me.status : '')}">
+                                <button type="button" class="lt-btn primary text-nowrap" id="ltSaveBtn">Lưu</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-3">
+                    <div class="lt-label">Lô đất của tôi</div>
+                    <div id="ltMyLot"></div>
+                </div>
+            </div>`;
+        ltMePanelUser = currentUser.username;
+        ltUpdateCounters();
+    }
+
+    function ltUpdateCounters() {
+        [['ltNameInput', 'ltNameCount', LT_NAME_MAX], ['ltStatusInput', 'ltStatusCount', LT_STATUS_MAX]].forEach(([inId, cId, max]) => {
+            let input = document.getElementById(inId), counter = document.getElementById(cId);
+            if (!input || !counter) return;
+            if (ltCodeLen(input.value) > max) input.value = ltCut(input.value, max);
+            let n = ltCodeLen(input.value);
+            counter.textContent = `${n}/${max}`;
+            counter.classList.toggle('full', n >= max);
+        });
+    }
+
+    function renderLinhThuMyLot() {
+        let box = document.getElementById('ltMyLot');
+        if (!box) return;
+        let me = ltMyPet();
+        let lot = me ? ltLotById(me.lot_id) : null;
+        let free = LT_LOTS.length - ltPets.filter(p => p.lot_id).length;
+        let stats = document.getElementById('linhThuLotStats');
+        if (stats) stats.textContent = `· ${ltPets.length} linh thú · còn ${free}/${LT_LOTS.length} lô trống`;
+        if (!me) {
+            box.innerHTML = `<div class="small" style="color:var(--slate-soft);">Chọn loài và bấm <b>Lưu</b> trước, sau đó mới nhận được lô đất.</div>`;
+            return;
+        }
+        box.innerHTML = `
+            <div class="mb-2">${lot
+                ? `<span class="lt-lot-chip"><i class="bi bi-house-door-fill" style="color:var(--brand);"></i>Lô ${lot.code}</span>`
+                : `<span class="small" style="color:var(--slate-soft);">Chưa có lô — thú đang chơi ở công viên.</span>`}</div>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="lt-btn" onclick="ltSetPickMode(${ltPickMode ? 'false' : 'true'})">${ltPickMode ? 'Huỷ chọn lô' : (lot ? 'Đổi lô' : 'Chọn lô')}</button>
+                ${lot ? `<button type="button" class="lt-btn" onclick="ltBringHome()">Gọi thú về lô</button>
+                         <button type="button" class="lt-btn" onclick="ltReleaseLot()">Trả lô</button>` : ''}
+            </div>`;
+    }
+
+    // Uỷ quyền sự kiện cho khung "Linh thú của tôi"
+    document.getElementById('linhThuMe').addEventListener('click', (e) => {
+        let btn = e.target.closest('.lt-species-btn');
+        if (btn) {
+            ltDraftSpecies = btn.dataset.species;
+            document.querySelectorAll('#ltSpeciesList .lt-species-btn').forEach(b => b.classList.toggle('active', b === btn));
+            let sp = ltSpecies(ltDraftSpecies);
+            document.getElementById('ltPreview').textContent = sp ? sp.emoji : '❔';
+            let nameVal = document.getElementById('ltNameInput').value.trim();
+            document.getElementById('ltPreviewName').textContent = nameVal || (sp ? sp.name : '');
+            return;
+        }
+        if (e.target.closest('#ltSaveBtn')) saveLinhThuPet();
+    });
+    document.getElementById('linhThuMe').addEventListener('input', (e) => {
+        if (e.target.id === 'ltNameInput' || e.target.id === 'ltStatusInput') ltUpdateCounters();
+        if (e.target.id === 'ltNameInput') {
+            let sp = ltSpecies(ltDraftSpecies);
+            document.getElementById('ltPreviewName').textContent = e.target.value.trim() || (sp ? sp.name : 'Chưa có thú');
+        }
+    });
+    document.getElementById('linhThuMe').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.target.id === 'ltNameInput' || e.target.id === 'ltStatusInput')) saveLinhThuPet();
+    });
+
+    async function saveLinhThuPet() {
+        if (!ltDraftSpecies) { alert("Hãy chọn 1 loài Linh thú trước!"); return; }
+        let petName = document.getElementById('ltNameInput').value.trim();
+        let status = document.getElementById('ltStatusInput').value.trim();
+        if (ltCodeLen(petName) > LT_NAME_MAX) { alert(`Tên thú tối đa ${LT_NAME_MAX} ký tự`); return; }
+        if (ltCodeLen(status) > LT_STATUS_MAX) { alert(`Trạng thái tối đa ${LT_STATUS_MAX} ký tự`); return; }
+        let btn = document.getElementById('ltSaveBtn');
+        btn.disabled = true; btn.textContent = 'Đang lưu...';
+        try {
+            let res = await apiFetch("api/linhthu/save", { method: "POST", body: JSON.stringify({ species: ltDraftSpecies, petName, status }) });
+            let result = await res.json();
+            if (!result.success) { alert(result.error || "Không lưu được, vui lòng thử lại!"); return; }
+            btn.textContent = 'Đã lưu ✓';
+            await fetchLinhThuPets();
+        } catch (e) {
+            console.error("Lỗi lưu Linh thú:", e);
+            alert("Lỗi kết nối, vui lòng thử lại!");
+        } finally {
+            setTimeout(() => { let b = document.getElementById('ltSaveBtn'); if (b) { b.disabled = false; b.textContent = 'Lưu'; } }, 900);
+        }
+    }
+
+    // ---------- Lô đất ----------
+    function ltSetPickMode(on) {
+        if (on && !ltMyPet()) { alert("Hãy chọn loài và bấm Lưu trước khi nhận lô!"); return; }
+        ltPickMode = !!on;
+        document.getElementById('linhThuYard').classList.toggle('picking', ltPickMode);
+        document.getElementById('linhThuPickBanner').classList.toggle('d-none', !ltPickMode);
+        renderLinhThuMyLot();
+        if (ltPickMode) document.getElementById('linhThuPickBanner').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    async function ltClaimLot(lot) {
+        if (!confirm(`Nhận lô ${lot.code}? ${ltMyPet() && ltMyPet().lot_id ? '(Lô cũ sẽ được trả lại cho người khác chọn.)' : ''}`)) return;
+        let c = ltLotCenter(lot);
+        try {
+            let res = await apiFetch("api/linhthu/claim-lot", { method: "POST", body: JSON.stringify({ lotId: lot.id, x: c.x, y: c.y }) });
+            let result = await res.json();
+            if (!result.success) alert(result.error || "Không nhận được lô, vui lòng thử lại!");
+        } catch (e) {
+            console.error("Lỗi nhận lô:", e);
+            alert("Lỗi kết nối, vui lòng thử lại!");
+        }
+        ltSetPickMode(false);
+        await fetchLinhThuPets();
+    }
+
+    async function ltReleaseLot() {
+        let me = ltMyPet(), lot = me ? ltLotById(me.lot_id) : null;
+        if (!lot || !confirm(`Trả lại lô ${lot.code}? Người khác sẽ có thể nhận lô này.`)) return;
+        try {
+            let res = await apiFetch("api/linhthu/claim-lot", { method: "POST", body: JSON.stringify({ lotId: null }) });
+            let result = await res.json();
+            if (!result.success) alert(result.error || "Không trả được lô, vui lòng thử lại!");
+        } catch (e) { console.error("Lỗi trả lô:", e); }
+        await fetchLinhThuPets();
+    }
+
+    async function ltBringHome() {
+        let me = ltMyPet(), lot = me ? ltLotById(me.lot_id) : null;
+        if (!lot) return;
+        let c = ltLotCenter(lot);
+        await ltSavePosition(c.x, c.y);
+        await fetchLinhThuPets();
+    }
+
+    async function ltSavePosition(x, y) {
+        let me = ltMyPet();
+        if (me) { me.pos_x = x; me.pos_y = y; }
+        try {
+            let res = await apiFetch("api/linhthu/move", { method: "POST", body: JSON.stringify({ x, y }) });
+            let result = await res.json();
+            if (!result.success) alert(result.error || "Không lưu được vị trí!");
+        } catch (e) { console.error("Lỗi lưu vị trí:", e); }
+    }
+
+    // ---------- Vẽ khu dân cư (SVG) ----------
+    function renderLinhThuYardSvg() {
+        let svg = document.getElementById('linhThuYardSvg');
+        if (!svg) return;
+        let ownerByLot = {};
+        ltPets.forEach(p => { if (p.lot_id) ownerByLot[p.lot_id] = p; });
+        let myName = currentUser ? currentUser.username : null;
+        let parts = [];
+
+        // Nền đường nhựa
+        parts.push(`<rect x="0" y="0" width="${LT_W}" height="${LT_H}" fill="#666C70"/>`);
+        // Vạch kẻ giữa đường + tên đường
+        for (let r = 0; r <= LT_ROWS; r++) {
+            let y = r * (LT_BH + LT_ROAD) + LT_ROAD / 2;
+            parts.push(`<line x1="0" y1="${y}" x2="${LT_W}" y2="${y}" stroke="#F4F1E6" stroke-width="2" stroke-dasharray="16 12" opacity=".85"/>`);
+        }
+        for (let c = 0; c <= LT_COLS; c++) {
+            let x = c * (LT_BW + LT_ROAD) + LT_ROAD / 2;
+            parts.push(`<line x1="${x}" y1="0" x2="${x}" y2="${LT_H}" stroke="#F4F1E6" stroke-width="2" stroke-dasharray="16 12" opacity=".85"/>`);
+        }
+        // Ngã tư: phủ lại nền đường để vạch kẻ không cắt chéo nhau
+        for (let r = 0; r <= LT_ROWS; r++) {
+            for (let c = 0; c <= LT_COLS; c++) {
+                let cx = c * (LT_BW + LT_ROAD), cy = r * (LT_BH + LT_ROAD);
+                parts.push(`<rect x="${cx + 4}" y="${cy + 4}" width="${LT_ROAD - 8}" height="${LT_ROAD - 8}" fill="#666C70"/>`);
+            }
+        }
+        // Tên đường (vẽ sau cùng để không bị nền ngã tư che)
+        for (let r = 0; r <= LT_ROWS; r++) {
+            let y = r * (LT_BH + LT_ROAD) + LT_ROAD / 2;
+            parts.push(`<text x="${LT_ROAD + 10}" y="${y - 7}" font-size="11" font-weight="700" fill="#E9ECEF" font-family="IBM Plex Sans, sans-serif">Đường N${r + 1}</text>`);
+        }
+        for (let c = 0; c <= LT_COLS; c++) {
+            let x = c * (LT_BW + LT_ROAD) + LT_ROAD / 2, ly = LT_ROAD + LT_BH - 10;
+            parts.push(`<text x="${x - 6}" y="${ly}" font-size="11" font-weight="700" fill="#E9ECEF" font-family="IBM Plex Sans, sans-serif" transform="rotate(-90 ${x - 6} ${ly})">Đường D${c + 1}</text>`);
+        }
+
+        LT_BLOCKS.forEach(b => {
+            // Vỉa hè
+            parts.push(`<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="8" fill="#DAD7CE"/>`);
+            if (b.isPark) {
+                let cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+                parts.push(`<rect x="${b.x + LT_WALK}" y="${b.y + LT_WALK}" width="${b.w - 2 * LT_WALK}" height="${b.h - 2 * LT_WALK}" rx="6" fill="#B9DA97"/>`);
+                parts.push(`<path d="M ${b.x + LT_WALK} ${cy} H ${b.x + b.w - LT_WALK} M ${cx} ${b.y + LT_WALK} V ${b.y + b.h - LT_WALK}" stroke="#EADFC4" stroke-width="12"/>`);
+                parts.push(`<ellipse cx="${cx}" cy="${cy}" rx="62" ry="38" fill="#86C3E3" stroke="#EADFC4" stroke-width="6"/>`);
+                parts.push(`<text x="${cx}" y="${cy + 9}" font-size="26" text-anchor="middle">⛲</text>`);
+                [[0.1, 0.3], [0.9, 0.3], [0.1, 0.82], [0.9, 0.82], [0.28, 0.85], [0.72, 0.85]].forEach(([fx, fy]) => {
+                    parts.push(`<text x="${b.x + fx * b.w}" y="${b.y + fy * b.h + 8}" font-size="22" text-anchor="middle">🌳</text>`);
+                });
+                parts.push(`<text x="${cx}" y="${b.y + 26}" font-size="11" font-weight="700" text-anchor="middle" fill="#3E5F25" font-family="IBM Plex Sans, sans-serif">CÔNG VIÊN TRUNG TÂM</text>`);
+                return;
+            }
+            // Cây xanh 4 góc vỉa hè
+            [[b.x + 2, b.y + 2], [b.x + b.w - 2, b.y + 2], [b.x + 2, b.y + b.h - 2], [b.x + b.w - 2, b.y + b.h - 2]].forEach(([tx, ty]) => {
+                parts.push(`<circle cx="${tx}" cy="${ty}" r="9" fill="#5E9E3C" stroke="#447A28" stroke-width="2"/>`);
+            });
+        });
+
+        LT_LOTS.forEach(l => {
+            let owner = ownerByLot[l.id];
+            let isMine = owner && owner.username === myName;
+            let fill = isMine ? '#E3F2CC' : (owner ? '#F3E6C6' : '#CFE4B5');
+            let stroke = isMine ? '#3F7D1F' : '#FFFFFF';
+            let sw = isMine ? 3 : 2;
+            parts.push(`<rect class="lt-lot ${owner ? 'taken' : 'free'}" data-lot="${l.id}" x="${l.x + 1.5}" y="${l.y + 1.5}" width="${l.w - 3}" height="${l.h - 3}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`);
+            parts.push(`<text x="${l.x + 6}" y="${l.y + 14}" font-size="10" font-weight="700" fill="#6F7D63" font-family="IBM Plex Mono, monospace" pointer-events="none">${l.code}</text>`);
+            if (owner) {
+                let label = ltOwnerLabel(owner).text;
+                parts.push(`<text x="${l.x + l.w - 6}" y="${l.y + 17}" font-size="13" text-anchor="end" pointer-events="none">🏠</text>`);
+                parts.push(`<text x="${l.x + l.w / 2}" y="${l.y + l.h - 7}" font-size="9.5" font-weight="600" text-anchor="middle" fill="#6A5528" font-family="IBM Plex Sans, sans-serif" pointer-events="none">${escapeHtml(ltCut(label, 14))}</text>`);
+            }
+        });
+        svg.innerHTML = parts.join('');
+    }
+
+    document.getElementById('linhThuYardSvg').addEventListener('click', (e) => {
+        if (!ltPickMode) return;
+        let rect = e.target.closest('.lt-lot.free');
+        if (!rect) return;
+        let lot = ltLotById(rect.dataset.lot);
+        if (lot) ltClaimLot(lot);
+    });
+
+    // ---------- Vẽ thú ----------
+    function renderLinhThuPets() {
+        let layer = document.getElementById('linhThuPets');
+        if (!layer) return;
+        let myName = currentUser ? currentUser.username : null;
+        layer.innerHTML = ltPets.map(p => {
+            let sp = ltSpecies(p.species);
+            if (!sp) return '';
+            let pos = ltPetPosition(p);
+            let mine = p.username === myName;
+            let owner = ltOwnerLabel(p);
+            let ownerHtml = owner.partner ? `<span class="sparkle-name">${escapeHtml(owner.text)}</span>` : escapeHtml(owner.text);
+            let title = `${p.pet_name || sp.name} — ${owner.text}${mine ? ' (thú của bạn — kéo để di chuyển)' : ''}`;
+            return `
+                <div class="lt-pet ${mine ? 'mine' : ''}" data-username="${escapeHtml(p.username)}" title="${escapeHtml(title)}"
+                     style="left:${(pos.x * 100).toFixed(3)}%; top:${(pos.y * 100).toFixed(3)}%; z-index:${mine ? 5000 : Math.round(pos.y * 1000)};">
+                    ${p.status ? `<div class="lt-pet-status">${escapeHtml(p.status)}</div>` : ''}
+                    <div class="lt-pet-emoji">${sp.emoji}</div>
+                    <div class="lt-pet-name">${escapeHtml(p.pet_name || sp.name)} · ${ownerHtml}</div>
+                </div>`;
         }).join('');
     }
 
-    // Khối "Đổi tên riêng" — chỉ hiện khi editable và đã đạt Cấp mở khoá
-    function renderRenameBlock(subjectType, subjectKey, slot, level, petName, domId) {
-        if (level < LINH_THU_RENAME_UNLOCK_LEVEL) return '';
-        return `
-            <div class="mt-2 d-flex gap-2 align-items-center">
-                <input type="text" class="form-control form-control-sm linh-thu-rename-input" id="renameInput_${domId}" placeholder="Đặt tên riêng cho thú..." value="${escapeHtml(petName || '')}" maxlength="20" style="max-width:170px;">
-                <button type="button" class="btn btn-sm linh-thu-rename-btn" data-subject-type="${escapeHtml(subjectType)}" data-subject-key="${escapeHtml(subjectKey)}" data-slot="${slot}" data-input="renameInput_${domId}" style="background:var(--surface); border:1px solid var(--line); font-size:11.5px;">Lưu tên</button>
-            </div>
-        `;
+    // ---------- Kéo thả thú của chính mình ----------
+    (function setupLinhThuDrag() {
+        let layer = document.getElementById('linhThuPets');
+        let yard = document.getElementById('linhThuYard');
+        layer.addEventListener('pointerdown', (e) => {
+            let el = e.target.closest('.lt-pet.mine');
+            if (!el || e.button > 0) return;
+            e.preventDefault();
+            el.setPointerCapture(e.pointerId);
+            ltDragging = { el, startX: e.clientX, startY: e.clientY, moved: false };
+            el.classList.add('dragging');
+        });
+        layer.addEventListener('pointermove', (e) => {
+            if (!ltDragging) return;
+            if (Math.abs(e.clientX - ltDragging.startX) + Math.abs(e.clientY - ltDragging.startY) > 3) ltDragging.moved = true;
+            let r = yard.getBoundingClientRect();
+            let x = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+            let y = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+            ltDragging.el.style.left = (x * 100) + '%';
+            ltDragging.el.style.top = (y * 100) + '%';
+            ltDragging.x = x; ltDragging.y = y;
+        });
+        const endDrag = async () => {
+            if (!ltDragging) return;
+            let d = ltDragging;
+            ltDragging = null;
+            d.el.classList.remove('dragging');
+            if (d.moved && d.x !== undefined) await ltSavePosition(d.x, d.y);
+        };
+        layer.addEventListener('pointerup', endDrag);
+        layer.addEventListener('pointercancel', endDrag);
+    })();
+
+    // ---------- Vòng đời tab ----------
+    function ltTabActive() {
+        let pane = document.getElementById('linhThuContent');
+        return pane && pane.classList.contains('active');
     }
-
-    // Khối "Thú con" — chỉ hiện trong thẻ editable. Dùng chung Cấp/XP với thú
-    // chính (cùng 1 chủ, cùng 1 công việc thật, chỉ là thêm 1 con để nuôi).
-    function renderCompanionBlock(subjectType, subjectKey, mainXp, mainLevel, companionSlotData, domIdBase) {
-        if (mainLevel < LINH_THU_COMPANION_UNLOCK_LEVEL) {
-            return `
-                <div class="mt-3 pt-2" style="border-top:1px dashed var(--line);">
-                    <div class="small" style="color:var(--slate-soft);">🔒 Thú con — cần đạt Cấp ${LINH_THU_COMPANION_UNLOCK_LEVEL} mới được chọn thêm (hiện Cấp ${mainLevel}).</div>
-                </div>
-            `;
-        }
-        // Thú con có kinh nghiệm riêng = 1/10 thú chính — lên cấp/tiến hoá
-        // chậm hơn hẳn, đúng vai trò "con", không "ăn theo" ngang thú chính.
-        let companionXp = mainXp / 10;
-        let companionLevel = getLinhThuLevel(companionXp);
-        let stageIdx = getLinhThuStageIndex(companionLevel);
-        let groupIdx = getLinhThuGroupIndex(companionLevel);
-        let companionSpecies = companionSlotData && companionSlotData.species ? LINH_THU_SPECIES.find(s => s.key === companionSlotData.species) : null;
-        let domId = domIdBase + '_slot2';
-
-        if (!companionSpecies) {
-            return `
-                <div class="mt-3 pt-2" style="border-top:1px dashed var(--line);">
-                    <div class="small fw-bold mb-1" style="color:var(--ink);">🐣 Thú con — đã mở khoá! Chọn 1 loài:</div>
-                    ${renderSpeciesPickerHtml(subjectType, subjectKey, 2)}
-                </div>
-            `;
-        }
-        let stageName = companionSpecies.stages[stageIdx];
-        return `
-            <div class="mt-3 pt-2" style="border-top:1px dashed var(--line);">
-                <div class="small fw-bold mb-1" style="color:var(--ink);">🐣 Thú con · Cấp ${companionLevel}/${LINH_THU_MAX_LEVEL} (Nhóm ${groupIdx}/${LINH_THU_GROUP_COUNT}) · ${companionXp.toFixed(1)} XP <span style="color:var(--slate-soft); font-weight:400;">(= 1/10 XP thú chính)</span></div>
-                <div class="d-flex align-items-center gap-2">
-                    <span style="font-size:22px;">${companionSpecies.emoji}</span>
-                    <div>
-                        <div class="small fw-bold">${companionSlotData.petName ? escapeHtml(companionSlotData.petName) + ' · ' : ''}${escapeHtml(stageName)}</div>
-                        <div class="small" style="color:var(--slate-soft);">${escapeHtml(companionSpecies.name)}</div>
-                    </div>
-                </div>
-                ${renderRenameBlock(subjectType, subjectKey, 2, companionLevel, companionSlotData.petName, domId)}
-                <button type="button" class="btn btn-sm mt-2 linh-thu-toggle-btn" data-target="picker_${domId}" style="background:var(--surface); border:1px solid var(--line); font-size:11.5px;">Đổi loài thú con</button>
-                <div id="picker_${domId}" class="d-none">${renderSpeciesPickerHtml(subjectType, subjectKey, 2)}</div>
-            </div>
-        `;
-    }
-
-    function renderPetCard(subjectType, subjectKey, xp, editable) {
-        let selKey = `${subjectType}::${subjectKey}`;
-        let slots = linhThuSelections[selKey] || {};
-        let mainSlot = slots[1] || {};
-        let speciesKey = mainSlot.species;
-        let isAdminType = subjectType === 'admin';
-        let level = getLinhThuLevel(xp);
-        let stageIdx = getLinhThuStageIndex(level);
-        let stageLabel = LINH_THU_STAGE_LABELS[stageIdx];
-        let groupIdx = getLinhThuGroupIndex(level);
-        let isMaxLevel = level >= LINH_THU_MAX_LEVEL;
-        let levelFloor = (level - 1) * LINH_THU_XP_PER_LEVEL;
-        let levelCeil = level * LINH_THU_XP_PER_LEVEL;
-        let progressPct = isMaxLevel ? 100 : Math.min(100, ((xp - levelFloor) / LINH_THU_XP_PER_LEVEL) * 100);
-        let subjectLabel = subjectType === 'doiTac' ? 'Đối tác' : (isAdminType ? 'Quản trị viên' : 'Đội trưởng');
-        let domId = safeDomId(selKey);
-        // Với admin, "XP" thực chất là số NGÀY ĐĂNG NHẬP quy đổi (1 ngày = 1
-        // cấp) — hiện đúng đơn vị ngày cho dễ hiểu, không hiện "XP" gây hiểu nhầm.
-        let unitLabel = isAdminType ? 'ngày đăng nhập' : 'XP';
-
-        let bodyHtml;
-        if (!speciesKey) {
-            bodyHtml = editable
-                ? `<div class="pet-xp mb-1">Chưa chọn Linh thú — chọn 1 loài để bắt đầu:</div>${renderSpeciesPickerHtml(subjectType, subjectKey, 1)}`
-                : `<div class="pet-xp">Chưa chọn Linh thú</div>`;
-        } else {
-            let species = LINH_THU_SPECIES.find(s => s.key === speciesKey);
-            let stageName = species ? species.stages[stageIdx] : speciesKey;
-            let tierName = species ? LINH_THU_TIER_NAMES[species.tier] : '';
-            bodyHtml = `
-                <div class="pet-stage-name">${mainSlot.petName ? escapeHtml(mainSlot.petName) + ' · ' : ''}${escapeHtml(stageName)}</div>
-                <div class="pet-species-name">${species ? escapeHtml(species.name) : ''} · ${tierName} · Cấp ${level}/${LINH_THU_MAX_LEVEL} (Nhóm ${groupIdx}/${LINH_THU_GROUP_COUNT}): ${stageLabel}</div>
-                <div class="progress mb-1" style="height:7px; background:var(--line);">
-                    <div class="progress-bar" style="width:${progressPct}%; background:#C9A227;"></div>
-                </div>
-                <div class="pet-xp">${isAdminType ? level : xp.toFixed(1)} ${unitLabel}${isMaxLevel ? ' · Đã đạt Cấp tối đa' : ` / ${isAdminType ? level + 1 : levelCeil} (lên Cấp ${level + 1})`}</div>
-                ${editable ? `
-                    ${renderRenameBlock(subjectType, subjectKey, 1, level, mainSlot.petName, domId)}
-                    <button type="button" class="btn btn-sm mt-2 linh-thu-toggle-btn" data-target="picker_${domId}" style="background:var(--surface); border:1px solid var(--line); font-size:11.5px;">Đổi loài</button>
-                    <div id="picker_${domId}" class="d-none">${renderSpeciesPickerHtml(subjectType, subjectKey, 1)}</div>
-                    ${renderCompanionBlock(subjectType, subjectKey, xp, level, slots[2], domId)}
-                ` : ''}
-            `;
-        }
-
-        return `
-            <div class="col-md-4">
-                <div class="pet-card ${speciesKey ? 'has-pet' : ''}">
-                    <div class="pet-subject">${subjectLabel}: ${subjectType === 'doiTac' ? `<span class="sparkle-name" style="font-size:12px;">${escapeHtml(subjectKey)}</span>` : escapeHtml(subjectKey)}</div>
-                    ${bodyHtml}
-                </div>
-            </div>
-        `;
-    }
-
-    function renderLinhThuTab() {
-        let container = document.getElementById('linhThuBody');
-        if (!currentUser) return;
-        let html = '';
-
-        if (currentUser.role === 'petonly') {
-            // Chỉ nuôi thú qua đăng nhập hằng ngày — KHÔNG có dataBT nên
-            // không hiện được phần tổng quan Đối tác/Đội trưởng.
-            let myEntry = linhThuLeaderboard.find(e => e.subjectType === 'admin' && e.subjectKey === currentUser.username);
-            let myXp = adminLevelToXp(myEntry ? myEntry.level : 1);
-            html += renderPetCard('admin', currentUser.username, myXp, true);
-
-        } else if (currentUser.doiTruong && currentUser.doiTruong.trim() !== '') {
-            // Cấp Đội trưởng — chỉ có đúng 1 pet của chính họ
-            let xp = calcDoiTruongXp(currentUser.doiTruong, globalData);
-            html += renderPetCard('doiTruong', currentUser.doiTruong, xp, true);
-
-        } else if (currentUser.role !== 'admin' && currentUser.role !== 'superadmin') {
-            // Cấp Đối tác quản lý — pet của họ + danh sách các Đội trưởng trực thuộc
-            let xpDoiTac = calcDoiTacXp(globalData);
-            html += renderPetCard('doiTac', currentUser.doiTac, xpDoiTac, true);
-
-            let doiTruongNames = [...new Set(globalData.map(i => i.doiTruong))].filter(Boolean).sort();
-            if (doiTruongNames.length > 0) {
-                html += `<div class="col-12 mt-2 mb-1 fw-bold small" style="color:var(--slate);">Linh thú các Đội trưởng trực thuộc</div>`;
-                doiTruongNames.forEach(name => {
-                    html += renderPetCard('doiTruong', name, calcDoiTruongXp(name, globalData), false);
-                });
-            }
-
-        } else {
-            // Admin/SuperAdmin — có pet riêng, Cấp tính theo số ngày đăng nhập
-            // (server trả sẵn qua linhThuLeaderboard, subjectType='admin')
-            let myAdminEntry = linhThuLeaderboard.find(e => e.subjectType === 'admin' && e.subjectKey === currentUser.username);
-            let myAdminXp = adminLevelToXp(myAdminEntry ? myAdminEntry.level : 1);
-            html += renderPetCard('admin', currentUser.username, myAdminXp, true);
-
-            let doiTacs = [...new Set(globalData.map(i => i.doiTac))].filter(Boolean).sort();
-            html += `<div class="col-12 mt-2 mb-1 fw-bold small" style="color:var(--slate);">Linh thú các Đối tác</div>`;
-            doiTacs.forEach(dt => {
-                let scoped = globalData.filter(i => i.doiTac === dt);
-                html += renderPetCard('doiTac', dt, calcDoiTacXp(scoped), false);
-            });
-
-            let doiTruongNames = [...new Set(globalData.map(i => i.doiTruong))].filter(Boolean).sort();
-            if (doiTruongNames.length > 0) {
-                html += `<div class="col-12 mt-2 mb-1 fw-bold small" style="color:var(--slate);">Linh thú các Đội trưởng</div>`;
-                doiTruongNames.forEach(name => {
-                    html += renderPetCard('doiTruong', name, calcDoiTruongXp(name, globalData), false);
-                });
-            }
-        }
-
-        container.innerHTML = html || `<div class="col-12 text-center small py-4" style="color:var(--slate);">Chưa có dữ liệu.</div>`;
-    }
-
-    // Uỷ quyền sự kiện (event delegation) cho toàn bộ nút trong tab Linh Thú —
-    // tránh phải nhúng dữ liệu (tên Đội trưởng có dấu, khoảng trắng...) trực tiếp
-    // vào thuộc tính onclick, dễ gây lỗi hoặc rủi ro chèn mã.
-    document.getElementById('linhThuBody').addEventListener('click', (e) => {
-        let pickBtn = e.target.closest('.linh-thu-pick-btn');
-        if (pickBtn) {
-            selectLinhThuSpecies(pickBtn.dataset.subjectType, pickBtn.dataset.subjectKey, pickBtn.dataset.species, parseInt(pickBtn.dataset.slot || '1', 10));
-            return;
-        }
-        let renameBtn = e.target.closest('.linh-thu-rename-btn');
-        if (renameBtn) {
-            let input = document.getElementById(renameBtn.dataset.input);
-            let newName = input ? input.value.trim() : '';
-            renameLinhThuPet(renameBtn.dataset.subjectType, renameBtn.dataset.subjectKey, parseInt(renameBtn.dataset.slot || '1', 10), newName);
-            return;
-        }
-        let toggleBtn = e.target.closest('.linh-thu-toggle-btn');
-        if (toggleBtn) {
-            document.getElementById(toggleBtn.dataset.target)?.classList.toggle('d-none');
-        }
-    });
-
     document.getElementById('linhthu-tab').addEventListener('shown.bs.tab', () => {
-        fetchLinhThuSelections();
+        fetchLinhThuPets();
+    });
+    document.getElementById('linhthu-tab').addEventListener('hidden.bs.tab', () => {
+        if (ltPickMode) ltSetPickMode(false);
     });
 
     function resetFilters() {
