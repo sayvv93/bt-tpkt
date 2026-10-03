@@ -334,6 +334,35 @@
         .hi-spot-val { font-family:'IBM Plex Mono', monospace; font-weight:800; font-size:14px; }
         .hi-spot-head { font-size:12px; font-weight:800; margin:2px 0 4px; }
 
+        /* ---------- LỊCH TRỰC ĐỘI TRƯỞNG ---------- */
+        .lich-wrap { overflow:auto; max-height:70vh; border:1px solid var(--line); border-radius:10px; background:var(--card); }
+        .lich-table { border-collapse:separate; border-spacing:0; font-size:12px; min-width:100%; }
+        .lich-table th, .lich-table td { border-bottom:1px solid var(--line); border-right:1px solid var(--line); padding:0; text-align:center; white-space:nowrap; }
+        .lich-table thead th { position:sticky; top:0; z-index:3; background:var(--ink); color:#fff; font-weight:600; padding:5px 0; min-width:38px; }
+        .lich-table thead th.we { background:#3a4247; }
+        .lich-table thead th.today { background:var(--brand); }
+        .lich-table .lich-name { position:sticky; left:0; z-index:2; background:var(--card); text-align:left; padding:6px 10px; min-width:190px; font-weight:600; }
+        .lich-table thead .lich-name { z-index:4; background:var(--ink); }
+        .lich-table .lich-name small { display:block; font-weight:400; color:var(--slate-soft); }
+        .lich-cell { height:34px; cursor:default; user-select:none; font-weight:800; font-size:11px; }
+        .lich-cell.editable { cursor:pointer; }
+        .lich-cell.editable:hover { outline:2px solid var(--brand); outline-offset:-2px; }
+        .lich-cell.on { background:#DDEFD0; color:#2E6516; }
+        .lich-cell.off { background:#F6D9D6; color:#A3261E; }
+        .lich-cell.today-col { box-shadow: inset 2px 0 0 var(--brand), inset -2px 0 0 var(--brand); }
+        .lich-cell.saving { opacity:.45; }
+        .lich-foot td { background:var(--surface); font-weight:700; font-size:11px; padding:4px 0; }
+        .lich-brush { display:inline-flex; gap:4px; background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:3px; }
+        .lich-brush button { border:none; border-radius:6px; padding:4px 12px; font-size:12px; font-weight:700; background:transparent; color:var(--slate); }
+        .lich-brush button.active[data-v="ON"] { background:#3F7D1F; color:#fff; }
+        .lich-brush button.active[data-v="OFF"] { background:#AC2B22; color:#fff; }
+        .lich-brush button.active[data-v=""] { background:var(--ink); color:#fff; }
+        .lich-chip { display:inline-block; font-size:12px; font-weight:600; border-radius:12px; padding:2px 10px; margin:0 4px 4px 0; }
+        .lich-chip.on { background:#DDEFD0; color:#2E6516; }
+        .lich-chip.off { background:#F6D9D6; color:#A3261E; }
+        .lich-chip.none { background:var(--surface); color:var(--slate); border:1px dashed var(--line); }
+        .lich-day-big { font-family:'IBM Plex Mono', monospace; font-size:26px; font-weight:800; }
+
         /* ---------- CHAT NỘI BỘ ---------- */
         .chat-panel {
             background: var(--card); border: 1px solid var(--line); border-radius: 10px;
@@ -473,6 +502,16 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="rkn-tab" data-bs-toggle="tab" data-bs-target="#rknContent" type="button" role="tab">
                 <i class="bi bi-reception-2 me-1" style="color:var(--red);"></i> SH &amp; RKN
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="ns-tab" data-bs-toggle="tab" data-bs-target="#nsContent" type="button" role="tab">
+                <i class="bi bi-people-fill me-1" style="color:#2C7DA0;"></i> Nhân Sự
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="lich-tab" data-bs-toggle="tab" data-bs-target="#lichContent" type="button" role="tab">
+                <i class="bi bi-calendar-week me-1" style="color:#7A4FB0;"></i> Lịch Trực ĐT
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -1107,6 +1146,100 @@
             </div>
         </div>
 
+        <!-- TAB: NHÂN SỰ (dataNS) -->
+        <div class="tab-pane fade" id="nsContent" role="tabpanel">
+            <div id="nsAdminBar" class="hi-admin-bar d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 d-none">
+                <span class="fw-bold small" style="color:#8A6A12;"><i class="bi bi-shield-lock-fill me-1"></i>Admin — Quản lý danh sách Nhân sự (dataNS)</span>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="filter-reset-btn" onclick="nsDownloadTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu</button>
+                    <label class="filter-reset-btn mb-0" style="cursor:pointer;"><i class="bi bi-upload me-1"></i>Nhập Excel
+                        <input type="file" accept=".xlsx,.xls,.csv" class="d-none" onchange="nsHandleImportFile(event)">
+                    </label>
+                    <button class="filter-reset-btn" onclick="nsOpenEditModal(null)"><i class="bi bi-person-plus me-1"></i>Thêm nhân sự</button>
+                </div>
+            </div>
+
+            <div class="filter-strip row g-2 mb-3 align-items-end">
+                <div class="col-md-2 f-group"><label>Đối tác</label><select id="nsFilterDoiTac" class="form-select form-select-sm" onchange="nsOnFilterChange()"></select></div>
+                <div class="col-md-3 f-group"><label>Đội trưởng</label><select id="nsFilterDoiTruong" class="form-select form-select-sm" onchange="nsApplyFilters()"></select></div>
+                <div class="col-md-2 f-group"><label>Bậc</label><select id="nsFilterBac" class="form-select form-select-sm" onchange="nsApplyFilters()"></select></div>
+                <div class="col-md-2 f-group"><label>Thâm niên</label><select id="nsFilterTn" class="form-select form-select-sm" onchange="nsApplyFilters()"></select></div>
+                <div class="col-md-3 f-group"><label>Tìm tên / mã NV / Mobinet / mail</label>
+                    <input type="text" id="nsSearch" class="form-control form-control-sm" placeholder="Nhập để tìm..." oninput="clearTimeout(window._nsT); window._nsT = setTimeout(nsApplyFilters, 250);"></div>
+                <div class="col-12 f-group d-flex justify-content-end gap-2">
+                    <span class="small align-self-center me-auto" id="nsLastLoaded" style="color:var(--slate-soft);"></span>
+                    <button class="filter-reset-btn" onclick="nsResetFilters()"><i class="bi bi-x-circle me-1"></i>Xoá lọc</button>
+                    <button class="filter-reset-btn" onclick="nsFetchData(true)"><i class="bi bi-arrow-clockwise me-1"></i>Tải lại</button>
+                    <button class="filter-reset-btn" onclick="nsExportExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Xuất Excel</button>
+                </div>
+            </div>
+
+            <div class="stat-strip">
+                <div class="stat-item accent-neutral"><div class="stat-label">TỔNG NHÂN SỰ</div><div class="stat-value" id="nsKpiTotal">0</div></div>
+                <div class="stat-item accent-neutral"><div class="stat-label">SỐ ĐỘI TRƯỞNG</div><div class="stat-value" id="nsKpiTeams">0</div></div>
+                <div class="stat-item accent-brand"><div class="stat-label">THÂM NIÊN TB</div><div class="stat-value" id="nsKpiAvg">--</div></div>
+                <div class="stat-item accent-amber"><div class="stat-label">MỚI (&lt; 6 THÁNG)</div><div class="stat-value" id="nsKpiNew">0</div></div>
+                <div class="stat-item accent-brand"><div class="stat-label">TỪ 3 NĂM TRỞ LÊN</div><div class="stat-value" id="nsKpiOld">0</div></div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-lg-8">
+                    <div class="table-panel h-100">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 p-3 pb-2">
+                            <div class="fw-bold"><i class="bi bi-people me-2" style="color:var(--brand);"></i>Cơ cấu nhân sự theo thâm niên</div>
+                            <div class="hi-seg" id="nsGroupSeg">
+                                <button type="button" data-group="doiTacQuanLy" class="active">Theo Đối tác</button>
+                                <button type="button" data-group="doiTruong">Theo Đội trưởng</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive"><table class="table table-hover align-middle mb-0" id="nsGroupTable"></table></div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="hi-card">
+                        <div class="hi-card-title"><i class="bi bi-bar-chart-steps me-1"></i>Phân bố theo Bậc</div>
+                        <div class="hi-chart-box" style="height:250px;"><canvas id="nsBacChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-panel">
+                <div class="p-3 pb-2 fw-bold"><i class="bi bi-person-lines-fill me-2" style="color:var(--brand);"></i>Danh sách nhân sự <span class="small fw-normal" id="nsDetailCount" style="color:var(--slate-soft);"></span></div>
+                <div class="table-responsive"><table class="table table-hover align-middle mb-0" id="nsDetailTable"></table></div>
+                <div class="d-flex justify-content-end p-3"><nav><ul class="pagination pagination-sm mb-0" id="nsPagination"></ul></nav></div>
+            </div>
+        </div>
+
+        <!-- TAB: LỊCH TRỰC ĐỘI TRƯỞNG (dataLichTruc) -->
+        <div class="tab-pane fade" id="lichContent" role="tabpanel">
+            <div class="row g-3 mb-3" id="lichQuick"></div>
+
+            <div class="filter-strip row g-2 mb-3 align-items-end">
+                <div class="col-md-4 f-group">
+                    <label>Tháng</label>
+                    <div class="d-flex gap-2 align-items-center">
+                        <button class="filter-reset-btn" onclick="lichShiftMonth(-1)" title="Tháng trước"><i class="bi bi-chevron-left"></i></button>
+                        <input type="month" id="lichMonth" class="form-control form-control-sm" style="max-width:170px;" onchange="lichLoad()">
+                        <button class="filter-reset-btn" onclick="lichShiftMonth(1)" title="Tháng sau"><i class="bi bi-chevron-right"></i></button>
+                        <button class="filter-reset-btn" onclick="lichGoToday()">Hôm nay</button>
+                    </div>
+                </div>
+                <div class="col-md-2 f-group"><label>Đối tác</label><select id="lichFilterDoiTac" class="form-select form-select-sm" onchange="lichRender()"></select></div>
+                <div class="col-md-3 f-group"><label>Tìm Đội trưởng</label><input type="text" id="lichSearch" class="form-control form-control-sm" placeholder="Nhập tên..." oninput="lichRender()"></div>
+                <div class="col-md-3 f-group" id="lichBrushBox">
+                    <label>Khai báo (chọn rồi bấm / kéo trên ô ngày)</label>
+                    <div class="lich-brush" id="lichBrush">
+                        <button type="button" data-v="ON" class="active">ON</button>
+                        <button type="button" data-v="OFF">OFF</button>
+                        <button type="button" data-v="">Xoá</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lich-wrap mb-2"><table class="lich-table" id="lichTable"></table></div>
+            <div class="small" id="lichNote" style="color:var(--slate-soft);"></div>
+        </div>
+
         <!-- TAB 5: LINH THÚ — KHU DÂN CƯ -->
         <div class="tab-pane fade" id="linhThuContent" role="tabpanel">
             <div id="linhThuMe" class="lt-me-panel mb-3">
@@ -1178,6 +1311,8 @@
                                         <tr><td><b>Cảnh báo CLL2 &amp; 3</b></td><td>Số hợp đồng xuất hiện từ 2 lần trở lên trong dữ liệu bảo trì</td><td>Mọi tài khoản trừ cus</td></tr>
                                         <tr><td><b>HI FPT</b></td><td>Tỉ lệ cài đặt và tỉ lệ tương tác ứng dụng HI FPT</td><td>Mọi tài khoản trừ cus</td></tr>
                                         <tr><td><b>SH &amp; RKN</b></td><td>Theo dõi và xử lý ca Suy hao / Rớt kết nối liên tục</td><td>Tất cả</td></tr>
+                                        <tr><td><b>Nhân Sự</b></td><td>Danh sách nhân sự, thâm niên tự tính, cơ cấu theo thâm niên / bậc</td><td>Tất cả (cus chỉ xem)</td></tr>
+                                        <tr><td><b>Lịch Trực ĐT</b></td><td>Khai báo lịch ON / OFF của Đội trưởng, xem nhanh lịch hôm nay và ngày mai</td><td>Tất cả (cus chỉ xem)</td></tr>
                                         <tr><td><b>Trò chuyện</b></td><td>Chat nội bộ + nhật ký tự động (XL Lại, SH &amp; RKN)</td><td>Tất cả</td></tr>
                                         <tr><td><b>Linh Thú</b></td><td>Nuôi thú, chọn lô đất trong khu dân cư — cho vui, không tính hiệu suất</td><td>Tất cả</td></tr>
                                         <tr><td><b>Phân tích SHD</b></td><td>Mở công cụ n8n chẩn đoán số hợp đồng</td><td>Admin, SuperAdmin, Đối tác quản lý</td></tr>
@@ -1267,6 +1402,30 @@
                 </div>
 
                 <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gns">7b. Nhân Sự</button></h2>
+                    <div id="gns" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li>Phạm vi xem giống tab Bảo Trì (Đội trưởng — đội mình, Đối tác — đối tác mình, Admin — tất cả); tài khoản cus xem theo đối tác của mình và <b>chỉ được xem</b>.</li>
+                            <li><b>Thâm niên</b> tự tính = hôm nay − Ngày vào CT, hiển thị "X năm Y tháng" (nhân sự dưới 6 tháng tô màu cam). Báo cáo: tổng nhân sự, thâm niên trung bình, cơ cấu theo nhóm thâm niên (theo Đối tác / Đội trưởng) và phân bố theo Bậc.</li>
+                            <li>Mọi tài khoản (trừ cus) bấm ✏️ để sửa thông tin nhân sự trong phạm vi của mình; <b>Note</b> tối đa 500 ký tự. Chỉ Admin được chuyển nhân sự sang Đối tác / Đội trưởng khác.</li>
+                            <li><b>Admin / SuperAdmin</b>: nhập Excel (khoá là Mã nhân viên — trùng thì cập nhật; ô DVKH / Note trống trong file sẽ giữ nội dung đã nhập trên web), thêm, xoá nhân sự.</li>
+                        </ul></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#glich">7c. Lịch Trực Đội Trưởng</button></h2>
+                    <div id="glich" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li>Đầu tab là <b>báo cáo nhanh Hôm nay và Ngày mai</b>: ai trực (ON), ai nghỉ (OFF), ai chưa khai báo.</li>
+                            <li>Bảng lịch theo tháng: mỗi dòng 1 Đội trưởng, mỗi cột 1 ngày (cột hôm nay viền xanh). Dùng nút ‹ › hoặc ô Tháng để chuyển tháng.</li>
+                            <li>Khai báo: chọn <b>ON / OFF / Xoá</b> ở ô "Khai báo", rồi bấm vào ô ngày — hoặc giữ chuột kéo qua nhiều ô để khai báo cả tuần một lần.</li>
+                            <li>Đội trưởng khai báo cho chính mình; Đối tác quản lý khai báo cho các đội trong đối tác; Admin khai báo cho tất cả; tài khoản cus chỉ xem.</li>
+                        </ul></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
                     <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g5">8. Trò chuyện</button></h2>
                     <div id="g5" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
                         <div class="accordion-body small"><ul class="mb-0">
@@ -1327,13 +1486,13 @@
                         <div class="accordion-body small">
                             <div class="table-responsive">
                                 <table class="table table-sm table-bordered align-middle mb-0">
-                                    <thead><tr><th>Tài khoản</th><th>Bảo Trì · CLL2&amp;3 · HI FPT</th><th>SH &amp; RKN</th><th>Phân tích SHD</th><th>Quyền riêng</th></tr></thead>
+                                    <thead><tr><th>Tài khoản</th><th>Bảo Trì · CLL2&amp;3 · HI FPT</th><th>SH &amp; RKN</th><th>Nhân Sự · Lịch Trực</th><th>Phân tích SHD</th><th>Quyền riêng</th></tr></thead>
                                     <tbody>
-                                        <tr><td><b>Đội trưởng</b></td><td>Đội mình</td><td>Đội mình · Hướng XL + Đội trưởng note</td><td>✗</td><td>Nhập Excel cập nhật ca: 300 dòng</td></tr>
-                                        <tr><td><b>Đối tác quản lý</b></td><td>Cả đối tác</td><td>Cả đối tác · Hướng XL + Đội trưởng note</td><td>✓</td><td>Tạo tài khoản cus</td></tr>
-                                        <tr><td><b>Admin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Quản lý dữ liệu SH &amp; RKN</td></tr>
-                                        <tr><td><b>SuperAdmin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Nhập ca bảo trì mới, quản lý HI FPT, đổi link Phân tích SHD, nhập Excel 1000 dòng</td></tr>
-                                        <tr><td><b>cus</b></td><td>✗</td><td>Đối tác mình · Hướng XL + DVKH care note</td><td>✗</td><td>—</td></tr>
+                                        <tr><td><b>Đội trưởng</b></td><td>Đội mình</td><td>Đội mình · Hướng XL + Đội trưởng note</td><td>Đội mình · sửa / khai báo lịch của mình</td><td>✗</td><td>Nhập Excel cập nhật ca: 300 dòng</td></tr>
+                                        <tr><td><b>Đối tác quản lý</b></td><td>Cả đối tác</td><td>Cả đối tác · Hướng XL + Đội trưởng note</td><td>Cả đối tác · sửa / khai báo lịch</td><td>✓</td><td>Tạo tài khoản cus</td></tr>
+                                        <tr><td><b>Admin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Quản lý dữ liệu SH &amp; RKN</td></tr>
+                                        <tr><td><b>SuperAdmin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Nhập ca bảo trì mới, quản lý HI FPT, đổi link Phân tích SHD, nhập Excel 1000 dòng</td></tr>
+                                        <tr><td><b>cus</b></td><td>✗</td><td>Đối tác mình · Hướng XL + DVKH care note</td><td>Đối tác mình · chỉ xem</td><td>✗</td><td>—</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -1479,6 +1638,23 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
                     <button type="button" class="btn btn-sm text-white" style="background:var(--brand);" id="rknImportConfirmBtn" onclick="rknConfirmImport()">Nhập vào hệ thống</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Sửa / thêm nhân sự -->
+    <div class="modal fade" id="nsEditModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold" id="nsEditTitle">Sửa nhân sự</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body"><div class="row g-2" id="nsEditFields"></div></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="button" class="btn btn-sm text-white" style="background:var(--brand);" id="nsEditSaveBtn" onclick="nsSaveEdit()">Lưu</button>
                 </div>
             </div>
         </div>
@@ -4719,6 +4895,419 @@
     }
 
     document.getElementById('rkn-tab').addEventListener('shown.bs.tab', () => rknFetchData(false));
+
+    // ================== NHÂN SỰ (dataNS) ==================
+    // Xem: mọi tài khoản trong phạm vi (cus theo Đối tác, chỉ xem). Sửa: mọi tài
+    // khoản trừ cus. Nhập file / thêm / xoá: Admin, SuperAdmin.
+    // Thâm niên KHÔNG lưu trong D1 — tính tại trình duyệt = hôm nay - Ngày vào CT.
+    const NS_FIELDS = ['doiTacQuanLy', 'doiTruong', 'blockQuanLy', 'mobinet', 'bac', 'saleClub',
+                       'maNhanVien', 'ten', 'ngayVaoCT', 'mbp', 'mail', 'dvkh', 'note'];
+    const NS_LABELS = { doiTacQuanLy: 'Đối tác quản lý', doiTruong: 'Đội trưởng', blockQuanLy: 'Block quản lý', mobinet: 'Mobinet',
+        bac: 'Bậc', saleClub: 'SaleClub', maNhanVien: 'Mã nhân viên', ten: 'Tên', ngayVaoCT: 'Ngày Vào CT', mbp: 'MBP', mail: 'Mail',
+        dvkh: 'DVKH', note: 'Note' };
+    const NS_NOTE_MAX = 500, NS_PAGE_SIZE = 50;
+    const NS_TN_BUCKETS = [['lt6', '< 6 tháng', 0, 182], ['6to12', '6–12 tháng', 183, 365], ['1to3', '1–3 năm', 366, 1095],
+                           ['3to5', '3–5 năm', 1096, 1826], ['gt5', '> 5 năm', 1827, Infinity]];
+    let nsData = [], nsFiltered = [], nsLoadedFor = null, nsLoadedAt = 0, nsPage = 1, nsGroupBy = 'doiTacQuanLy', nsEditingId = null;
+    const nsCanEdit = () => currentUser && currentUser.role !== 'petonly';
+
+    // Thâm niên (số ngày) và chữ hiển thị "X năm Y tháng"
+    function nsTenureDays(v) {
+        let d = parseFlexibleDate(v);
+        if (!d) return null;
+        let t = new Date(); t.setHours(0, 0, 0, 0); d.setHours(0, 0, 0, 0);
+        return Math.floor((t - d) / 86400000);
+    }
+    function nsTenureText(v) {
+        let d = parseFlexibleDate(v);
+        if (!d) return '';
+        let t = new Date();
+        if (d > t) return 'Chưa vào làm';
+        let months = (t.getFullYear() - d.getFullYear()) * 12 + (t.getMonth() - d.getMonth()) - (t.getDate() < d.getDate() ? 1 : 0);
+        if (months < 1) return `${nsTenureDays(v)} ngày`;
+        let y = Math.floor(months / 12), m = months % 12;
+        return [y ? `${y} năm` : '', m ? `${m} tháng` : ''].filter(Boolean).join(' ');
+    }
+    function nsBucketOf(days) {
+        if (days === null || days < 0) return null;
+        let b = NS_TN_BUCKETS.find(([, , lo, hi]) => days >= lo && days <= hi);
+        return b ? b[0] : null;
+    }
+    function nsAvgText(rows) {
+        let ds = rows.map(r => r._days).filter(d => d !== null && d >= 0);
+        if (!ds.length) return '--';
+        let avg = ds.reduce((a, b) => a + b, 0) / ds.length / 365.25;
+        return avg.toFixed(1) + ' năm';
+    }
+
+    async function nsFetchData(force) {
+        if (!currentUser) return;
+        if (!force && nsLoadedFor === currentUser.username && Date.now() - nsLoadedAt < HI_STALE_MS) { nsRenderAll(); return; }
+        try {
+            let res = await apiFetch("api/ns/data", { method: "GET" });
+            let data = await res.json();
+            if (!res.ok) { alert(data.error || "Không tải được dữ liệu Nhân sự"); return; }
+            nsData = data.dataNS || [];
+            nsData.forEach(r => { r._days = nsTenureDays(r.ngayVaoCT); r._bucket = nsBucketOf(r._days); });
+            nsLoadedFor = currentUser.username; nsLoadedAt = Date.now();
+            document.getElementById('nsLastLoaded').textContent = `Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN')} · ${nsData.length} nhân sự`;
+        } catch (e) { console.error("Lỗi tải Nhân sự:", e); return; }
+        hiFillSelect('nsFilterDoiTac', hiUniq(nsData, 'doiTacQuanLy'), 'Tất cả Đối tác', true);
+        let sel = document.getElementById('nsFilterDoiTac');
+        if (isDoiTacLocked()) {
+            if (![...sel.options].some(o => o.value === currentUser.doiTac)) sel.add(new Option(currentUser.doiTac, currentUser.doiTac));
+            sel.value = currentUser.doiTac; sel.disabled = true;
+        } else sel.disabled = false;
+        hiFillSelect('nsFilterBac', hiUniq(nsData, 'bac').sort((a, b) => (parseFloat(a) || 0) - (parseFloat(b) || 0)), 'Tất cả', true);
+        let tn = document.getElementById('nsFilterTn');
+        if (!tn.options.length) tn.innerHTML = '<option value="">Tất cả</option>' + NS_TN_BUCKETS.map(b => `<option value="${b[0]}">${b[1]}</option>`).join('');
+        nsOnFilterChange();
+    }
+    function nsOnFilterChange() {
+        let dt = document.getElementById('nsFilterDoiTac').value;
+        hiFillSelect('nsFilterDoiTruong', hiUniq(nsData.filter(r => !dt || r.doiTacQuanLy === dt), 'doiTruong'), 'Tất cả Đội trưởng', true);
+        let s = document.getElementById('nsFilterDoiTruong');
+        if (isDoiTruongLocked()) {
+            if (![...s.options].some(o => o.value === currentUser.doiTruong)) s.add(new Option(currentUser.doiTruong, currentUser.doiTruong));
+            s.value = currentUser.doiTruong; s.disabled = true;
+        } else s.disabled = false;
+        nsApplyFilters();
+    }
+    function nsResetFilters() {
+        ['nsFilterBac', 'nsFilterTn', 'nsSearch'].forEach(id => document.getElementById(id).value = '');
+        if (!isDoiTacLocked()) document.getElementById('nsFilterDoiTac').value = '';
+        if (!isDoiTruongLocked()) document.getElementById('nsFilterDoiTruong').value = '';
+        nsOnFilterChange();
+    }
+    function nsApplyFilters() {
+        let dt = document.getElementById('nsFilterDoiTac').value, dtr = document.getElementById('nsFilterDoiTruong').value;
+        let bac = document.getElementById('nsFilterBac').value, tn = document.getElementById('nsFilterTn').value;
+        let q = hiNorm(document.getElementById('nsSearch').value);
+        nsFiltered = nsData.filter(r => (!dt || r.doiTacQuanLy === dt) && (!dtr || r.doiTruong === dtr) && (!bac || r.bac === bac)
+            && (!tn || r._bucket === tn) && (!q || [r.ten, r.maNhanVien, r.mobinet, r.mail, r.saleClub, r.mbp].some(v => hiNorm(v).includes(q))));
+        nsPage = 1;
+        nsRenderAll();
+    }
+
+    function nsRenderAll() {
+        document.getElementById('nsAdminBar').classList.toggle('d-none', !rknIsAdmin());
+        document.querySelectorAll('#nsGroupSeg button').forEach(b => b.classList.toggle('active', b.dataset.group === nsGroupBy));
+        let rows = nsFiltered;
+        document.getElementById('nsKpiTotal').textContent = rows.length.toLocaleString('vi-VN');
+        document.getElementById('nsKpiTeams').textContent = new Set(rows.map(r => r.doiTruong).filter(Boolean)).size;
+        document.getElementById('nsKpiAvg').textContent = nsAvgText(rows);
+        document.getElementById('nsKpiNew').textContent = rows.filter(r => r._bucket === 'lt6').length;
+        document.getElementById('nsKpiOld').textContent = rows.filter(r => r._days !== null && r._days >= 1096).length;
+
+        // Bảng cơ cấu thâm niên
+        let groups = new Map();
+        rows.forEach(r => { let k = r[nsGroupBy] || '(trống)'; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(r); });
+        let list = [...groups.entries()].sort((a, b) => b[1].length - a[1].length);
+        let first = nsGroupBy === 'doiTruong' ? 'Đội trưởng' : 'Đối tác';
+        const cells = rs => NS_TN_BUCKETS.map(b => { let n = rs.filter(r => r._bucket === b[0]).length; return `<td class="text-end mono" style="${b[0] === 'lt6' && n ? 'color:var(--amber);font-weight:700;' : ''}">${n || ''}</td>`; }).join('');
+        document.getElementById('nsGroupTable').innerHTML = `<thead><tr><th>${first}</th><th class="text-end">Số NS</th>${NS_TN_BUCKETS.map(b => `<th class="text-end">${b[1]}</th>`).join('')}<th class="text-end">TB thâm niên</th></tr></thead><tbody>` +
+            (list.length ? list.map(([k, rs]) => `<tr class="hi-group-row" data-key="${escapeHtml(k)}"><td class="fw-semibold">${escapeHtml(k)}</td><td class="text-end mono fw-bold">${rs.length}</td>${cells(rs)}<td class="text-end mono">${nsAvgText(rs)}</td></tr>`).join('')
+                + `<tr class="hi-total-row"><td>TỔNG</td><td class="text-end mono">${rows.length}</td>${cells(rows)}<td class="text-end mono">${nsAvgText(rows)}</td></tr>`
+                : `<tr><td colspan="8" class="text-center py-4 small" style="color:var(--slate);">Chưa có dữ liệu.</td></tr>`) + '</tbody>';
+
+        // Biểu đồ Bậc
+        if (typeof Chart !== 'undefined') {
+            let bacs = hiUniq(rows, 'bac').sort((a, b) => (parseFloat(a) || 0) - (parseFloat(b) || 0));
+            let vals = bacs.map(b => rows.filter(r => r.bac === b).length);
+            hiDestroyChart('nsBac');
+            hiCharts.nsBac = new Chart(document.getElementById('nsBacChart'), {
+                type: 'bar',
+                data: { labels: bacs.map(b => 'Bậc ' + b), datasets: [{ data: vals, backgroundColor: '#3F7D1F', borderRadius: 5 }] },
+                options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 18 } },
+                    plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', font: { weight: '700', size: 11 } } },
+                    scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grace: '12%', ticks: { precision: 0 }, grid: { color: '#EEF0EB' } } } },
+                plugins: [ChartDataLabels]
+            });
+        }
+        nsRenderDetail();
+    }
+
+    function nsRenderDetail() {
+        let rows = nsFiltered.slice().sort((a, b) => String(a.doiTacQuanLy).localeCompare(String(b.doiTacQuanLy), 'vi')
+            || String(a.doiTruong).localeCompare(String(b.doiTruong), 'vi') || String(a.ten).localeCompare(String(b.ten), 'vi'));
+        let pages = Math.max(1, Math.ceil(rows.length / NS_PAGE_SIZE));
+        nsPage = Math.min(nsPage, pages);
+        let slice = rows.slice((nsPage - 1) * NS_PAGE_SIZE, nsPage * NS_PAGE_SIZE);
+        let canEdit = nsCanEdit(), isAdmin = rknIsAdmin();
+        document.getElementById('nsDetailCount').textContent = `— ${rows.length.toLocaleString('vi-VN')} người`;
+        document.getElementById('nsDetailTable').innerHTML = `<thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Block</th><th>Mobinet</th><th class="text-center">Bậc</th><th>SaleClub</th><th>Mã NV</th><th>Tên</th><th>Ngày vào CT</th><th>Thâm niên</th><th>MBP</th><th>Mail</th><th>DVKH</th><th>Note</th>${canEdit ? '<th class="text-end">Sửa</th>' : ''}</tr></thead><tbody>` +
+            (slice.length ? slice.map(r => `<tr>
+                <td>${escapeHtml(r.doiTacQuanLy || '')}</td><td class="small">${escapeHtml(r.doiTruong || '')}</td><td class="small">${escapeHtml(r.blockQuanLy || '')}</td>
+                <td class="small mono">${escapeHtml(r.mobinet || '')}</td><td class="text-center fw-bold">${escapeHtml(r.bac || '')}</td><td class="small mono">${escapeHtml(r.saleClub || '')}</td>
+                <td class="mono small">${escapeHtml(r.maNhanVien || '')}</td><td class="fw-semibold text-nowrap">${escapeHtml(r.ten || '')}</td>
+                <td class="mono small">${escapeHtml(r.ngayVaoCT || '')}</td>
+                <td class="small text-nowrap" style="${r._bucket === 'lt6' ? 'color:var(--amber);font-weight:700;' : ''}">${nsTenureText(r.ngayVaoCT)}</td>
+                <td class="small mono">${escapeHtml(r.mbp || '')}</td><td class="small">${escapeHtml(r.mail || '')}</td><td class="small">${escapeHtml(r.dvkh || '')}</td>
+                <td class="small" style="max-width:260px; white-space:normal;">${escapeHtml(r.note || '')}</td>
+                ${canEdit ? `<td class="text-end text-nowrap"><button class="btn btn-sm btn-link p-0 me-2" title="Sửa" onclick="nsOpenEditModal(${r.id})"><i class="bi bi-pencil-square"></i></button>${isAdmin ? `<button class="btn btn-sm btn-link p-0 text-danger" title="Xoá" onclick="nsDeleteRow(${r.id})"><i class="bi bi-trash"></i></button>` : ''}</td>` : ''}
+            </tr>`).join('') : `<tr><td colspan="15" class="text-center py-4 small" style="color:var(--slate);">Chưa có dữ liệu.</td></tr>`) + '</tbody>';
+        let nums = [...new Set([1, pages, nsPage - 1, nsPage, nsPage + 1].filter(n => n >= 1 && n <= pages))].sort((a, b) => a - b);
+        let html = '', prev = 0;
+        nums.forEach(n => { if (n - prev > 1) html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+            html += `<li class="page-item ${n === nsPage ? 'active' : ''}"><a class="page-link" href="#" data-nspage="${n}">${n}</a></li>`; prev = n; });
+        document.getElementById('nsPagination').innerHTML = pages > 1 ? html : '';
+    }
+    document.getElementById('nsPagination').addEventListener('click', e => {
+        let a = e.target.closest('[data-nspage]'); if (!a) return;
+        e.preventDefault(); nsPage = parseInt(a.dataset.nspage, 10); nsRenderDetail();
+    });
+    document.getElementById('nsGroupSeg').addEventListener('click', e => {
+        let b = e.target.closest('button[data-group]'); if (!b) return;
+        nsGroupBy = b.dataset.group; nsRenderAll();
+    });
+    document.getElementById('nsGroupTable').addEventListener('click', e => {
+        let tr = e.target.closest('tr.hi-group-row'); if (!tr || tr.dataset.key === '(trống)') return;
+        if (nsGroupBy === 'doiTacQuanLy') { if (!isDoiTacLocked()) document.getElementById('nsFilterDoiTac').value = tr.dataset.key; nsGroupBy = 'doiTruong'; nsOnFilterChange(); }
+        else { if (!isDoiTruongLocked()) document.getElementById('nsFilterDoiTruong').value = tr.dataset.key; nsApplyFilters(); document.getElementById('nsDetailTable').scrollIntoView({ behavior: 'smooth' }); }
+    });
+
+    function nsOpenEditModal(id) {
+        if (!nsCanEdit()) return;
+        nsEditingId = id;
+        let row = id ? nsData.find(r => r.id === id) : null;
+        if (id && !row) return;
+        let isAdmin = rknIsAdmin();
+        document.getElementById('nsEditTitle').textContent = row ? `Sửa nhân sự — ${row.ten || row.maNhanVien}` : 'Thêm nhân sự';
+        document.getElementById('nsEditFields').innerHTML = NS_FIELDS.map(f => {
+            let v = row ? (row[f] ?? '') : (f === 'doiTacQuanLy' && currentUser.doiTac !== 'ALL' ? currentUser.doiTac || '' : '');
+            let locked = (f === 'maNhanVien' && row) || (!isAdmin && (f === 'doiTacQuanLy' || f === 'doiTruong'));
+            let req = ['doiTacQuanLy', 'maNhanVien'].includes(f) ? ' *' : '';
+            if (f === 'note') return `<div class="col-12"><div class="d-flex justify-content-between"><label class="small fw-bold mb-1" style="color:var(--slate);">Note</label><span class="lt-counter" id="nsNoteCount"></span></div>
+                <textarea class="form-control form-control-sm" rows="3" data-nsfield="note" maxlength="${NS_NOTE_MAX}" oninput="document.getElementById('nsNoteCount').textContent = this.value.length + '/${NS_NOTE_MAX}'">${escapeHtml(v)}</textarea></div>`;
+            return `<div class="col-md-6"><label class="small fw-bold mb-1" style="color:var(--slate);">${NS_LABELS[f]}${req}</label>
+                <input type="text" class="form-control form-control-sm" data-nsfield="${f}" value="${escapeHtml(v)}" ${locked ? 'disabled' : ''} ${f === 'ngayVaoCT' ? 'placeholder="dd/mm/yyyy"' : ''}></div>`;
+        }).join('') + (row ? `<div class="col-12 small" style="color:var(--slate-soft);">Thâm niên hiện tại: <b>${nsTenureText(row.ngayVaoCT) || '--'}</b>${row.updatedBy ? ` · Sửa lần cuối: ${escapeHtml(row.updatedBy)} lúc ${formatDateTime(row.ngayCapNhat)}` : ''}</div>` : '');
+        let ta = document.querySelector('#nsEditFields textarea'); document.getElementById('nsNoteCount').textContent = ta.value.length + '/' + NS_NOTE_MAX;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('nsEditModal')).show();
+    }
+    async function nsSaveEdit() {
+        let row = {};
+        document.querySelectorAll('#nsEditFields [data-nsfield]').forEach(i => { if (!i.disabled) row[i.dataset.nsfield] = i.value.trim(); });
+        if (row.ngayVaoCT) row.ngayVaoCT = hiSmartDate(row.ngayVaoCT, row.ngayVaoCT, false);
+        if (row.ngayVaoCT && !/^\d{2}\/\d{2}\/\d{4}$/.test(row.ngayVaoCT)) { alert("Ngày vào CT phải dạng dd/mm/yyyy"); return; }
+        if (!nsEditingId && (!row.maNhanVien || !row.doiTacQuanLy)) { alert("Cần nhập Mã nhân viên và Đối tác"); return; }
+        let btn = document.getElementById('nsEditSaveBtn'); btn.disabled = true;
+        try {
+            let res = nsEditingId
+                ? await apiFetch("api/ns/update", { method: "POST", body: JSON.stringify({ id: nsEditingId, row }) })
+                : await apiFetch("api/ns/import", { method: "POST", body: JSON.stringify({ rows: [row] }) });
+            let r = await res.json();
+            if (!r.success) { alert(r.error || "Không lưu được!"); return; }
+            if (!nsEditingId && r.updated > 0) alert("Mã nhân viên đã có — thông tin nhân sự đó đã được cập nhật.");
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('nsEditModal')).hide();
+            await nsFetchData(true);
+        } catch (e) { console.error("Lỗi lưu Nhân sự:", e); alert("Lỗi kết nối, vui lòng thử lại!"); }
+        finally { btn.disabled = false; }
+    }
+    async function nsDeleteRow(id) {
+        let row = nsData.find(r => r.id === id);
+        if (!row || !confirm(`Xoá nhân sự ${row.ten} (${row.maNhanVien})?`)) return;
+        let r = await (await apiFetch("api/ns/delete", { method: "POST", body: JSON.stringify({ id }) })).json();
+        if (!r.success) { alert(r.error || "Không xoá được!"); return; }
+        await nsFetchData(true);
+    }
+
+    function nsExportExcel() {
+        if (typeof XLSX === 'undefined') return;
+        let rows = nsFiltered.map(r => { let o = {}; NS_FIELDS.forEach(f => { o[NS_LABELS[f]] = r[f] || ''; if (f === 'mail') o['Thâm Niên'] = nsTenureText(r.ngayVaoCT); }); return o; });
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Nhân sự');
+        XLSX.writeFile(wb, `NhanSu_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    }
+    function nsDownloadTemplate() {
+        let o = {}; NS_FIELDS.forEach(f => o[NS_LABELS[f]] = '');
+        Object.assign(o, { 'Đối tác quản lý': 'BHA1', 'Đội trưởng': 'Nguyễn Ngọc Phán', 'Block quản lý': 'Phuong Bien Hoa-001', 'Mobinet': 'DNI01.DAMHH', 'Bậc': '1',
+            'SaleClub': 'DNI.PNC.DAMHH', 'Mã nhân viên': '00078539', 'Tên': 'Huỳnh Hoàng Đảm', 'Ngày Vào CT': '01/10/2025', 'MBP': 'phuongnam.DAMHH', 'Mail': 'phuongnam.DAMHH@fpt.net' });
+        let ws = XLSX.utils.json_to_sheet([o]);
+        Object.keys(ws).forEach(k => { if (k[0] !== '!' ) ws[k].t = 's'; }); // để dạng chữ, giữ số 0 đầu mã NV
+        let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'NhanSu');
+        XLSX.writeFile(wb, 'mau_import_NhanSu.xlsx');
+    }
+    const NS_HEADER_MAP = { doitacquanly: 'doiTacQuanLy', doitac: 'doiTacQuanLy', doitruong: 'doiTruong', blockquanly: 'blockQuanLy', mobinet: 'mobinet',
+        bac: 'bac', saleclub: 'saleClub', manhanvien: 'maNhanVien', manv: 'maNhanVien', ten: 'ten', hoten: 'ten', ngayvaoct: 'ngayVaoCT',
+        ngayvaocongty: 'ngayVaoCT', mbp: 'mbp', mail: 'mail', email: 'mail', dvkh: 'dvkh', note: 'note', ghichu: 'note' };
+    async function nsHandleImportFile(event) {
+        let file = event.target.files[0]; event.target.value = '';
+        if (!file || typeof XLSX === 'undefined') return;
+        let wb = XLSX.read(await file.arrayBuffer(), { type: 'array' }), sh = wb.Sheets[wb.SheetNames[0]];
+        let raw = XLSX.utils.sheet_to_json(sh, { defval: '', raw: true }), txt = XLSX.utils.sheet_to_json(sh, { defval: '', raw: false });
+        if (!raw.length) { alert("File không có dữ liệu!"); return; }
+        let colMap = {};
+        Object.keys(raw[0]).forEach(h => { let f = NS_HEADER_MAP[hiNorm(h).replace(/[^a-z0-9]/g, '')]; if (f) colMap[h] = f; });
+        let missing = ['doiTacQuanLy', 'maNhanVien'].filter(f => !Object.values(colMap).includes(f));
+        if (missing.length) { alert(`File thiếu cột: ${missing.map(f => NS_LABELS[f]).join(', ')}`); return; }
+        let rows = [], errors = [], seen = new Set();
+        raw.forEach((r, i) => {
+            let row = {}; NS_FIELDS.forEach(f => row[f] = '');
+            // Dùng chữ hiển thị (giữ số 0 đầu của Mã NV), riêng ngày đọc theo dd/mm
+            Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayVaoCT' ? hiSmartDate(r[h], (txt[i] || {})[h], false) : String((txt[i] || {})[h] ?? '').trim());
+            if (!row.maNhanVien && !row.ten) return;
+            if (!row.maNhanVien || !row.doiTacQuanLy) { errors.push(`Dòng ${i + 2}: thiếu Mã NV / Đối tác`); return; }
+            if (row.ngayVaoCT && !/^\d{2}\/\d{2}\/\d{4}$/.test(row.ngayVaoCT)) { errors.push(`Dòng ${i + 2} (${row.maNhanVien}): Ngày vào CT "${row.ngayVaoCT}" không đọc được`); return; }
+            if (row.note.length > NS_NOTE_MAX) row.note = row.note.slice(0, NS_NOTE_MAX);
+            if (seen.has(row.maNhanVien)) return;
+            seen.add(row.maNhanVien); rows.push(row);
+        });
+        let exist = new Set(nsData.map(r => r.maNhanVien));
+        let future = rows.filter(r => { let d = parseFlexibleDate(r.ngayVaoCT); return d && d > new Date(); }).length;
+        let msg = `${rows.length} nhân sự hợp lệ: ~${rows.filter(r => !exist.has(r.maNhanVien)).length} thêm mới, ~${rows.filter(r => exist.has(r.maNhanVien)).length} cập nhật.` +
+            (errors.length ? `\n\n${errors.length} dòng lỗi (bỏ qua):\n${errors.slice(0, 8).join('\n')}` : '') +
+            (future ? `\n\n⚠ ${future} người có Ngày vào CT ở tương lai — kiểm tra lại ngày/tháng.` : '') +
+            `\n\nVí dụ dòng đầu: ${rows[0] ? `${rows[0].maNhanVien} · ${rows[0].ten} · vào CT ${rows[0].ngayVaoCT}` : '--'}\n\nNhập vào hệ thống?`;
+        if (!rows.length || !confirm(msg)) return;
+        let ins = 0, upd = 0;
+        for (let i = 0; i < rows.length; i += 500) {
+            let r = await (await apiFetch("api/ns/import", { method: "POST", body: JSON.stringify({ rows: rows.slice(i, i + 500) }) })).json();
+            if (!r.success) { alert(r.error || "Lỗi nhập file"); break; }
+            ins += r.inserted; upd += r.updated;
+        }
+        alert(`Hoàn tất: ${ins} thêm mới, ${upd} cập nhật.`);
+        nsFetchData(true);
+    }
+    document.getElementById('ns-tab').addEventListener('shown.bs.tab', () => nsFetchData(false));
+
+    // ================== LỊCH TRỰC ĐỘI TRƯỞNG ==================
+    // Ma trận Đội trưởng × ngày trong tháng; ô ON / OFF / trống. Khai báo: chọn
+    // "bút" ON/OFF/Xoá rồi bấm hoặc kéo qua các ô. Quyền giống Nhân sự: cus chỉ
+    // xem; Đội trưởng chỉ khai báo được dòng của mình, Đối tác — đội trong đối tác.
+    let lichRoster = [], lichEntries = new Map(), lichQuickEntries = new Map(), lichCanWrite = false, lichBrush = 'ON';
+    let lichPainting = null; // { cells: Map key→{...} }
+    const lichKey = (ngay, dt, dtr) => `${ngay}|${dt}|${dtr}`;
+    const lichIso = d => `${d.getFullYear()}-${hiPad(d.getMonth() + 1)}-${hiPad(d.getDate())}`;
+    const LICH_WD = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    function lichCanEditRow(dt, dtr) {
+        if (!currentUser || currentUser.role === 'petonly' || !lichCanWrite) return false;
+        if (rknIsAdmin() || !currentUser.doiTac || currentUser.doiTac === 'ALL') return true;
+        if (dt !== currentUser.doiTac) return false;
+        return isDoiTruongLocked() ? dtr === currentUser.doiTruong : true;
+    }
+    function lichMonthRange() {
+        let v = document.getElementById('lichMonth').value;
+        if (!v) { let t = new Date(); v = `${t.getFullYear()}-${hiPad(t.getMonth() + 1)}`; document.getElementById('lichMonth').value = v; }
+        let [y, m] = v.split('-').map(Number);
+        return { y, m, first: new Date(y, m - 1, 1), last: new Date(y, m, 0) };
+    }
+    function lichShiftMonth(n) {
+        let { y, m } = lichMonthRange(); let d = new Date(y, m - 1 + n, 1);
+        document.getElementById('lichMonth').value = `${d.getFullYear()}-${hiPad(d.getMonth() + 1)}`;
+        lichLoad();
+    }
+    function lichGoToday() { document.getElementById('lichMonth').value = ''; lichLoad(); }
+
+    async function lichLoad() {
+        if (!currentUser) return;
+        let { first, last } = lichMonthRange();
+        let today = new Date(), tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1);
+        try {
+            let [a, b] = await Promise.all([
+                apiFetch(`api/lich/data?from=${lichIso(first)}&to=${lichIso(last)}`, { method: "GET" }).then(r => r.json()),
+                apiFetch(`api/lich/data?from=${lichIso(today)}&to=${lichIso(tomorrow)}`, { method: "GET" }).then(r => r.json())
+            ]);
+            if (!a.roster) { alert(a.error || "Không tải được lịch trực"); return; }
+            lichRoster = a.roster; lichCanWrite = !!a.canWrite;
+            lichEntries = new Map(a.entries.map(e => [lichKey(e.ngay, e.doiTacQuanLy, e.doiTruong), e]));
+            lichQuickEntries = new Map((b.entries || []).map(e => [lichKey(e.ngay, e.doiTacQuanLy, e.doiTruong), e]));
+        } catch (e) { console.error("Lỗi tải lịch trực:", e); return; }
+        hiFillSelect('lichFilterDoiTac', hiUniq(lichRoster, 'doiTacQuanLy'), 'Tất cả Đối tác', true);
+        let sel = document.getElementById('lichFilterDoiTac');
+        if (isDoiTacLocked()) { if (![...sel.options].some(o => o.value === currentUser.doiTac)) sel.add(new Option(currentUser.doiTac, currentUser.doiTac)); sel.value = currentUser.doiTac; sel.disabled = true; }
+        document.getElementById('lichBrushBox').classList.toggle('d-none', !lichCanWrite);
+        lichRender();
+    }
+    function lichVisibleRoster() {
+        let dt = document.getElementById('lichFilterDoiTac').value, q = hiNorm(document.getElementById('lichSearch').value);
+        return lichRoster.filter(r => (!dt || r.doiTacQuanLy === dt) && (!q || hiNorm(r.doiTruong).includes(q)));
+    }
+    function lichRender() {
+        lichRenderQuick();
+        let { first, last } = lichMonthRange(), todayIso = lichIso(new Date());
+        let days = []; for (let d = new Date(first); d <= last; d.setDate(d.getDate() + 1)) days.push(new Date(d));
+        let roster = lichVisibleRoster();
+        let head = `<thead><tr><th class="lich-name">Đội trưởng</th>${days.map(d => {
+            let iso = lichIso(d), we = d.getDay() === 0 || d.getDay() === 6;
+            return `<th class="${iso === todayIso ? 'today' : we ? 'we' : ''}">${d.getDate()}<br><span style="font-weight:400;font-size:10px;">${LICH_WD[d.getDay()]}</span></th>`; }).join('')}</tr></thead>`;
+        let body = roster.map(r => {
+            let editable = lichCanEditRow(r.doiTacQuanLy, r.doiTruong);
+            return `<tr><td class="lich-name">${escapeHtml(r.doiTruong)}<small>${escapeHtml(r.doiTacQuanLy)}</small></td>${days.map(d => {
+                let iso = lichIso(d), e = lichEntries.get(lichKey(iso, r.doiTacQuanLy, r.doiTruong)), v = e ? e.trangThai : '';
+                return `<td class="lich-cell ${v === 'ON' ? 'on' : v === 'OFF' ? 'off' : ''} ${editable ? 'editable' : ''} ${iso === todayIso ? 'today-col' : ''}"
+                    data-ngay="${iso}" data-dt="${escapeHtml(r.doiTacQuanLy)}" data-dtr="${escapeHtml(r.doiTruong)}"
+                    title="${escapeHtml(r.doiTruong)} · ${d.getDate()}/${d.getMonth() + 1}${e ? ` · ${v} (${escapeHtml(e.updatedBy || '')})` : ''}">${v}</td>`; }).join('')}</tr>`;
+        }).join('');
+        let foot = `<tr class="lich-foot"><td class="lich-name">Số Đội trưởng ON</td>${days.map(d => {
+            let iso = lichIso(d), n = roster.filter(r => (lichEntries.get(lichKey(iso, r.doiTacQuanLy, r.doiTruong)) || {}).trangThai === 'ON').length;
+            return `<td style="color:${n ? '#2E6516' : 'var(--slate-soft)'};">${n}</td>`; }).join('')}</tr>`;
+        document.getElementById('lichTable').innerHTML = head + '<tbody>' + (roster.length ? body + foot :
+            `<tr><td class="lich-name" style="color:var(--slate);">Chưa có Đội trưởng nào trong phạm vi.</td></tr>`) + '</tbody>';
+        document.getElementById('lichNote').textContent = lichCanWrite
+            ? 'Chọn ON / OFF / Xoá ở ô "Khai báo", sau đó bấm hoặc giữ chuột kéo qua các ô ngày để khai báo. Bạn chỉ khai báo được cho Đội trưởng trong phạm vi của mình (ô hiện viền khi rê chuột).'
+            : 'Tài khoản cus chỉ xem lịch trực.';
+        let wrap = document.querySelector('.lich-wrap'), td = wrap.querySelector('th.today');
+        if (td && !wrap.dataset.scrolled) { wrap.scrollLeft = Math.max(0, td.offsetLeft - 260); wrap.dataset.scrolled = '1'; }
+    }
+    function lichRenderQuick() {
+        let today = new Date(), tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1);
+        let roster = lichVisibleRoster();
+        const card = (d, label) => {
+            let iso = lichIso(d), on = [], off = [], none = [];
+            roster.forEach(r => { let e = lichQuickEntries.get(lichKey(iso, r.doiTacQuanLy, r.doiTruong)); (e ? (e.trangThai === 'ON' ? on : off) : none).push(r); });
+            const chips = (list, cls) => list.length ? list.map(r => `<span class="lich-chip ${cls}" title="${escapeHtml(r.doiTacQuanLy)}">${escapeHtml(r.doiTruong)}</span>`).join('') : '<span class="small" style="color:var(--slate-soft);">—</span>';
+            return `<div class="col-lg-6"><div class="hi-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div><div class="hi-card-title mb-0">${label}</div><div class="lich-day-big">${LICH_WD[d.getDay()]} · ${hiPad(d.getDate())}/${hiPad(d.getMonth() + 1)}</div></div>
+                    <div class="text-end small"><span class="lich-chip on">ON ${on.length}</span><span class="lich-chip off">OFF ${off.length}</span><span class="lich-chip none">Chưa khai báo ${none.length}</span></div>
+                </div>
+                <div class="small fw-bold mb-1" style="color:#2E6516;">Trực (ON)</div><div class="mb-2">${chips(on, 'on')}</div>
+                <div class="small fw-bold mb-1" style="color:#A3261E;">Nghỉ (OFF)</div><div class="mb-2">${chips(off, 'off')}</div>
+                <div class="small fw-bold mb-1" style="color:var(--slate);">Chưa khai báo</div><div>${chips(none, 'none')}</div>
+            </div></div>`;
+        };
+        document.getElementById('lichQuick').innerHTML = card(today, 'Hôm nay') + card(tomorrow, 'Ngày mai (T+1)');
+    }
+
+    // Bút khai báo + bấm / kéo để tô nhiều ô, lưu 1 lần khi thả chuột
+    document.getElementById('lichBrush').addEventListener('click', e => {
+        let b = e.target.closest('button[data-v]'); if (!b) return;
+        lichBrush = b.dataset.v;
+        document.querySelectorAll('#lichBrush button').forEach(x => x.classList.toggle('active', x === b));
+    });
+    function lichPaint(td) {
+        if (!td || !td.classList.contains('editable') || !lichPainting) return;
+        let k = lichKey(td.dataset.ngay, td.dataset.dt, td.dataset.dtr);
+        if (lichPainting.has(k)) return;
+        lichPainting.set(k, { ngay: td.dataset.ngay, doiTacQuanLy: td.dataset.dt, doiTruong: td.dataset.dtr, trangThai: lichBrush, td });
+        td.classList.remove('on', 'off'); if (lichBrush) td.classList.add(lichBrush === 'ON' ? 'on' : 'off');
+        td.textContent = lichBrush; td.classList.add('saving');
+    }
+    document.getElementById('lichTable').addEventListener('pointerdown', e => {
+        let td = e.target.closest('td.lich-cell.editable'); if (!td) return;
+        e.preventDefault(); lichPainting = new Map(); lichPaint(td);
+    });
+    document.getElementById('lichTable').addEventListener('pointerover', e => { if (lichPainting) lichPaint(e.target.closest('td.lich-cell')); });
+    document.addEventListener('pointerup', async () => {
+        if (!lichPainting) return;
+        let items = [...lichPainting.values()]; lichPainting = null;
+        if (!items.length) return;
+        try {
+            for (let i = 0; i < items.length; i += 62) {
+                let chunk = items.slice(i, i + 62);
+                let r = await (await apiFetch("api/lich/set", { method: "POST", body: JSON.stringify({ items: chunk.map(({ td, ...x }) => x) }) })).json();
+                if (!r.success) { alert(r.error || "Không lưu được lịch!"); break; }
+                chunk.forEach(x => {
+                    let k = lichKey(x.ngay, x.doiTacQuanLy, x.doiTruong);
+                    let entry = { ...x, td: undefined, updatedBy: currentUser.username };
+                    if (x.trangThai) { lichEntries.set(k, entry); lichQuickEntries.set(k, entry); } else { lichEntries.delete(k); lichQuickEntries.delete(k); }
+                });
+            }
+        } catch (e) { console.error("Lỗi lưu lịch trực:", e); alert("Lỗi kết nối, vui lòng thử lại!"); }
+        lichRender();
+    });
+    document.getElementById('lich-tab').addEventListener('shown.bs.tab', lichLoad);
 
     function resetFilters() {
         let doiTacSelect = document.getElementById('filterDoiTac');
