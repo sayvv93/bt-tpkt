@@ -5145,7 +5145,7 @@
         raw.forEach((r, i) => {
             let row = {}; NS_FIELDS.forEach(f => row[f] = '');
             // Dùng chữ hiển thị (giữ số 0 đầu của Mã NV), riêng ngày đọc theo dd/mm
-            Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayVaoCT' ? hiSmartDate(r[h], (txt[i] || {})[h], false) : String((txt[i] || {})[h] ?? '').trim());
+            Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayVaoCT' ? hiSmartDate(r[h], (txt[i] || {})[h], false) : String((txt[i] || {})[h] ?? '').normalize('NFC').replace(/\s+/g, ' ').trim());
             if (!row.maNhanVien && !row.ten) return;
             if (!row.maNhanVien || !row.doiTacQuanLy) { errors.push(`Dòng ${i + 2}: thiếu Mã NV / Đối tác`); return; }
             if (row.ngayVaoCT && !/^\d{2}\/\d{2}\/\d{4}$/.test(row.ngayVaoCT)) { errors.push(`Dòng ${i + 2} (${row.maNhanVien}): Ngày vào CT "${row.ngayVaoCT}" không đọc được`); return; }
@@ -5154,10 +5154,25 @@
             seen.add(row.maNhanVien); rows.push(row);
         });
         let exist = new Set(nsData.map(r => r.maNhanVien));
+        // Cảnh báo tên Đội trưởng "gần giống nhưng khác dấu" so với tên đang có trong hệ
+        // thống (tài khoản Đội trưởng + dữ liệu hiện có) — VD "Chinh" ↔ "Chính" sẽ tạo
+        // thành 2 Đội trưởng khác nhau và tài khoản Đội trưởng không thấy nhân sự của mình.
+        let nameWarn = [];
+        try {
+            let t = lichIso(new Date());
+            let rs = await (await apiFetch(`api/lich/data?from=${t}&to=${t}`, { method: "GET" })).json();
+            let known = (rs.roster || []).map(x => x.doiTruong.normalize('NFC'));
+            [...new Set(rows.map(r => r.doiTruong).filter(Boolean))].forEach(n => {
+                if (known.includes(n)) return;
+                let similar = known.filter(k => hiNorm(k) === hiNorm(n));
+                if (similar.length) nameWarn.push(`"${n}" (file) ↔ ${similar.map(x => `"${x}"`).join(', ')} (hệ thống)`);
+            });
+        } catch (e) { console.warn("Không kiểm tra được tên Đội trưởng:", e); }
         let future = rows.filter(r => { let d = parseFlexibleDate(r.ngayVaoCT); return d && d > new Date(); }).length;
         let msg = `${rows.length} nhân sự hợp lệ: ~${rows.filter(r => !exist.has(r.maNhanVien)).length} thêm mới, ~${rows.filter(r => exist.has(r.maNhanVien)).length} cập nhật.` +
             (errors.length ? `\n\n${errors.length} dòng lỗi (bỏ qua):\n${errors.slice(0, 8).join('\n')}` : '') +
             (future ? `\n\n⚠ ${future} người có Ngày vào CT ở tương lai — kiểm tra lại ngày/tháng.` : '') +
+            (nameWarn.length ? `\n\n⚠ Tên Đội trưởng khác cách viết (dấu) so với hệ thống — sẽ thành 2 Đội trưởng khác nhau:\n${nameWarn.slice(0, 8).join('\n')}\nNên sửa file cho thống nhất trước khi nhập.` : '') +
             `\n\nVí dụ dòng đầu: ${rows[0] ? `${rows[0].maNhanVien} · ${rows[0].ten} · vào CT ${rows[0].ngayVaoCT}` : '--'}\n\nNhập vào hệ thống?`;
         if (!rows.length || !confirm(msg)) return;
         let ins = 0, upd = 0;
