@@ -456,10 +456,9 @@
     <!-- TABS -->
     <ul class="nav seg-tabs mb-3" id="mainTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboardContent" type="button" role="tab">TPKT Check</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#reportContent" type="button" role="tab">Báo cáo Tổng quan</button>
+            <button class="nav-link active" id="bt-tab" data-bs-toggle="tab" data-bs-target="#btContent" type="button" role="tab">
+                <i class="bi bi-tools me-1" style="color:var(--brand);"></i> Bảo Trì
+            </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="cll-tab" data-bs-toggle="tab" data-bs-target="#cllContent" type="button" role="tab">
@@ -498,63 +497,204 @@
         </li>
     </ul>
 
-    <!-- THANH BỘ LỌC — chỉ hiện ở tab TPKT Check + Báo Cáo Tổng Quan, JS tự
-         ẩn/hiện theo tab đang active (xem toggleFilterStripVisibility) -->
-    <div class="filter-strip row g-2 mb-3 align-items-end" id="filterStripBar">
-        <div class="col-md-3 f-group">
-            <label>TG Hoàn Tất (từ - đến)</label>
-            <div class="d-flex gap-1">
-                <input type="date" id="filterTgHoanTatFrom" lang="vi" class="form-control form-control-sm" onchange="filterData()">
-                <input type="date" id="filterTgHoanTatTo" lang="vi" class="form-control form-control-sm" onchange="filterData()">
-            </div>
-        </div>
-        <div class="col-md-2 f-group">
-            <label>Đối tác</label>
-            <select id="filterDoiTac" class="form-select form-select-sm" onchange="onDoiTacChange()">
-                <option value="">Tất cả Đối tác</option>
-            </select>
-        </div>
-        <div class="col-md-2 f-group">
-            <label>Đội trưởng</label>
-            <select id="filterDoiTruong" class="form-select form-select-sm" onchange="onDoiTruongChange()">
-                <option value="">Tất cả Đội trưởng</option>
-            </select>
-        </div>
-        <div class="col-md-2 f-group">
-            <label>TPKT CHECK</label>
-            <select id="filterTpktCheck" class="form-select form-select-sm" onchange="filterData()">
-                <option value="">Tất cả TPKT Check</option>
-                <option value="Chưa kiểm tra">Chưa kiểm tra</option>
-                <option value="__DOI_TRUONG_XU_LY__">Đội trưởng xử lý (tất cả lỗi)</option>
-                <option value="Suy hao">Suy hao</option>
-                <option value="Không tín hiệu">Không tín hiệu</option>
-                <option value="Rớt kết nối">Rớt kết nối</option>
-                <option value="Vùng phủ không đảm bảo">Vùng phủ không đảm bảo</option>
-            </select>
-        </div>
-        <div class="col-md-2 f-group">
-            <label>Nhân viên</label>
-            <select id="filterNhanVien" class="form-select form-select-sm" onchange="filterData()">
-                <option value="">Tất cả Nhân viên</option>
-            </select>
-        </div>
-        <div class="col-md-1">
-            <button class="filter-reset-btn w-100" onclick="resetFilters()">Đặt lại</button>
-        </div>
-
-        <div class="col-md-5 mt-3">
-            <label style="font-size:10.5px;font-weight:600;letter-spacing:.03em;color:var(--slate);">TÌM KIẾM SỐ HỢP ĐỒNG</label>
-            <div class="input-group input-group-sm">
-                <span class="input-group-text bg-transparent border-0 border-bottom" style="border-bottom:2px solid var(--line) !important; color:var(--slate);"><i class="bi bi-search"></i></span>
-                <input type="text" id="searchSoHopDong" class="form-control" autocomplete="off" placeholder="Nhập số hợp đồng cần tìm..." oninput="debounceFilter()" style="border:none; border-bottom:2px solid var(--line); border-radius:0;">
-                <button class="btn btn-sm" type="button" onclick="clearSearchHopDong()" style="border:none; border-bottom:2px solid var(--line); border-radius:0; color:var(--slate);"><i class="bi bi-x-lg"></i></button>
-            </div>
-        </div>
-    </div>
-
     <div class="tab-content" id="mainTabsContent">
-        <!-- TAB 1: TPKT CHECK -->
-        <div class="tab-pane fade show active" id="dashboardContent" role="tabpanel">
+        <!-- TAB: BẢO TRÌ (gộp TPKT Check + Báo cáo Tổng quan, cùng 1 bộ lọc) -->
+        <div class="tab-pane fade show active" id="btContent" role="tabpanel">
+            <div id="superAdminImportBar" class="hi-admin-bar d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 d-none">
+                <span class="fw-bold small" style="color:#8A6A12;"><i class="bi bi-shield-lock-fill me-1"></i>SuperAdmin — Nhập dữ liệu ca bảo trì MỚI (dataBT)</span>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="filter-reset-btn" onclick="downloadNewDataTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu (Dữ liệu mới)</button>
+                    <button class="filter-reset-btn" onclick="triggerImportNewData()"><i class="bi bi-database-add me-1"></i>Nhập dữ liệu mới</button>
+                    <input type="file" id="importNewDataFileInput" accept=".xlsx,.xls" class="d-none" onchange="handleImportNewData(event)">
+                </div>
+            </div>
+
+            <div class="filter-strip row g-2 mb-3 align-items-end" id="filterStripBar">
+                <div class="col-md-3 f-group">
+                    <label>TG Hoàn Tất (từ - đến)</label>
+                    <div class="d-flex gap-1">
+                        <input type="date" id="filterTgHoanTatFrom" lang="vi" class="form-control form-control-sm" onchange="filterData()">
+                        <input type="date" id="filterTgHoanTatTo" lang="vi" class="form-control form-control-sm" onchange="filterData()">
+                    </div>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>Đối tác</label>
+                    <select id="filterDoiTac" class="form-select form-select-sm" onchange="onDoiTacChange()">
+                        <option value="">Tất cả Đối tác</option>
+                    </select>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>Đội trưởng</label>
+                    <select id="filterDoiTruong" class="form-select form-select-sm" onchange="onDoiTruongChange()">
+                        <option value="">Tất cả Đội trưởng</option>
+                    </select>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>TPKT CHECK</label>
+                    <select id="filterTpktCheck" class="form-select form-select-sm" onchange="filterData()">
+                        <option value="">Tất cả TPKT Check</option>
+                        <option value="Chưa kiểm tra">Chưa kiểm tra</option>
+                        <option value="__DOI_TRUONG_XU_LY__">Đội trưởng xử lý (tất cả lỗi)</option>
+                        <option value="Suy hao">Suy hao</option>
+                        <option value="Không tín hiệu">Không tín hiệu</option>
+                        <option value="Rớt kết nối">Rớt kết nối</option>
+                        <option value="Vùng phủ không đảm bảo">Vùng phủ không đảm bảo</option>
+                    </select>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>Nhân viên</label>
+                    <select id="filterNhanVien" class="form-select form-select-sm" onchange="filterData()">
+                        <option value="">Tất cả Nhân viên</option>
+                    </select>
+                </div>
+
+                <div class="col-md-5 mt-3">
+                    <label style="font-size:10.5px;font-weight:600;letter-spacing:.03em;color:var(--slate);">TÌM KIẾM SỐ HỢP ĐỒNG</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-transparent border-0 border-bottom" style="border-bottom:2px solid var(--line) !important; color:var(--slate);"><i class="bi bi-search"></i></span>
+                        <input type="text" id="searchSoHopDong" class="form-control" autocomplete="off" placeholder="Nhập số hợp đồng cần tìm..." oninput="debounceFilter()" style="border:none; border-bottom:2px solid var(--line); border-radius:0;">
+                        <button class="btn btn-sm" type="button" onclick="clearSearchHopDong()" style="border:none; border-bottom:2px solid var(--line); border-radius:0; color:var(--slate);"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                </div>
+                <div class="col-md-7 mt-3 d-flex flex-wrap justify-content-end align-items-end gap-2">
+                    <button class="filter-reset-btn" onclick="resetFilters()"><i class="bi bi-x-circle me-1"></i>Đặt lại</button>
+                    <button class="filter-reset-btn" onclick="downloadImportTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu</button>
+                    <button class="filter-reset-btn" onclick="triggerImportFile()"><i class="bi bi-file-earmark-arrow-up me-1"></i>Nhập Excel</button>
+                    <input type="file" id="importFileInput" accept=".xlsx,.xls" class="d-none" onchange="handleImportFile(event)">
+                    <button class="filter-reset-btn" onclick="exportFilteredToExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Xuất Excel</button>
+                </div>
+            </div>
+
+            <div class="stat-strip">
+                <div class="stat-item accent-neutral">
+                    <div class="stat-label">TỔNG CA BẢO TRÌ</div>
+                    <div class="stat-value" id="kpiTotalCa">0</div>
+                </div>
+                <div class="stat-item accent-neutral">
+                    <div class="stat-label">CHƯA KIỂM TRA</div>
+                    <div class="stat-value" id="kpiChuaKiemTra">0</div>
+                </div>
+                <div class="stat-item accent-red">
+                    <div class="stat-label">CHƯA XỬ LÝ</div>
+                    <div class="stat-value" id="kpiTotalLoi">0</div>
+                </div>
+                <div class="stat-item accent-amber">
+                    <div class="stat-label">TỈ LỆ CHƯA XỬ LÝ</div>
+                    <div class="stat-value" id="kpiRateLoi">0%</div>
+                </div>
+                <div class="stat-item accent-brand">
+                    <div class="stat-label">BẢO TRÌ OK / ĐÃ XỬ LÝ</div>
+                    <div class="stat-value" id="kpiTotalOk">0</div>
+                </div>
+            </div>
+
+
+            <div class="mb-4" id="btReport">
+                <div class="hi-report-head">
+                    <div>
+                        <span class="hi-report-title"><i class="bi bi-speedometer2 me-2" style="color:var(--brand);"></i>Báo cáo Bảo Trì</span>
+                        <span class="hi-scope-chip" id="btScopeChip">Toàn bộ phạm vi</span>
+                    </div>
+                    <button class="filter-reset-btn" id="btReportToggle" onclick="btToggleReport()"><i class="bi bi-chevron-up me-1"></i>Thu gọn báo cáo</button>
+                </div>
+                <div id="btReportBody">
+                    <div class="row g-3 mb-3">
+                        <div class="col-lg-4 col-md-6">
+                            <div class="hi-card">
+                                <div class="hi-card-title"><i class="bi bi-check2-circle me-1"></i>Tỉ lệ hoàn thành</div>
+                                <div class="hi-gauge"><canvas id="btGaugeDone"></canvas>
+                                    <div class="hi-gauge-center"><div class="big" id="btGaugeDoneVal">--</div><div class="sub">bảo trì OK + đã xử lý / tổng ca</div></div></div>
+                                <div class="hi-gauge-foot"><span>Hoàn thành <b id="btGDoneOk">0</b></span><span>Còn lại <b id="btGDoneLeft" style="color:var(--red);">0</b></span><span>Tổng <b id="btGDoneTotal">0</b></span></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="hi-card">
+                                <div class="hi-card-title"><i class="bi bi-wrench-adjustable me-1"></i>Tỉ lệ xử lý ca lỗi</div>
+                                <div class="hi-gauge"><canvas id="btGaugeFix"></canvas>
+                                    <div class="hi-gauge-center"><div class="big" id="btGaugeFixVal">--</div><div class="sub">ca lỗi đã xử lý / tổng ca lỗi</div></div></div>
+                                <div class="hi-gauge-foot"><span>Đã xử lý <b id="btGFixOk">0</b></span><span>Chưa xử lý <b id="btGFixLeft" style="color:var(--red);">0</b></span><span>Ca lỗi <b id="btGFixTotal">0</b></span></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-12">
+                            <div class="hi-card">
+                                <div class="hi-card-title"><i class="bi bi-pie-chart me-1"></i>Cơ cấu trạng thái ca</div>
+                                <div class="hi-chart-box" style="height:190px;"><canvas id="btDonutStatus"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-lg-6">
+                            <div class="hi-card">
+                                <div class="hi-card-title"><i class="bi bi-bar-chart-fill me-1"></i>Hiệu suất theo Đối tác</div>
+                                <div class="executive-chart-container"><canvas id="chartDoiTac"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="hi-card">
+                                <div class="hi-card-title"><i class="bi bi-bar-chart-fill me-1"></i>Hiệu suất theo Đội trưởng</div>
+                                <div class="executive-chart-container"><canvas id="chartDoiTruong"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-xl-6">
+                    <div class="alert-console">
+                        <div class="alert-console-head">
+                            <span><i class="bi bi-hourglass-split me-2"></i>Cảnh báo Đội trưởng — Ca còn tồn CHƯA XỬ LÝ (gộp tất cả loại lỗi)</span>
+                            <span class="count-pill" id="pendingByLeadBadge">0 đội trưởng</span>
+                        </div>
+                        <div class="table-responsive mb-0">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Đội trưởng</th>
+                                        <th>Đối tác</th>
+                                        <th class="text-center">Số ca tồn chưa xử lý</th>
+                                        <th class="text-center">Tồn lâu nhất (ngày)</th>
+                                        <th class="text-center">Mức độ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingByLeadTableBody">
+                                    <tr><td colspan="5" class="text-center py-3" style="color:var(--slate);">Không có ca nào tồn đọng.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                        </div>
+                        <div class="col-xl-6">
+                    <div class="alert-console">
+                        <div class="alert-console-head">
+                            <span><i class="bi bi-shield-exclamation me-2"></i>Cảnh báo Nhân sự Bảo trì không đứt điểm</span>
+                            <span class="count-pill" id="warningCountBadge">0 nhân sự</span>
+                        </div>
+                        <div class="table-responsive mb-0">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Nhân viên</th>
+                                        <th>Đội trưởng</th>
+                                        <th>Đối tác</th>
+                                        <th class="text-center">Số ca lỗi</th>
+                                        <th class="text-center">Tỷ lệ lỗi / Tổng ca</th>
+                                        <th class="text-center">Mức độ cảnh báo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="warningTableBody">
+                                    <tr><td colspan="6" class="text-center py-3" style="color:var(--slate);">Không có nhân sự nào vượt ngưỡng cảnh báo.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hi-report-head mb-2">
+                <span class="hi-report-title" style="font-size:15px;"><i class="bi bi-list-check me-2" style="color:var(--brand);"></i>Danh sách cần xử lý</span>
+            </div>
             <div id="batchActionBar" class="card batch-bar mb-3" style="display: none;">
                 <div class="card-body py-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
                     <div>
@@ -584,20 +724,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="d-flex justify-content-end gap-2 mb-2">
-                <button class="filter-reset-btn" onclick="downloadImportTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu</button>
-                <button class="filter-reset-btn" onclick="triggerImportFile()"><i class="bi bi-file-earmark-arrow-up me-1"></i>Nhập Excel</button>
-                <input type="file" id="importFileInput" accept=".xlsx,.xls" class="d-none" onchange="handleImportFile(event)">
-                <button class="filter-reset-btn" onclick="exportFilteredToExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Xuất Excel</button>
-            </div>
-
-            <div id="superAdminImportBar" class="d-flex justify-content-end align-items-center gap-2 mb-2 d-none" style="background:#FFF8E6; border:1px solid #E8D9A8; border-radius:8px; padding:8px 12px;">
-                <span class="small fw-bold me-auto" style="color:#8A6A1E;"><i class="bi bi-shield-lock-fill me-1"></i>SuperAdmin — Nhập dữ liệu MỚI</span>
-                <button class="filter-reset-btn" onclick="downloadNewDataTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu (Dữ liệu mới)</button>
-                <button class="filter-reset-btn" onclick="triggerImportNewData()"><i class="bi bi-database-add me-1"></i>Nhập dữ liệu mới</button>
-                <input type="file" id="importNewDataFileInput" accept=".xlsx,.xls" class="d-none" onchange="handleImportNewData(event)">
             </div>
 
             <div class="table-panel">
@@ -640,102 +766,6 @@
                 <nav>
                     <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
                 </nav>
-            </div>
-        </div>
-
-        <!-- TAB 2: REPORT EXECUTIVE -->
-        <div class="tab-pane fade" id="reportContent" role="tabpanel">
-            <div class="stat-strip">
-                <div class="stat-item accent-neutral">
-                    <div class="stat-label">TỔNG CA BẢO TRÌ</div>
-                    <div class="stat-value" id="kpiTotalCa">0</div>
-                </div>
-                <div class="stat-item accent-neutral">
-                    <div class="stat-label">CHƯA KIỂM TRA</div>
-                    <div class="stat-value" id="kpiChuaKiemTra">0</div>
-                </div>
-                <div class="stat-item accent-red">
-                    <div class="stat-label">CHƯA XỬ LÝ</div>
-                    <div class="stat-value" id="kpiTotalLoi">0</div>
-                </div>
-                <div class="stat-item accent-amber">
-                    <div class="stat-label">TỈ LỆ CHƯA XỬ LÝ</div>
-                    <div class="stat-value" id="kpiRateLoi">0%</div>
-                </div>
-                <div class="stat-item accent-brand">
-                    <div class="stat-label">BẢO TRÌ OK / ĐÃ XỬ LÝ</div>
-                    <div class="stat-value" id="kpiTotalOk">0</div>
-                </div>
-            </div>
-
-            <div class="row g-4 mb-4">
-                <div class="col-md-6">
-                    <div class="chart-panel">
-                        <h5 class="mb-3"><i class="bi bi-bar-chart-fill me-2" style="color:var(--brand);"></i>Hiệu suất theo Đối tác</h5>
-                        <div class="executive-chart-container"><canvas id="chartDoiTac"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="chart-panel">
-                        <h5 class="mb-3"><i class="bi bi-bar-chart-fill me-2" style="color:var(--amber);"></i>Hiệu suất theo Đội trưởng</h5>
-                        <div class="executive-chart-container"><canvas id="chartDoiTruong"></canvas></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-md-12">
-                    <div class="alert-console">
-                        <div class="alert-console-head">
-                            <span><i class="bi bi-hourglass-split me-2"></i>Cảnh báo Đội trưởng — Ca còn tồn CHƯA XỬ LÝ (gộp tất cả loại lỗi)</span>
-                            <span class="count-pill" id="pendingByLeadBadge">0 đội trưởng</span>
-                        </div>
-                        <div class="table-responsive mb-0">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Đội trưởng</th>
-                                        <th>Đối tác</th>
-                                        <th class="text-center">Số ca tồn chưa xử lý</th>
-                                        <th class="text-center">Tồn lâu nhất (ngày)</th>
-                                        <th class="text-center">Mức độ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="pendingByLeadTableBody">
-                                    <tr><td colspan="5" class="text-center py-3" style="color:var(--slate);">Không có ca nào tồn đọng.</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-md-12">
-                    <div class="alert-console">
-                        <div class="alert-console-head">
-                            <span><i class="bi bi-shield-exclamation me-2"></i>Cảnh báo Nhân sự Bảo trì không đứt điểm</span>
-                            <span class="count-pill" id="warningCountBadge">0 nhân sự</span>
-                        </div>
-                        <div class="table-responsive mb-0">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Nhân viên</th>
-                                        <th>Đội trưởng</th>
-                                        <th>Đối tác</th>
-                                        <th class="text-center">Số ca lỗi</th>
-                                        <th class="text-center">Tỷ lệ lỗi / Tổng ca</th>
-                                        <th class="text-center">Mức độ cảnh báo</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="warningTableBody">
-                                    <tr><td colspan="6" class="text-center py-3" style="color:var(--slate);">Không có nhân sự nào vượt ngưỡng cảnh báo.</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -1033,7 +1063,7 @@
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g2">
-                            2. Xử lý checklist (tab TPKT Check)
+                            2. Xử lý checklist (tab Bảo Trì — Danh sách cần xử lý)
                         </button>
                     </h2>
                     <div id="g2" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
@@ -1055,7 +1085,7 @@
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g3">
-                            3. Báo cáo Tổng quan
+                            3. Báo cáo (tab Bảo Trì)
                         </button>
                     </h2>
                     <div id="g3" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
@@ -1065,6 +1095,7 @@
                                 <li>2 biểu đồ Hiệu suất theo Đối tác/Đội trưởng — cột "Ca lỗi" không tính các ca đã xử lý qua "Checklist Onsite" (vì đã xong ngay tại chỗ, không cần theo dõi thêm).</li>
                                 <li><b>Cảnh báo Đội trưởng — Ca còn tồn CHƯA XỬ LÝ</b>: gộp cả 4 loại lỗi, cho biết Đội trưởng nào đang tồn nhiều ca nhất và ca cũ nhất đã để bao lâu.</li>
                                 <li><b>Cảnh báo Nhân sự Bảo trì không đứt điểm</b>: theo dõi tỷ lệ lỗi từng nhân viên — ≥5 ca lỗi hoặc tỷ lệ ≥30% bị đánh dấu "Rủi ro cao".</li>
+                                <li>Báo cáo nằm phía trên danh sách xử lý, dùng chung bộ lọc: 2 đồng hồ (<b>Tỉ lệ hoàn thành</b> = Bảo trì OK + đã xử lý / tổng ca; <b>Tỉ lệ xử lý ca lỗi</b> = ca lỗi đã xử lý / tổng ca lỗi), biểu đồ cơ cấu trạng thái, biểu đồ theo Đối tác/Đội trưởng và 2 bảng cảnh báo. Bấm <b>Thu gọn báo cáo</b> để chỉ làm việc với danh sách — trình duyệt nhớ lựa chọn này.</li>
                             </ul>
                         </div>
                     </div>
@@ -1155,7 +1186,7 @@
                                 <li><b>Tỉ lệ tương tác</b> = số ca "Có Gửi" có Tương tác = "Có" / tổng số ca "Có Gửi". Ca "Không Gửi" không tính vào tỉ lệ này.</li>
                                 <li><b>Tự động</b>: ca có Tương tác = "Có" mà Tình trạng kích hoạt đang là "Chua kich hoat" (hoặc trống) sẽ tự chuyển thành <b>"Kich hoat khi Trien Khai"</b> khi nhập Excel, thêm hoặc sửa dòng — vì khách đã tương tác thì chắc chắn đã cài HI FPT.</li>
                                 <li>Xem báo cáo theo <b>Đối tác / Đội trưởng / Nhân viên</b>; bấm 1 dòng để lọc xuống cấp dưới, bấm tiêu đề cột để sắp xếp. Màu tỉ lệ: xanh ≥ 80%, cam 50–80%, đỏ &lt; 50%.</li>
-                                <li>Phân quyền xem giống tab TPKT Check: Đội trưởng chỉ thấy đội mình, Đối tác thấy đối tác mình, Admin/SuperAdmin thấy tất cả; tài khoản Nuôi thú không thấy tab này.</li>
+                                <li>Phân quyền xem giống tab Bảo Trì: Đội trưởng chỉ thấy đội mình, Đối tác thấy đối tác mình, Admin/SuperAdmin thấy tất cả; tài khoản Nuôi thú không thấy tab này.</li>
                                 <li><b>SuperAdmin</b>: nhập Excel (đúng tiêu đề cột như sheet "Import" — có thể tải file mẫu), xem trước trước khi nhập; dòng trùng Số HĐ + Ngày hoàn tất sẽ được <b>cập nhật</b> theo file mới. Sửa/xoá từng dòng ngay trên bảng chi tiết hoặc thêm dòng thủ công.</li>
                             </ul>
                         </div>
@@ -1889,15 +1920,6 @@
         fetchPetAccountsList();
     });
 
-    // Thanh bộ lọc CHỈ hiện ở đúng 2 tab TPKT Check + Báo Cáo Tổng Quan (2 tab
-    // này dùng chung 1 bộ lọc) — ẩn hoàn toàn ở mọi tab khác.
-    const FILTER_VISIBLE_TABS = ['dashboard-tab', 'report-tab'];
-    function toggleFilterStripVisibility(activeTabId) {
-        document.getElementById('filterStripBar').classList.toggle('d-none', !FILTER_VISIBLE_TABS.includes(activeTabId));
-    }
-    document.getElementById('mainTabs').addEventListener('shown.bs.tab', (e) => {
-        toggleFilterStripVisibility(e.target.id);
-    });
 
     // Danh sách tài khoản KHÔNG còn được tải về client nữa.
     // Việc xác thực đăng nhập và phân quyền dữ liệu đều xử lý ở Worker (D1).
@@ -2291,18 +2313,16 @@
         // đụng vào dataBT ở bất kỳ hình thức nào — ẩn hết các tab liên quan
         // dữ liệu vận hành, chỉ còn Trò chuyện / Linh Thú / Hướng dẫn.
         let isPetOnly = currentUser.role === 'petonly';
-        document.getElementById('dashboard-tab').classList.toggle('d-none', isPetOnly);
-        document.getElementById('report-tab').classList.toggle('d-none', isPetOnly);
+        document.getElementById('bt-tab').classList.toggle('d-none', isPetOnly);
         document.getElementById('cll-tab').classList.toggle('d-none', isPetOnly);
         document.getElementById('hifpt-tab').classList.toggle('d-none', isPetOnly);
         if (isPetOnly) {
             document.getElementById('phantich-tab').classList.add('d-none'); // luôn ẩn, bất kể isDoiTruongLocked()
-            // Tab mặc định (TPKT Check) đang bị ẩn — chuyển sang tab Linh Thú.
-            document.getElementById('dashboard-tab').classList.remove('active');
-            document.getElementById('dashboardContent').classList.remove('show', 'active');
+            // Tab mặc định (Bảo Trì) đang bị ẩn — chuyển sang tab Linh Thú.
+            document.getElementById('bt-tab').classList.remove('active');
+            document.getElementById('btContent').classList.remove('show', 'active');
             document.getElementById('linhthu-tab').classList.add('active');
             document.getElementById('linhThuContent').classList.add('show', 'active');
-            toggleFilterStripVisibility('linhthu-tab'); // ẩn luôn (không nằm trong FILTER_VISIBLE_TABS)
         }
     }
 
@@ -2548,22 +2568,106 @@
 
         applySortToFilteredData();
         renderTable(filteredDataCache);
-        // Chỉ vẽ lại KPI + Chart.js khi tab "Báo cáo Tổng quan" đang thực sự mở —
-        // huỷ/tạo lại biểu đồ là thao tác nặng, không cần làm khi người dùng
-        // đang ở tab khác (mỗi lần gõ tìm kiếm/đổi bộ lọc đều gọi hàm này).
-        if (document.getElementById('reportContent').classList.contains('active')) {
-            renderExecutiveReport(filteredDataCache);
-        }
+        // Chỉ vẽ lại báo cáo (KPI + Chart.js) khi tab Bảo Trì đang mở và phần báo
+        // cáo không bị thu gọn — huỷ/tạo lại biểu đồ là thao tác nặng.
+        btMaybeRenderReport();
         
         document.getElementById('selectAll').checked = false;
         updateBatchBar();
     }
 
-    // Vẽ lại báo cáo đúng lúc chuyển sang tab "Báo cáo Tổng quan", để dữ liệu
-    // luôn mới nhất kể cả khi bộ lọc/tìm kiếm đã đổi trong lúc tab đang ẩn.
-    document.getElementById('report-tab').addEventListener('shown.bs.tab', () => {
-        renderExecutiveReport(filteredDataCache);
-    });
+    // ================== TAB BẢO TRÌ: báo cáo phía trên bảng xử lý ==================
+    const BT_REPORT_COLLAPSE_KEY = 'tpkt_bt_report_collapsed';
+    function btReportVisible() {
+        let pane = document.getElementById('btContent');
+        return pane && pane.classList.contains('active') && !document.getElementById('btReportBody').classList.contains('d-none');
+    }
+    function btMaybeRenderReport() {
+        // KPI luôn cập nhật (nhẹ); biểu đồ chỉ vẽ khi phần báo cáo đang hiện
+        if (btReportVisible()) renderExecutiveReport(filteredDataCache);
+        else btRenderKpisOnly(filteredDataCache);
+    }
+    function btApplyCollapse(collapsed) {
+        document.getElementById('btReportBody').classList.toggle('d-none', collapsed);
+        document.getElementById('btReportToggle').innerHTML = collapsed
+            ? '<i class="bi bi-chevron-down me-1"></i>Mở báo cáo'
+            : '<i class="bi bi-chevron-up me-1"></i>Thu gọn báo cáo';
+    }
+    function btToggleReport() {
+        let collapsed = !document.getElementById('btReportBody').classList.contains('d-none');
+        localStorage.setItem(BT_REPORT_COLLAPSE_KEY, collapsed ? '1' : '0');
+        btApplyCollapse(collapsed);
+        if (!collapsed) renderExecutiveReport(filteredDataCache);
+    }
+    btApplyCollapse(localStorage.getItem(BT_REPORT_COLLAPSE_KEY) === '1');
+    document.getElementById('bt-tab').addEventListener('shown.bs.tab', btMaybeRenderReport);
+
+    function btScopeText() {
+        let parts = [];
+        ['filterDoiTac', 'filterDoiTruong', 'filterNhanVien'].forEach(id => { let v = document.getElementById(id).value; if (v) parts.push(v); });
+        let tp = document.getElementById('filterTpktCheck');
+        if (tp.value) parts.push(tp.options[tp.selectedIndex].text);
+        let f = document.getElementById('filterTgHoanTatFrom').value, t = document.getElementById('filterTgHoanTatTo').value;
+        const vn = d => d.split('-').reverse().join('/');
+        if (f || t) parts.push(`${f ? vn(f) : '…'} → ${t ? vn(t) : '…'}`);
+        let q = document.getElementById('searchSoHopDong').value.trim(); if (q) parts.push(`HĐ "${q}"`);
+        return parts.length ? parts.join(' · ') : 'Toàn bộ phạm vi';
+    }
+    function btCounts(data) {
+        let c = { total: data.length, chuaKiemTra: 0, chuaXuLy: 0, done: 0, okNoLoi: 0, loiFixed: 0 };
+        data.forEach(item => {
+            let { category, isLoi } = classifyRow(item);
+            if (category === 'CHUA_KIEM_TRA') c.chuaKiemTra++;
+            else if (category === 'CHUA_XU_LY') c.chuaXuLy++;
+            else if (category === 'DA_HOAN_THANH') { c.done++; if (isLoi) c.loiFixed++; else c.okNoLoi++; }
+        });
+        return c;
+    }
+    function btRenderKpisOnly(data) {
+        let c = btCounts(data);
+        document.getElementById('kpiTotalCa').innerText = c.total;
+        document.getElementById('kpiChuaKiemTra').innerText = c.chuaKiemTra;
+        document.getElementById('kpiTotalLoi').innerText = c.chuaXuLy;
+        document.getElementById('kpiRateLoi').innerText = (c.total ? (c.chuaXuLy / c.total * 100).toFixed(1) : 0) + '%';
+        document.getElementById('kpiTotalOk').innerText = c.done;
+        document.getElementById('btScopeChip').textContent = btScopeText();
+    }
+    // Đồng hồ + biểu đồ vòng theo phong cách tab HI FPT (dùng chung hiGauge/hiCharts)
+    function btRenderVisuals(data) {
+        if (typeof Chart === 'undefined') return;
+        let c = btCounts(data);
+        document.getElementById('btScopeChip').textContent = btScopeText();
+        let fmt = n => n.toLocaleString('vi-VN');
+        let doneRate = c.total ? c.done / c.total * 100 : null;
+        let loiTotal = c.loiFixed + c.chuaXuLy;
+        let fixRate = loiTotal ? c.loiFixed / loiTotal * 100 : null;
+        hiGauge('btDone', 'btGaugeDone', doneRate);
+        hiGauge('btFix', 'btGaugeFix', fixRate);
+        let setVal = (id, p) => { let el = document.getElementById(id); el.textContent = p === null ? '--' : p.toFixed(1) + '%'; el.style.color = hiRateColor(p); };
+        setVal('btGaugeDoneVal', doneRate); setVal('btGaugeFixVal', fixRate);
+        document.getElementById('btGDoneOk').textContent = fmt(c.done);
+        document.getElementById('btGDoneLeft').textContent = fmt(c.total - c.done);
+        document.getElementById('btGDoneTotal').textContent = fmt(c.total);
+        document.getElementById('btGFixOk').textContent = fmt(c.loiFixed);
+        document.getElementById('btGFixLeft').textContent = fmt(c.chuaXuLy);
+        document.getElementById('btGFixTotal').textContent = fmt(loiTotal);
+
+        let labels = ['Bảo trì OK', 'Lỗi đã xử lý', 'Chưa xử lý', 'Chưa kiểm tra'];
+        let vals = [c.okNoLoi, c.loiFixed, c.chuaXuLy, c.chuaKiemTra];
+        let colors = ['#3F7D1F', '#7FB04F', HI_COLOR_BAD, '#C9CEC6'];
+        hiDestroyChart('btDonut');
+        hiCharts.btDonut = new Chart(document.getElementById('btDonutStatus'), {
+            type: 'doughnut',
+            data: { labels, datasets: [{ data: vals, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '58%',
+                plugins: {
+                    legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 },
+                        generateLabels: ch => labels.map((l, i) => ({ text: `${l}: ${fmt(vals[i])} (${(vals[i] / Math.max(1, c.total) * 100).toFixed(1)}%)`,
+                            fillStyle: colors[i], strokeStyle: colors[i], index: i })) } },
+                    tooltip: { callbacks: { label: x => ` ${x.label}: ${fmt(x.raw)} ca` } }
+                } }
+        });
+    }
 
     // ================== TRÒ CHUYỆN NỘI BỘ ==================
     // Chat: GET /api/chat/messages?since_id=N (Worker lọc nhật ký theo phạm vi) · POST /api/chat/send { message }
@@ -3233,7 +3337,7 @@
         hiRenderAll();
     }
 
-    // ---------- Bộ lọc (khoá theo phạm vi giống tab TPKT Check) ----------
+    // ---------- Bộ lọc (khoá theo phạm vi giống tab Bảo Trì) ----------
     function hiFillSelect(id, values, allLabel, keep) {
         let sel = document.getElementById(id);
         let cur = keep ? sel.value : '';
@@ -4233,6 +4337,7 @@
     }
 
     function renderExecutiveReport(data) {
+        btRenderVisuals(data);
         let totalCa = data.length;
         let totalChuaKiemTra = 0;
         let totalCaLoi = 0; // = SUM CHƯA XỬ LÝ (không tính Checklist Onsite)
