@@ -3726,6 +3726,33 @@
         return false;
     }
 
+    // Ô ngày trong Excel/Google Sheet: TIN THEO CHỮ ĐANG HIỂN THỊ, đọc theo kiểu
+    // Việt Nam dd/mm. Lý do: sheet cài locale Mỹ sẽ hiểu "01/10/2026" người dùng
+    // dán vào là 10/01 (giá trị ngầm sai) nhưng vẫn HIỂN THỊ "01/10/2026" — đọc
+    // giá trị ngầm sẽ ra 10/01/2026 (sự cố 03/10/2026 ở SH & RKN). Ngày/tháng lấy
+    // từ chữ hiển thị, giờ:phút:giây lấy từ giá trị ngầm cho đủ giây.
+    function hiSmartDate(rawVal, txtVal, withTime) {
+        if (typeof rawVal === 'number' && isFinite(rawVal)) {
+            let p = XLSX.SSF.parse_date_code(rawVal);
+            if (!p) return '';
+            let d = p.d, m = p.m, y = p.y;
+            let t = String(txtVal ?? '').trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+            if (t) { d = parseInt(t[1], 10); m = parseInt(t[2], 10); }
+            let date = `${hiPad(d)}/${hiPad(m)}/${y}`;
+            return withTime ? `${date} ${hiPad(p.H)}:${hiPad(p.M)}:${hiPad(Math.floor(p.S))}` : date;
+        }
+        let full = hiNormalizeDate(rawVal);
+        if (withTime) return full;
+        let mm = String(full).match(/^(\d{2}\/\d{2}\/\d{4})/);
+        return mm ? mm[1] : String(rawVal ?? '').trim();
+    }
+    // Đếm ngày "khả nghi" (tương lai hoặc cũ hơn 120 ngày) để cảnh báo ở màn xem trước.
+    function hiSuspiciousDates(values) {
+        let now = Date.now(), bad = 0;
+        values.forEach(v => { let d = parseFlexibleDate(v); if (d && (d.getTime() > now + 86400000 || d.getTime() < now - 120 * 86400000)) bad++; });
+        return bad;
+    }
+
     async function hiHandleImportFile(event) {
         let file = event.target.files[0];
         event.target.value = '';
@@ -3734,6 +3761,7 @@
         let wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
         let sheet = wb.Sheets[wb.SheetNames[0]];
         let raw = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: true });
+        let txt = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false }); // chữ đang hiển thị
         if (raw.length === 0) { alert("File không có dữ liệu!"); return; }
 
         let headerKeys = Object.keys(raw[0]);
@@ -3750,7 +3778,7 @@
             let row = {};
             HI_FIELDS.forEach(f => row[f] = '');
             Object.entries(colMap).forEach(([h, f]) => {
-                row[f] = f === 'ngayHoanTat' ? hiNormalizeDate(r[h]) : String(r[h] ?? '').trim();
+                row[f] = f === 'ngayHoanTat' ? hiSmartDate(r[h], (txt[i] || {})[h], true) : String(r[h] ?? '').trim();
             });
             if (!row.soHopDong && !row.doiTacQuanLy && !row.ngayHoanTat) return; // dòng trống
             if (!row.soHopDong || !row.doiTacQuanLy || !row.ngayHoanTat) { errors.push(`Dòng ${i + 2}: thiếu Số HĐ / Đối tác / Ngày hoàn tất`); return; }
@@ -3778,6 +3806,7 @@
             </div>
             <div class="small mb-2"><b>Theo đối tác:</b> ${Object.entries(byDt).map(([k, v]) => `${escapeHtml(k)} (${v})`).join(' · ')}</div>
             ${dupInFile ? `<div class="small mb-2" style="color:var(--amber);">${dupInFile} dòng trùng Số HĐ + Ngày hoàn tất trong file — chỉ giữ dòng cuối.</div>` : ''}
+            ${(n => n ? `<div class="alert alert-warning small py-2"><b>${n} dòng có Ngày hoàn tất bất thường</b> (ở tương lai hoặc cũ hơn 120 ngày) — có thể bị đảo ngày/tháng. Kiểm tra lại file trước khi nhập.</div>` : '')(hiSuspiciousDates(hiPendingImport.map(r => r.ngayHoanTat)))}
             ${ignored.length ? `<div class="small mb-2" style="color:var(--slate-soft);">Bỏ qua cột không dùng: ${ignored.map(escapeHtml).join(', ')}</div>` : ''}
             ${errors.length ? `<div class="alert alert-danger small py-2"><b>${errors.length} dòng lỗi (sẽ không nhập):</b><br>${errors.slice(0, 10).map(escapeHtml).join('<br>')}${errors.length > 10 ? `<br>… và ${errors.length - 10} dòng khác` : ''}</div>` : ''}
             <div class="small fw-bold mb-1">5 dòng đầu — kiểm tra kỹ cột Ngày hoàn tất (phải đúng ngày/tháng):</div>
@@ -4577,6 +4606,7 @@
         if (typeof XLSX === 'undefined') { alert("Thư viện Excel chưa tải xong, vui lòng thử lại."); return; }
         let wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
         let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '', raw: true });
+        let txt = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '', raw: false }); // chữ đang hiển thị
         if (!raw.length) { alert("File không có dữ liệu!"); return; }
         let colMap = {};
         Object.keys(raw[0]).forEach(h => { let f = RKN_HEADER_MAP[hiNorm(h).replace(/[^a-z0-9]/g, '')]; if (f) colMap[h] = f; });
@@ -4586,7 +4616,7 @@
         let errors = [], seen = new Set(), dupInFile = 0, rows = [];
         raw.forEach((r, i) => {
             let row = {}; RKN_FIELDS.forEach(f => row[f] = '');
-            Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayData' ? rknNormalizeDate(r[h]) : String(r[h] ?? '').trim());
+            Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayData' ? hiSmartDate(r[h], (txt[i] || {})[h], false) : String(r[h] ?? '').trim());
             if (!row.soHopDong && !row.doiTacQuanLy && !row.ngayData) return;
             let st = rknStatus(row.huongXL);
             if (!row.soHopDong || !row.doiTacQuanLy || !row.ngayData) { errors.push(`Dòng ${i + 2}: thiếu Số HĐ / Đối tác / Ngày data`); return; }
@@ -4611,6 +4641,7 @@
             <div class="small mb-2"><b>Theo đối tác:</b> ${Object.entries(byDt).map(([k, v]) => `${escapeHtml(k)} (${v})`).join(' · ')}</div>
             ${willSkip.length ? `<div class="alert alert-warning small py-2"><b>Trùng Chưa XL — không import thêm</b> (Số HĐ đang có ca "Chưa XL"/"Đã Tạo CL"): ${willSkip.slice(0, 30).map(r => escapeHtml(r.soHopDong)).join(', ')}${willSkip.length > 30 ? ` … và ${willSkip.length - 30} HĐ khác` : ''}</div>` : ''}
             ${dupInFile ? `<div class="small mb-2" style="color:var(--amber);">${dupInFile} dòng trùng Số HĐ trong file — chỉ giữ dòng đầu.</div>` : ''}
+            ${(n => n ? `<div class="alert alert-warning small py-2"><b>${n} dòng có Ngày data bất thường</b> (ở tương lai hoặc cũ hơn 120 ngày) — có thể bị đảo ngày/tháng. Kiểm tra lại file trước khi nhập.</div>` : '')(hiSuspiciousDates(rows.map(r => r.ngayData)))}
             ${errors.length ? `<div class="alert alert-danger small py-2"><b>${errors.length} dòng lỗi (không nhập):</b><br>${errors.slice(0, 10).map(escapeHtml).join('<br>')}${errors.length > 10 ? `<br>… và ${errors.length - 10} dòng khác` : ''}</div>` : ''}
             <div class="small fw-bold mb-1">5 dòng đầu — kiểm tra cột Ngày data:</div>
             <div class="table-responsive"><table class="table table-sm table-bordered small mb-0">
