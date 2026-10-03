@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Vận hành & Xử lý TPKT</title>
+    <title>Hệ thống Chất Lượng Dịch Vụ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -401,7 +401,7 @@
     <div style="margin: 14px 0 26px;">
       <div style="margin-bottom:8px;"><span class="q4-badge">🏁 Nước rút Quý 4</span></div>
       <div style="color:#FFB27A; font-size:12.5px; font-weight:600; margin-bottom:6px;">Tập trung cao độ — về đích năm <span id="loginYear">2026</span> · <span id="loginCountdown">--</span></div>
-      <h3 style="color: #fff; font-weight: 700; font-size: 19px; margin: 0; letter-spacing: -0.01em;">Hệ thống Check ca vụ Bảo trì</h3>
+      <h3 style="color: #fff; font-weight: 700; font-size: 19px; margin: 0; letter-spacing: -0.01em;">Hệ thống Chất Lượng Dịch Vụ</h3>
       <p style="color: #9AA39C; font-size: 13px; margin-top: 6px;">Đăng nhập để tiếp tục vận hành</p>
     </div>
 
@@ -427,7 +427,7 @@
     <div class="ops-header d-flex flex-wrap align-items-center justify-content-between mb-3">
         <div>
             <span class="ops-mark mb-2 d-inline-block">TPKT · OPS</span>
-            <h2 class="fw-bold mb-0 fs-4">Vận hành &amp; Kiểm tra checklist Bảo trì</h2>
+            <h2 class="fw-bold mb-0 fs-4">Hệ thống Chất Lượng Dịch Vụ</h2>
             <div class="d-flex align-items-center gap-3 mt-2" style="position:relative;">
                 <div style="position:relative;">
                     <button class="ops-pill" id="btnOnlineCount" onclick="toggleOnlinePanel()" style="cursor:pointer;">
@@ -471,6 +471,11 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link" id="rkn-tab" data-bs-toggle="tab" data-bs-target="#rknContent" type="button" role="tab">
+                <i class="bi bi-reception-2 me-1" style="color:var(--red);"></i> SH &amp; RKN
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chatContent" type="button" role="tab">
                 <i class="bi bi-chat-dots-fill me-1"></i> Trò chuyện <span id="badgeChatUnread" class="count-chip d-none">0</span>
             </button>
@@ -492,7 +497,7 @@
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link d-none" id="petaccounts-tab" data-bs-toggle="tab" data-bs-target="#petAccountsContent" type="button" role="tab">
-                <i class="bi bi-person-plus me-1"></i> Tài khoản Nuôi thú
+                <i class="bi bi-person-plus me-1"></i> Tài khoản cus
             </button>
         </li>
     </ul>
@@ -963,6 +968,145 @@
             </div>
         </div>
 
+        <!-- TAB: SH & RKN (dataRKN) -->
+        <div class="tab-pane fade" id="rknContent" role="tabpanel">
+            <div id="rknAdminBar" class="hi-admin-bar d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 d-none">
+                <span class="fw-bold small" style="color:#8A6A12;"><i class="bi bi-shield-lock-fill me-1"></i>Admin — Quản lý dữ liệu SH &amp; RKN (dataRKN)</span>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="filter-reset-btn" onclick="rknDownloadTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu</button>
+                    <label class="filter-reset-btn mb-0" style="cursor:pointer;"><i class="bi bi-upload me-1"></i>Nhập Excel
+                        <input type="file" accept=".xlsx,.xls,.csv" class="d-none" onchange="rknHandleImportFile(event)">
+                    </label>
+                    <button class="filter-reset-btn" onclick="rknOpenEditModal(null)"><i class="bi bi-plus-lg me-1"></i>Thêm dòng</button>
+                </div>
+            </div>
+
+            <div class="filter-strip row g-2 mb-3 align-items-end">
+                <div class="col-md-3 f-group">
+                    <label>Ngày data (từ - đến)</label>
+                    <div class="d-flex gap-1">
+                        <input type="date" id="rknFilterFrom" class="form-control form-control-sm" onchange="rknApplyFilters()">
+                        <input type="date" id="rknFilterTo" class="form-control form-control-sm" onchange="rknApplyFilters()">
+                    </div>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>Đối tác</label>
+                    <select id="rknFilterDoiTac" class="form-select form-select-sm" onchange="rknOnFilterChange('doiTac')"></select>
+                </div>
+                <div class="col-md-3 f-group">
+                    <label>Đội trưởng</label>
+                    <select id="rknFilterDoiTruong" class="form-select form-select-sm" onchange="rknApplyFilters()"></select>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>Hướng XL</label>
+                    <select id="rknFilterHuong" class="form-select form-select-sm" onchange="rknApplyFilters()">
+                        <option value="">Tất cả</option><option>Chưa XL</option><option>Đã Tạo CL</option><option>Đã XL</option>
+                    </select>
+                </div>
+                <div class="col-md-2 f-group">
+                    <label>Số lần Up/Down</label>
+                    <select id="rknFilterUpDown" class="form-select form-select-sm" onchange="rknApplyFilters()">
+                        <option value="">Tất cả</option><option value="20">≥ 20 lần</option><option value="50">≥ 50 lần</option><option value="100">≥ 100 lần</option>
+                    </select>
+                </div>
+                <div class="col-md-4 f-group">
+                    <label>Tìm Số HĐ / MAC / Tập điểm</label>
+                    <input type="text" id="rknSearch" class="form-control form-control-sm" placeholder="Nhập số HĐ, MAC hoặc tập điểm..." oninput="clearTimeout(window._rknSearchT); window._rknSearchT = setTimeout(rknApplyFilters, 250);">
+                </div>
+                <div class="col-md-8 f-group d-flex justify-content-end gap-2">
+                    <span class="small align-self-center me-auto" id="rknLastLoaded" style="color:var(--slate-soft);"></span>
+                    <button class="filter-reset-btn" onclick="rknResetFilters()"><i class="bi bi-x-circle me-1"></i>Xoá lọc</button>
+                    <button class="filter-reset-btn" onclick="rknFetchData(true)"><i class="bi bi-arrow-clockwise me-1"></i>Tải lại</button>
+                    <button class="filter-reset-btn" onclick="rknExportExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Xuất Excel</button>
+                </div>
+            </div>
+
+            <div class="stat-strip">
+                <div class="stat-item accent-neutral"><div class="stat-label">TỔNG CA</div><div class="stat-value" id="rknKpiTotal">0</div></div>
+                <div class="stat-item accent-red"><div class="stat-label">CHƯA XL</div><div class="stat-value" id="rknKpiChua">0</div></div>
+                <div class="stat-item accent-amber"><div class="stat-label">ĐÃ TẠO CL</div><div class="stat-value" id="rknKpiCl">0</div></div>
+                <div class="stat-item accent-brand"><div class="stat-label">ĐÃ XL</div><div class="stat-value" id="rknKpiDone">0</div></div>
+                <div class="stat-item accent-brand"><div class="stat-label">TỈ LỆ ĐÃ XL</div><div class="stat-value" id="rknKpiRate">0%</div></div>
+                <div class="stat-item accent-neutral"><div class="stat-label">TB UP/DOWN / CA</div><div class="stat-value" id="rknKpiAvgUd">0</div></div>
+            </div>
+
+            <div class="mb-4" id="rknReport">
+                <div class="hi-report-head">
+                    <div>
+                        <span class="hi-report-title"><i class="bi bi-reception-2 me-2" style="color:var(--red);"></i>Báo cáo SH &amp; RKN</span>
+                        <span class="hi-scope-chip" id="rknScopeChip">Toàn bộ phạm vi</span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <div class="hi-seg" id="rknGroupSeg">
+                            <button type="button" data-group="doiTacQuanLy" class="active">Theo Đối tác</button>
+                            <button type="button" data-group="doiTruong">Theo Đội trưởng</button>
+                            <button type="button" data-group="huongXL">Theo Hướng XL</button>
+                        </div>
+                        <button class="filter-reset-btn" id="rknReportToggle" onclick="rknToggleReport()"><i class="bi bi-chevron-up me-1"></i>Thu gọn</button>
+                    </div>
+                </div>
+                <div id="rknReportBody">
+                    <div class="row g-3 mb-3">
+                        <div class="col-lg-4 col-md-6">
+                            <div class="hi-card">
+                                <div class="hi-card-title"><i class="bi bi-check2-circle me-1"></i>Tỉ lệ đã xử lý</div>
+                                <div class="hi-gauge"><canvas id="rknGauge"></canvas>
+                                    <div class="hi-gauge-center"><div class="big" id="rknGaugeVal">--</div><div class="sub">ca Đã XL / tổng ca</div></div></div>
+                                <div class="hi-gauge-foot"><span>Đã XL <b id="rknGDone">0</b></span><span>Còn mở <b id="rknGOpen" style="color:var(--red);">0</b></span><span>Tổng <b id="rknGTotal">0</b></span></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="hi-card">
+                                <div class="hi-card-title"><i class="bi bi-pie-chart me-1"></i>Cơ cấu Hướng XL</div>
+                                <div class="hi-chart-box" style="height:190px;"><canvas id="rknDonut"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-12">
+                            <div class="hi-card">
+                                <div class="hi-card-title"><i class="bi bi-activity me-1"></i>Mức độ Up/Down (ca còn mở)</div>
+                                <div class="hi-chart-box" style="height:190px;"><canvas id="rknUdChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hi-card mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="hi-card-title mb-0"><i class="bi bi-graph-up-arrow me-1"></i>Diễn biến theo ngày data</div>
+                            <span class="small" id="rknTrendNote" style="color:var(--slate-soft);"></span>
+                        </div>
+                        <div class="hi-chart-box mt-2"><canvas id="rknTrendChart"></canvas></div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-lg-8">
+                            <div class="hi-card">
+                                <div class="hi-card-title mb-2" id="rknRankTitle">Tình trạng xử lý</div>
+                                <div class="hi-rank-scroll"><div id="rknRankBox" style="position:relative;"><canvas id="rknRankChart"></canvas></div></div>
+                                <div class="small mt-2" style="color:var(--slate-soft);">Sắp xếp theo số ca còn mở · Bấm 1 cột để lọc xuống cấp dưới</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4"><div class="hi-card" id="rknSpotlight"></div></div>
+                    </div>
+
+                    <div class="table-panel">
+                        <div class="p-3 pb-2 fw-bold"><i class="bi bi-table me-2" style="color:var(--brand);"></i>Bảng số liệu <span class="small fw-normal" style="color:var(--slate-soft);">— bấm 1 dòng để lọc xuống cấp dưới</span></div>
+                        <div class="table-responsive"><table class="table table-hover align-middle mb-0" id="rknGroupTable"></table></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-panel">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 p-3 pb-2">
+                    <div class="fw-bold"><i class="bi bi-list-check me-2" style="color:var(--brand);"></i>Danh sách cần xử lý <span class="small fw-normal" id="rknDetailCount" style="color:var(--slate-soft);"></span></div>
+                    <label class="small d-flex align-items-center gap-1 mb-0" style="color:var(--slate);">
+                        <input type="checkbox" id="rknShowDone" onchange="rknPage = 1; rknRenderDetail();"> Hiện cả ca Đã XL
+                    </label>
+                </div>
+                <div class="table-responsive"><table class="table table-hover align-middle mb-0" id="rknDetailTable"></table></div>
+                <div class="d-flex justify-content-end p-3"><nav><ul class="pagination pagination-sm mb-0" id="rknPagination"></ul></nav></div>
+            </div>
+        </div>
+
         <!-- TAB 5: LINH THÚ — KHU DÂN CƯ -->
         <div class="tab-pane fade" id="linhThuContent" role="tabpanel">
             <div id="linhThuMe" class="lt-me-panel mb-3">
@@ -1017,255 +1161,27 @@
         <!-- TAB 7: HƯỚNG DẪN SỬ DỤNG -->
         <div class="tab-pane fade" id="huongDanContent" role="tabpanel">
             <div class="table-panel p-4 mb-3">
-                <h5 class="fw-bold mb-1"><i class="bi bi-book me-2" style="color:var(--brand);"></i>Hướng dẫn sử dụng hệ thống</h5>
-                <p class="small mb-0" style="color:var(--slate);">Bấm vào từng mục bên dưới để xem chi tiết. Nội dung áp dụng cho tất cả tài khoản — mục 8 tóm tắt riêng ai được dùng gì.</p>
+                <h5 class="fw-bold mb-1"><i class="bi bi-book me-2" style="color:var(--brand);"></i>Hướng dẫn sử dụng — Hệ thống Chất Lượng Dịch Vụ</h5>
+                <p class="small mb-0" style="color:var(--slate);">Bấm vào từng mục để xem chi tiết. Mục cuối tóm tắt từng loại tài khoản được thấy và làm gì.</p>
             </div>
 
             <div class="accordion" id="guideAccordion">
-
                 <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gsec">
-                            Đăng nhập &amp; bảo mật
-                        </button>
-                    </h2>
-                    <div id="gsec" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small">
-                            <ul class="mb-0">
-                                <li>Mật khẩu được mã hoá một chiều trong hệ thống — quản trị viên cũng không xem được mật khẩu của bạn. Quên mật khẩu thì liên hệ SuperAdmin để đặt lại.</li>
-                                <li>Nhập sai mật khẩu <b>5 lần trong 15 phút</b> → tài khoản tạm khoá <b>15 phút</b>.</li>
-                                <li><b>Đổi mật khẩu</b> sẽ tự đăng xuất tài khoản đó trên mọi máy khác. Mật khẩu mới tối thiểu 6 ký tự.</li>
-                                <li>Phiên đăng nhập kéo dài tối đa 12 giờ và tự đăng xuất sau 20 phút không thao tác.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#g1">
-                            1. Bộ lọc &amp; tìm kiếm
-                        </button>
-                    </h2>
-                    <div id="g1" class="accordion-collapse collapse show" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small">
-                            <ul class="mb-0">
-                                <li><b>Đối tác / Đội trưởng / Nhân viên</b>: lọc theo cấp bậc — chọn Đối tác trước sẽ tự thu hẹp danh sách Đội trưởng, chọn Đội trưởng sẽ thu hẹp Nhân viên. Tài khoản bị giới hạn phạm vi (Đối tác quản lý / Đội trưởng) sẽ thấy ô tương ứng bị khoá xám, không đổi được.</li>
-                                <li><b>TG Hoàn Tất (từ - đến)</b>: lọc theo khoảng ngày hoàn tất ca bảo trì, để trống 1 hoặc cả 2 đầu đều được.</li>
-                                <li><b>TPKT CHECK</b>: có thêm lựa chọn <b>"Đội trưởng xử lý (tất cả lỗi)"</b> — gộp cả 4 loại lỗi (Suy hao/Không tín hiệu/Rớt kết nối/Vùng phủ không đảm bảo) vào 1 lượt lọc, tiện xem hết ca cần xử lý mà không phải đổi qua lại từng loại.</li>
-                                <li><b>Tìm số hợp đồng</b>: gõ là lọc ngay (có độ trễ nhỏ để đỡ giật khi gõ nhanh).</li>
-                                <li><b>Đặt lại</b>: xoá hết bộ lọc đang chọn (trừ các ô đang bị khoá theo quyền tài khoản).</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g2">
-                            2. Xử lý checklist (tab Bảo Trì — Danh sách cần xử lý)
-                        </button>
-                    </h2>
-                    <div id="g2" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small">
-                            <ul class="mb-0">
-                                <li><b>Chưa kiểm tra</b> → chọn 1 trong 5 giá trị TPKT Check.</li>
-                                <li>Chọn <b>"Bảo trì ok"</b> → bấm Gửi → dòng biến mất khỏi bảng (coi như xong).</li>
-                                <li>Chọn 1 trong 4 loại lỗi → chọn tiếp <b>XL Lại</b> (Chuyển KTV XL lại / Đã xử lý lại / Checklist Onsite) → bấm Gửi. Chỉ "Đã xử lý lại" và "Checklist Onsite" mới ẩn dòng; "Chuyển KTV XL lại" vẫn hiển thị để theo dõi tiếp.</li>
-                                <li>Nút <b>[Chọn lại]</b> chỉ dùng được khi chưa gửi lên server — sau khi Gửi, muốn đổi phải chọn lại XL Lại rồi Gửi tiếp.</li>
-                                <li>Dòng có nền <span style="color:var(--red);">đỏ nhạt</span> kèm dòng chữ "Quá X ngày chưa xử lý" là ca đang tồn đọng lâu (quá 3 ngày kể từ TG Hoàn Tất mà chưa xử lý xong).</li>
-                                <li><b>Chọn hàng loạt</b>: tick tối đa 20 dòng → thanh công cụ hiện ra để áp dụng TPKT Check (và XL Lại nếu là lỗi) cho tất cả cùng lúc. Dòng đã tự thao tác riêng sẽ không tick được nữa.</li>
-                                <li><b>Xuất Excel</b>: xuất toàn bộ danh sách đang lọc (có cả cột <code>tgTao</code> để dùng lại cho việc nhập lại nếu cần).</li>
-                                <li><b>Nhập Excel</b>: cập nhật hàng loạt TPKT Check/XL Lại cho các dòng đã tồn tại, khớp chính xác theo Số HĐ + tgTao (tải file mẫu trước để biết đúng định dạng, có sẵn ví dụ đủ mọi tổ hợp giá trị hợp lệ).</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g3">
-                            3. Báo cáo (tab Bảo Trì)
-                        </button>
-                    </h2>
-                    <div id="g3" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small">
-                            <ul class="mb-0">
-                                <li>5 chỉ số tổng: Tổng ca, Chưa kiểm tra, Chưa xử lý, Tỉ lệ chưa xử lý, Bảo trì OK/Đã xử lý — tính theo đúng bộ lọc đang áp dụng ở tab TPKT Check.</li>
-                                <li>2 biểu đồ Hiệu suất theo Đối tác/Đội trưởng — cột "Ca lỗi" không tính các ca đã xử lý qua "Checklist Onsite" (vì đã xong ngay tại chỗ, không cần theo dõi thêm).</li>
-                                <li><b>Cảnh báo Đội trưởng — Ca còn tồn CHƯA XỬ LÝ</b>: gộp cả 4 loại lỗi, cho biết Đội trưởng nào đang tồn nhiều ca nhất và ca cũ nhất đã để bao lâu.</li>
-                                <li><b>Cảnh báo Nhân sự Bảo trì không đứt điểm</b>: theo dõi tỷ lệ lỗi từng nhân viên — ≥5 ca lỗi hoặc tỷ lệ ≥30% bị đánh dấu "Rủi ro cao".</li>
-                                <li>Báo cáo nằm phía trên danh sách xử lý, dùng chung bộ lọc: 2 đồng hồ (<b>Tỉ lệ hoàn thành</b> = Bảo trì OK + đã xử lý / tổng ca; <b>Tỉ lệ xử lý ca lỗi</b> = ca lỗi đã xử lý / tổng ca lỗi), biểu đồ cơ cấu trạng thái, biểu đồ theo Đối tác/Đội trưởng và 2 bảng cảnh báo. Bấm <b>Thu gọn báo cáo</b> để chỉ làm việc với danh sách — trình duyệt nhớ lựa chọn này.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g4">
-                            4. Cảnh báo CLL2 &amp; 3 (số hợp đồng trùng)
-                        </button>
-                    </h2>
-                    <div id="g4" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small">
-                            <ul class="mb-0">
-                                <li>Liệt kê số hợp đồng xuất hiện từ 2 lần trở lên trong dữ liệu — thường do nhập liệu 2 lần.</li>
-                                <li>Có dropdown lọc riêng theo Đối tác ngay trong tab này.</li>
-                                <li>Chi tiết mỗi dòng trùng hiện Đối tác, Đội trưởng, Nhân viên, TG Hoàn Tất và Ghi chú — so sánh nội dung ghi chú để biết dòng nào mới/đúng hơn trước khi báo lại bộ phận dữ liệu xử lý.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g5">
-                            5. Trò chuyện nội bộ
-                        </button>
-                    </h2>
-                    <div id="g5" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small">
-                            <ul class="mb-0">
-                                <li>Chat chung cho toàn bộ người dùng đang đăng nhập, tự tải tin nhắn mới mỗi vài giây.</li>
-                                <li>Tin của chính bạn hiện bên phải (nền xanh), người khác hiện bên trái.</li>
-                                <li>Tin nền xanh nhạt, chữ đều, tên gửi <b>"Nhật ký XL Lại"</b> là nhật ký tự động: mỗi khi cột <b>XL Lại</b> của một ca đổi giá trị (sửa trực tiếp trên bảng hoặc qua Nhập Excel), hệ thống ghi lại ai đổi, số HĐ, giá trị cũ → mới. Mỗi người chỉ thấy nhật ký của các ca thuộc phạm vi dữ liệu của mình (Đội trưởng thấy đội mình, Đối tác thấy đối tác mình, Admin thấy tất cả, tài khoản Nuôi thú không thấy). Nhật ký không tính vào số tin chưa đọc.</li>
-                                <li>Tin nhắn (cả tin người gửi lẫn nhật ký) <b>tự động xoá sau 7 ngày</b>.</li>
-                                <li>Số đỏ trên tên tab là số tin nhắn mới chưa đọc kể từ lần cuối bạn mở tab này.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g6">
-                            6. Linh Thú đồng hành
-                        </button>
-                    </h2>
-                    <div id="g6" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small">
-                            <ul class="mb-0">
-                                <li><b>Mọi tài khoản</b> (Đội trưởng, Đối tác, Admin, SuperAdmin, Nuôi thú) đều có đúng <b>1 Linh thú</b> riêng, chọn tự do 1 trong 32 loài, đổi loài bất cứ lúc nào. Không còn XP, cấp hay bảng xếp hạng.</li>
-                                <li><b>Tên thú</b> (tối đa 20 ký tự, không bắt buộc) và <b>Trạng thái</b> (tối đa 50 ký tự) — trạng thái hiện thành bong bóng trên đầu thú để mọi người cùng thấy. Bấm <b>Lưu</b> để cập nhật.</li>
-                                <li><b>Khu dân cư</b>: sân chung chia thành 112 lô đất dọc các tuyến đường, có công viên ở giữa. Bấm <b>Chọn lô</b> rồi bấm vào 1 lô tô vàng (còn trống) để nhận. Mỗi người giữ 1 lô; có thể <b>Đổi lô</b> hoặc <b>Trả lô</b>. Chưa nhận lô thì thú đứng chơi ở công viên.</li>
-                                <li>Thú <b>đứng yên</b>, không tự đi lại. Muốn di chuyển: <b>giữ chuột (hoặc giữ ngón tay) vào thú của mình và kéo</b> tới bất kỳ đâu trên sân — vị trí được lưu lại và mọi người cùng thấy. Chỉ kéo được thú của chính mình. Nút <b>Gọi thú về lô</b> đưa thú về giữa lô đất.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g7">
-                            7. Phân tích SHD (công cụ n8n)
-                        </button>
-                    </h2>
-                    <div id="g7" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small">
-                            <ul class="mb-0">
-                                <li>Công cụ chẩn đoán tự động chạy trên n8n riêng (không phải một phần của web này) — bấm nút để mở ở tab mới.</li>
-                                <li>Cần đăng nhập MyPT bằng OTP rồi dán danh sách Số HĐ cần phân tích, hệ thống sẽ trả về nguyên nhân + hướng xử lý gợi ý cho từng hợp đồng.</li>
-                                <li>Tab này chỉ hiện cho Admin, SuperAdmin và Đối tác quản lý — Đội trưởng không thấy tab này.</li>
-                                <li>Link công cụ lưu trong hệ thống. Khi instance n8n hết hạn, <b>SuperAdmin</b> dán link mới vào ô "Đổi link" ngay trong tab này — mọi người thấy link mới ngay.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ghifpt">
-                            HI FPT — Tỉ lệ cài đặt &amp; tương tác
-                        </button>
-                    </h2>
-                    <div id="ghifpt" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small">
-                            <ul class="mb-0">
-                                <li><b>Tỉ lệ cài đặt</b> = số ca có Tình trạng kích hoạt <b>khác</b> "Chua kich hoat" / tổng số ca.</li>
-                                <li><b>Tỉ lệ tương tác</b> = số ca "Có Gửi" có Tương tác = "Có" / tổng số ca "Có Gửi". Ca "Không Gửi" không tính vào tỉ lệ này.</li>
-                                <li><b>Tự động</b>: ca có Tương tác = "Có" mà Tình trạng kích hoạt đang là "Chua kich hoat" (hoặc trống) sẽ tự chuyển thành <b>"Kich hoat khi Trien Khai"</b> khi nhập Excel, thêm hoặc sửa dòng — vì khách đã tương tác thì chắc chắn đã cài HI FPT.</li>
-                                <li>Xem báo cáo theo <b>Đối tác / Đội trưởng / Nhân viên</b>; bấm 1 dòng để lọc xuống cấp dưới, bấm tiêu đề cột để sắp xếp. Màu tỉ lệ: xanh ≥ 80%, cam 50–80%, đỏ &lt; 50%.</li>
-                                <li>Phân quyền xem giống tab Bảo Trì: Đội trưởng chỉ thấy đội mình, Đối tác thấy đối tác mình, Admin/SuperAdmin thấy tất cả; tài khoản Nuôi thú không thấy tab này.</li>
-                                <li><b>SuperAdmin</b>: nhập Excel (đúng tiêu đề cột như sheet "Import" — có thể tải file mẫu), xem trước trước khi nhập; dòng trùng Số HĐ + Ngày hoàn tất sẽ được <b>cập nhật</b> theo file mới. Sửa/xoá từng dòng ngay trên bảng chi tiết hoặc thêm dòng thủ công.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g8pet">
-                            8. Tài khoản Nuôi thú (chỉ Đối tác quản lý)
-                        </button>
-                    </h2>
-                    <div id="g8pet" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small">
-                            <ul class="mb-0">
-                                <li>Cho phép Đối tác quản lý tự tạo tài khoản Nuôi thú (role petonly) cho nhân sự không thuộc Đội trưởng/KTV nhưng muốn tham gia nuôi Linh thú.</li>
-                                <li>Tải file mẫu (2 cột: username, password) → điền → Nhập Excel — tối đa 50 tài khoản/lần. Bỏ trống cột password thì mật khẩu mặc định trùng username.</li>
-                                <li>Tài khoản tạo ra <b>không có quyền truy cập dữ liệu vận hành dưới bất kỳ hình thức nào</b> — kể cả khi cố gọi thẳng API, Worker vẫn chặn ở tầng server. Chỉ thấy 3 tab: Trò chuyện, Linh Thú, Hướng dẫn.</li>
-                                <li>Danh sách bên dưới chỉ hiện tài khoản do đúng Đối tác quản lý này tạo.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g8">
-                            9. Phân quyền theo tài khoản
-                        </button>
-                    </h2>
-                    <div id="g8" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                    <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#g0">1. Tổng quan các tab</button></h2>
+                    <div id="g0" class="accordion-collapse collapse show" data-bs-parent="#guideAccordion">
                         <div class="accordion-body small">
                             <div class="table-responsive">
                                 <table class="table table-sm table-bordered align-middle mb-0">
-                                    <thead>
-                                        <tr class="text-center">
-                                            <th style="min-width:140px;">Cấp tài khoản</th>
-                                            <th>Phạm vi dữ liệu thấy được</th>
-                                            <th class="text-center">Tab Phân tích SHD</th>
-                                            <th class="text-center">Giới hạn Nhập Excel</th>
-                                            <th class="text-center">Đặc quyền riêng</th>
-                                        </tr>
-                                    </thead>
+                                    <thead><tr><th>Tab</th><th>Dùng để</th><th>Ai thấy</th></tr></thead>
                                     <tbody>
-                                        <tr>
-                                            <td><b>Đội trưởng</b><br><span style="color:var(--slate-soft);">(user + có doiTruong)</span></td>
-                                            <td>Chỉ dữ liệu của đúng đội mình</td>
-                                            <td class="text-center">✗</td>
-                                            <td class="text-center">300 dòng</td>
-                                            <td class="text-center">--</td>
-                                        </tr>
-                                        <tr>
-                                            <td><b>Đối tác quản lý</b><br><span style="color:var(--slate-soft);">(user, không có doiTruong)</span></td>
-                                            <td>Toàn bộ đối tác mình quản lý (mọi đội trưởng trực thuộc)</td>
-                                            <td class="text-center">✓</td>
-                                            <td class="text-center">300 dòng</td>
-                                            <td class="text-center">Sử dụng công cụ Phân tích SHD (n8n)</td>
-                                        </tr>
-                                        <tr>
-                                            <td><b>Admin</b><br><span style="color:var(--slate-soft);">(cấp quản trị hệ thống)</span></td>
-                                            <td>Toàn bộ dữ liệu, mọi đối tác</td>
-                                            <td class="text-center">✓</td>
-                                            <td class="text-center">300 dòng</td>
-                                            <td class="text-center">Sử dụng công cụ Phân tích SHD (n8n)</td>
-                                        </tr>
-                                        <tr>
-                                            <td><b>SuperAdmin</b><br><span style="color:var(--slate-soft);">(quản trị cấp cao nhất)</span></td>
-                                            <td>Toàn bộ dữ liệu, mọi đối tác</td>
-                                            <td class="text-center">✓</td>
-                                            <td class="text-center">1000 dòng</td>
-                                            <td class="text-center">Sử dụng công cụ Phân tích SHD (n8n) · Nhập dữ liệu MỚI (nguồn dữ liệu duy nhất) · Đổi link Phân tích SHD · Quản lý dữ liệu HI FPT</td>
-                                        </tr>
-                                        <tr>
-                                            <td><b>Nuôi thú</b><br><span style="color:var(--slate-soft);">(role petonly)</span></td>
-                                            <td>Không có — không truy cập được dữ liệu vận hành dưới bất kỳ hình thức nào</td>
-                                            <td class="text-center">✗</td>
-                                            <td class="text-center">--</td>
-                                            <td class="text-center">Chỉ thấy 3 tab: Trò chuyện, Linh Thú, Hướng dẫn</td>
-                                        </tr>
+                                        <tr><td><b>Bảo Trì</b></td><td>Kiểm tra checklist ca bảo trì (TPKT Check), xử lý lại ca lỗi (XL Lại) và xem báo cáo tiến độ</td><td>Mọi tài khoản trừ cus</td></tr>
+                                        <tr><td><b>Cảnh báo CLL2 &amp; 3</b></td><td>Số hợp đồng xuất hiện từ 2 lần trở lên trong dữ liệu bảo trì</td><td>Mọi tài khoản trừ cus</td></tr>
+                                        <tr><td><b>HI FPT</b></td><td>Tỉ lệ cài đặt và tỉ lệ tương tác ứng dụng HI FPT</td><td>Mọi tài khoản trừ cus</td></tr>
+                                        <tr><td><b>SH &amp; RKN</b></td><td>Theo dõi và xử lý ca Suy hao / Rớt kết nối liên tục</td><td>Tất cả</td></tr>
+                                        <tr><td><b>Trò chuyện</b></td><td>Chat nội bộ + nhật ký tự động (XL Lại, SH &amp; RKN)</td><td>Tất cả</td></tr>
+                                        <tr><td><b>Linh Thú</b></td><td>Nuôi thú, chọn lô đất trong khu dân cư — cho vui, không tính hiệu suất</td><td>Tất cả</td></tr>
+                                        <tr><td><b>Phân tích SHD</b></td><td>Mở công cụ n8n chẩn đoán số hợp đồng</td><td>Admin, SuperAdmin, Đối tác quản lý</td></tr>
+                                        <tr><td><b>Tài khoản cus</b></td><td>Tạo tài khoản cus cho nhân sự của đối tác</td><td>Chỉ Đối tác quản lý</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -1273,15 +1189,166 @@
                     </div>
                 </div>
 
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gsec">2. Đăng nhập &amp; bảo mật</button></h2>
+                    <div id="gsec" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li>Mật khẩu được mã hoá một chiều — quản trị viên cũng không xem được. Quên mật khẩu: liên hệ SuperAdmin để đặt lại.</li>
+                            <li>Nhập sai mật khẩu <b>5 lần trong 15 phút</b> → tài khoản tạm khoá <b>15 phút</b>.</li>
+                            <li><b>Đổi mật khẩu</b> (nút trên đầu trang): mật khẩu mới tối thiểu 6 ký tự; tài khoản sẽ tự đăng xuất trên mọi máy khác.</li>
+                            <li>Phiên đăng nhập tối đa 12 giờ; tự đăng xuất sau 20 phút không thao tác. Đóng trình duyệt trên Safari/iPhone có thể phải đăng nhập lại.</li>
+                        </ul></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g1">3. Tab Bảo Trì — bộ lọc &amp; xử lý ca</button></h2>
+                    <div id="g1" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li><b>Bộ lọc</b>: TG Hoàn Tất (từ–đến), Đối tác → Đội trưởng → Nhân viên (chọn cấp trên sẽ thu hẹp cấp dưới), TPKT Check, tìm Số HĐ. Ô bị khoá xám là phạm vi cố định theo tài khoản. Lựa chọn <b>"Đội trưởng xử lý (tất cả lỗi)"</b> gộp cả 4 loại lỗi.</li>
+                            <li><b>Ca chưa kiểm tra</b> → chọn 1 trong 5 giá trị TPKT Check. Chọn <b>"Bảo trì ok"</b> → bấm Gửi → ca rời khỏi danh sách.</li>
+                            <li><b>Ca lỗi</b> (Suy hao / Không tín hiệu / Rớt kết nối / Vùng phủ không đảm bảo) → chọn XL Lại: <i>Chuyển KTV XL lại</i> (vẫn hiện để theo dõi), <i>Đã xử lý lại</i> hoặc <i>Checklist Onsite</i> (ca rời khỏi danh sách) → bấm Gửi.</li>
+                            <li>Dòng nền đỏ nhạt <b>"Quá X ngày chưa xử lý"</b>: ca lỗi đã quá 3 ngày kể từ TG Hoàn Tất mà chưa xong.</li>
+                            <li><b>Chọn hàng loạt</b>: tick tối đa 20 dòng → thanh công cụ hiện ra để áp dụng TPKT Check / XL Lại cùng lúc.</li>
+                            <li><b>Xuất Excel</b>: xuất toàn bộ danh sách đang lọc. <b>Nhập Excel</b>: cập nhật TPKT Check / XL Lại cho ca đã có, khớp theo <b>Số HĐ + TG tạo</b> (tối đa 300 dòng/lần; SuperAdmin 1000). Tải file mẫu để có đúng định dạng.</li>
+                            <li><b>SuperAdmin — Nhập dữ liệu MỚI</b> (thanh vàng trên cùng): nguồn duy nhất đưa ca bảo trì mới vào hệ thống; ca đã có không bị ghi đè. Cả lô bị từ chối nếu cột thời gian không đúng dạng ngày <code>dd/mm/yyyy hh:mm:ss</code>.</li>
+                        </ul></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g2">4. Tab Bảo Trì — báo cáo</button></h2>
+                    <div id="g2" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li>Báo cáo nằm phía trên danh sách và dùng chung bộ lọc. 5 chỉ số: Tổng ca, Chưa kiểm tra, Chưa xử lý, Tỉ lệ chưa xử lý, Bảo trì OK / Đã xử lý.</li>
+                            <li><b>Tỉ lệ hoàn thành</b> = (Bảo trì OK + ca lỗi đã xử lý) / tổng ca. <b>Tỉ lệ xử lý ca lỗi</b> = ca lỗi đã xử lý / tổng ca lỗi. Màu: xanh ≥ 80%, cam 50–80%, đỏ &lt; 50%.</li>
+                            <li>Biểu đồ theo Đối tác / Đội trưởng — cột "Ca lỗi" không tính ca đã xử lý bằng Checklist Onsite.</li>
+                            <li><b>Cảnh báo Đội trưởng tồn đọng</b>: "Cần xử lý gấp" khi tồn ≥ 10 ca hoặc có ca quá 3 ngày. <b>Cảnh báo nhân sự</b>: "Rủi ro cao" khi ≥ 5 ca lỗi hoặc tỉ lệ lỗi ≥ 30%.</li>
+                            <li>Nút <b>Thu gọn báo cáo</b> để chỉ làm việc với danh sách — trình duyệt nhớ lựa chọn.</li>
+                        </ul></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g3">5. Cảnh báo CLL2 &amp; 3</button></h2>
+                    <div id="g3" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li>Liệt kê số hợp đồng xuất hiện từ 2 lần trở lên trong dữ liệu bảo trì; có ô lọc theo Đối tác ngay trong tab.</li>
+                            <li>Mỗi dòng hiện Đối tác, Đội trưởng, Nhân viên, TG Hoàn Tất, Ghi chú — so sánh để biết ca nào đúng trước khi báo bộ phận dữ liệu.</li>
+                        </ul></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ghifpt">6. HI FPT — tỉ lệ cài đặt &amp; tương tác</button></h2>
+                    <div id="ghifpt" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li><b>Tỉ lệ cài đặt</b> = ca có Tình trạng kích hoạt khác "Chua kich hoat" / tổng ca. <b>Tỉ lệ tương tác</b> = ca "Có Gửi" có Tương tác = "Có" / tổng ca "Có Gửi".</li>
+                            <li>Bộ lọc: Ngày hoàn tất, Đối tác, Đội trưởng, Nhân viên, Tình trạng kích hoạt, Tương tác, tìm Số HĐ.</li>
+                            <li>Báo cáo theo Đối tác / Đội trưởng / Nhân viên: 2 đồng hồ, cơ cấu tình trạng, diễn biến theo ngày, xếp hạng, điểm nhấn. Bấm 1 dòng/cột để lọc xuống cấp dưới.</li>
+                            <li><b>Tự động</b>: ca có Tương tác = "Có" mà đang "Chua kich hoat" (hoặc trống) sẽ được chuyển thành "Kich hoat khi Trien Khai".</li>
+                            <li><b>SuperAdmin</b>: nhập Excel (tiêu đề như sheet "Import", có màn xem trước), sửa / xoá / thêm dòng. Nhập trùng Số HĐ + Ngày hoàn tất thì dòng cũ được cập nhật.</li>
+                        </ul></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#grkn">7. SH &amp; RKN — Suy hao &amp; Rớt kết nối liên tục</button></h2>
+                    <div id="grkn" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li><b>Phạm vi</b>: Đội trưởng thấy ca của đội mình; Đối tác quản lý và tài khoản cus thấy ca của Đối tác mình; Admin/SuperAdmin thấy tất cả.</li>
+                            <li><b>Hướng XL</b>: <b>Chưa XL</b> → <b>Đã Tạo CL</b> → <b>Đã XL</b>. Ca "Đã XL" tự ẩn khỏi Danh sách cần xử lý (tick "Hiện cả ca Đã XL" để xem lại).</li>
+                            <li>Trên danh sách, mọi tài khoản chọn được Hướng XL. Tài khoản cus nhập <b>DVKH care note</b>; Đội trưởng / Đối tác nhập <b>Đội trưởng note</b> — tối đa 100 ký tự, bấm ✓ hoặc Enter để lưu.</li>
+                            <li>Mọi thay đổi (Hướng XL, ghi chú, nhập/sửa/xoá ca) được ghi vào <b>Trò chuyện</b> dưới tên "Nhật ký SH &amp; RKN".</li>
+                            <li>Báo cáo theo Đối tác / Đội trưởng / Hướng XL: tỉ lệ đã XL, cơ cấu Hướng XL, mức Up/Down của ca còn mở, diễn biến theo ngày data, điểm nhấn.</li>
+                            <li><b>Admin / SuperAdmin</b>: nhập Excel (tiêu đề như sheet "From-import"), sửa đủ cột, thêm / xoá ca. Khi nhập, Số HĐ đang có ca <b>Chưa XL</b> hoặc <b>Đã Tạo CL</b> báo <b>trùng</b> và không nhập thêm; Số HĐ chỉ có ca "Đã XL" được nhập thành ca mới.</li>
+                        </ul></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g5">8. Trò chuyện</button></h2>
+                    <div id="g5" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li>Chat chung cho mọi tài khoản, tin tối đa 500 ký tự, tự tải tin mới vài giây một lần. Số đỏ trên tab là tin chưa đọc.</li>
+                            <li>Tin nền xanh nhạt là <b>nhật ký tự động</b>: <b>"Nhật ký XL Lại"</b> (cột XL Lại của ca bảo trì đổi giá trị) và <b>"Nhật ký SH &amp; RKN"</b> (thay đổi trong tab SH &amp; RKN). Nhật ký không tính vào số tin chưa đọc.</li>
+                            <li>Mỗi người chỉ thấy nhật ký trong phạm vi dữ liệu của mình: Đội trưởng — đội mình; Đối tác — đối tác mình; Admin — tất cả; tài khoản cus — chỉ nhật ký SH &amp; RKN của đối tác mình.</li>
+                            <li>Mọi tin nhắn và nhật ký <b>tự động xoá sau 7 ngày</b>.</li>
+                        </ul></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g6">9. Linh Thú</button></h2>
+                    <div id="g6" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li>Mỗi tài khoản có 1 Linh thú, chọn tự do 1 trong 32 loài, đặt tên (≤ 20 ký tự) và trạng thái (≤ 50 ký tự, hiện thành bong bóng trên đầu thú) → bấm Lưu. Không có cấp hay xếp hạng.</li>
+                            <li>Khu dân cư 112 lô quanh công viên: bấm <b>Chọn lô</b> rồi bấm 1 lô tô vàng để nhận; có thể Đổi lô / Trả lô. Chưa có lô thì thú đứng ở công viên.</li>
+                            <li>Thú đứng yên — giữ chuột (hoặc ngón tay) vào thú của mình và kéo đi bất kỳ đâu; vị trí được lưu cho mọi người cùng thấy. Nút <b>Gọi thú về lô</b> đưa thú về giữa lô.</li>
+                        </ul></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g7">10. Phân tích SHD</button></h2>
+                    <div id="g7" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li>Bấm nút để mở công cụ chẩn đoán trên n8n ở tab mới: đăng nhập MyPT bằng OTP, dán danh sách Số HĐ → nhận nguyên nhân và hướng xử lý gợi ý.</li>
+                            <li>Khi link hết hạn (khoảng 15 ngày/lần), <b>SuperAdmin</b> dán link mới vào ô "Đổi link" ngay trong tab — mọi người thấy link mới ngay.</li>
+                        </ul></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g8pet">11. Tài khoản cus (Đối tác quản lý tạo)</button></h2>
+                    <div id="g8pet" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li>Đối tác quản lý tự tạo tài khoản cus cho nhân sự của mình (VD bộ phận chăm sóc khách hàng): <b>Tải file mẫu</b> (cột username, password) → điền → <b>Nhập Excel</b>, tối đa 50 tài khoản/lần. Bỏ trống password thì mật khẩu mặc định trùng username — nhắc nhân sự đổi mật khẩu ngay sau lần đăng nhập đầu.</li>
+                            <li>Tài khoản cus thấy: <b>SH &amp; RKN</b> (theo đối tác, được đổi Hướng XL và nhập DVKH care note), <b>Trò chuyện</b>, <b>Linh Thú</b>, <b>Hướng dẫn</b>. Không xem được dữ liệu Bảo Trì, CLL2 &amp; 3, HI FPT — Worker chặn cả khi gọi thẳng API.</li>
+                            <li>Danh sách trong tab chỉ hiện tài khoản do chính Đối tác quản lý đó tạo.</li>
+                        </ul></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g9">12. Lưu ý khi nhập file Excel</button></h2>
+                    <div id="g9" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li>Luôn bấm <b>Tải file mẫu</b> trước để có đúng tiêu đề cột.</li>
+                            <li>Cột ngày giữ đúng dạng <code>dd/mm/yyyy</code> (kèm giờ nếu có). <b>Không mở file CSV bằng Excel cài định dạng Mỹ</b> — Excel sẽ đảo ngày/tháng (01/10 thành 10/01). Nên xuất thẳng <code>.xlsx</code> từ Google Sheet.</li>
+                            <li>HI FPT và SH &amp; RKN có màn <b>xem trước</b> — kiểm tra kỹ cột ngày ở 5 dòng đầu rồi mới bấm "Nhập vào hệ thống".</li>
+                        </ul></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g10">13. Phân quyền theo loại tài khoản</button></h2>
+                    <div id="g10" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered align-middle mb-0">
+                                    <thead><tr><th>Tài khoản</th><th>Bảo Trì · CLL2&amp;3 · HI FPT</th><th>SH &amp; RKN</th><th>Phân tích SHD</th><th>Quyền riêng</th></tr></thead>
+                                    <tbody>
+                                        <tr><td><b>Đội trưởng</b></td><td>Đội mình</td><td>Đội mình · Hướng XL + Đội trưởng note</td><td>✗</td><td>Nhập Excel cập nhật ca: 300 dòng</td></tr>
+                                        <tr><td><b>Đối tác quản lý</b></td><td>Cả đối tác</td><td>Cả đối tác · Hướng XL + Đội trưởng note</td><td>✓</td><td>Tạo tài khoản cus</td></tr>
+                                        <tr><td><b>Admin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Quản lý dữ liệu SH &amp; RKN</td></tr>
+                                        <tr><td><b>SuperAdmin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Nhập ca bảo trì mới, quản lý HI FPT, đổi link Phân tích SHD, nhập Excel 1000 dòng</td></tr>
+                                        <tr><td><b>cus</b></td><td>✗</td><td>Đối tác mình · Hướng XL + DVKH care note</td><td>✗</td><td>—</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- TAB 8: TÀI KHOẢN NUÔI THÚ (chỉ Đối tác quản lý) -->
+        <!-- TAB 8: TÀI KHOẢN CUS (chỉ Đối tác quản lý) -->
         <div class="tab-pane fade" id="petAccountsContent" role="tabpanel">
             <div class="table-panel p-4 mb-3">
-                <h5 class="fw-bold mb-1"><i class="bi bi-person-plus me-2" style="color:var(--brand);"></i>Tạo tài khoản Nuôi thú cho nhân sự</h5>
+                <h5 class="fw-bold mb-1"><i class="bi bi-person-plus me-2" style="color:var(--brand);"></i>Tạo tài khoản cus cho nhân sự</h5>
                 <p class="small mb-0" style="color:var(--slate);">
-                    Dành cho nhân sự không thuộc Đội trưởng/KTV nhưng muốn tham gia nuôi Linh thú. Tài khoản tạo ra <b>không có quyền truy cập bất kỳ dữ liệu vận hành nào</b>, chỉ thấy 3 tab: Trò chuyện, Linh Thú, Hướng dẫn.
+                    Dành cho nhân sự của đối tác (VD chăm sóc khách hàng). Tài khoản cus thấy tab <b>SH &amp; RKN</b> theo đối tác của bạn (được đổi Hướng XL và nhập DVKH care note), cùng Trò chuyện, Linh Thú, Hướng dẫn — <b>không</b> xem được dữ liệu Bảo Trì, CLL2 &amp; 3, HI FPT.
                 </p>
             </div>
 
@@ -1293,7 +1360,7 @@
 
             <div class="alert-console">
                 <div class="alert-console-head">
-                    <span><i class="bi bi-people-fill me-2"></i>Danh sách tài khoản Nuôi thú đã tạo</span>
+                    <span><i class="bi bi-people-fill me-2"></i>Danh sách tài khoản cus đã tạo</span>
                     <span class="count-pill" id="petAccountsCountBadge">0 tài khoản</span>
                 </div>
                 <div class="table-responsive mb-0">
@@ -1378,6 +1445,40 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
                     <button type="button" class="btn btn-sm text-white" style="background:var(--brand);" id="hiImportConfirmBtn" onclick="hiConfirmImport()">Nhập vào hệ thống</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Sửa / thêm dòng SH & RKN (Admin) -->
+    <div class="modal fade" id="rknEditModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold" id="rknEditTitle">Sửa dòng SH &amp; RKN</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body"><div class="row g-2" id="rknEditFields"></div></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="button" class="btn btn-sm text-white" style="background:var(--brand);" id="rknEditSaveBtn" onclick="rknSaveEdit()">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Xem trước file import SH & RKN -->
+    <div class="modal fade" id="rknImportModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold">Xem trước dữ liệu SH &amp; RKN trước khi nhập</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="rknImportPreview"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="button" class="btn btn-sm text-white" style="background:var(--brand);" id="rknImportConfirmBtn" onclick="rknConfirmImport()">Nhập vào hệ thống</button>
                 </div>
             </div>
         </div>
@@ -1802,7 +1903,7 @@
         }
     }
 
-    // ================== ĐỐI TÁC QUẢN LÝ: IMPORT TÀI KHOẢN NUÔI THÚ ==================
+    // ================== ĐỐI TÁC QUẢN LÝ: IMPORT TÀI KHOẢN CUS (role petonly) ==================
     function downloadPetAccountTemplate() {
         if (typeof XLSX === 'undefined') {
             alert("Thư viện Excel chưa tải xong, vui lòng thử lại sau giây lát.");
@@ -1857,7 +1958,7 @@
                 return;
             }
 
-            if (!confirm(`Xác nhận tạo ${rows.length} tài khoản Nuôi thú mới?\nMật khẩu mặc định (nếu để trống trong file) sẽ trùng với username — nên báo nhân sự đổi lại sau khi đăng nhập lần đầu.`)) {
+            if (!confirm(`Xác nhận tạo ${rows.length} tài khoản cus mới?\nMật khẩu mặc định (nếu để trống trong file) sẽ trùng với username — nên báo nhân sự đổi lại sau khi đăng nhập lần đầu.`)) {
                 return;
             }
 
@@ -1885,7 +1986,7 @@
 
             await fetchPetAccountsList();
         } catch (e) {
-            console.error("Lỗi import tài khoản Nuôi thú:", e);
+            console.error("Lỗi import tài khoản cus:", e);
             alert("Lỗi đọc file Excel — vui lòng dùng đúng file mẫu đã tải, không đổi tên cột!");
         }
     }
@@ -1901,7 +2002,7 @@
             document.getElementById('petAccountsCountBadge').innerText = accounts.length + ' tài khoản';
 
             if (accounts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="2" class="text-center py-4" style="color:var(--slate);">Chưa tạo tài khoản Nuôi thú nào.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="2" class="text-center py-4" style="color:var(--slate);">Chưa tạo tài khoản cus nào.</td></tr>`;
                 return;
             }
             tbody.innerHTML = accounts.map(a => `
@@ -1911,7 +2012,7 @@
                 </tr>
             `).join('');
         } catch (e) {
-            console.error("Lỗi tải danh sách tài khoản Nuôi thú:", e);
+            console.error("Lỗi tải danh sách tài khoản cus:", e);
             tbody.innerHTML = `<tr><td colspan="2" class="text-center py-4" style="color:var(--slate);">Lỗi tải danh sách.</td></tr>`;
         }
     }
@@ -2282,10 +2383,11 @@
     function initSessionUI() {
         if (!currentUser) return;
         document.getElementById('lblCurrentUsername').innerText = currentUser.username;
-        document.getElementById('lblCurrentRole').innerText = `Role: ${currentUser.role}`;
+        // Role "petonly" trong DB hiển thị là "cus"
+        document.getElementById('lblCurrentRole').innerText = `Role: ${currentUser.role === 'petonly' ? 'cus' : currentUser.role}`;
         
         let dtLabel = currentUser.role === 'petonly'
-            ? "Không áp dụng (chỉ nuôi thú)"
+            ? (currentUser.doiTac && currentUser.doiTac !== "ALL" ? `${currentUser.doiTac} (tài khoản cus)` : "Chưa gắn đối tác")
             : (currentUser.doiTac && currentUser.doiTac.trim() !== "" && currentUser.doiTac !== "ALL") ? currentUser.doiTac : "Tất cả (Full quyền)";
         document.getElementById('lblCurrentDoiTac').innerText = `Đối tác: ${dtLabel}`;
 
@@ -2303,13 +2405,13 @@
         // (tài khoản user không gắn doiTruong) — Đội trưởng không thấy tab này.
         document.getElementById('phantich-tab').classList.toggle('d-none', isDoiTruongLocked());
 
-        // Tab "Tài khoản Nuôi thú" — CHỈ dành riêng cho Đối tác quản lý (role
+        // Tab "Tài khoản cus" — CHỈ dành riêng cho Đối tác quản lý (role
         // 'user', không gắn doiTruong) — không phải Đội trưởng, không phải
         // Admin/SuperAdmin/petonly.
         let isDoiTacQuanLyTier = currentUser.role === 'user' && !isDoiTruongLocked();
         document.getElementById('petaccounts-tab').classList.toggle('d-none', !isDoiTacQuanLyTier);
 
-        // Role "petonly" — chỉ nuôi thú qua đăng nhập hằng ngày, KHÔNG được
+        // Role "petonly" (hiển thị là tài khoản cus) — KHÔNG được
         // đụng vào dataBT ở bất kỳ hình thức nào — ẩn hết các tab liên quan
         // dữ liệu vận hành, chỉ còn Trò chuyện / Linh Thú / Hướng dẫn.
         let isPetOnly = currentUser.role === 'petonly';
@@ -2676,7 +2778,8 @@
     let lastChatId = 0;
     let chatUnreadCount = 0;
     let chatPollTimer = null;
-    const CHAT_LOG_USER = 'Nhật ký XL Lại'; // tin tự động do Worker ghi khi XL Lại đổi giá trị
+    // Tin tự động do Worker ghi (XL Lại đổi giá trị / thay đổi trong tab SH & RKN)
+    const CHAT_LOG_USERS = ['Nhật ký XL Lại', 'Nhật ký SH & RKN'];
 
     function isChatTabActive() {
         return document.getElementById('chatContent').classList.contains('active');
@@ -2697,7 +2800,7 @@
                 renderChatMessages();
             } else {
                 // Nhật ký tự động không tính vào số tin chưa đọc, tránh badge nhảy liên tục
-                chatUnreadCount += newMsgs.filter(m => m.username !== CHAT_LOG_USER).length;
+                chatUnreadCount += newMsgs.filter(m => !CHAT_LOG_USERS.includes(m.username)).length;
                 updateChatBadge();
             }
         } catch (error) {
@@ -2713,7 +2816,7 @@
         }
         body.innerHTML = chatMessages.map(m => {
             let isOwn = currentUser && m.username === currentUser.username;
-            if (m.username === CHAT_LOG_USER) {
+            if (CHAT_LOG_USERS.includes(m.username)) {
                 return `
                     <div class="chat-bubble" style="align-self:center; max-width:92%; width:100%;">
                         <div class="chat-meta"><i class="bi bi-journal-text me-1"></i>${escapeHtml(m.username)} · ${formatDateTime(m.created_at)}</div>
@@ -4015,6 +4118,576 @@
         } finally { btn.disabled = false; }
     }
     document.getElementById('phantich-tab').addEventListener('shown.bs.tab', loadShdLink);
+
+    // ================== SH & RKN (dataRKN) ==================
+    // Mọi tài khoản đều thấy tab này (phạm vi do Worker lọc: Đội trưởng → đội mình,
+    // Đối tác / tài khoản cus → theo Đối tác quản lý, Admin → tất cả).
+    // Hướng XL: Chưa XL / Đã Tạo CL / Đã XL — ca "Đã XL" ẩn khỏi danh sách xử lý.
+    // Thao tác nhanh: Hướng XL + ghi chú theo vai trò (cus → DVKH care note,
+    // Đội trưởng/Đối tác → Đội trưởng note). Admin/SuperAdmin: nhập, sửa đủ cột, xoá.
+    const RKN_FIELDS = ['doiTacQuanLy', 'doiTruong', 'blockQuanLy', 'soHopDong', 'ngayData', 'thongTinDSP',
+                        'tapDiem', 'macAddress', 'soLanUpDown', 'huongXL', 'dvkhNote', 'doiTruongNote'];
+    const RKN_LABELS = {
+        doiTacQuanLy: 'Đối tác quản lý', doiTruong: 'Đội trưởng', blockQuanLy: 'Block quản lý', soHopDong: 'Số hợp đồng',
+        ngayData: 'Ngày data', thongTinDSP: 'Thông tin DSP', tapDiem: 'Tập điểm', macAddress: 'Mac Address',
+        soLanUpDown: 'Số lần Up/Down', huongXL: 'Hướng XL', dvkhNote: 'DVKH care note', doiTruongNote: 'Đội trưởng note'
+    };
+    const RKN_STATUSES = ['Chưa XL', 'Đã Tạo CL', 'Đã XL'];
+    const RKN_STATUS_COLOR = { 'Chưa XL': '#AC2B22', 'Đã Tạo CL': '#E3A23B', 'Đã XL': '#3F7D1F' };
+    const RKN_NOTE_MAX = 100;
+    const RKN_PAGE_SIZE = 50;
+    const RKN_IMPORT_CHUNK = 500;
+    const RKN_COLLAPSE_KEY = 'tpkt_rkn_report_collapsed';
+
+    let rknData = [], rknFiltered = [];
+    let rknLoadedFor = null, rknLoadedAt = 0;
+    let rknGroupBy = 'doiTacQuanLy';
+    let rknGroupSort = { key: 'open', dir: -1 };
+    let rknPage = 1;
+    let rknEditingId = null;
+    let rknPendingImport = [];
+
+    const rknIsAdmin = () => currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin');
+    // Ghi chú mà tài khoản hiện tại được sửa nhanh trên bảng
+    function rknMyNoteFields() {
+        if (!currentUser) return [];
+        if (rknIsAdmin()) return ['dvkhNote', 'doiTruongNote'];
+        if (currentUser.role === 'petonly') return ['dvkhNote'];
+        return ['doiTruongNote'];
+    }
+    function rknStatus(v) {
+        let n = hiNorm(v);
+        if (n === '' || n === 'chua xl') return 'Chưa XL';
+        if (n === 'da tao cl') return 'Đã Tạo CL';
+        if (n === 'da xl') return 'Đã XL';
+        return null;
+    }
+    const rknIsOpen = r => r.huongXL !== 'Đã XL';
+    const rknUd = r => (r.soLanUpDown === null || r.soLanUpDown === undefined || r.soLanUpDown === '') ? null : Number(r.soLanUpDown);
+
+    function rknStats(rows) {
+        let s = { total: rows.length, chua: 0, cl: 0, done: 0, udSum: 0, udN: 0 };
+        rows.forEach(r => {
+            if (r.huongXL === 'Đã XL') s.done++; else if (r.huongXL === 'Đã Tạo CL') s.cl++; else s.chua++;
+            let u = rknUd(r); if (u !== null) { s.udSum += u; s.udN++; }
+        });
+        s.open = s.chua + s.cl;
+        s.rate = s.total ? s.done / s.total * 100 : null;
+        s.udAvg = s.udN ? s.udSum / s.udN : null;
+        return s;
+    }
+
+    // ---------- Tải dữ liệu ----------
+    async function rknFetchData(force) {
+        if (!currentUser) return;
+        if (!force && rknLoadedFor === currentUser.username && Date.now() - rknLoadedAt < HI_STALE_MS) { rknRenderAll(); return; }
+        document.getElementById('rknDetailTable').innerHTML = '<tbody><tr><td class="text-center py-4 small" style="color:var(--slate);">Đang tải dữ liệu SH & RKN...</td></tr></tbody>';
+        try {
+            let res = await apiFetch("api/rkn/data", { method: "GET" });
+            let data = await res.json();
+            if (!res.ok) { alert(data.error || "Không tải được dữ liệu SH & RKN"); return; }
+            rknData = data.dataRKN || [];
+            rknData.forEach(r => { let d = parseFlexibleDate(r.ngayData); r._t = d ? d.getTime() : null; });
+            rknLoadedFor = currentUser.username; rknLoadedAt = Date.now();
+            document.getElementById('rknLastLoaded').textContent = `Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN')} · ${rknData.length} dòng`;
+        } catch (e) { console.error("Lỗi tải SH & RKN:", e); return; }
+        rknInitFilters();
+    }
+
+    // ---------- Bộ lọc ----------
+    function rknInitFilters() {
+        hiFillSelect('rknFilterDoiTac', hiUniq(rknData, 'doiTacQuanLy'), 'Tất cả Đối tác', true);
+        let sel = document.getElementById('rknFilterDoiTac');
+        if (isDoiTacLocked()) {
+            if (![...sel.options].some(o => o.value === currentUser.doiTac)) sel.add(new Option(currentUser.doiTac, currentUser.doiTac));
+            sel.value = currentUser.doiTac; sel.disabled = true;
+        } else sel.disabled = false;
+        rknOnFilterChange('init');
+    }
+    function rknOnFilterChange() {
+        let dt = document.getElementById('rknFilterDoiTac').value;
+        hiFillSelect('rknFilterDoiTruong', hiUniq(rknData.filter(r => !dt || r.doiTacQuanLy === dt), 'doiTruong'), 'Tất cả Đội trưởng', true);
+        let s = document.getElementById('rknFilterDoiTruong');
+        if (isDoiTruongLocked()) {
+            if (![...s.options].some(o => o.value === currentUser.doiTruong)) s.add(new Option(currentUser.doiTruong, currentUser.doiTruong));
+            s.value = currentUser.doiTruong; s.disabled = true;
+        } else s.disabled = false;
+        rknApplyFilters();
+    }
+    function rknResetFilters() {
+        ['rknFilterFrom', 'rknFilterTo', 'rknSearch', 'rknFilterHuong', 'rknFilterUpDown'].forEach(id => document.getElementById(id).value = '');
+        if (!isDoiTacLocked()) document.getElementById('rknFilterDoiTac').value = '';
+        if (!isDoiTruongLocked()) document.getElementById('rknFilterDoiTruong').value = '';
+        rknGroupBy = 'doiTacQuanLy';
+        rknOnFilterChange();
+    }
+    function rknApplyFilters() {
+        let dt = document.getElementById('rknFilterDoiTac').value;
+        let dtr = document.getElementById('rknFilterDoiTruong').value;
+        let hx = document.getElementById('rknFilterHuong').value;
+        let ud = parseInt(document.getElementById('rknFilterUpDown').value || '0', 10);
+        let q = hiNorm(document.getElementById('rknSearch').value);
+        let f = document.getElementById('rknFilterFrom').value, t = document.getElementById('rknFilterTo').value;
+        let fromT = f ? new Date(f + 'T00:00:00').getTime() : null, toT = t ? new Date(t + 'T23:59:59').getTime() : null;
+        rknFiltered = rknData.filter(r => {
+            if (dt && r.doiTacQuanLy !== dt) return false;
+            if (dtr && r.doiTruong !== dtr) return false;
+            if (hx && r.huongXL !== hx) return false;
+            if (ud && !(rknUd(r) >= ud)) return false;
+            if (q && ![r.soHopDong, r.macAddress, r.tapDiem].some(v => hiNorm(v).includes(q))) return false;
+            if (fromT !== null || toT !== null) {
+                if (!r._t) return false;
+                if (fromT !== null && r._t < fromT) return false;
+                if (toT !== null && r._t > toT) return false;
+            }
+            return true;
+        });
+        rknPage = 1;
+        rknRenderAll();
+    }
+
+    // ---------- Render ----------
+    function rknRenderAll() {
+        document.getElementById('rknAdminBar').classList.toggle('d-none', !rknIsAdmin());
+        document.querySelectorAll('#rknGroupSeg button').forEach(b => b.classList.toggle('active', b.dataset.group === rknGroupBy));
+        let s = rknStats(rknFiltered), fmt = n => n.toLocaleString('vi-VN');
+        document.getElementById('rknKpiTotal').textContent = fmt(s.total);
+        document.getElementById('rknKpiChua').textContent = fmt(s.chua);
+        document.getElementById('rknKpiCl').textContent = fmt(s.cl);
+        document.getElementById('rknKpiDone').textContent = fmt(s.done);
+        document.getElementById('rknKpiRate').textContent = s.rate === null ? '--' : s.rate.toFixed(1) + '%';
+        document.getElementById('rknKpiAvgUd').textContent = s.udAvg === null ? '--' : s.udAvg.toFixed(1);
+        document.getElementById('rknScopeChip').textContent = rknScopeText();
+        if (!document.getElementById('rknReportBody').classList.contains('d-none')) {
+            rknRenderCharts(s);
+            rknRenderGroupTable();
+        }
+        rknRenderDetail();
+    }
+    function rknScopeText() {
+        let p = [];
+        ['rknFilterDoiTac', 'rknFilterDoiTruong', 'rknFilterHuong'].forEach(id => { let v = document.getElementById(id).value; if (v) p.push(v); });
+        let ud = document.getElementById('rknFilterUpDown').value; if (ud) p.push(`Up/Down ≥ ${ud}`);
+        let f = document.getElementById('rknFilterFrom').value, t = document.getElementById('rknFilterTo').value;
+        const vn = d => d.split('-').reverse().join('/');
+        if (f || t) p.push(`${f ? vn(f) : '…'} → ${t ? vn(t) : '…'}`);
+        let q = document.getElementById('rknSearch').value.trim(); if (q) p.push(`"${q}"`);
+        return p.length ? p.join(' · ') : 'Toàn bộ phạm vi';
+    }
+    function rknGroups(rows, field) {
+        let m = new Map();
+        rows.forEach(r => {
+            let k = (r[field] || '').trim() || '(trống)';
+            if (!m.has(k)) m.set(k, { key: k, rows: [], doiTac: r.doiTacQuanLy });
+            m.get(k).rows.push(r);
+        });
+        let list = [...m.values()].map(g => Object.assign(g, rknStats(g.rows)));
+        if (field === 'huongXL') list.sort((a, b) => RKN_STATUSES.indexOf(a.key) - RKN_STATUSES.indexOf(b.key));
+        return list;
+    }
+
+    function rknRenderCharts(s) {
+        if (typeof Chart === 'undefined') return;
+        let fmt = n => n.toLocaleString('vi-VN');
+        // Đồng hồ tỉ lệ đã XL
+        hiGauge('rknG', 'rknGauge', s.rate);
+        let gv = document.getElementById('rknGaugeVal');
+        gv.textContent = s.rate === null ? '--' : s.rate.toFixed(1) + '%'; gv.style.color = hiRateColor(s.rate);
+        document.getElementById('rknGDone').textContent = fmt(s.done);
+        document.getElementById('rknGOpen').textContent = fmt(s.open);
+        document.getElementById('rknGTotal').textContent = fmt(s.total);
+
+        // Cơ cấu Hướng XL
+        let vals = [s.chua, s.cl, s.done], colors = RKN_STATUSES.map(k => RKN_STATUS_COLOR[k]);
+        hiDestroyChart('rknDonut');
+        hiCharts.rknDonut = new Chart(document.getElementById('rknDonut'), {
+            type: 'doughnut',
+            data: { labels: RKN_STATUSES, datasets: [{ data: vals, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '58%',
+                plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 },
+                    generateLabels: () => RKN_STATUSES.map((l, i) => ({ text: `${l}: ${fmt(vals[i])} (${(vals[i] / Math.max(1, s.total) * 100).toFixed(1)}%)`, fillStyle: colors[i], strokeStyle: colors[i], index: i })) } },
+                    tooltip: { callbacks: { label: c => ` ${c.label}: ${fmt(c.raw)} ca` } } } }
+        });
+
+        // Mức độ Up/Down của ca còn mở
+        let buckets = [['< 20', 0, 19], ['20–49', 20, 49], ['50–99', 50, 99], ['100–199', 100, 199], ['≥ 200', 200, Infinity]];
+        let open = rknFiltered.filter(rknIsOpen);
+        let bv = buckets.map(([, lo, hi]) => open.filter(r => { let u = rknUd(r); return u !== null && u >= lo && u <= hi; }).length);
+        hiDestroyChart('rknUd');
+        hiCharts.rknUd = new Chart(document.getElementById('rknUdChart'), {
+            type: 'bar',
+            data: { labels: buckets.map(b => b[0]), datasets: [{ data: bv, backgroundColor: ['#C9CEC6', '#E3A23B', '#D97A2B', '#AC2B22', '#6E1A15'], borderRadius: 5 }] },
+            options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 18 } },
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${fmt(c.raw)} ca còn mở` } },
+                    datalabels: { anchor: 'end', align: 'end', font: { weight: '700', size: 11 }, formatter: v => v || '' } },
+                scales: { x: { grid: { display: false }, title: { display: true, text: 'Số lần Up/Down', font: { size: 10.5 } } },
+                          y: { beginAtZero: true, grid: { color: '#EEF0EB' }, ticks: { precision: 0 } } } },
+            plugins: [ChartDataLabels]
+        });
+
+        // Diễn biến theo ngày data: cột chồng 3 trạng thái + đường tỉ lệ đã XL
+        hiDestroyChart('rknTrend');
+        let ts = rknFiltered.map(r => r._t).filter(Boolean);
+        if (ts.length) {
+            let byWeek = (Math.max(...ts) - Math.min(...ts)) / 86400000 > 45;
+            let bk = new Map();
+            rknFiltered.forEach(r => {
+                if (!r._t) return;
+                let d = new Date(r._t); d.setHours(0, 0, 0, 0);
+                if (byWeek) d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+                if (!bk.has(d.getTime())) bk.set(d.getTime(), []);
+                bk.get(d.getTime()).push(r);
+            });
+            let keys = [...bk.keys()].sort((a, b) => a - b), st = keys.map(k => rknStats(bk.get(k)));
+            document.getElementById('rknTrendNote').textContent = byWeek ? 'Gộp theo tuần (từ Thứ 2)' : 'Theo từng ngày data';
+            hiCharts.rknTrend = new Chart(document.getElementById('rknTrendChart'), {
+                data: { labels: keys.map(k => { let d = new Date(k); return (byWeek ? 'Tuần ' : '') + `${hiPad(d.getDate())}/${hiPad(d.getMonth() + 1)}`; }),
+                    datasets: [
+                        { type: 'line', label: 'Tỉ lệ đã XL (%)', data: st.map(x => x.rate), yAxisID: 'y1', borderColor: '#12181B', backgroundColor: '#12181B', tension: 0.35, pointRadius: 2.5, borderWidth: 2, order: 0 },
+                        { type: 'bar', label: 'Chưa XL', data: st.map(x => x.chua), backgroundColor: RKN_STATUS_COLOR['Chưa XL'], stack: 's', order: 1 },
+                        { type: 'bar', label: 'Đã Tạo CL', data: st.map(x => x.cl), backgroundColor: RKN_STATUS_COLOR['Đã Tạo CL'], stack: 's', order: 1 },
+                        { type: 'bar', label: 'Đã XL', data: st.map(x => x.done), backgroundColor: RKN_STATUS_COLOR['Đã XL'], stack: 's', order: 1 }
+                    ] },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 10, font: { size: 11 } } },
+                        tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y1' ? ` Tỉ lệ đã XL: ${c.raw === null ? '--' : c.raw.toFixed(1) + '%'}` : ` ${c.dataset.label}: ${fmt(c.raw)} ca` } } },
+                    scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10.5 }, maxRotation: 0, autoSkip: true } },
+                        y: { stacked: true, beginAtZero: true, grid: { color: '#EEF0EB' }, title: { display: true, text: 'Số ca', font: { size: 10.5 } } },
+                        y1: { position: 'right', min: 0, max: 100, grid: { display: false }, ticks: { callback: v => v + '%' } } } }
+            });
+        } else document.getElementById('rknTrendNote').textContent = 'Không có dữ liệu';
+
+        // Xếp hạng: cột ngang chồng 3 trạng thái theo nhóm đang chọn
+        let groups = rknGroups(rknFiltered, rknGroupBy);
+        if (rknGroupBy !== 'huongXL') groups.sort((a, b) => b.open - a.open || b.total - a.total);
+        document.getElementById('rknRankTitle').textContent = `Tình trạng xử lý theo ${{ doiTacQuanLy: 'Đối tác', doiTruong: 'Đội trưởng', huongXL: 'Hướng XL' }[rknGroupBy]} (${groups.length})`;
+        document.getElementById('rknRankBox').style.height = Math.max(160, groups.length * 30 + 60) + 'px';
+        hiDestroyChart('rknRank');
+        hiCharts.rknRank = new Chart(document.getElementById('rknRankChart'), {
+            type: 'bar',
+            data: { labels: groups.map(g => g.key), datasets: RKN_STATUSES.map((st, i) => ({
+                label: st, data: groups.map(g => [g.chua, g.cl, g.done][i]), backgroundColor: RKN_STATUS_COLOR[st], barThickness: 18, stack: 's' })) },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, layout: { padding: { right: 60 } },
+                onClick: (e, els) => { if (els.length) rknDrillDown(groups[els[0].index].key); },
+                plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 10, font: { size: 11 } } },
+                    tooltip: { callbacks: { footer: items => { let g = groups[items[0].dataIndex]; return `Tỉ lệ đã XL: ${g.rate === null ? '--' : g.rate.toFixed(1) + '%'}`; } } },
+                    datalabels: { color: '#fff', font: { weight: '700', size: 10.5 }, formatter: (v, c) => {
+                        let g = groups[c.dataIndex]; return v && v / Math.max(1, g.total) >= 0.12 ? v : ''; } } },
+                scales: { x: { stacked: true, beginAtZero: true, grid: { color: '#EEF0EB' }, ticks: { precision: 0 } },
+                          y: { stacked: true, grid: { display: false }, ticks: { font: { size: 11.5, weight: '600' }, color: '#12181B' } } } },
+            plugins: [ChartDataLabels]
+        });
+        rknRenderSpotlight();
+    }
+
+    function rknRenderSpotlight() {
+        let label = { doiTacQuanLy: 'Đối tác', doiTruong: 'Đội trưởng', huongXL: 'Đội trưởng' };
+        let field = rknGroupBy === 'huongXL' ? 'doiTruong' : rknGroupBy;
+        let groups = rknGroups(rknFiltered, field);
+        let mostOpen = groups.filter(g => g.open > 0).sort((a, b) => b.open - a.open).slice(0, 3);
+        let best = groups.filter(g => g.total >= 10 && g.rate !== null).sort((a, b) => b.rate - a.rate).slice(0, 3);
+        let topUd = rknFiltered.filter(r => rknIsOpen(r) && rknUd(r) !== null).sort((a, b) => rknUd(b) - rknUd(a)).slice(0, 5);
+        const li = (icon, name, sub, val, color) => `<li><span class="hi-spot-medal">${icon}</span><span class="hi-spot-name">${escapeHtml(name)}<small>${escapeHtml(sub)}</small></span><span class="hi-spot-val" style="color:${color};">${val}</span></li>`;
+        const empty = '<li class="small" style="color:var(--slate-soft);">Không có</li>';
+        let medals = ['🥇', '🥈', '🥉'];
+        document.getElementById('rknSpotlight').innerHTML = `
+            <div class="hi-card-title">Điểm nhấn theo ${label[rknGroupBy]}</div>
+            <div class="hi-spot-head" style="color:${HI_COLOR_BAD};">⏳ Tồn nhiều ca chưa xong nhất</div>
+            <ul class="hi-spot-list mb-3">${mostOpen.length ? mostOpen.map(g => li('📌', g.key, `${g.chua} Chưa XL · ${g.cl} Đã Tạo CL`, g.open + ' ca', HI_COLOR_BAD)).join('') : empty}</ul>
+            <div class="hi-spot-head" style="color:${HI_COLOR_GOOD};">🏆 Tỉ lệ đã XL cao nhất <span class="fw-normal" style="color:var(--slate-soft);">(≥ 10 ca)</span></div>
+            <ul class="hi-spot-list mb-3">${best.length ? best.map((g, i) => li(medals[i], g.key, `${g.done}/${g.total} ca`, g.rate.toFixed(1) + '%', hiRateColor(g.rate))).join('') : empty}</ul>
+            <div class="hi-spot-head" style="color:var(--amber);">📶 Up/Down nhiều nhất — chưa xong</div>
+            <ul class="hi-spot-list">${topUd.length ? topUd.map(r => li('⚡', r.soHopDong, `${r.doiTruong || ''} · ${r.huongXL}`, rknUd(r) + ' lần', HI_COLOR_BAD)).join('') : empty}</ul>`;
+    }
+
+    function rknRenderGroupTable() {
+        let list = rknGroups(rknFiltered, rknGroupBy);
+        let k = rknGroupSort.key, dir = rknGroupSort.dir;
+        if (rknGroupBy !== 'huongXL' || k !== 'open') list.sort((a, b) => k === 'key' ? dir * String(a.key).localeCompare(String(b.key), 'vi') : dir * ((a[k] ?? -1) - (b[k] ?? -1)));
+        let first = { doiTacQuanLy: 'Đối tác', doiTruong: 'Đội trưởng', huongXL: 'Hướng XL' }[rknGroupBy];
+        const th = (key, lbl, cls = '') => `<th class="sortable ${cls}" data-sort="${key}">${lbl}${rknGroupSort.key === key ? (rknGroupSort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`;
+        let head = `<thead><tr>${th('key', first)}${th('total', 'Tổng ca', 'text-end')}${th('chua', 'Chưa XL', 'text-end')}${th('cl', 'Đã Tạo CL', 'text-end')}${th('done', 'Đã XL', 'text-end')}${th('open', 'Còn mở', 'text-end')}${th('rate', 'Tỉ lệ đã XL')}${th('udAvg', 'TB Up/Down', 'text-end')}</tr></thead>`;
+        if (!list.length) { document.getElementById('rknGroupTable').innerHTML = head + '<tbody><tr><td colspan="8" class="text-center py-4 small" style="color:var(--slate);">Không có dữ liệu.</td></tr></tbody>'; return; }
+        let row = (g, cls, key) => `<tr class="${cls}" ${key !== undefined ? `data-key="${escapeHtml(key)}"` : ''}>
+            <td class="fw-semibold">${escapeHtml(g.key)}</td><td class="text-end mono">${g.total}</td>
+            <td class="text-end mono" style="color:${g.chua ? 'var(--red)' : 'inherit'};">${g.chua}</td><td class="text-end mono" style="color:${g.cl ? 'var(--amber)' : 'inherit'};">${g.cl}</td>
+            <td class="text-end mono">${g.done}</td><td class="text-end mono fw-bold">${g.open}</td>
+            <td>${hiRateHtml(g.rate)}</td><td class="text-end mono">${g.udAvg === null ? '--' : g.udAvg.toFixed(1)}</td></tr>`;
+        let t = Object.assign(rknStats(rknFiltered), { key: 'TỔNG' });
+        document.getElementById('rknGroupTable').innerHTML = head + '<tbody>' + list.map(g => row(g, 'hi-group-row', g.key)).join('') + row(t, 'hi-total-row') + '</tbody>';
+    }
+
+    function rknDrillDown(key) {
+        if (!key || key === '(trống)') return;
+        if (rknGroupBy === 'doiTacQuanLy') {
+            if (!isDoiTacLocked()) document.getElementById('rknFilterDoiTac').value = key;
+            rknGroupBy = 'doiTruong'; rknOnFilterChange();
+        } else if (rknGroupBy === 'doiTruong') {
+            if (!isDoiTruongLocked()) document.getElementById('rknFilterDoiTruong').value = key;
+            rknGroupBy = 'huongXL'; rknApplyFilters();
+        } else {
+            document.getElementById('rknFilterHuong').value = key; rknApplyFilters();
+            document.getElementById('rknDetailTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    // ---------- Danh sách cần xử lý (ẩn ca Đã XL) + thao tác nhanh ----------
+    function rknRenderDetail() {
+        let showDone = document.getElementById('rknShowDone').checked;
+        let rows = rknFiltered.filter(r => showDone || rknIsOpen(r))
+            .sort((a, b) => (rknIsOpen(b) - rknIsOpen(a)) || (b._t || 0) - (a._t || 0) || (rknUd(b) || 0) - (rknUd(a) || 0));
+        let pages = Math.max(1, Math.ceil(rows.length / RKN_PAGE_SIZE));
+        rknPage = Math.min(rknPage, pages);
+        let slice = rows.slice((rknPage - 1) * RKN_PAGE_SIZE, rknPage * RKN_PAGE_SIZE);
+        document.getElementById('rknDetailCount').textContent = `— ${rows.length.toLocaleString('vi-VN')} ca${showDone ? '' : ' còn mở'}`;
+        let isAdmin = rknIsAdmin(), myNotes = rknMyNoteFields();
+        const noteCell = (r, f) => myNotes.includes(f)
+            ? `<div class="d-flex gap-1"><input type="text" class="form-control form-control-sm rkn-note" data-id="${r.id}" data-field="${f}" maxlength="${RKN_NOTE_MAX}" value="${escapeHtml(r[f] || '')}" placeholder="Nhập ghi chú..." style="min-width:150px;">
+               <button class="btn btn-sm btn-outline-success rkn-note-save d-none" data-id="${r.id}" data-field="${f}" title="Lưu"><i class="bi bi-check-lg"></i></button></div>`
+            : `<span class="small">${escapeHtml(r[f] || '')}</span>`;
+        let head = `<thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Số HĐ</th><th>Ngày data</th><th>Tập điểm / DSP</th><th>MAC</th><th class="text-end">Up/Down</th>
+            <th style="min-width:140px;">Hướng XL</th><th>DVKH care note</th><th>Đội trưởng note</th>${isAdmin ? '<th class="text-end">Sửa</th>' : ''}</tr></thead>`;
+        let body = slice.length === 0
+            ? `<tr><td colspan="${isAdmin ? 11 : 10}" class="text-center py-4 small" style="color:var(--slate);">${rknData.length ? 'Không còn ca nào cần xử lý 🎉' : 'Chưa có dữ liệu.'}</td></tr>`
+            : slice.map(r => {
+                let ud = rknUd(r);
+                return `<tr>
+                    <td>${escapeHtml(r.doiTacQuanLy || '')}</td><td class="small">${escapeHtml(r.doiTruong || '')}<br><span style="color:var(--slate-soft);">${escapeHtml(r.blockQuanLy || '')}</span></td>
+                    <td class="fw-bold mono">${escapeHtml(r.soHopDong || '')}</td><td class="mono small">${escapeHtml(r.ngayData || '')}</td>
+                    <td class="small mono">${escapeHtml(r.tapDiem || '')}<br><span style="color:var(--slate-soft);">${escapeHtml(r.thongTinDSP || '')}</span></td>
+                    <td class="small mono">${escapeHtml(r.macAddress || '')}</td>
+                    <td class="text-end mono fw-bold" style="color:${ud >= 100 ? 'var(--red)' : ud >= 50 ? 'var(--amber)' : 'inherit'};">${ud === null ? '' : ud}</td>
+                    <td><select class="form-select form-select-sm rkn-status" data-id="${r.id}" style="border-left:4px solid ${RKN_STATUS_COLOR[r.huongXL] || '#ccc'};">
+                        ${RKN_STATUSES.map(s => `<option ${s === r.huongXL ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
+                    <td>${noteCell(r, 'dvkhNote')}</td><td>${noteCell(r, 'doiTruongNote')}</td>
+                    ${isAdmin ? `<td class="text-end text-nowrap"><button class="btn btn-sm btn-link p-0 me-2" title="Sửa đủ cột" onclick="rknOpenEditModal(${r.id})"><i class="bi bi-pencil-square"></i></button><button class="btn btn-sm btn-link p-0 text-danger" title="Xoá" onclick="rknDeleteRow(${r.id})"><i class="bi bi-trash"></i></button></td>` : ''}
+                </tr>`;
+            }).join('');
+        document.getElementById('rknDetailTable').innerHTML = head + `<tbody>${body}</tbody>`;
+        let pg = document.getElementById('rknPagination');
+        let nums = [...new Set([1, pages, rknPage - 1, rknPage, rknPage + 1].filter(n => n >= 1 && n <= pages))].sort((a, b) => a - b);
+        let html = '', prev = 0;
+        nums.forEach(n => { if (n - prev > 1) html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+            html += `<li class="page-item ${n === rknPage ? 'active' : ''}"><a class="page-link" href="#" data-rknpage="${n}">${n}</a></li>`; prev = n; });
+        pg.innerHTML = pages > 1 ? html : '';
+    }
+
+    async function rknQuickSave(id, payload) {
+        try {
+            let res = await apiFetch("api/rkn/quick", { method: "POST", body: JSON.stringify(Object.assign({ id }, payload)) });
+            let r = await res.json();
+            if (!r.success) { alert(r.error || "Không lưu được!"); return false; }
+            let row = rknData.find(x => x.id === id);
+            if (row) Object.assign(row, payload);
+            return true;
+        } catch (e) { console.error("Lỗi lưu SH & RKN:", e); alert("Lỗi kết nối, vui lòng thử lại!"); return false; }
+    }
+    document.getElementById('rknDetailTable').addEventListener('change', async e => {
+        let sel = e.target.closest('.rkn-status');
+        if (!sel) return;
+        let id = parseInt(sel.dataset.id, 10), row = rknData.find(x => x.id === id), old = row ? row.huongXL : null;
+        sel.disabled = true;
+        let ok = await rknQuickSave(id, { huongXL: sel.value });
+        if (!ok) sel.value = old;
+        rknRenderAll(); // ca chuyển "Đã XL" sẽ tự ẩn khỏi danh sách
+    });
+    document.getElementById('rknDetailTable').addEventListener('input', e => {
+        let inp = e.target.closest('.rkn-note');
+        if (!inp) return;
+        let row = rknData.find(x => x.id === parseInt(inp.dataset.id, 10));
+        let btn = inp.parentElement.querySelector('.rkn-note-save');
+        btn.classList.toggle('d-none', !row || (row[inp.dataset.field] || '') === inp.value.trim());
+    });
+    async function rknSaveNote(inp) {
+        let id = parseInt(inp.dataset.id, 10), f = inp.dataset.field, row = rknData.find(x => x.id === id);
+        if (!row || (row[f] || '') === inp.value.trim()) return;
+        inp.disabled = true;
+        if (await rknQuickSave(id, { [f]: inp.value.trim() })) inp.parentElement.querySelector('.rkn-note-save').classList.add('d-none');
+        inp.disabled = false;
+    }
+    document.getElementById('rknDetailTable').addEventListener('click', e => {
+        let btn = e.target.closest('.rkn-note-save');
+        if (btn) rknSaveNote(btn.parentElement.querySelector('.rkn-note'));
+    });
+    document.getElementById('rknDetailTable').addEventListener('keydown', e => {
+        if (e.key === 'Enter' && e.target.closest('.rkn-note')) rknSaveNote(e.target);
+    });
+    document.getElementById('rknPagination').addEventListener('click', e => {
+        let a = e.target.closest('[data-rknpage]'); if (!a) return;
+        e.preventDefault(); rknPage = parseInt(a.dataset.rknpage, 10); rknRenderDetail();
+    });
+    document.getElementById('rknGroupSeg').addEventListener('click', e => {
+        let b = e.target.closest('button[data-group]'); if (!b) return;
+        rknGroupBy = b.dataset.group; rknRenderAll();
+    });
+    document.getElementById('rknGroupTable').addEventListener('click', e => {
+        let th = e.target.closest('th[data-sort]');
+        if (th) { let k = th.dataset.sort; rknGroupSort = { key: k, dir: rknGroupSort.key === k ? -rknGroupSort.dir : (k === 'key' ? 1 : -1) }; rknRenderGroupTable(); return; }
+        let tr = e.target.closest('tr.hi-group-row'); if (tr) rknDrillDown(tr.dataset.key);
+    });
+    function rknApplyCollapse(c) {
+        document.getElementById('rknReportBody').classList.toggle('d-none', c);
+        document.getElementById('rknReportToggle').innerHTML = c ? '<i class="bi bi-chevron-down me-1"></i>Mở báo cáo' : '<i class="bi bi-chevron-up me-1"></i>Thu gọn';
+    }
+    function rknToggleReport() {
+        let c = !document.getElementById('rknReportBody').classList.contains('d-none');
+        localStorage.setItem(RKN_COLLAPSE_KEY, c ? '1' : '0');
+        rknApplyCollapse(c);
+        if (!c) rknRenderAll();
+    }
+    rknApplyCollapse(localStorage.getItem(RKN_COLLAPSE_KEY) === '1');
+
+    // ---------- Xuất Excel ----------
+    function rknExportExcel() {
+        if (typeof XLSX === 'undefined') { alert("Thư viện Excel chưa tải xong."); return; }
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rknFiltered.map(r => { let o = {}; RKN_FIELDS.forEach(f => o[RKN_LABELS[f]] = r[f] ?? ''); return o; })), 'Chi tiết');
+        [['doiTacQuanLy', 'Theo Đối tác'], ['doiTruong', 'Theo Đội trưởng'], ['huongXL', 'Theo Hướng XL']].forEach(([f, name]) => {
+            let rows = rknGroups(rknFiltered, f).map(g => ({ [RKN_LABELS[f]]: g.key, 'Tổng ca': g.total, 'Chưa XL': g.chua, 'Đã Tạo CL': g.cl, 'Đã XL': g.done,
+                'Còn mở': g.open, 'Tỉ lệ đã XL (%)': g.rate === null ? '' : +g.rate.toFixed(1), 'TB Up/Down': g.udAvg === null ? '' : +g.udAvg.toFixed(1) }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), name);
+        });
+        XLSX.writeFile(wb, `SH_RKN_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    }
+
+    // ---------- Admin: file mẫu, nhập Excel ----------
+    function rknDownloadTemplate() {
+        let sample = [{ 'Đối tác quản lý': 'BHA2', 'Đội trưởng': 'Thiều Khắc Thắng', 'Block quản lý': 'Phuong Long Binh-003', 'Số hợp đồng': 'DNH012195',
+            'Ngày data': '01/10/2026', 'Thông tin DSP': 'DNIP012.0471/HO-4/4-XGS', 'Tập điểm': 'DNIP012.0471/HO', 'Mac Address': '00:c8:96:0e:67:81',
+            'Số lần Up/Down': 15, 'Hướng XL': 'Chưa XL', 'DVKH care note': '', 'Đội trưởng note': '' }];
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sample), 'From-import');
+        XLSX.writeFile(wb, 'mau_import_SH_RKN.xlsx');
+    }
+    const RKN_HEADER_MAP = {
+        doitacquanly: 'doiTacQuanLy', doitac: 'doiTacQuanLy', doitruong: 'doiTruong', blockquanly: 'blockQuanLy',
+        sohopdong: 'soHopDong', sohd: 'soHopDong', ngaydata: 'ngayData', thongtindsp: 'thongTinDSP', tapdiem: 'tapDiem',
+        macaddress: 'macAddress', mac: 'macAddress', solanupdown: 'soLanUpDown', huongxl: 'huongXL',
+        dvkhcarenote: 'dvkhNote', dvkhnote: 'dvkhNote', doitruongnote: 'doiTruongNote'
+    };
+    function rknNormalizeDate(v) {
+        let full = hiNormalizeDate(v); // dùng chung với HI FPT: ô ngày thật → dd/mm/yyyy hh:mm:ss
+        let m = String(full).match(/^(\d{2}\/\d{2}\/\d{4})/);
+        return m ? m[1] : String(v ?? '').trim();
+    }
+    async function rknHandleImportFile(event) {
+        let file = event.target.files[0];
+        event.target.value = '';
+        if (!file) return;
+        if (typeof XLSX === 'undefined') { alert("Thư viện Excel chưa tải xong, vui lòng thử lại."); return; }
+        let wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+        let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '', raw: true });
+        if (!raw.length) { alert("File không có dữ liệu!"); return; }
+        let colMap = {};
+        Object.keys(raw[0]).forEach(h => { let f = RKN_HEADER_MAP[hiNorm(h).replace(/[^a-z0-9]/g, '')]; if (f) colMap[h] = f; });
+        let missing = ['doiTacQuanLy', 'soHopDong', 'ngayData'].filter(f => !Object.values(colMap).includes(f));
+        if (missing.length) { alert(`File thiếu cột bắt buộc: ${missing.map(f => RKN_LABELS[f]).join(', ')}.\nHãy dùng "Tải file mẫu" để xem đúng tiêu đề cột.`); return; }
+
+        let errors = [], seen = new Set(), dupInFile = 0, rows = [];
+        raw.forEach((r, i) => {
+            let row = {}; RKN_FIELDS.forEach(f => row[f] = '');
+            Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayData' ? rknNormalizeDate(r[h]) : String(r[h] ?? '').trim());
+            if (!row.soHopDong && !row.doiTacQuanLy && !row.ngayData) return;
+            let st = rknStatus(row.huongXL);
+            if (!row.soHopDong || !row.doiTacQuanLy || !row.ngayData) { errors.push(`Dòng ${i + 2}: thiếu Số HĐ / Đối tác / Ngày data`); return; }
+            if (!/^\d{2}\/\d{2}\/\d{4}$/.test(row.ngayData)) { errors.push(`Dòng ${i + 2} (${row.soHopDong}): Ngày data "${row.ngayData}" không đọc được`); return; }
+            if (!st) { errors.push(`Dòng ${i + 2} (${row.soHopDong}): Hướng XL "${row.huongXL}" không hợp lệ`); return; }
+            row.huongXL = st;
+            if (seen.has(row.soHopDong)) { dupInFile++; return; }
+            seen.add(row.soHopDong); rows.push(row);
+        });
+        rknPendingImport = rows;
+        let openSet = new Set(rknData.filter(rknIsOpen).map(r => r.soHopDong));
+        let willSkip = rows.filter(r => openSet.has(r.soHopDong));
+        let byDt = {}; rows.forEach(r => byDt[r.doiTacQuanLy] = (byDt[r.doiTacQuanLy] || 0) + 1);
+        let st = rknStats(rows);
+        document.getElementById('rknImportPreview').innerHTML = `
+            <div class="row g-2 mb-3 small">
+                <div class="col-md-3"><b>${rows.length.toLocaleString('vi-VN')}</b> dòng hợp lệ</div>
+                <div class="col-md-3">≈ <b>${(rows.length - willSkip.length).toLocaleString('vi-VN')}</b> sẽ thêm mới</div>
+                <div class="col-md-3" style="color:var(--red);"><b>${willSkip.length}</b> trùng ca đang mở — bỏ qua</div>
+                <div class="col-md-3">Chưa XL ${st.chua} · Đã Tạo CL ${st.cl} · Đã XL ${st.done}</div>
+            </div>
+            <div class="small mb-2"><b>Theo đối tác:</b> ${Object.entries(byDt).map(([k, v]) => `${escapeHtml(k)} (${v})`).join(' · ')}</div>
+            ${willSkip.length ? `<div class="alert alert-warning small py-2"><b>Trùng Chưa XL — không import thêm</b> (Số HĐ đang có ca "Chưa XL"/"Đã Tạo CL"): ${willSkip.slice(0, 30).map(r => escapeHtml(r.soHopDong)).join(', ')}${willSkip.length > 30 ? ` … và ${willSkip.length - 30} HĐ khác` : ''}</div>` : ''}
+            ${dupInFile ? `<div class="small mb-2" style="color:var(--amber);">${dupInFile} dòng trùng Số HĐ trong file — chỉ giữ dòng đầu.</div>` : ''}
+            ${errors.length ? `<div class="alert alert-danger small py-2"><b>${errors.length} dòng lỗi (không nhập):</b><br>${errors.slice(0, 10).map(escapeHtml).join('<br>')}${errors.length > 10 ? `<br>… và ${errors.length - 10} dòng khác` : ''}</div>` : ''}
+            <div class="small fw-bold mb-1">5 dòng đầu — kiểm tra cột Ngày data:</div>
+            <div class="table-responsive"><table class="table table-sm table-bordered small mb-0">
+                <thead><tr>${RKN_FIELDS.map(f => `<th>${RKN_LABELS[f]}</th>`).join('')}</tr></thead>
+                <tbody>${rows.slice(0, 5).map(r => `<tr>${RKN_FIELDS.map(f => `<td>${escapeHtml(r[f])}</td>`).join('')}</tr>`).join('')}</tbody>
+            </table></div>`;
+        let btn = document.getElementById('rknImportConfirmBtn');
+        btn.disabled = rows.length === 0; btn.textContent = 'Nhập vào hệ thống';
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('rknImportModal')).show();
+    }
+    async function rknConfirmImport() {
+        if (!rknPendingImport.length) return;
+        let btn = document.getElementById('rknImportConfirmBtn');
+        btn.disabled = true;
+        let sum = { inserted: 0, skippedOpen: 0, skippedSameDay: 0, list: [] };
+        try {
+            for (let i = 0; i < rknPendingImport.length; i += RKN_IMPORT_CHUNK) {
+                btn.textContent = `Đang nhập ${Math.min(i + RKN_IMPORT_CHUNK, rknPendingImport.length)}/${rknPendingImport.length}...`;
+                let res = await apiFetch("api/rkn/import", { method: "POST", body: JSON.stringify({ rows: rknPendingImport.slice(i, i + RKN_IMPORT_CHUNK) }) });
+                let r = await res.json();
+                if (!r.success) { alert(`Dừng ở dòng ${i + 1}: ${r.error || 'lỗi không xác định'}\nĐã thêm trước đó: ${sum.inserted} dòng.`); break; }
+                sum.inserted += r.inserted; sum.skippedOpen += r.skippedOpen; sum.skippedSameDay += r.skippedSameDay;
+                sum.list = sum.list.concat(r.skippedOpenList || []);
+            }
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('rknImportModal')).hide();
+            alert(`Hoàn tất: ${sum.inserted} ca thêm mới.` +
+                (sum.skippedOpen ? `\n${sum.skippedOpen} HĐ trùng Chưa XL — không import thêm${sum.list.length ? ': ' + sum.list.slice(0, 15).join(', ') + (sum.skippedOpen > 15 ? '…' : '') : ''}` : '') +
+                (sum.skippedSameDay ? `\n${sum.skippedSameDay} dòng đã có cùng Số HĐ + Ngày data — bỏ qua.` : ''));
+        } catch (e) { console.error("Lỗi nhập SH & RKN:", e); alert("Lỗi kết nối khi nhập dữ liệu."); }
+        finally { btn.disabled = false; rknPendingImport = []; rknFetchData(true); }
+    }
+
+    // ---------- Admin: sửa đủ cột / thêm / xoá ----------
+    function rknOpenEditModal(id) {
+        rknEditingId = id;
+        let row = id ? rknData.find(r => r.id === id) : null;
+        if (id && !row) return;
+        document.getElementById('rknEditTitle').textContent = row ? `Sửa dòng SH & RKN — ${row.soHopDong}` : 'Thêm dòng SH & RKN';
+        document.getElementById('rknEditFields').innerHTML = RKN_FIELDS.map(f => {
+            let v = row ? (row[f] ?? '') : (f === 'huongXL' ? 'Chưa XL' : '');
+            let req = ['doiTacQuanLy', 'soHopDong', 'ngayData'].includes(f) ? ' *' : '';
+            let input = f === 'huongXL'
+                ? `<select class="form-select form-select-sm" data-rknfield="${f}">${RKN_STATUSES.map(s => `<option ${s === v ? 'selected' : ''}>${s}</option>`).join('')}</select>`
+                : `<input type="${f === 'soLanUpDown' ? 'number' : 'text'}" class="form-control form-control-sm" data-rknfield="${f}" value="${escapeHtml(v)}" ${f === 'ngayData' ? 'placeholder="dd/mm/yyyy"' : ''} ${f.endsWith('Note') ? 'maxlength="1000"' : ''}>`;
+            return `<div class="col-md-6"><label class="small fw-bold mb-1" style="color:var(--slate);">${RKN_LABELS[f]}${req}</label>${input}</div>`;
+        }).join('');
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('rknEditModal')).show();
+    }
+    async function rknSaveEdit() {
+        let row = {};
+        document.querySelectorAll('#rknEditFields [data-rknfield]').forEach(i => row[i.dataset.rknfield] = i.value.trim());
+        row.ngayData = rknNormalizeDate(row.ngayData);
+        if (!row.soHopDong || !row.doiTacQuanLy || !/^\d{2}\/\d{2}\/\d{4}$/.test(row.ngayData)) { alert("Cần nhập Đối tác, Số HĐ và Ngày data dạng dd/mm/yyyy"); return; }
+        let btn = document.getElementById('rknEditSaveBtn'); btn.disabled = true;
+        try {
+            let res = rknEditingId
+                ? await apiFetch("api/rkn/update", { method: "POST", body: JSON.stringify({ id: rknEditingId, row }) })
+                : await apiFetch("api/rkn/import", { method: "POST", body: JSON.stringify({ rows: [row] }) });
+            let r = await res.json();
+            if (!r.success) { alert(r.error || "Không lưu được!"); return; }
+            if (!rknEditingId && r.inserted === 0) { alert(r.skippedOpen ? "Số HĐ này đang có ca Chưa XL / Đã Tạo CL — không thêm được." : "Đã có dòng cùng Số HĐ + Ngày data."); return; }
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('rknEditModal')).hide();
+            await rknFetchData(true);
+        } catch (e) { console.error("Lỗi lưu SH & RKN:", e); alert("Lỗi kết nối, vui lòng thử lại!"); }
+        finally { btn.disabled = false; }
+    }
+    async function rknDeleteRow(id) {
+        let row = rknData.find(r => r.id === id);
+        if (!row || !confirm(`Xoá ca ${row.soHopDong} (${row.ngayData})? Không thể hoàn tác.`)) return;
+        try {
+            let r = await (await apiFetch("api/rkn/delete", { method: "POST", body: JSON.stringify({ id }) })).json();
+            if (!r.success) { alert(r.error || "Không xoá được!"); return; }
+            await rknFetchData(true);
+        } catch (e) { console.error("Lỗi xoá SH & RKN:", e); }
+    }
+
+    document.getElementById('rkn-tab').addEventListener('shown.bs.tab', () => rknFetchData(false));
 
     function resetFilters() {
         let doiTacSelect = document.getElementById('filterDoiTac');
