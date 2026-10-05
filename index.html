@@ -1315,7 +1315,7 @@
                                         <tr><td><b>Lịch Trực ĐT</b></td><td>Khai báo lịch ON / OFF của Đội trưởng, xem nhanh lịch hôm nay và ngày mai</td><td>Tất cả (cus chỉ xem)</td></tr>
                                         <tr><td><b>Trò chuyện</b></td><td>Chat nội bộ + nhật ký tự động (XL Lại, SH &amp; RKN)</td><td>Tất cả</td></tr>
                                         <tr><td><b>Linh Thú</b></td><td>Nuôi thú, chọn lô đất trong khu dân cư — cho vui, không tính hiệu suất</td><td>Tất cả</td></tr>
-                                        <tr><td><b>Phân tích SHD</b></td><td>Mở công cụ n8n chẩn đoán số hợp đồng</td><td>Admin, SuperAdmin, Đối tác quản lý</td></tr>
+                                        <tr><td><b>Phân tích SHD</b></td><td>Mở công cụ n8n chẩn đoán số hợp đồng</td><td>Admin, SuperAdmin, Đối tác quản lý, mọi tài khoản DNI02</td></tr>
                                         <tr><td><b>Tài khoản cus</b></td><td>Tạo tài khoản cus cho nhân sự của đối tác</td><td>Chỉ Đối tác quản lý</td></tr>
                                     </tbody>
                                 </table>
@@ -1453,6 +1453,7 @@
                     <div id="g7" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
                         <div class="accordion-body small"><ul class="mb-0">
                             <li>Bấm nút để mở công cụ chẩn đoán trên n8n ở tab mới: đăng nhập MyPT bằng OTP, dán danh sách Số HĐ → nhận nguyên nhân và hướng xử lý gợi ý.</li>
+                            <li>Ai dùng được: Admin, SuperAdmin, Đối tác quản lý và <b>mọi tài khoản thuộc đối tác DNI02</b> (cả Đội trưởng và tài khoản cus của DNI02).</li>
                             <li>Khi link hết hạn (khoảng 15 ngày/lần), <b>SuperAdmin</b> dán link mới vào ô "Đổi link" ngay trong tab — mọi người thấy link mới ngay.</li>
                         </ul></div>
                     </div>
@@ -1488,11 +1489,11 @@
                                 <table class="table table-sm table-bordered align-middle mb-0">
                                     <thead><tr><th>Tài khoản</th><th>Bảo Trì · CLL2&amp;3 · HI FPT</th><th>SH &amp; RKN</th><th>Nhân Sự · Lịch Trực</th><th>Phân tích SHD</th><th>Quyền riêng</th></tr></thead>
                                     <tbody>
-                                        <tr><td><b>Đội trưởng</b></td><td>Đội mình</td><td>Đội mình · Hướng XL + Đội trưởng note</td><td>Đội mình · sửa / khai báo lịch của mình</td><td>✗</td><td>Nhập Excel cập nhật ca: 300 dòng</td></tr>
+                                        <tr><td><b>Đội trưởng</b></td><td>Đội mình</td><td>Đội mình · Hướng XL + Đội trưởng note</td><td>Đội mình · sửa / khai báo lịch của mình</td><td>✗ (✓ nếu thuộc DNI02)</td><td>Nhập Excel cập nhật ca: 300 dòng</td></tr>
                                         <tr><td><b>Đối tác quản lý</b></td><td>Cả đối tác</td><td>Cả đối tác · Hướng XL + Đội trưởng note</td><td>Cả đối tác · sửa / khai báo lịch</td><td>✓</td><td>Tạo tài khoản cus</td></tr>
                                         <tr><td><b>Admin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Quản lý dữ liệu SH &amp; RKN</td></tr>
                                         <tr><td><b>SuperAdmin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Nhập ca bảo trì mới, quản lý HI FPT, đổi link Phân tích SHD, nhập Excel 1000 dòng</td></tr>
-                                        <tr><td><b>cus</b></td><td>✗</td><td>Đối tác mình · Hướng XL + DVKH care note</td><td>Đối tác mình · chỉ xem</td><td>✗</td><td>—</td></tr>
+                                        <tr><td><b>cus</b></td><td>✗</td><td>Đối tác mình · Hướng XL + DVKH care note</td><td>Đối tác mình · chỉ xem</td><td>✗ (✓ nếu thuộc DNI02)</td><td>—</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -2577,9 +2578,9 @@
 
         document.getElementById('superAdminImportBar').classList.toggle('d-none', currentUser.role !== 'superadmin');
 
-        // Tab "Phân tích SHD" chỉ dành cho admin, superadmin và Đối tác quản lý
-        // (tài khoản user không gắn doiTruong) — Đội trưởng không thấy tab này.
-        document.getElementById('phantich-tab').classList.toggle('d-none', isDoiTruongLocked());
+        // Tab "Phân tích SHD": admin, superadmin, Đối tác quản lý + MỌI tài khoản
+        // thuộc các đối tác trong SHD_EXTRA_DOITAC (phải khớp hằng số cùng tên trong worker.js).
+        document.getElementById('phantich-tab').classList.toggle('d-none', !canUseShd());
 
         // Tab "Tài khoản cus" — CHỈ dành riêng cho Đối tác quản lý (role
         // 'user', không gắn doiTruong) — không phải Đội trưởng, không phải
@@ -2595,7 +2596,7 @@
         document.getElementById('cll-tab').classList.toggle('d-none', isPetOnly);
         document.getElementById('hifpt-tab').classList.toggle('d-none', isPetOnly);
         if (isPetOnly) {
-            document.getElementById('phantich-tab').classList.add('d-none'); // luôn ẩn, bất kể isDoiTruongLocked()
+            if (!canUseShd()) document.getElementById('phantich-tab').classList.add('d-none');
             // Tab mặc định (Bảo Trì) đang bị ẩn — chuyển sang tab Linh Thú.
             document.getElementById('bt-tab').classList.remove('active');
             document.getElementById('btContent').classList.remove('show', 'active');
@@ -4285,6 +4286,14 @@
     document.getElementById('hifpt-tab').addEventListener('shown.bs.tab', () => hiFetchData(false));
 
     // ================== PHÂN TÍCH SHD: link lấy từ D1 (app_settings.shd_link) ==================
+    // Đối tác được mở cho TẤT CẢ tài khoản (Đội trưởng, cus) dùng Phân tích SHD.
+    const SHD_EXTRA_DOITAC = ['DNI02'];
+    function canUseShd() {
+        if (!currentUser) return false;
+        if (currentUser.role === 'admin' || currentUser.role === 'superadmin') return true;
+        if (SHD_EXTRA_DOITAC.includes(currentUser.doiTac)) return true;
+        return currentUser.role === 'user' && !isDoiTruongLocked();
+    }
     async function loadShdLink() {
         let btn = document.getElementById('shdLinkBtn'), info = document.getElementById('shdLinkInfo');
         let isSA = currentUser && currentUser.role === 'superadmin';
