@@ -434,6 +434,12 @@
             .seg-tabs .nav-link { white-space: nowrap; padding: 9px 13px; }
             .filter-strip .f-group { border-right: none !important; }
             .lich-day-big { font-size: 21px; white-space: nowrap; }
+            /* Cảnh Báo: mỗi Số HĐ thành 1 thẻ xếp dọc, ô ghi chú rộng hết màn hình */
+            #cbDetailTable thead { display: none; }
+            #cbDetailTable, #cbDetailTable tbody, #cbDetailTable tr, #cbDetailTable td { display: block; width: 100%; }
+            #cbDetailTable tr { border-bottom: 1px solid var(--line); padding: 10px 6px; }
+            #cbDetailTable td { border: none; padding: 3px 4px; }
+            #cbDetailTable td:nth-child(1), #cbDetailTable td:nth-child(2) { display: inline-block; width: auto; margin-right: 12px; vertical-align: top; }
         }
         /* Màn hình cảm ứng: nút đủ lớn để bấm (~40px) */
         @media (pointer: coarse) {
@@ -514,8 +520,8 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="cll-tab" data-bs-toggle="tab" data-bs-target="#cllContent" type="button" role="tab">
-                <i class="bi bi-exclamation-triangle-fill me-1" style="color:var(--red);"></i> Cảnh báo CLL2 &amp; 3 <span id="badgeDuplicateCount" class="count-chip">0</span>
+            <button class="nav-link" id="cb-tab" data-bs-toggle="tab" data-bs-target="#cbContent" type="button" role="tab">
+                <i class="bi bi-exclamation-triangle-fill me-1" style="color:var(--red);"></i> Cảnh Báo <span id="badgeCanhBao" class="count-chip d-none" title="Số HĐ chưa ghi chú">0</span>
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -837,33 +843,51 @@
             </div>
         </div>
 
-        <!-- TAB 3: CẢNH BÁO TRÙNG SỐ HỢP ĐỒNG -->
-        <div class="tab-pane fade" id="cllContent" role="tabpanel">
-            <div class="d-flex align-items-center gap-2 mb-2">
-                <label class="small mb-0 fw-bold" style="color:var(--slate);">Lọc theo Đối tác:</label>
-                <select id="cllFilterDoiTac" class="form-select form-select-sm" style="width:180px;" onchange="renderCllTable()">
-                    <option value="">Tất cả Đối tác</option>
-                </select>
+        <!-- TAB 3: CẢNH BÁO — Số HĐ vừa có ca Bảo Trì vừa bị SH/RKN -->
+        <div class="tab-pane fade" id="cbContent" role="tabpanel">
+            <div class="filter-strip row g-2 mb-3 align-items-end">
+                <div class="col-md-2 f-group"><label>Đối tác</label><select id="cbFilterDoiTac" class="form-select form-select-sm" onchange="cbOnFilterChange()"></select></div>
+                <div class="col-md-3 f-group"><label>Đội trưởng</label><select id="cbFilterDoiTruong" class="form-select form-select-sm" onchange="cbApplyFilters()"></select></div>
+                <div class="col-md-2 f-group"><label>Hướng XL (SH &amp; RKN)</label>
+                    <select id="cbFilterHuong" class="form-select form-select-sm" onchange="cbApplyFilters()">
+                        <option value="">Tất cả</option><option value="open">Còn mở (Chưa XL / Đã Tạo CL)</option><option>Chưa XL</option><option>Đã Tạo CL</option><option>Đã XL</option>
+                    </select></div>
+                <div class="col-md-2 f-group"><label>Ghi chú</label>
+                    <select id="cbFilterNote" class="form-select form-select-sm" onchange="cbApplyFilters()">
+                        <option value="">Tất cả</option><option value="no">Chưa ghi chú</option><option value="yes">Đã ghi chú</option>
+                    </select></div>
+                <div class="col-md-3 f-group"><label>Tìm Số HĐ</label>
+                    <input type="text" id="cbSearch" class="form-control form-control-sm" placeholder="Nhập số hợp đồng..." oninput="clearTimeout(window._cbT); window._cbT = setTimeout(cbApplyFilters, 250);"></div>
+                <div class="col-12 f-group d-flex flex-wrap justify-content-end gap-2">
+                    <span class="small align-self-center me-auto" id="cbLastLoaded" style="color:var(--slate-soft);"></span>
+                    <button class="filter-reset-btn" onclick="cbResetFilters()"><i class="bi bi-x-circle me-1"></i>Xoá lọc</button>
+                    <button class="filter-reset-btn" onclick="cbFetchData(true)"><i class="bi bi-arrow-clockwise me-1"></i>Tải lại</button>
+                    <button class="filter-reset-btn" onclick="cbExportExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Xuất Excel</button>
+                </div>
             </div>
-            <div class="alert-console">
-                <div class="alert-console-head">
-                    <span><i class="bi bi-exclamation-octagon-fill me-2"></i>Số Hợp Đồng bị Trùng Lặp (CLL2 &amp; 3)</span>
-                    <span class="count-pill" id="cllDuplicateBadge">0 số hợp đồng trùng</span>
+
+            <div class="stat-strip">
+                <div class="stat-item accent-neutral"><div class="stat-label">SỐ HĐ TRÙNG BẢO TRÌ &amp; RKN</div><div class="stat-value" id="cbKpiTotal">0</div></div>
+                <div class="stat-item accent-red"><div class="stat-label">CHƯA GHI CHÚ</div><div class="stat-value" id="cbKpiNoNote">0</div></div>
+                <div class="stat-item accent-brand"><div class="stat-label">ĐÃ GHI CHÚ</div><div class="stat-value" id="cbKpiNote">0</div></div>
+                <div class="stat-item accent-amber"><div class="stat-label">RKN CÒN MỞ</div><div class="stat-value" id="cbKpiOpen">0</div></div>
+            </div>
+
+            <div class="table-panel mb-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 p-3 pb-2">
+                    <div class="fw-bold"><i class="bi bi-diagram-3 me-2" style="color:var(--red);"></i>Tổng hợp <span class="small fw-normal" style="color:var(--slate-soft);">— bấm 1 dòng để lọc xuống</span></div>
+                    <div class="hi-seg" id="cbGroupSeg">
+                        <button type="button" data-group="doiTacQuanLy" class="active">Theo Đối tác</button>
+                        <button type="button" data-group="doiTruong">Theo Đội trưởng</button>
+                    </div>
                 </div>
-                <div class="table-responsive mb-0">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Số Hợp Đồng</th>
-                                <th class="text-center">Số lần trùng</th>
-                                <th>Chi tiết các dòng bị trùng</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cllTableBody">
-                            <tr><td colspan="3" class="text-center py-4" style="color:var(--slate);">Không có số hợp đồng nào bị trùng lặp.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <div class="table-responsive"><table class="table table-hover align-middle mb-0" id="cbGroupTable"></table></div>
+            </div>
+
+            <div class="table-panel">
+                <div class="p-3 pb-2 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2" style="color:var(--red);"></i>Danh sách cảnh báo <span class="small fw-normal" id="cbDetailCount" style="color:var(--slate-soft);"></span></div>
+                <div class="table-responsive"><table class="table table-hover align-middle mb-0" id="cbDetailTable"></table></div>
+                <div class="d-flex justify-content-end p-3"><nav><ul class="pagination pagination-sm mb-0" id="cbPagination"></ul></nav></div>
             </div>
         </div>
 
@@ -1332,7 +1356,7 @@
                                     <thead><tr><th>Tab</th><th>Dùng để</th><th>Ai thấy</th></tr></thead>
                                     <tbody>
                                         <tr><td><b>Bảo Trì</b></td><td>Kiểm tra checklist ca bảo trì (TPKT Check), xử lý lại ca lỗi (XL Lại) và xem báo cáo tiến độ</td><td>Mọi tài khoản trừ cus</td></tr>
-                                        <tr><td><b>Cảnh báo CLL2 &amp; 3</b></td><td>Số hợp đồng xuất hiện từ 2 lần trở lên trong dữ liệu bảo trì</td><td>Mọi tài khoản trừ cus</td></tr>
+                                        <tr><td><b>Cảnh Báo</b></td><td>Số HĐ vừa có ca Bảo Trì vừa bị Suy hao / Rớt kết nối — ghi chú hướng xử lý</td><td>Mọi tài khoản trừ cus</td></tr>
                                         <tr><td><b>HI FPT</b></td><td>Tỉ lệ cài đặt và tỉ lệ tương tác ứng dụng HI FPT</td><td>Mọi tài khoản trừ cus</td></tr>
                                         <tr><td><b>SH &amp; RKN</b></td><td>Theo dõi và xử lý ca Suy hao / Rớt kết nối liên tục</td><td>Tất cả</td></tr>
                                         <tr><td><b>Nhân Sự</b></td><td>Danh sách nhân sự, thâm niên tự tính, cơ cấu theo thâm niên / bậc</td><td>Tất cả (cus chỉ xem)</td></tr>
@@ -1389,11 +1413,13 @@
                 </div>
 
                 <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g3">5. Cảnh báo CLL2 &amp; 3</button></h2>
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g3">5. Cảnh Báo — Số HĐ trùng Bảo Trì &amp; SH/RKN</button></h2>
                     <div id="g3" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
                         <div class="accordion-body small"><ul class="mb-0">
-                            <li>Liệt kê số hợp đồng xuất hiện từ 2 lần trở lên trong dữ liệu bảo trì; có ô lọc theo Đối tác ngay trong tab.</li>
-                            <li>Mỗi dòng hiện Đối tác, Đội trưởng, Nhân viên, TG Hoàn Tất, Ghi chú — so sánh để biết ca nào đúng trước khi báo bộ phận dữ liệu.</li>
+                            <li>Liệt kê các Số HĐ <b>vừa có ca Bảo Trì vừa bị Suy hao / Rớt kết nối</b> (có mặt ở cả 2 nguồn dữ liệu), mỗi Số HĐ 1 dòng: tóm tắt ca Bảo Trì gần nhất và ca SH &amp; RKN gần nhất. Số đỏ trên tab = số HĐ chưa ghi chú.</li>
+                            <li>Phạm vi giống tab Bảo Trì (Đội trưởng — đội mình, Đối tác — đối tác mình, Admin — tất cả). Tài khoản cus không thấy tab này.</li>
+                            <li>Nhập <b>ghi chú hướng xử lý</b> (tối đa 500 ký tự) ngay trên dòng → bấm ✓ hoặc Enter (Shift+Enter để xuống dòng). Dòng <b>không bị ẩn</b> sau khi ghi chú, chỉ đổi nhãn sang "Đã ghi chú"; mỗi Số HĐ 1 ghi chú, người sửa sau ghi đè và hiện tên người sửa cuối.</li>
+                            <li>Lọc theo Đối tác, Đội trưởng, Hướng XL của SH &amp; RKN, tình trạng ghi chú; bảng Tổng hợp cho biết đơn vị nào còn nhiều HĐ chưa ghi chú. Có Xuất Excel.</li>
                         </ul></div>
                     </div>
                 </div>
@@ -1488,7 +1514,7 @@
                     <div id="g8pet" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
                         <div class="accordion-body small"><ul class="mb-0">
                             <li>Đối tác quản lý tự tạo tài khoản cus cho nhân sự của mình (VD bộ phận chăm sóc khách hàng): <b>Tải file mẫu</b> (cột username, password) → điền → <b>Nhập Excel</b>, tối đa 50 tài khoản/lần. Bỏ trống password thì mật khẩu mặc định trùng username — nhắc nhân sự đổi mật khẩu ngay sau lần đăng nhập đầu.</li>
-                            <li>Tài khoản cus thấy: <b>SH &amp; RKN</b> (theo đối tác, được đổi Hướng XL và nhập DVKH care note), <b>Trò chuyện</b>, <b>Linh Thú</b>, <b>Hướng dẫn</b>. Không xem được dữ liệu Bảo Trì, CLL2 &amp; 3, HI FPT — Worker chặn cả khi gọi thẳng API.</li>
+                            <li>Tài khoản cus thấy: <b>SH &amp; RKN</b> (theo đối tác, được đổi Hướng XL và nhập DVKH care note), <b>Trò chuyện</b>, <b>Linh Thú</b>, <b>Hướng dẫn</b>. Không xem được dữ liệu Bảo Trì, Cảnh Báo, HI FPT — Worker chặn cả khi gọi thẳng API.</li>
                             <li>Danh sách trong tab chỉ hiện tài khoản do chính Đối tác quản lý đó tạo.</li>
                         </ul></div>
                     </div>
@@ -1511,7 +1537,7 @@
                         <div class="accordion-body small">
                             <div class="table-responsive">
                                 <table class="table table-sm table-bordered align-middle mb-0">
-                                    <thead><tr><th>Tài khoản</th><th>Bảo Trì · CLL2&amp;3 · HI FPT</th><th>SH &amp; RKN</th><th>Nhân Sự · Lịch Trực</th><th>Phân tích SHD</th><th>Quyền riêng</th></tr></thead>
+                                    <thead><tr><th>Tài khoản</th><th>Bảo Trì · Cảnh Báo · HI FPT</th><th>SH &amp; RKN</th><th>Nhân Sự · Lịch Trực</th><th>Phân tích SHD</th><th>Quyền riêng</th></tr></thead>
                                     <tbody>
                                         <tr><td><b>Đội trưởng</b></td><td>Đội mình</td><td>Đội mình · Hướng XL + Đội trưởng note</td><td>Đội mình · sửa / khai báo lịch của mình</td><td>✗ (✓ nếu thuộc DNI02)</td><td>Nhập Excel cập nhật ca: 300 dòng</td></tr>
                                         <tr><td><b>Đối tác quản lý</b></td><td>Cả đối tác</td><td>Cả đối tác · Hướng XL + Đội trưởng note</td><td>Cả đối tác · sửa / khai báo lịch</td><td>✓</td><td>Tạo tài khoản cus</td></tr>
@@ -1532,7 +1558,7 @@
             <div class="table-panel p-4 mb-3">
                 <h5 class="fw-bold mb-1"><i class="bi bi-person-plus me-2" style="color:var(--brand);"></i>Tạo tài khoản cus cho nhân sự</h5>
                 <p class="small mb-0" style="color:var(--slate);">
-                    Dành cho nhân sự của đối tác (VD chăm sóc khách hàng). Tài khoản cus thấy tab <b>SH &amp; RKN</b> theo đối tác của bạn (được đổi Hướng XL và nhập DVKH care note), cùng Trò chuyện, Linh Thú, Hướng dẫn — <b>không</b> xem được dữ liệu Bảo Trì, CLL2 &amp; 3, HI FPT.
+                    Dành cho nhân sự của đối tác (VD chăm sóc khách hàng). Tài khoản cus thấy tab <b>SH &amp; RKN</b> theo đối tác của bạn (được đổi Hướng XL và nhập DVKH care note), cùng Trò chuyện, Linh Thú, Hướng dẫn — <b>không</b> xem được dữ liệu Bảo Trì, Cảnh Báo, HI FPT.
                 </p>
             </div>
 
@@ -2272,7 +2298,7 @@
                     clearFilterSelections();
                     initFilters(globalData);
                     filterData();
-                    checkDuplicateContracts(globalData);
+                    cbFetchData(true); // nạp số HĐ cần cảnh báo để hiện số trên tab
                     refreshData();
                     startAutoRefresh();
                 }
@@ -2466,7 +2492,6 @@
 
             initFilters(globalData);
             filterData();
-            checkDuplicateContracts(globalData);
         } catch (error) {
             console.error("Lỗi đồng bộ ngầm:", error);
         }
@@ -2617,7 +2642,7 @@
         // dữ liệu vận hành, chỉ còn Trò chuyện / Linh Thú / Hướng dẫn.
         let isPetOnly = currentUser.role === 'petonly';
         document.getElementById('bt-tab').classList.toggle('d-none', isPetOnly);
-        document.getElementById('cll-tab').classList.toggle('d-none', isPetOnly);
+        document.getElementById('cb-tab').classList.toggle('d-none', isPetOnly);
         document.getElementById('hifpt-tab').classList.toggle('d-none', isPetOnly);
         if (isPetOnly) {
             if (!canUseShd()) document.getElementById('phantich-tab').classList.add('d-none');
@@ -5362,6 +5387,174 @@
         e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
     });
 
+    // ================== CẢNH BÁO: Số HĐ có ở CẢ dataBT lẫn dataRKN ==================
+    // Mỗi Số HĐ 1 dòng (ca RKN mới nhất + ca Bảo Trì mới nhất). Người dùng ghi chú
+    // hướng xử lý ngay trên dòng; dòng KHÔNG bị ẩn sau khi ghi chú. Ẩn với tài khoản cus.
+    const CB_NOTE_MAX = 500, CB_PAGE_SIZE = 50;
+    let cbData = [], cbFiltered = [], cbLoadedFor = null, cbLoadedAt = 0, cbPage = 1, cbGroupBy = 'doiTacQuanLy';
+    const cbIsOpen = r => r.huongXL !== 'Đã XL';
+    const cbNoteTag = has => `<span class="hi-tag cb-note-tag ${has ? 'ok' : 'no'}">${has ? 'Đã ghi chú' : 'Chưa ghi chú'}</span>`;
+
+    async function cbFetchData(force) {
+        if (!currentUser || currentUser.role === 'petonly') return;
+        if (!force && cbLoadedFor === currentUser.username && Date.now() - cbLoadedAt < HI_STALE_MS) { cbRenderAll(); return; }
+        try {
+            let res = await apiFetch("api/canhbao/data", { method: "GET" });
+            let j = await res.json();
+            if (!res.ok) { console.warn(j.error); return; }
+            cbData = j.data || [];
+            cbLoadedFor = currentUser.username; cbLoadedAt = Date.now();
+            document.getElementById('cbLastLoaded').textContent = `Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN')} · ${cbData.length} số HĐ`;
+        } catch (e) { console.error("Lỗi tải Cảnh Báo:", e); return; }
+        cbUpdateBadge();
+        hiFillSelect('cbFilterDoiTac', hiUniq(cbData, 'doiTacQuanLy'), 'Tất cả Đối tác', true);
+        let sel = document.getElementById('cbFilterDoiTac');
+        if (isDoiTacLocked()) { if (![...sel.options].some(o => o.value === currentUser.doiTac)) sel.add(new Option(currentUser.doiTac, currentUser.doiTac)); sel.value = currentUser.doiTac; sel.disabled = true; }
+        else sel.disabled = false;
+        cbOnFilterChange();
+    }
+    // Số trên tab = số HĐ chưa ghi chú
+    function cbUpdateBadge() {
+        let n = cbData.filter(r => !r.note).length, b = document.getElementById('badgeCanhBao');
+        b.textContent = n; b.classList.toggle('d-none', n === 0);
+    }
+    function cbOnFilterChange() {
+        let dt = document.getElementById('cbFilterDoiTac').value;
+        hiFillSelect('cbFilterDoiTruong', hiUniq(cbData.filter(r => !dt || r.doiTacQuanLy === dt), 'doiTruong'), 'Tất cả Đội trưởng', true);
+        let s = document.getElementById('cbFilterDoiTruong');
+        if (isDoiTruongLocked()) { if (![...s.options].some(o => o.value === currentUser.doiTruong)) s.add(new Option(currentUser.doiTruong, currentUser.doiTruong)); s.value = currentUser.doiTruong; s.disabled = true; }
+        else s.disabled = false;
+        cbApplyFilters();
+    }
+    function cbResetFilters() {
+        ['cbFilterHuong', 'cbFilterNote', 'cbSearch'].forEach(id => document.getElementById(id).value = '');
+        if (!isDoiTacLocked()) document.getElementById('cbFilterDoiTac').value = '';
+        if (!isDoiTruongLocked()) document.getElementById('cbFilterDoiTruong').value = '';
+        cbGroupBy = 'doiTacQuanLy';
+        cbOnFilterChange();
+    }
+    function cbApplyFilters() {
+        let dt = document.getElementById('cbFilterDoiTac').value, dtr = document.getElementById('cbFilterDoiTruong').value;
+        let hx = document.getElementById('cbFilterHuong').value, nt = document.getElementById('cbFilterNote').value;
+        let q = document.getElementById('cbSearch').value.trim().toUpperCase();
+        cbFiltered = cbData.filter(r => (!dt || r.doiTacQuanLy === dt) && (!dtr || r.doiTruong === dtr)
+            && (!hx || (hx === 'open' ? cbIsOpen(r) : r.huongXL === hx))
+            && (!nt || (nt === 'yes' ? !!r.note : !r.note))
+            && (!q || String(r.soHopDong).toUpperCase().includes(q)));
+        cbPage = 1;
+        cbRenderAll();
+    }
+    function cbRenderAll() {
+        document.querySelectorAll('#cbGroupSeg button').forEach(b => b.classList.toggle('active', b.dataset.group === cbGroupBy));
+        let rows = cbFiltered, fmt = n => n.toLocaleString('vi-VN');
+        document.getElementById('cbKpiTotal').textContent = fmt(rows.length);
+        document.getElementById('cbKpiNoNote').textContent = fmt(rows.filter(r => !r.note).length);
+        document.getElementById('cbKpiNote').textContent = fmt(rows.filter(r => r.note).length);
+        document.getElementById('cbKpiOpen').textContent = fmt(rows.filter(cbIsOpen).length);
+        // Bảng tổng hợp
+        let g = new Map();
+        rows.forEach(r => { let k = r[cbGroupBy] || '(trống)'; if (!g.has(k)) g.set(k, []); g.get(k).push(r); });
+        let list = [...g.entries()].map(([k, rs]) => ({ k, n: rs.length, noNote: rs.filter(r => !r.note).length, open: rs.filter(cbIsOpen).length }))
+            .sort((a, b) => b.noNote - a.noNote || b.n - a.n);
+        let first = cbGroupBy === 'doiTruong' ? 'Đội trưởng' : 'Đối tác';
+        document.getElementById('cbGroupTable').innerHTML = `<thead><tr><th>${first}</th><th class="text-end">Số HĐ trùng</th><th class="text-end">Chưa ghi chú</th><th class="text-end">RKN còn mở</th><th>Tiến độ ghi chú</th></tr></thead><tbody>` +
+            (list.length ? list.map(x => `<tr class="hi-group-row" data-key="${escapeHtml(x.k)}"><td class="fw-semibold">${escapeHtml(x.k)}</td><td class="text-end mono">${x.n}</td>
+                <td class="text-end mono fw-bold" style="color:${x.noNote ? 'var(--red)' : 'inherit'};">${x.noNote}</td><td class="text-end mono">${x.open}</td>
+                <td>${hiRateHtml(x.n ? (x.n - x.noNote) / x.n * 100 : null)}</td></tr>`).join('')
+                : `<tr><td colspan="5" class="text-center py-4 small" style="color:var(--slate);">${cbData.length ? 'Không có Số HĐ nào khớp bộ lọc.' : 'Không có Số HĐ nào vừa có ca Bảo Trì vừa bị SH/RKN 🎉'}</td></tr>`) + '</tbody>';
+        cbRenderDetail();
+    }
+    function cbRenderDetail() {
+        let rows = cbFiltered.slice().sort((a, b) => (!!a.note - !!b.note) || (cbIsOpen(b) - cbIsOpen(a)) || ((b.soLanUpDown || 0) - (a.soLanUpDown || 0)));
+        let pages = Math.max(1, Math.ceil(rows.length / CB_PAGE_SIZE));
+        cbPage = Math.min(cbPage, pages);
+        let slice = rows.slice((cbPage - 1) * CB_PAGE_SIZE, cbPage * CB_PAGE_SIZE);
+        document.getElementById('cbDetailCount').textContent = `— ${rows.length.toLocaleString('vi-VN')} số HĐ`;
+        const tag = (t, color) => t ? `<span class="hi-tag" style="background:${color}1f;color:${color};">${escapeHtml(t)}</span>` : '<span style="color:var(--slate-soft);">Chưa kiểm tra</span>';
+        document.getElementById('cbDetailTable').innerHTML = `<thead><tr><th>Đối tác / Đội trưởng</th><th>Số HĐ</th><th>Bảo Trì (ca gần nhất)</th><th>SH &amp; RKN (ca gần nhất)</th><th style="min-width:300px;">Ghi chú xử lý</th></tr></thead><tbody>` +
+            (slice.length ? slice.map(r => {
+                let ud = r.soLanUpDown;
+                return `<tr>
+                <td><span class="fw-semibold">${escapeHtml(r.doiTacQuanLy || '')}</span><br><span class="small">${escapeHtml(r.doiTruong || '')}</span></td>
+                <td class="fw-bold mono">${escapeHtml(r.soHopDong)}<br>${cbNoteTag(!!r.note)}</td>
+                <td class="small">${tag(r.tpktCheck, '#5C6660')}${r.xlLai ? ` → ${escapeHtml(r.xlLai)}` : ''}
+                    <div style="color:var(--slate);">${escapeHtml(r.tgHoanTat || '')} · ${r.btCount} ca${r.nhanVien ? ' · ' + escapeHtml(r.nhanVien) : ''}</div></td>
+                <td class="small"><span class="hi-tag" style="background:${RKN_STATUS_COLOR[r.huongXL] || '#999'}22;color:${RKN_STATUS_COLOR[r.huongXL] || '#555'};">${escapeHtml(r.huongXL || '')}</span>
+                    <span class="mono fw-bold ms-1" style="color:${ud >= 100 ? 'var(--red)' : ud >= 50 ? 'var(--amber)' : 'inherit'};">${ud ?? ''}</span> lần Up/Down
+                    <div style="color:var(--slate);">Ngày data ${escapeHtml(r.ngayData || '')} · ${r.rknCount} ca</div></td>
+                <td>
+                    <div class="d-flex gap-1 align-items-start">
+                        <textarea class="form-control form-control-sm cb-note" rows="2" maxlength="${CB_NOTE_MAX}" data-shd="${escapeHtml(r.soHopDong)}" placeholder="Nhập hướng xử lý..." aria-label="Ghi chú xử lý ${escapeHtml(r.soHopDong)}">${escapeHtml(r.note || '')}</textarea>
+                        <button class="btn btn-sm btn-outline-success cb-note-save d-none" data-shd="${escapeHtml(r.soHopDong)}" title="Lưu ghi chú" aria-label="Lưu ghi chú"><i class="bi bi-check-lg"></i></button>
+                    </div>
+                    <div class="small mt-1 cb-note-meta" style="color:var(--slate-soft);">${r.noteBy ? `${escapeHtml(r.noteBy)} · ${formatDateTime(r.noteAt)}` : ''}</div>
+                </td></tr>`;
+            }).join('') : `<tr><td colspan="5" class="text-center py-4 small" style="color:var(--slate);">Không có dữ liệu.</td></tr>`) + '</tbody>';
+        let nums = [...new Set([1, pages, cbPage - 1, cbPage, cbPage + 1].filter(n => n >= 1 && n <= pages))].sort((a, b) => a - b);
+        let html = '', prev = 0;
+        nums.forEach(n => { if (n - prev > 1) html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+            html += `<li class="page-item ${n === cbPage ? 'active' : ''}"><a class="page-link" href="#" data-cbpage="${n}">${n}</a></li>`; prev = n; });
+        document.getElementById('cbPagination').innerHTML = pages > 1 ? html : '';
+    }
+
+    async function cbSaveNote(ta) {
+        let shd = ta.dataset.shd, row = cbData.find(r => r.soHopDong === shd);
+        let val = ta.value.trim();
+        if (!row || (row.note || '') === val) return;
+        ta.disabled = true;
+        try {
+            let r = await (await apiFetch("api/canhbao/note", { method: "POST", body: JSON.stringify({ soHopDong: shd, note: val }) })).json();
+            if (!r.success) { alert(r.error || "Không lưu được ghi chú!"); return; }
+            row.note = val || null; row.noteBy = r.noteBy; row.noteAt = r.noteAt;
+            let wrap = ta.closest('td');
+            wrap.querySelector('.cb-note-save').classList.add('d-none');
+            wrap.querySelector('.cb-note-meta').textContent = r.noteBy ? `${r.noteBy} · ${formatDateTime(r.noteAt)} · đã lưu ✓` : 'Đã xoá ghi chú';
+            let tagEl = ta.closest('tr').querySelector('.cb-note-tag');
+            if (tagEl) tagEl.outerHTML = cbNoteTag(!!row.note);
+            cbUpdateBadge();
+            // Chỉ cập nhật số liệu, KHÔNG vẽ lại danh sách — dòng vẫn ở nguyên chỗ để người dùng thấy kết quả
+            let rows = cbFiltered;
+            document.getElementById('cbKpiNoNote').textContent = rows.filter(x => !x.note).length.toLocaleString('vi-VN');
+            document.getElementById('cbKpiNote').textContent = rows.filter(x => x.note).length.toLocaleString('vi-VN');
+        } catch (e) { console.error("Lỗi lưu ghi chú Cảnh Báo:", e); alert("Lỗi kết nối, vui lòng thử lại!"); }
+        finally { ta.disabled = false; }
+    }
+    document.getElementById('cbDetailTable').addEventListener('input', e => {
+        let ta = e.target.closest('.cb-note'); if (!ta) return;
+        let row = cbData.find(r => r.soHopDong === ta.dataset.shd);
+        ta.closest('td').querySelector('.cb-note-save').classList.toggle('d-none', !row || (row.note || '') === ta.value.trim());
+    });
+    document.getElementById('cbDetailTable').addEventListener('click', e => {
+        let b = e.target.closest('.cb-note-save'); if (b) cbSaveNote(b.closest('td').querySelector('.cb-note'));
+    });
+    document.getElementById('cbDetailTable').addEventListener('keydown', e => {
+        // Enter = lưu, Shift+Enter = xuống dòng
+        if (e.key === 'Enter' && !e.shiftKey && e.target.closest('.cb-note')) { e.preventDefault(); cbSaveNote(e.target); }
+    });
+    document.getElementById('cbPagination').addEventListener('click', e => {
+        let a = e.target.closest('[data-cbpage]'); if (!a) return;
+        e.preventDefault(); cbPage = parseInt(a.dataset.cbpage, 10); cbRenderDetail();
+    });
+    document.getElementById('cbGroupSeg').addEventListener('click', e => {
+        let b = e.target.closest('button[data-group]'); if (!b) return;
+        cbGroupBy = b.dataset.group; cbRenderAll();
+    });
+    document.getElementById('cbGroupTable').addEventListener('click', e => {
+        let tr = e.target.closest('tr.hi-group-row'); if (!tr || tr.dataset.key === '(trống)') return;
+        if (cbGroupBy === 'doiTacQuanLy') { if (!isDoiTacLocked()) document.getElementById('cbFilterDoiTac').value = tr.dataset.key; cbGroupBy = 'doiTruong'; cbOnFilterChange(); }
+        else { if (!isDoiTruongLocked()) document.getElementById('cbFilterDoiTruong').value = tr.dataset.key; cbApplyFilters(); document.getElementById('cbDetailTable').scrollIntoView({ behavior: 'smooth' }); }
+    });
+    function cbExportExcel() {
+        if (typeof XLSX === 'undefined') return;
+        let rows = cbFiltered.map(r => ({ 'Đối tác': r.doiTacQuanLy, 'Đội trưởng': r.doiTruong, 'Số HĐ': r.soHopDong,
+            'Số ca Bảo Trì': r.btCount, 'TG hoàn tất gần nhất': r.tgHoanTat, 'TPKT Check': r.tpktCheck || '', 'XL Lại': r.xlLai || '', 'Nhân viên': r.nhanVien || '',
+            'Số ca RKN': r.rknCount, 'Ngày data gần nhất': r.ngayData, 'Số lần Up/Down': r.soLanUpDown ?? '', 'Hướng XL': r.huongXL,
+            'Ghi chú xử lý': r.note || '', 'Người ghi chú': r.noteBy || '', 'Thời gian ghi chú': r.noteAt || '' }));
+        let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Cảnh Báo');
+        XLSX.writeFile(wb, `CanhBao_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    }
+    document.getElementById('cb-tab').addEventListener('shown.bs.tab', () => cbFetchData(false));
+
     function resetFilters() {
         let doiTacSelect = document.getElementById('filterDoiTac');
         if (!isDoiTacLocked()) {
@@ -5377,71 +5570,6 @@
         document.getElementById('filterTgHoanTatTo').value = "";
         updateDependentFilters();
         filterData();
-    }
-
-    let cllDuplicateEntriesAll = []; // lưu toàn bộ (không lọc), để renderCllTable() áp filter riêng
-
-    function checkDuplicateContracts(data) {
-        let contractMap = {};
-        data.forEach(item => {
-            let soHD = item.soHopDong ? String(item.soHopDong).trim() : "";
-            if (!soHD) return;
-            if (!contractMap[soHD]) contractMap[soHD] = [];
-            contractMap[soHD].push(item);
-        });
-
-        cllDuplicateEntriesAll = Object.entries(contractMap).filter(([soHD, items]) => items.length > 1);
-        document.getElementById('badgeDuplicateCount').innerText = cllDuplicateEntriesAll.length;
-
-        // Build dropdown lọc Đối tác từ chính các đối tác có xuất hiện trong danh sách trùng
-        let doiTacSet = new Set();
-        cllDuplicateEntriesAll.forEach(([, items]) => items.forEach(i => { if (i.doiTac) doiTacSet.add(i.doiTac); }));
-        let cllSelect = document.getElementById('cllFilterDoiTac');
-        let currentVal = cllSelect.value;
-        let doiTacList = [...doiTacSet].sort();
-        cllSelect.innerHTML = '<option value="">Tất cả Đối tác</option>' +
-            doiTacList.map(dt => `<option value="${escapeHtml(dt)}">${escapeHtml(dt)}</option>`).join('');
-        if (doiTacList.includes(currentVal)) cllSelect.value = currentVal;
-
-        renderCllTable();
-    }
-
-    function renderCllTable() {
-        let selectedDoiTac = document.getElementById('cllFilterDoiTac').value;
-
-        let duplicateEntries = selectedDoiTac
-            ? cllDuplicateEntriesAll
-                .map(([soHD, items]) => [soHD, items.filter(i => i.doiTac === selectedDoiTac)])
-                .filter(([, items]) => items.length > 1)
-            : cllDuplicateEntriesAll;
-
-        document.getElementById('cllDuplicateBadge').innerText = duplicateEntries.length + ' số hợp đồng trùng';
-
-        let cllBody = document.getElementById('cllTableBody');
-        cllBody.innerHTML = "";
-
-        if (duplicateEntries.length === 0) {
-            cllBody.innerHTML = `<tr><td colspan="3" class="text-center py-4" style="color:var(--slate);">Không có số hợp đồng nào bị trùng lặp.</td></tr>`;
-            return;
-        }
-
-        const fragment = document.createDocumentFragment();
-        duplicateEntries.forEach(([soHD, items]) => {
-            let tr = document.createElement('tr');
-            let detailsHtml = '<ul class="mb-0 ps-3 small" style="color:var(--slate);">';
-            items.forEach(subItem => {
-                detailsHtml += `<li><b>Đối tác:</b> ${escapeHtml(subItem.doiTac) || '--'} | <b>Đội trưởng:</b> ${escapeHtml(subItem.doiTruong) || '--'} | <b>Nhân viên:</b> ${escapeHtml(subItem.nhanVien) || '--'} | <b>TG Hoàn Tất:</b> ${formatDate(subItem.tgHoanTat)}<br><b>Ghi chú:</b> ${escapeHtml(subItem.ghiChu) || '--'}</li>`;
-            });
-            detailsHtml += '</ul>';
-
-            tr.innerHTML = `
-                <td class="op-code fw-bold" style="color:var(--red);">${escapeHtml(soHD)}</td>
-                <td class="text-center"><span class="severity-dot is-high">${items.length} lần</span></td>
-                <td>${detailsHtml}</td>
-            `;
-            fragment.appendChild(tr);
-        });
-        cllBody.appendChild(fragment);
     }
 
     function renderTable(data) {
