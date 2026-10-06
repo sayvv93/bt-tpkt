@@ -1197,7 +1197,7 @@
         <!-- TAB: NHÂN SỰ (dataNS) -->
         <div class="tab-pane fade" id="nsContent" role="tabpanel">
             <div id="nsAdminBar" class="hi-admin-bar d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 d-none">
-                <span class="fw-bold small" style="color:#8A6A12;"><i class="bi bi-shield-lock-fill me-1"></i>Admin — Quản lý danh sách Nhân sự (dataNS)</span>
+                <span class="fw-bold small" style="color:#8A6A12;"><i class="bi bi-shield-lock-fill me-1"></i>Admin / HR — Quản lý danh sách Nhân sự (dataNS)</span>
                 <div class="d-flex flex-wrap gap-2">
                     <button class="filter-reset-btn" onclick="nsDownloadTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu</button>
                     <label class="filter-reset-btn mb-0" style="cursor:pointer;"><i class="bi bi-upload me-1"></i>Nhập Excel
@@ -1458,7 +1458,8 @@
                             <li>Phạm vi xem giống tab Bảo Trì (Đội trưởng — đội mình, Đối tác — đối tác mình, Admin — tất cả); tài khoản cus xem theo đối tác của mình và <b>chỉ được xem</b>.</li>
                             <li><b>Thâm niên</b> tự tính = hôm nay − Ngày vào CT, hiển thị "X năm Y tháng" (nhân sự dưới 6 tháng tô màu cam). Báo cáo: tổng nhân sự, thâm niên trung bình, cơ cấu theo nhóm thâm niên (theo Đối tác / Đội trưởng) và phân bố theo Bậc.</li>
                             <li>Mọi tài khoản (trừ cus) bấm ✏️ để sửa thông tin nhân sự trong phạm vi của mình; <b>Note</b> tối đa 500 ký tự. Chỉ Admin được chuyển nhân sự sang Đối tác / Đội trưởng khác.</li>
-                            <li><b>Admin / SuperAdmin</b>: nhập Excel (khoá là Mã nhân viên — trùng thì cập nhật; ô DVKH / Note trống trong file sẽ giữ nội dung đã nhập trên web), thêm, xoá nhân sự.</li>
+                            <li><b>Admin / SuperAdmin / HR</b>: nhập Excel (khoá là Mã nhân viên — trùng thì cập nhật; ô DVKH / Note trống trong file sẽ giữ nội dung đã nhập trên web), thêm, xoá, chuyển nhân sự sang Đối tác / Đội trưởng khác.</li>
+                            <li><b>Tài khoản HR</b>: quản lý Nhân sự của toàn bộ đối tác, xem Lịch Trực (không khai báo), không xem dữ liệu vận hành (Bảo Trì, Cảnh Báo, HI FPT, SH &amp; RKN). Mọi thao tác của HR được ghi <b>"Nhật ký Nhân Sự"</b> vào Trò chuyện — chuyển đội thì cả đội cũ và đội mới đều thấy.</li>
                         </ul></div>
                     </div>
                 </div>
@@ -1480,8 +1481,8 @@
                     <div id="g5" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
                         <div class="accordion-body small"><ul class="mb-0">
                             <li>Chat chung cho mọi tài khoản, tin tối đa 500 ký tự, tự tải tin mới vài giây một lần. Số đỏ trên tab là tin chưa đọc.</li>
-                            <li>Tin nền xanh nhạt là <b>nhật ký tự động</b>: <b>"Nhật ký XL Lại"</b> (cột XL Lại của ca bảo trì đổi giá trị) và <b>"Nhật ký SH &amp; RKN"</b> (thay đổi trong tab SH &amp; RKN). Nhật ký không tính vào số tin chưa đọc.</li>
-                            <li>Mỗi người chỉ thấy nhật ký trong phạm vi dữ liệu của mình: Đội trưởng — đội mình; Đối tác — đối tác mình; Admin — tất cả; tài khoản cus — chỉ nhật ký SH &amp; RKN của đối tác mình.</li>
+                            <li>Tin nền xanh nhạt là <b>nhật ký tự động</b>: <b>"Nhật ký XL Lại"</b> (cột XL Lại của ca bảo trì đổi giá trị) <b>"Nhật ký SH &amp; RKN"</b> (thay đổi trong tab SH &amp; RKN) và <b>"Nhật ký Nhân Sự"</b> (thao tác của tài khoản HR). Nhật ký không tính vào số tin chưa đọc.</li>
+                            <li>Mỗi người chỉ thấy nhật ký trong phạm vi dữ liệu của mình: Đội trưởng — đội mình; Đối tác — đối tác mình; Admin — tất cả; tài khoản cus — chỉ nhật ký SH &amp; RKN của đối tác mình; HR — chỉ Nhật ký Nhân Sự.</li>
                             <li>Mọi tin nhắn và nhật ký <b>tự động xoá sau 7 ngày</b>.</li>
                         </ul></div>
                     </div>
@@ -1544,6 +1545,7 @@
                                         <tr><td><b>Admin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Quản lý dữ liệu SH &amp; RKN</td></tr>
                                         <tr><td><b>SuperAdmin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Nhập ca bảo trì mới, quản lý HI FPT, đổi link Phân tích SHD, nhập Excel 1000 dòng</td></tr>
                                         <tr><td><b>cus</b></td><td>✗</td><td>Đối tác mình · Hướng XL + DVKH care note</td><td>Đối tác mình · chỉ xem</td><td>✗ (✓ nếu thuộc DNI02)</td><td>—</td></tr>
+                                        <tr><td><b>HR</b></td><td>✗</td><td>✗</td><td>Nhân Sự: toàn bộ · nhập / sửa / xoá · Lịch: chỉ xem</td><td>✗</td><td>Mọi thao tác Nhân Sự ghi "Nhật ký Nhân Sự" vào Trò chuyện</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -2289,7 +2291,7 @@
 
                 document.getElementById('loginOverlay').style.display = 'none';
                 initSessionUI();
-                if (currentUser.role === 'petonly') {
+                if (isRestrictedRole()) {
                     // Không đụng dataBT dưới bất kỳ hình thức nào — chỉ tải Linh
                     // Thú trực tiếp (chuyển tab bằng JS không tự bắn sự kiện
                     // shown.bs.tab nên phải gọi tay).
@@ -2432,8 +2434,11 @@
     // Đây là tối ưu quan trọng để không vượt hạn mức đọc row/ngày của D1 free tier.
     let lastSyncTimestamp = null;
 
+    // cus (petonly) và HR không được tải dữ liệu vận hành (Bảo Trì, Cảnh Báo…)
+    function isRestrictedRole() { return !!currentUser && (currentUser.role === 'petonly' || currentUser.role === 'hr'); }
+
     async function refreshData() {
-        if (!currentUser || !currentUser.username) return;
+        if (!currentUser || !currentUser.username || isRestrictedRole()) return;
         try {
             let path = "api/get-data";
             if (lastSyncTimestamp) {
@@ -2533,7 +2538,7 @@
 
                 document.getElementById('loginOverlay').style.display = 'none';
                 initSessionUI();
-                if (currentUser.role === 'petonly') {
+                if (isRestrictedRole()) {
                     fetchLinhThuSelections();
                 } else {
                     clearFilterSelections();
@@ -2612,7 +2617,8 @@
         // Role "petonly" trong DB hiển thị là "cus"
         document.getElementById('lblCurrentRole').innerText = `Role: ${currentUser.role === 'petonly' ? 'cus' : currentUser.role}`;
         
-        let dtLabel = currentUser.role === 'petonly'
+        let dtLabel = currentUser.role === 'hr' ? "Tất cả (HR)"
+            : currentUser.role === 'petonly'
             ? (currentUser.doiTac && currentUser.doiTac !== "ALL" ? `${currentUser.doiTac} (tài khoản cus)` : "Chưa gắn đối tác")
             : (currentUser.doiTac && currentUser.doiTac.trim() !== "" && currentUser.doiTac !== "ALL") ? currentUser.doiTac : "Tất cả (Full quyền)";
         document.getElementById('lblCurrentDoiTac').innerText = `Đối tác: ${dtLabel}`;
@@ -2641,9 +2647,22 @@
         // đụng vào dataBT ở bất kỳ hình thức nào — ẩn hết các tab liên quan
         // dữ liệu vận hành, chỉ còn Trò chuyện / Linh Thú / Hướng dẫn.
         let isPetOnly = currentUser.role === 'petonly';
-        document.getElementById('bt-tab').classList.toggle('d-none', isPetOnly);
-        document.getElementById('cb-tab').classList.toggle('d-none', isPetOnly);
-        document.getElementById('hifpt-tab').classList.toggle('d-none', isPetOnly);
+        // HR: giống cus (không thấy dữ liệu vận hành) + KHÔNG thấy SH & RKN; quản trị tab Nhân Sự.
+        let isHr = currentUser.role === 'hr';
+        let isRestrictedUi = isPetOnly || isHr;
+        document.getElementById('bt-tab').classList.toggle('d-none', isRestrictedUi);
+        document.getElementById('cb-tab').classList.toggle('d-none', isRestrictedUi);
+        document.getElementById('hifpt-tab').classList.toggle('d-none', isRestrictedUi);
+        document.getElementById('rkn-tab').classList.toggle('d-none', isHr);
+        if (isHr) {
+            document.getElementById('phantich-tab').classList.add('d-none');
+            // Tab mặc định cho HR là Nhân Sự
+            document.getElementById('bt-tab').classList.remove('active');
+            document.getElementById('btContent').classList.remove('show', 'active');
+            document.getElementById('ns-tab').classList.add('active');
+            document.getElementById('nsContent').classList.add('show', 'active');
+            nsFetchData(true);
+        }
         if (isPetOnly) {
             if (!canUseShd()) document.getElementById('phantich-tab').classList.add('d-none');
             // Tab mặc định (Bảo Trì) đang bị ẩn — chuyển sang tab Linh Thú.
@@ -3005,7 +3024,7 @@
     let chatUnreadCount = 0;
     let chatPollTimer = null;
     // Tin tự động do Worker ghi (XL Lại đổi giá trị / thay đổi trong tab SH & RKN)
-    const CHAT_LOG_USERS = ['Nhật ký XL Lại', 'Nhật ký SH & RKN'];
+    const CHAT_LOG_USERS = ['Nhật ký XL Lại', 'Nhật ký SH & RKN', 'Nhật ký Nhân Sự'];
 
     function isChatTabActive() {
         return document.getElementById('chatContent').classList.contains('active');
@@ -3642,7 +3661,7 @@
 
     // ---------- Tải dữ liệu ----------
     async function hiFetchData(force) {
-        if (!currentUser || currentUser.role === 'petonly') return;
+        if (!currentUser || isRestrictedRole()) return;
         if (!force && hiLoadedFor === currentUser.username && Date.now() - hiLoadedAt < HI_STALE_MS) {
             hiRenderAll();
             return;
@@ -4968,6 +4987,8 @@
                            ['3to5', '3–5 năm', 1096, 1826], ['gt5', '> 5 năm', 1827, Infinity]];
     let nsData = [], nsFiltered = [], nsLoadedFor = null, nsLoadedAt = 0, nsPage = 1, nsGroupBy = 'doiTacQuanLy', nsEditingId = null;
     const nsCanEdit = () => currentUser && currentUser.role !== 'petonly';
+    // Quản trị Nhân sự (nhập file, thêm, xoá, chuyển Đối tác/Đội trưởng): Admin, SuperAdmin, HR
+    const nsIsAdmin = () => currentUser && ['admin', 'superadmin', 'hr'].includes(currentUser.role);
 
     // Thâm niên (số ngày) và chữ hiển thị "X năm Y tháng"
     function nsTenureDays(v) {
@@ -5048,7 +5069,7 @@
     }
 
     function nsRenderAll() {
-        document.getElementById('nsAdminBar').classList.toggle('d-none', !rknIsAdmin());
+        document.getElementById('nsAdminBar').classList.toggle('d-none', !nsIsAdmin());
         document.querySelectorAll('#nsGroupSeg button').forEach(b => b.classList.toggle('active', b.dataset.group === nsGroupBy));
         let rows = nsFiltered;
         document.getElementById('nsKpiTotal').textContent = rows.length.toLocaleString('vi-VN');
@@ -5091,7 +5112,7 @@
         let pages = Math.max(1, Math.ceil(rows.length / NS_PAGE_SIZE));
         nsPage = Math.min(nsPage, pages);
         let slice = rows.slice((nsPage - 1) * NS_PAGE_SIZE, nsPage * NS_PAGE_SIZE);
-        let canEdit = nsCanEdit(), isAdmin = rknIsAdmin();
+        let canEdit = nsCanEdit(), isAdmin = nsIsAdmin();
         document.getElementById('nsDetailCount').textContent = `— ${rows.length.toLocaleString('vi-VN')} người`;
         document.getElementById('nsDetailTable').innerHTML = `<thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Block</th><th>Mobinet</th><th class="text-center">Bậc</th><th>SaleClub</th><th>Mã NV</th><th>Tên</th><th>Ngày vào CT</th><th>Thâm niên</th><th>MBP</th><th>Mail</th><th>DVKH</th><th>Note</th>${canEdit ? '<th class="text-end">Sửa</th>' : ''}</tr></thead><tbody>` +
             (slice.length ? slice.map(r => `<tr>
@@ -5129,7 +5150,7 @@
         nsEditingId = id;
         let row = id ? nsData.find(r => r.id === id) : null;
         if (id && !row) return;
-        let isAdmin = rknIsAdmin();
+        let isAdmin = nsIsAdmin();
         document.getElementById('nsEditTitle').textContent = row ? `Sửa nhân sự — ${row.ten || row.maNhanVien}` : 'Thêm nhân sự';
         document.getElementById('nsEditFields').innerHTML = NS_FIELDS.map(f => {
             let v = row ? (row[f] ?? '') : (f === 'doiTacQuanLy' && currentUser.doiTac !== 'ALL' ? currentUser.doiTac || '' : '');
@@ -5396,7 +5417,7 @@
     const cbNoteTag = has => `<span class="hi-tag cb-note-tag ${has ? 'ok' : 'no'}">${has ? 'Đã ghi chú' : 'Chưa ghi chú'}</span>`;
 
     async function cbFetchData(force) {
-        if (!currentUser || currentUser.role === 'petonly') return;
+        if (!currentUser || isRestrictedRole()) return;
         if (!force && cbLoadedFor === currentUser.username && Date.now() - cbLoadedAt < HI_STALE_MS) { cbRenderAll(); return; }
         try {
             let res = await apiFetch("api/canhbao/data", { method: "GET" });
