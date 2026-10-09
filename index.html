@@ -585,7 +585,7 @@
 
             <div class="filter-strip row g-2 mb-3 align-items-end" id="filterStripBar">
                 <div class="col-md-3 f-group">
-                    <label>TG Hoàn Tất (từ - đến)</label>
+                    <label>TG Hoàn Tất (từ - đến) · mặc định tháng này</label>
                     <div class="d-flex gap-1">
                         <input type="date" id="filterTgHoanTatFrom" lang="vi" class="form-control form-control-sm" onchange="filterData()">
                         <input type="date" id="filterTgHoanTatTo" lang="vi" class="form-control form-control-sm" onchange="filterData()">
@@ -920,7 +920,7 @@
 
             <div class="filter-strip row g-2 mb-3 align-items-end">
                 <div class="col-md-3 f-group">
-                    <label>Ngày hoàn tất (từ - đến)</label>
+                    <label>Ngày hoàn tất (từ - đến) · mặc định tháng này</label>
                     <div class="d-flex gap-1">
                         <input type="date" id="hiFilterFrom" class="form-control form-control-sm" onchange="hiApplyFilters()">
                         <input type="date" id="hiFilterTo" class="form-control form-control-sm" onchange="hiApplyFilters()">
@@ -973,12 +973,16 @@
                         <span class="hi-report-title"><i class="bi bi-speedometer2 me-2" style="color:#F37021;"></i>Báo cáo HI FPT</span>
                         <span class="hi-scope-chip" id="hiScopeChip">Toàn bộ</span>
                     </div>
-                    <div class="hi-seg" id="hiGroupSeg">
-                        <button type="button" data-group="doiTacQuanLy" class="active">Theo Đối tác</button>
-                        <button type="button" data-group="doiTruong">Theo Đội trưởng</button>
-                        <button type="button" data-group="nhanVien">Theo Nhân viên</button>
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <div class="hi-seg" id="hiGroupSeg">
+                            <button type="button" data-group="doiTacQuanLy" class="active">Theo Đối tác</button>
+                            <button type="button" data-group="doiTruong">Theo Đội trưởng</button>
+                            <button type="button" data-group="nhanVien">Theo Nhân viên</button>
+                        </div>
+                        <button class="filter-reset-btn" id="hiReportToggle" onclick="hiToggleReport()"><i class="bi bi-chevron-up me-1"></i>Thu gọn</button>
                     </div>
                 </div>
+                <div id="hiReportBody">
 
                 <div class="row g-3 mb-3">
                     <div class="col-lg-4 col-md-6">
@@ -1040,6 +1044,7 @@
                         <table class="table table-hover align-middle mb-0" id="hiGroupTable"></table>
                     </div>
                 </div>
+                </div>
             </div>
 
             <div class="table-panel">
@@ -1070,7 +1075,7 @@
 
             <div class="filter-strip row g-2 mb-3 align-items-end">
                 <div class="col-md-3 f-group">
-                    <label>Ngày data (từ - đến)</label>
+                    <label>Ngày data (từ - đến) · mặc định tháng này</label>
                     <div class="d-flex gap-1">
                         <input type="date" id="rknFilterFrom" class="form-control form-control-sm" onchange="rknApplyFilters()">
                         <input type="date" id="rknFilterTo" class="form-control form-control-sm" onchange="rknApplyFilters()">
@@ -2601,14 +2606,27 @@
     // nguyên giá trị đã chọn của tài khoản cũ (do updateDependentFilters cố "giữ
     // lại" lựa chọn hiện tại khi build lại option), dẫn đến bộ lọc bị khoá vào tổ
     // hợp không còn khớp dữ liệu của tài khoản mới → hiện "Không có dữ liệu phù hợp".
+    // Mặc định các tab Bảo Trì / HI FPT / SH & RKN chỉ hiện dữ liệu THÁNG HIỆN TẠI
+    // (từ ngày 1 đến ngày cuối tháng). Muốn xem tháng cũ: người dùng tự chọn ngày,
+    // hoặc xoá trống 2 ô ngày để xem tất cả.
+    function setCurrentMonthRange(fromId, toId) {
+        let t = new Date(), p = n => String(n).padStart(2, '0');
+        let last = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate();
+        document.getElementById(fromId).value = `${t.getFullYear()}-${p(t.getMonth() + 1)}-01`;
+        document.getElementById(toId).value = `${t.getFullYear()}-${p(t.getMonth() + 1)}-${p(last)}`;
+    }
+    // Đặt mặc định ngay khi tải trang — áp dụng cho mọi vai trò (kể cả cus ở tab SH & RKN)
+    [['filterTgHoanTatFrom', 'filterTgHoanTatTo'], ['hiFilterFrom', 'hiFilterTo'], ['rknFilterFrom', 'rknFilterTo']]
+        .forEach(([f, t]) => setCurrentMonthRange(f, t));
     function clearFilterSelections() {
         document.getElementById('filterDoiTac').value = "";
         document.getElementById('filterDoiTruong').value = "";
         document.getElementById('filterTpktCheck').value = "";
         document.getElementById('filterNhanVien').value = "";
         document.getElementById('searchSoHopDong').value = "";
-        document.getElementById('filterTgHoanTatFrom').value = "";
-        document.getElementById('filterTgHoanTatTo').value = "";
+        setCurrentMonthRange('filterTgHoanTatFrom', 'filterTgHoanTatTo');
+        setCurrentMonthRange('hiFilterFrom', 'hiFilterTo');
+        setCurrentMonthRange('rknFilterFrom', 'rknFilterTo');
     }
 
     function initSessionUI() {
@@ -3720,7 +3738,8 @@
         hiApplyFilters();
     }
     function hiResetFilters() {
-        ['hiFilterFrom', 'hiFilterTo', 'hiSearch'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('hiSearch').value = '';
+        setCurrentMonthRange('hiFilterFrom', 'hiFilterTo');
         ['hiFilterNhanVien', 'hiFilterTinhTrang', 'hiFilterTuongTac'].forEach(id => document.getElementById(id).value = '');
         if (!isDoiTacLocked()) document.getElementById('hiFilterDoiTac').value = '';
         if (!isDoiTruongLocked()) document.getElementById('hiFilterDoiTruong').value = '';
@@ -3761,8 +3780,13 @@
         document.getElementById('hiAdminBar').classList.toggle('d-none', !(currentUser && currentUser.role === 'superadmin'));
         document.querySelectorAll('#hiGroupSeg button').forEach(b => b.classList.toggle('active', b.dataset.group === hiGroupBy));
         hiRenderKpis();
-        hiRenderCharts();
-        hiRenderGroupTable();
+        // Biểu đồ + bảng số liệu chỉ vẽ khi báo cáo đang mở (thu gọn thì bỏ qua cho nhẹ)
+        if (!document.getElementById('hiReportBody').classList.contains('d-none')) {
+            hiRenderCharts();
+            hiRenderGroupTable();
+        } else {
+            hiRenderScopeChip();
+        }
         hiRenderDetail();
     }
     function hiStats(rows) {
@@ -4351,6 +4375,19 @@
         hiRenderCharts();
     });
 
+    const HI_COLLAPSE_KEY = 'tpkt_hi_report_collapsed';
+    function hiApplyCollapse(c) {
+        document.getElementById('hiReportBody').classList.toggle('d-none', c);
+        document.getElementById('hiReportToggle').innerHTML = c ? '<i class="bi bi-chevron-down me-1"></i>Mở báo cáo' : '<i class="bi bi-chevron-up me-1"></i>Thu gọn';
+    }
+    function hiToggleReport() {
+        let c = !document.getElementById('hiReportBody').classList.contains('d-none');
+        try { localStorage.setItem(HI_COLLAPSE_KEY, c ? '1' : '0'); } catch (e) {}
+        hiApplyCollapse(c);
+        if (!c) hiRenderAll();
+    }
+    hiApplyCollapse(localStorage.getItem(HI_COLLAPSE_KEY) === '1');
+
     document.getElementById('hifpt-tab').addEventListener('shown.bs.tab', () => hiFetchData(false));
 
     // ================== PHÂN TÍCH SHD: link lấy từ D1 (app_settings.shd_link) ==================
@@ -4497,7 +4534,8 @@
         rknApplyFilters();
     }
     function rknResetFilters() {
-        ['rknFilterFrom', 'rknFilterTo', 'rknSearch', 'rknFilterHuong', 'rknFilterUpDown'].forEach(id => document.getElementById(id).value = '');
+        ['rknSearch', 'rknFilterHuong', 'rknFilterUpDown'].forEach(id => document.getElementById(id).value = '');
+        setCurrentMonthRange('rknFilterFrom', 'rknFilterTo');
         if (!isDoiTacLocked()) document.getElementById('rknFilterDoiTac').value = '';
         if (!isDoiTruongLocked()) document.getElementById('rknFilterDoiTruong').value = '';
         rknGroupBy = 'doiTacQuanLy';
@@ -5587,8 +5625,7 @@
         document.getElementById('filterTpktCheck').value = "";
         document.getElementById('filterNhanVien').value = "";
         document.getElementById('searchSoHopDong').value = "";
-        document.getElementById('filterTgHoanTatFrom').value = "";
-        document.getElementById('filterTgHoanTatTo').value = "";
+        setCurrentMonthRange('filterTgHoanTatFrom', 'filterTgHoanTatTo');
         updateDependentFilters();
         filterData();
     }
