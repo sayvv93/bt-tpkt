@@ -182,6 +182,14 @@
         .stat-item.accent-brand .stat-value { color: var(--brand-dark); }
         .stat-item.accent-amber .stat-value { color: var(--amber); }
         .stat-item.accent-red .stat-value { color: var(--red); }
+        @media (max-width: 576px) {
+            /* Điện thoại: KPI xếp lưới 2 cột thay vì 5 cột chật */
+            .stat-strip { display: grid; grid-template-columns: repeat(2, 1fr); }
+            .stat-item { padding: 12px 14px; border-bottom: 1px solid var(--line); }
+            .stat-item:nth-child(2n) { border-right: none; }
+            .stat-item:last-child:nth-child(odd) { grid-column: 1 / -1; }
+            .stat-value { font-size: 22px; }
+        }
 
         /* ---------- ALERT CONSOLE (cảnh báo nhân sự / trùng hợp đồng) ---------- */
         .alert-console { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
@@ -363,6 +371,16 @@
         .lich-chip.none { background:var(--surface); color:var(--slate); border:1px dashed var(--line); }
         .lich-day-big { font-family:'IBM Plex Mono', monospace; font-size:26px; font-weight:800; }
 
+        /* ---------- IQC & ĐẦU VÀO ---------- */
+        .iqc-link { display:flex; align-items:center; gap:12px; padding:12px 16px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); text-decoration:none; height:100%; }
+        .iqc-link:hover { border-color:var(--brand); background:var(--brand-soft); color:var(--ink); }
+        .iqc-link > .bi:first-child { font-size:22px; color:var(--brand); }
+        .iqc-link small { display:block; color:var(--slate); font-family:'IBM Plex Mono', monospace; font-size:12px; }
+        .iqc-sel { min-width:130px; }
+        .iqc-sel.v-ok { border-left:4px solid #3F7D1F; }
+        .iqc-sel.v-not { border-left:4px solid #AC2B22; }
+        .iqc-sel.v-pending { border-left:4px solid #C9CEC6; }
+
         /* ---------- CHAT NỘI BỘ ---------- */
         .chat-panel {
             background: var(--card); border: 1px solid var(--line); border-radius: 10px;
@@ -440,6 +458,13 @@
             #cbDetailTable tr { border-bottom: 1px solid var(--line); padding: 10px 6px; }
             #cbDetailTable td { border: none; padding: 3px 4px; }
             #cbDetailTable td:nth-child(1), #cbDetailTable td:nth-child(2) { display: inline-block; width: auto; margin-right: 12px; vertical-align: top; }
+            /* IQC & Đầu Vào: thẻ xếp dọc trên điện thoại */
+            #iqcDetailTable thead { display: none; }
+            #iqcDetailTable, #iqcDetailTable tbody, #iqcDetailTable tr, #iqcDetailTable td { display: block; width: 100%; }
+            #iqcDetailTable tr { border-bottom: 1px solid var(--line); padding: 10px 6px; }
+            #iqcDetailTable td { border: none; padding: 3px 4px; }
+            #iqcDetailTable td:nth-child(-n+4) { display: inline-block; width: auto; margin-right: 10px; vertical-align: top; }
+            #iqcDetailTable td:nth-child(6), #iqcDetailTable td:nth-child(7) { display: inline-block; width: 48%; }
         }
         /* Màn hình cảm ứng: nút đủ lớn để bấm (~40px) */
         @media (pointer: coarse) {
@@ -532,6 +557,11 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="rkn-tab" data-bs-toggle="tab" data-bs-target="#rknContent" type="button" role="tab">
                 <i class="bi bi-reception-2 me-1" style="color:var(--red);"></i> SH &amp; RKN
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="iqc-tab" data-bs-toggle="tab" data-bs-target="#iqcContent" type="button" role="tab">
+                <i class="bi bi-camera-fill me-1" style="color:#2C7DA0;"></i> IQC &amp; Đầu Vào
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -1199,6 +1229,154 @@
             </div>
         </div>
 
+        <!-- TAB: IQC & ĐẦU VÀO (dataIQCDV) -->
+        <div class="tab-pane fade" id="iqcContent" role="tabpanel">
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <a class="iqc-link" href="https://uploadiqc.fteldni.com" target="_blank" rel="noopener noreferrer">
+                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                        <span><b>Ảnh lỗi KTV khắc phục lại</b><small>uploadiqc.fteldni.com</small></span>
+                        <i class="bi bi-box-arrow-up-right ms-auto"></i>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a class="iqc-link" href="http://iqc.fpt.net/" target="_blank" rel="noopener noreferrer">
+                        <i class="bi bi-images"></i>
+                        <span><b>Xem ảnh KTV upload khi TKM</b><small>iqc.fpt.net</small></span>
+                        <i class="bi bi-box-arrow-up-right ms-auto"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div id="iqcAdminBar" class="hi-admin-bar d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 d-none">
+                <span class="fw-bold small" style="color:#8A6A12;"><i class="bi bi-shield-lock-fill me-1"></i>Admin — Nhập dữ liệu IQC &amp; Đầu Vào mới (<span id="iqcImportLimitLbl">1.000</span> dòng/lần)</span>
+                <label class="filter-reset-btn mb-0" style="cursor:pointer;"><i class="bi bi-database-add me-1"></i>Nhập dữ liệu mới
+                    <input type="file" accept=".xlsx,.xls,.csv" class="d-none" onchange="iqcHandleImportNew(event)">
+                </label>
+            </div>
+
+            <div class="filter-strip row g-2 mb-3 align-items-end">
+                <div class="col-md-3 f-group">
+                    <label>Ngày hoàn tất PTC (từ - đến) · mặc định tháng này</label>
+                    <div class="d-flex gap-1">
+                        <input type="date" id="iqcFilterFrom" class="form-control form-control-sm" onchange="iqcApplyFilters()">
+                        <input type="date" id="iqcFilterTo" class="form-control form-control-sm" onchange="iqcApplyFilters()">
+                    </div>
+                </div>
+                <div class="col-md-2 f-group"><label>Đối tác</label><select id="iqcFilterDoiTac" class="form-select form-select-sm" onchange="iqcOnFilterChange()"></select></div>
+                <div class="col-md-2 f-group"><label>Đội trưởng</label><select id="iqcFilterDoiTruong" class="form-select form-select-sm" onchange="iqcOnFilterChange('dtr')"></select></div>
+                <div class="col-md-2 f-group"><label>Nhân viên</label><select id="iqcFilterNhanVien" class="form-select form-select-sm" onchange="iqcApplyFilters()"></select></div>
+                <div class="col-md-3 f-group"><label>Tìm Số HĐ</label>
+                    <input type="text" id="iqcSearch" class="form-control form-control-sm" placeholder="Nhập số hợp đồng..." oninput="clearTimeout(window._iqcT); window._iqcT = setTimeout(iqcApplyFilters, 250);"></div>
+                <div class="col-md-2 f-group"><label>Check IQC</label>
+                    <select id="iqcFilterIqc" class="form-select form-select-sm" onchange="iqcApplyFilters()"><option value="">Tất cả</option><option>Chưa kiểm tra</option><option>OK</option><option>NOT</option></select></div>
+                <div class="col-md-2 f-group"><label>Check Đầu Vào</label>
+                    <select id="iqcFilterDv" class="form-select form-select-sm" onchange="iqcApplyFilters()"><option value="">Tất cả</option><option>Chưa kiểm tra</option><option>OK</option><option>NOT</option></select></div>
+                <div class="col-md-8 f-group d-flex flex-wrap justify-content-end gap-2">
+                    <span class="small align-self-center me-auto" id="iqcLastLoaded" style="color:var(--slate-soft);"></span>
+                    <button class="filter-reset-btn" onclick="iqcResetFilters()"><i class="bi bi-x-circle me-1"></i>Xoá lọc</button>
+                    <button class="filter-reset-btn" onclick="iqcFetchData(true)"><i class="bi bi-arrow-clockwise me-1"></i>Tải lại</button>
+                    <button class="filter-reset-btn" onclick="iqcDownloadTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu</button>
+                    <button class="filter-reset-btn" onclick="iqcExportPending()"><i class="bi bi-file-earmark-arrow-down me-1"></i>Xuất ca chưa kiểm tra</button>
+                    <label class="filter-reset-btn mb-0" style="cursor:pointer;"><i class="bi bi-file-earmark-arrow-up me-1"></i>Nhập file đã xử lý (≤100)
+                        <input type="file" accept=".xlsx,.xls,.csv" class="d-none" onchange="iqcHandleImportProcess(event)">
+                    </label>
+                </div>
+            </div>
+
+            <div class="stat-strip">
+                <div class="stat-item accent-neutral"><div class="stat-label">TỔNG CA</div><div class="stat-value" id="iqcKpiTotal">0</div></div>
+                <div class="stat-item accent-amber"><div class="stat-label">CÒN CHƯA KIỂM TRA</div><div class="stat-value" id="iqcKpiPending">0</div></div>
+                <div class="stat-item accent-red"><div class="stat-label">CÓ NOT</div><div class="stat-value" id="iqcKpiNot">0</div></div>
+                <div class="stat-item accent-brand"><div class="stat-label">ĐẠT CẢ 2</div><div class="stat-value" id="iqcKpiOk">0</div></div>
+                <div class="stat-item accent-brand"><div class="stat-label">TỈ LỆ ĐẠT CẢ 2</div><div class="stat-value" id="iqcKpiRate">--</div></div>
+            </div>
+
+            <div class="mb-4" id="iqcReport">
+                <div class="hi-report-head">
+                    <div>
+                        <span class="hi-report-title"><i class="bi bi-clipboard-data me-2" style="color:#2C7DA0;"></i>Báo cáo IQC &amp; Đầu Vào</span>
+                        <span class="hi-scope-chip" id="iqcScopeChip">Toàn bộ phạm vi</span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <div class="hi-seg" id="iqcGroupSeg">
+                            <button type="button" data-group="doiTacQuanLy" class="active">Theo Đối tác</button>
+                            <button type="button" data-group="doiTruong">Theo Đội trưởng</button>
+                            <button type="button" data-group="nhanVien">Theo Nhân viên</button>
+                        </div>
+                        <button class="filter-reset-btn" id="iqcReportToggle" onclick="iqcToggleReport()"><i class="bi bi-chevron-up me-1"></i>Thu gọn</button>
+                    </div>
+                </div>
+                <div id="iqcReportBody">
+                    <div class="row g-3 mb-3">
+                        <div class="col-lg-4 col-md-6">
+                            <div class="hi-card">
+                                <div class="hi-card-title"><i class="bi bi-camera me-1"></i>Tỉ lệ đạt IQC</div>
+                                <div class="hi-gauge"><canvas id="iqcGaugeIqc"></canvas>
+                                    <div class="hi-gauge-center"><div class="big" id="iqcGIqcVal">--</div><div class="sub">OK / ca đã kiểm tra IQC</div></div></div>
+                                <div class="hi-gauge-foot"><span>OK <b id="iqcGIqcOk">0</b></span><span>NOT <b id="iqcGIqcNot" style="color:var(--red);">0</b></span><span>Chưa KT <b id="iqcGIqcPend">0</b></span></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="hi-card">
+                                <div class="hi-card-title"><i class="bi bi-box-arrow-in-down me-1"></i>Tỉ lệ đạt Đầu Vào</div>
+                                <div class="hi-gauge"><canvas id="iqcGaugeDv"></canvas>
+                                    <div class="hi-gauge-center"><div class="big" id="iqcGDvVal">--</div><div class="sub">OK / ca đã kiểm tra Đầu Vào</div></div></div>
+                                <div class="hi-gauge-foot"><span>OK <b id="iqcGDvOk">0</b></span><span>NOT <b id="iqcGDvNot" style="color:var(--red);">0</b></span><span>Chưa KT <b id="iqcGDvPend">0</b></span></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-12">
+                            <div class="hi-card">
+                                <div class="hi-card-title"><i class="bi bi-pie-chart me-1"></i>Cơ cấu trạng thái ca</div>
+                                <div class="hi-chart-box" style="height:190px;"><canvas id="iqcDonut"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hi-card mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="hi-card-title mb-0"><i class="bi bi-graph-up-arrow me-1"></i>Diễn biến theo ngày hoàn tất PTC</div>
+                            <span class="small" id="iqcTrendNote" style="color:var(--slate-soft);"></span>
+                        </div>
+                        <div class="hi-chart-box mt-2"><canvas id="iqcTrendChart"></canvas></div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-lg-8">
+                            <div class="hi-card">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="hi-card-title mb-0" id="iqcRankTitle">Tình trạng kiểm tra</div>
+                                    <div class="hi-seg" id="iqcRankMetricSeg">
+                                        <button type="button" data-metric="status" class="active">Tình trạng</button>
+                                        <button type="button" data-metric="rate">Tỉ lệ đạt cả 2</button>
+                                    </div>
+                                </div>
+                                <div class="hi-rank-scroll"><div id="iqcRankBox" style="position:relative;"><canvas id="iqcRankChart"></canvas></div></div>
+                                <div class="small mt-2" style="color:var(--slate-soft);">Bấm vào 1 cột để lọc xuống cấp dưới · Tỉ lệ đạt cả 2 = ca cả 2 OK / tổng ca</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4"><div class="hi-card" id="iqcSpotlight"></div></div>
+                    </div>
+
+                    <div class="table-panel">
+                        <div class="p-3 pb-2 fw-bold"><i class="bi bi-table me-2" style="color:var(--brand);"></i>Bảng số liệu <span class="small fw-normal" style="color:var(--slate-soft);">— bấm 1 dòng để lọc xuống cấp dưới</span></div>
+                        <div class="table-responsive"><table class="table table-hover align-middle mb-0" id="iqcGroupTable"></table></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-panel">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 p-3 pb-2">
+                    <div class="fw-bold"><i class="bi bi-list-check me-2" style="color:var(--brand);"></i>Danh sách cần xử lý <span class="small fw-normal" id="iqcDetailCount" style="color:var(--slate-soft);"></span></div>
+                    <label class="small d-flex align-items-center gap-1 mb-0" style="color:var(--slate);">
+                        <input type="checkbox" id="iqcShowDone" onchange="iqcPage = 1; iqcRenderDetail();"> Hiện cả ca đã đạt (cả 2 OK)
+                    </label>
+                </div>
+                <div class="table-responsive"><table class="table table-hover align-middle mb-0" id="iqcDetailTable"></table></div>
+                <div class="d-flex justify-content-end p-3"><nav><ul class="pagination pagination-sm mb-0" id="iqcPagination"></ul></nav></div>
+            </div>
+        </div>
+
         <!-- TAB: NHÂN SỰ (dataNS) -->
         <div class="tab-pane fade" id="nsContent" role="tabpanel">
             <div id="nsAdminBar" class="hi-admin-bar d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 d-none">
@@ -1364,6 +1542,7 @@
                                         <tr><td><b>Cảnh Báo</b></td><td>Số HĐ vừa có ca Bảo Trì vừa bị Suy hao / Rớt kết nối — ghi chú hướng xử lý</td><td>Mọi tài khoản trừ cus</td></tr>
                                         <tr><td><b>HI FPT</b></td><td>Tỉ lệ cài đặt và tỉ lệ tương tác ứng dụng HI FPT</td><td>Mọi tài khoản trừ cus</td></tr>
                                         <tr><td><b>SH &amp; RKN</b></td><td>Theo dõi và xử lý ca Suy hao / Rớt kết nối liên tục</td><td>Tất cả</td></tr>
+                                        <tr><td><b>IQC &amp; Đầu Vào</b></td><td>Đội trưởng kiểm tra ca IQC / Đầu Vào (OK / NOT + ghi chú), link tới trang ảnh IQC</td><td>Mọi tài khoản trừ cus, HR</td></tr>
                                         <tr><td><b>Nhân Sự</b></td><td>Danh sách nhân sự, thâm niên tự tính, cơ cấu theo thâm niên / bậc</td><td>Tất cả (cus chỉ xem)</td></tr>
                                         <tr><td><b>Lịch Trực ĐT</b></td><td>Khai báo lịch ON / OFF của Đội trưởng, xem nhanh lịch hôm nay và ngày mai</td><td>Tất cả (cus chỉ xem)</td></tr>
                                         <tr><td><b>Trò chuyện</b></td><td>Chat nội bộ + nhật ký tự động (XL Lại, SH &amp; RKN)</td><td>Tất cả</td></tr>
@@ -1452,6 +1631,20 @@
                             <li>Mọi thay đổi (Hướng XL, ghi chú, nhập/sửa/xoá ca) được ghi vào <b>Trò chuyện</b> dưới tên "Nhật ký SH &amp; RKN".</li>
                             <li>Báo cáo theo Đối tác / Đội trưởng / Hướng XL: tỉ lệ đã XL, cơ cấu Hướng XL, mức Up/Down của ca còn mở, diễn biến theo ngày data, điểm nhấn.</li>
                             <li><b>Admin / SuperAdmin</b>: nhập Excel (tiêu đề như sheet "From-import"), sửa đủ cột, thêm / xoá ca. Khi nhập, Số HĐ đang có ca <b>Chưa XL</b> hoặc <b>Đã Tạo CL</b> báo <b>trùng</b> và không nhập thêm; Số HĐ chỉ có ca "Đã XL" được nhập thành ca mới.</li>
+                        </ul></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#giqc">7a. IQC &amp; Đầu Vào</button></h2>
+                    <div id="giqc" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li>Mỗi ca được gán Đối tác / Đội trưởng tự động theo <b>Nhân viên</b> (khớp cột <b>Mobinet</b> trong tab Nhân Sự). Nhân viên chưa có trong Nhân Sự → ca "Chưa map", chỉ Admin thấy cho tới khi bổ sung nhân sự. Chuyển đội ở tab Nhân Sự thì ca IQC đi theo.</li>
+                            <li>Đội trưởng chọn <b>Check IQC</b> và <b>Check Đầu Vào</b> (mặc định "Chưa kiểm tra" → OK / NOT) và nhập ghi chú (≤ 500 ký tự, Enter để lưu). Ca <b>cả 2 OK</b> tự ẩn khỏi danh sách (tick "Hiện cả ca đã đạt" để xem lại).</li>
+                            <li>Làm hàng loạt: <b>Xuất ca chưa kiểm tra</b> (theo bộ lọc, VD chọn đội của mình) → điền OK / NOT / ghi chú trong Excel → <b>Nhập file đã xử lý</b> (tối đa 100 dòng/lần; ô để trống giữ nguyên giá trị cũ).</li>
+                            <li>Mặc định chỉ hiện ca có Ngày hoàn tất PTC trong tháng hiện tại; chọn ngày để xem tháng cũ.</li>
+                            <li><b>Admin / SuperAdmin</b>: nhập dữ liệu mới (Admin 1.000 dòng, SuperAdmin 10.000 dòng mỗi lần), xoá ca. Nhập lại ca đã có giữ nguyên kết quả kiểm tra.</li>
+                            <li>Hai ô link trên đầu tab: <b>uploadiqc.fteldni.com</b> (ảnh lỗi KTV khắc phục lại) và <b>iqc.fpt.net</b> (xem ảnh KTV upload khi TKM).</li>
                         </ul></div>
                     </div>
                 </div>
@@ -2672,6 +2865,7 @@
         document.getElementById('cb-tab').classList.toggle('d-none', isRestrictedUi);
         document.getElementById('hifpt-tab').classList.toggle('d-none', isRestrictedUi);
         document.getElementById('rkn-tab').classList.toggle('d-none', isHr);
+        document.getElementById('iqc-tab').classList.toggle('d-none', isRestrictedUi);
         if (isHr) {
             document.getElementById('phantich-tab').classList.add('d-none');
             // Tab mặc định cho HR là Nhân Sự
@@ -3026,7 +3220,7 @@
             data: { labels, datasets: [{ data: vals, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
             options: { responsive: true, maintainAspectRatio: false, cutout: '58%',
                 plugins: {
-                    legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 },
+                    legend: { position: window.innerWidth < 576 ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 11 },
                         generateLabels: ch => labels.map((l, i) => ({ text: `${l}: ${fmt(vals[i])} (${(vals[i] / Math.max(1, c.total) * 100).toFixed(1)}%)`,
                             fillStyle: colors[i], strokeStyle: colors[i], index: i })) } },
                     tooltip: { callbacks: { label: x => ` ${x.label}: ${fmt(x.raw)} ca` } }
@@ -4258,7 +4452,7 @@
             data: { labels: entries.map(e => e[0]), datasets: [{ data: entries.map(e => e[1]), backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
             options: { responsive: true, maintainAspectRatio: false, cutout: '58%',
                 plugins: {
-                    legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 },
+                    legend: { position: window.innerWidth < 576 ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 11 },
                         generateLabels: ch => ch.data.labels.map((l, i) => ({ text: `${l} (${(ch.data.datasets[0].data[i] / Math.max(1, s.total) * 100).toFixed(1)}%)`,
                             fillStyle: colors[i], strokeStyle: colors[i], index: i })) } },
                     tooltip: { callbacks: { label: c => ` ${c.label}: ${fmt(c.raw)} ca` } }
@@ -4287,9 +4481,9 @@
             hiCharts.trend = new Chart(document.getElementById('hiTrendChart'), {
                 data: { labels, datasets: [
                     { type: 'line', label: 'Tỉ lệ tương tác (%)', data: st.map(x => x.interactRate), yAxisID: 'y1', borderColor: '#E3A23B', backgroundColor: '#E3A23B',
-                      tension: 0.35, pointRadius: 2.5, borderWidth: 2.5, spanGaps: true, order: 1 },
+                      cubicInterpolationMode: 'monotone', pointRadius: 2.5, borderWidth: 2.5, spanGaps: true, order: 1 },
                     { type: 'line', label: 'Tỉ lệ cài đặt (%)', data: st.map(x => x.installRate), yAxisID: 'y1', borderColor: '#3F7D1F', backgroundColor: '#3F7D1F',
-                      tension: 0.35, pointRadius: 2.5, borderWidth: 2.5, spanGaps: true, order: 2 },
+                      cubicInterpolationMode: 'monotone', pointRadius: 2.5, borderWidth: 2.5, spanGaps: true, order: 2 },
                     { type: 'bar', label: 'Số ca', data: st.map(x => x.total), yAxisID: 'y', backgroundColor: 'rgba(92,102,96,0.18)', borderRadius: 4, order: 3 }
                 ] },
                 options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
@@ -4624,7 +4818,7 @@
             type: 'doughnut',
             data: { labels: RKN_STATUSES, datasets: [{ data: vals, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
             options: { responsive: true, maintainAspectRatio: false, cutout: '58%',
-                plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 },
+                plugins: { legend: { position: window.innerWidth < 576 ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 11 },
                     generateLabels: () => RKN_STATUSES.map((l, i) => ({ text: `${l}: ${fmt(vals[i])} (${(vals[i] / Math.max(1, s.total) * 100).toFixed(1)}%)`, fillStyle: colors[i], strokeStyle: colors[i], index: i })) } },
                     tooltip: { callbacks: { label: c => ` ${c.label}: ${fmt(c.raw)} ca` } } } }
         });
@@ -5613,6 +5807,435 @@
         XLSX.writeFile(wb, `CanhBao_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
     document.getElementById('cb-tab').addEventListener('shown.bs.tab', () => cbFetchData(false));
+
+    // ================== IQC & ĐẦU VÀO (dataIQCDV) ==================
+    // Đối tác / Đội trưởng do Worker ghép từ Nhân viên ↔ dataNS.mobinet. Ca "Chưa map"
+    // (nhân viên chưa có trong Nhân Sự) chỉ tài khoản toàn quyền thấy. Đội trưởng chọn
+    // OK / NOT cho Check IQC và Check Đầu Vào + ghi chú; cả 2 OK thì ca ẩn khỏi danh sách.
+    const IQC_VALUES = ['Chưa kiểm tra', 'OK', 'NOT'];
+    const IQC_NOTE_MAX = 500, IQC_PAGE_SIZE = 50, IQC_PROCESS_MAX = 100, IQC_CHUNK = 500;
+    const IQC_COLLAPSE_KEY = 'tpkt_iqc_report_collapsed';
+    const IQC_COLS = [['soHopDong', 'Số hợp đồng'], ['ngayHoanTat', 'Ngày hoàn tất PTC'], ['ghiChu', 'Ghi chú'], ['nhanVien', 'Nhân viên'],
+                      ['checkIQC', 'Check IQC'], ['checkDauVao', 'Check Đầu Vào'], ['dtNote', 'Ghi chú đội trưởng']];
+    const IQC_HEADER_MAP = { sohopdong: 'soHopDong', sohd: 'soHopDong', ngayhoantatptc: 'ngayHoanTat', ngayhoantat: 'ngayHoanTat',
+        ghichu: 'ghiChu', nhanvien: 'nhanVien', checkiqc: 'checkIQC', checkdauvao: 'checkDauVao',
+        ghichudoitruong: 'dtNote', ghichidoitruong: 'dtNote', doitruongnote: 'dtNote' };
+    let iqcData = [], iqcFiltered = [], iqcLoadedFor = null, iqcLoadedAt = 0, iqcPage = 1, iqcGroupBy = 'doiTacQuanLy';
+    const iqcUnmapped = r => !r.doiTacQuanLy;
+    const iqcDone = r => r.checkIQC === 'OK' && r.checkDauVao === 'OK';
+    const iqcPending = r => r.checkIQC === 'Chưa kiểm tra' || r.checkDauVao === 'Chưa kiểm tra';
+    const iqcHasNot = r => r.checkIQC === 'NOT' || r.checkDauVao === 'NOT';
+    const iqcKey = r => (r.doiTacQuanLy ? r[iqcGroupBy] : '') || '(Chưa map)';
+
+    async function iqcFetchData(force) {
+        if (!currentUser || isRestrictedRole()) return;
+        if (!force && iqcLoadedFor === currentUser.username && Date.now() - iqcLoadedAt < HI_STALE_MS) { iqcRenderAll(); return; }
+        try {
+            let res = await apiFetch("api/iqc/data", { method: "GET" });
+            let j = await res.json();
+            if (!res.ok) { alert(j.error || "Không tải được dữ liệu IQC"); return; }
+            iqcData = j.data || [];
+            iqcData.forEach(r => { let d = parseFlexibleDate(r.ngayHoanTat); r._t = d ? d.getTime() : null; });
+            iqcLoadedFor = currentUser.username; iqcLoadedAt = Date.now();
+            document.getElementById('iqcLastLoaded').textContent = `Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN')} · ${iqcData.length} ca`;
+        } catch (e) { console.error("Lỗi tải IQC:", e); return; }
+        hiFillSelect('iqcFilterDoiTac', hiUniq(iqcData, 'doiTacQuanLy'), 'Tất cả Đối tác', true);
+        let sel = document.getElementById('iqcFilterDoiTac');
+        if (isDoiTacLocked()) { if (![...sel.options].some(o => o.value === currentUser.doiTac)) sel.add(new Option(currentUser.doiTac, currentUser.doiTac)); sel.value = currentUser.doiTac; sel.disabled = true; }
+        else sel.disabled = false;
+        iqcOnFilterChange();
+    }
+    function iqcOnFilterChange(level) {
+        let dt = document.getElementById('iqcFilterDoiTac').value;
+        let base = iqcData.filter(r => !dt || r.doiTacQuanLy === dt);
+        if (level !== 'dtr') hiFillSelect('iqcFilterDoiTruong', hiUniq(base, 'doiTruong'), 'Tất cả Đội trưởng', true);
+        let s = document.getElementById('iqcFilterDoiTruong');
+        if (isDoiTruongLocked()) { if (![...s.options].some(o => o.value === currentUser.doiTruong)) s.add(new Option(currentUser.doiTruong, currentUser.doiTruong)); s.value = currentUser.doiTruong; s.disabled = true; }
+        else s.disabled = false;
+        let dtr = s.value;
+        hiFillSelect('iqcFilterNhanVien', hiUniq(base.filter(r => !dtr || r.doiTruong === dtr), 'nhanVien'), 'Tất cả Nhân viên', true);
+        iqcApplyFilters();
+    }
+    function iqcResetFilters() {
+        ['iqcSearch', 'iqcFilterIqc', 'iqcFilterDv', 'iqcFilterNhanVien'].forEach(id => document.getElementById(id).value = '');
+        if (!isDoiTacLocked()) document.getElementById('iqcFilterDoiTac').value = '';
+        if (!isDoiTruongLocked()) document.getElementById('iqcFilterDoiTruong').value = '';
+        setCurrentMonthRange('iqcFilterFrom', 'iqcFilterTo');
+        iqcGroupBy = 'doiTacQuanLy';
+        iqcOnFilterChange();
+    }
+    function iqcApplyFilters() {
+        let v = id => document.getElementById(id).value;
+        let dt = v('iqcFilterDoiTac'), dtr = v('iqcFilterDoiTruong'), nv = v('iqcFilterNhanVien'), qi = v('iqcFilterIqc'), qd = v('iqcFilterDv');
+        let q = v('iqcSearch').trim().toUpperCase();
+        let f = v('iqcFilterFrom'), t = v('iqcFilterTo');
+        let fromT = f ? new Date(f + 'T00:00:00').getTime() : null, toT = t ? new Date(t + 'T23:59:59').getTime() : null;
+        iqcFiltered = iqcData.filter(r => (!dt || r.doiTacQuanLy === dt) && (!dtr || r.doiTruong === dtr) && (!nv || r.nhanVien === nv)
+            && (!qi || r.checkIQC === qi) && (!qd || r.checkDauVao === qd) && (!q || String(r.soHopDong).toUpperCase().includes(q))
+            && ((fromT === null && toT === null) || (r._t && (fromT === null || r._t >= fromT) && (toT === null || r._t <= toT))));
+        iqcPage = 1;
+        iqcRenderAll();
+    }
+    function iqcStats(rows) {
+        let s = { total: rows.length, pending: 0, not: 0, done: 0, iqcOk: 0, iqcChecked: 0, dvOk: 0, dvChecked: 0 };
+        rows.forEach(r => {
+            if (iqcPending(r)) s.pending++; if (iqcHasNot(r)) s.not++; if (iqcDone(r)) s.done++;
+            if (r.checkIQC !== 'Chưa kiểm tra') { s.iqcChecked++; if (r.checkIQC === 'OK') s.iqcOk++; }
+            if (r.checkDauVao !== 'Chưa kiểm tra') { s.dvChecked++; if (r.checkDauVao === 'OK') s.dvOk++; }
+        });
+        s.rate = s.total ? s.done / s.total * 100 : null;
+        s.iqcRate = s.iqcChecked ? s.iqcOk / s.iqcChecked * 100 : null;
+        s.dvRate = s.dvChecked ? s.dvOk / s.dvChecked * 100 : null;
+        return s;
+    }
+    function iqcScopeText() {
+        let p = [], v = id => document.getElementById(id).value;
+        ['iqcFilterDoiTac', 'iqcFilterDoiTruong', 'iqcFilterNhanVien'].forEach(id => { if (v(id)) p.push(v(id)); });
+        if (v('iqcFilterIqc')) p.push('IQC ' + v('iqcFilterIqc')); if (v('iqcFilterDv')) p.push('Đầu Vào ' + v('iqcFilterDv'));
+        const vn = d => d.split('-').reverse().join('/');
+        if (v('iqcFilterFrom') || v('iqcFilterTo')) p.push(`${v('iqcFilterFrom') ? vn(v('iqcFilterFrom')) : '…'} → ${v('iqcFilterTo') ? vn(v('iqcFilterTo')) : '…'}`);
+        return p.length ? p.join(' · ') : 'Toàn bộ phạm vi';
+    }
+    function iqcRenderAll() {
+        document.getElementById('iqcAdminBar').classList.toggle('d-none', !rknIsAdmin());
+        document.getElementById('iqcImportLimitLbl').textContent = currentUser && currentUser.role === 'superadmin' ? '10.000' : '1.000';
+        document.querySelectorAll('#iqcGroupSeg button').forEach(b => b.classList.toggle('active', b.dataset.group === iqcGroupBy));
+        let s = iqcStats(iqcFiltered), fmt = n => n.toLocaleString('vi-VN');
+        document.getElementById('iqcKpiTotal').textContent = fmt(s.total);
+        document.getElementById('iqcKpiPending').textContent = fmt(s.pending);
+        document.getElementById('iqcKpiNot').textContent = fmt(s.not);
+        document.getElementById('iqcKpiOk').textContent = fmt(s.done);
+        let rk = document.getElementById('iqcKpiRate'); rk.textContent = s.rate === null ? '--' : s.rate.toFixed(1) + '%';
+        document.getElementById('iqcScopeChip').textContent = iqcScopeText();
+        if (!document.getElementById('iqcReportBody').classList.contains('d-none')) { iqcRenderCharts(s); iqcRenderGroupTable(); }
+        iqcRenderDetail();
+    }
+    // ---------- Biểu đồ báo cáo (cùng phong cách HI FPT / SH & RKN) ----------
+    // Mỗi ca thuộc đúng 1 nhóm, ưu tiên: Còn chưa kiểm tra (≥ 1 mục chưa KT — khớp KPI và bảng)
+    // → Đã KT xong, có NOT → Đạt cả 2.
+    const IQC_STATUS = [['done', 'Đạt cả 2', '#3F7D1F'], ['not', 'Đã KT xong, có NOT', '#AC2B22'], ['pend', 'Còn chưa kiểm tra', '#E3A23B']];
+    const iqcBucket = r => iqcPending(r) ? 'pend' : (iqcDone(r) ? 'done' : 'not');
+    let iqcRankMetric = 'status';
+    function iqcGroups(rows) {
+        let g = new Map();
+        rows.forEach(r => { let k = iqcKey(r); if (!g.has(k)) g.set(k, { k, rows: [], dtr: r.doiTruong, dt: r.doiTacQuanLy }); g.get(k).rows.push(r); });
+        return [...g.values()].map(x => { let st = iqcStats(x.rows); st.bDone = st.done; st.bNot = x.rows.filter(r => iqcBucket(r) === 'not').length; st.bPend = x.rows.filter(r => iqcBucket(r) === 'pend').length; return Object.assign(x, st); });
+    }
+    function iqcRenderCharts(s) {
+        if (typeof Chart === 'undefined') return;
+        let rows = iqcFiltered, fmt = n => n.toLocaleString('vi-VN');
+        // 1) Hai đồng hồ
+        hiGauge('iqcG1', 'iqcGaugeIqc', s.iqcRate); hiGauge('iqcG2', 'iqcGaugeDv', s.dvRate);
+        let setVal = (id, p) => { let el = document.getElementById(id); el.textContent = p === null ? '--' : p.toFixed(1) + '%'; el.style.color = hiRateColor(p); };
+        setVal('iqcGIqcVal', s.iqcRate); setVal('iqcGDvVal', s.dvRate);
+        let cnt = (f, v) => rows.filter(r => r[f] === v).length;
+        document.getElementById('iqcGIqcOk').textContent = fmt(cnt('checkIQC', 'OK'));
+        document.getElementById('iqcGIqcNot').textContent = fmt(cnt('checkIQC', 'NOT'));
+        document.getElementById('iqcGIqcPend').textContent = fmt(cnt('checkIQC', 'Chưa kiểm tra'));
+        document.getElementById('iqcGDvOk').textContent = fmt(cnt('checkDauVao', 'OK'));
+        document.getElementById('iqcGDvNot').textContent = fmt(cnt('checkDauVao', 'NOT'));
+        document.getElementById('iqcGDvPend').textContent = fmt(cnt('checkDauVao', 'Chưa kiểm tra'));
+
+        // 2) Cơ cấu trạng thái
+        let vals = IQC_STATUS.map(([k]) => rows.filter(r => iqcBucket(r) === k).length), colors = IQC_STATUS.map(x => x[2]);
+        hiDestroyChart('iqcDonut');
+        hiCharts.iqcDonut = new Chart(document.getElementById('iqcDonut'), {
+            type: 'doughnut',
+            data: { labels: IQC_STATUS.map(x => x[1]), datasets: [{ data: vals, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '58%',
+                plugins: { legend: { position: window.innerWidth < 576 ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 11 },
+                    generateLabels: () => IQC_STATUS.map((x, i) => ({ text: `${x[1]}: ${fmt(vals[i])} (${(vals[i] / Math.max(1, rows.length) * 100).toFixed(1)}%)`, fillStyle: colors[i], strokeStyle: colors[i], index: i })) } },
+                    tooltip: { callbacks: { label: c => ` ${c.label}: ${fmt(c.raw)} ca` } } } }
+        });
+
+        // 3) Diễn biến theo ngày: cột chồng 3 trạng thái + đường tỉ lệ đạt IQC / Đầu Vào
+        hiDestroyChart('iqcTrend');
+        let ts = rows.map(r => r._t).filter(Boolean);
+        if (ts.length) {
+            let byWeek = (Math.max(...ts) - Math.min(...ts)) / 86400000 > 45, bk = new Map();
+            rows.forEach(r => {
+                if (!r._t) return;
+                let d = new Date(r._t); d.setHours(0, 0, 0, 0);
+                if (byWeek) d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+                if (!bk.has(d.getTime())) bk.set(d.getTime(), []);
+                bk.get(d.getTime()).push(r);
+            });
+            let keys = [...bk.keys()].sort((a, b) => a - b), st = keys.map(k => iqcStats(bk.get(k)));
+            document.getElementById('iqcTrendNote').textContent = byWeek ? 'Gộp theo tuần (từ Thứ 2)' : 'Theo từng ngày';
+            hiCharts.iqcTrend = new Chart(document.getElementById('iqcTrendChart'), {
+                data: { labels: keys.map(k => { let d = new Date(k); return (byWeek ? 'Tuần ' : '') + `${hiPad(d.getDate())}/${hiPad(d.getMonth() + 1)}`; }),
+                    datasets: [
+                        { type: 'line', label: 'Tỉ lệ đạt IQC (%)', data: st.map(x => x.iqcRate), yAxisID: 'y1', borderColor: '#2C7DA0', backgroundColor: '#2C7DA0', cubicInterpolationMode: 'monotone', pointRadius: 2.5, borderWidth: 2.5, spanGaps: true, order: 0 },
+                        { type: 'line', label: 'Tỉ lệ đạt Đầu Vào (%)', data: st.map(x => x.dvRate), yAxisID: 'y1', borderColor: '#12181B', backgroundColor: '#12181B', tension: 0.35, pointRadius: 2.5, borderWidth: 2, borderDash: [5, 4], spanGaps: true, order: 0 },
+                        ...IQC_STATUS.map(([k, l, c]) => ({ type: 'bar', label: l, data: keys.map(key => bk.get(key).filter(r => iqcBucket(r) === k).length), backgroundColor: c, stack: 's', order: 1 }))
+                    ] },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 10, font: { size: 11 } } },
+                        tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y1' ? ` ${c.dataset.label}: ${c.raw === null ? '--' : c.raw.toFixed(1) + '%'}` : ` ${c.dataset.label}: ${fmt(c.raw)} ca` } } },
+                    scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10.5 }, maxRotation: 0, autoSkip: true } },
+                        y: { stacked: true, beginAtZero: true, grid: { color: '#EEF0EB' }, title: { display: true, text: 'Số ca', font: { size: 10.5 } } },
+                        y1: { position: 'right', min: 0, max: 100, grid: { display: false }, ticks: { callback: v => v + '%' } } } }
+            });
+        } else document.getElementById('iqcTrendNote').textContent = 'Không có dữ liệu ngày';
+
+        // 4) Xếp hạng theo nhóm đang chọn
+        let groups = iqcGroups(rows), label = { doiTacQuanLy: 'Đối tác', doiTruong: 'Đội trưởng', nhanVien: 'Nhân viên' }[iqcGroupBy];
+        document.querySelectorAll('#iqcRankMetricSeg button').forEach(b => b.classList.toggle('active', b.dataset.metric === iqcRankMetric));
+        hiDestroyChart('iqcRank');
+        let box = document.getElementById('iqcRankBox');
+        if (iqcRankMetric === 'status') {
+            groups.sort((a, b) => (b.bPend + b.bNot) - (a.bPend + a.bNot) || b.total - a.total);
+            document.getElementById('iqcRankTitle').textContent = `Tình trạng kiểm tra theo ${label} (${groups.length})`;
+            box.style.height = Math.max(160, groups.length * 30 + 60) + 'px';
+            hiCharts.iqcRank = new Chart(document.getElementById('iqcRankChart'), {
+                type: 'bar',
+                data: { labels: groups.map(g => g.k), datasets: [['bPend', 'Còn chưa kiểm tra', '#E3A23B'], ['bNot', 'Đã KT xong, có NOT', '#AC2B22'], ['bDone', 'Đạt cả 2', '#3F7D1F']].map(([f, l, c]) => ({ label: l, data: groups.map(g => g[f]), backgroundColor: c, barThickness: 18, stack: 's' })) },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, layout: { padding: { right: 30 } },
+                    onClick: (e, els) => { if (els.length) iqcDrillDown(groups[els[0].index].k); },
+                    plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 10, font: { size: 11 } } },
+                        tooltip: { callbacks: { footer: it => { let g = groups[it[0].dataIndex]; return `Tỉ lệ đạt cả 2: ${g.rate === null ? '--' : g.rate.toFixed(1) + '%'}`; } } },
+                        datalabels: { color: '#fff', font: { weight: '700', size: 10.5 }, formatter: (v, c) => v && v / Math.max(1, groups[c.dataIndex].total) >= 0.12 ? v : '' } },
+                    scales: { x: { stacked: true, beginAtZero: true, grid: { color: '#EEF0EB' }, ticks: { precision: 0 } },
+                              y: { stacked: true, grid: { display: false }, ticks: { font: { size: 11.5, weight: '600' }, color: '#12181B' } } } },
+                plugins: [ChartDataLabels]
+            });
+        } else {
+            groups = groups.filter(g => g.rate !== null).sort((a, b) => b.rate - a.rate || b.total - a.total);
+            document.getElementById('iqcRankTitle').textContent = `Xếp hạng tỉ lệ đạt cả 2 theo ${label} (${groups.length})`;
+            box.style.height = Math.max(160, groups.length * 28 + 50) + 'px';
+            hiCharts.iqcRank = new Chart(document.getElementById('iqcRankChart'), {
+                type: 'bar',
+                data: { labels: groups.map(g => g.k), datasets: [{ data: groups.map(g => +g.rate.toFixed(1)), backgroundColor: groups.map(g => hiRateColor(g.rate)), borderRadius: 4, barThickness: 18 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, layout: { padding: { top: 16, right: 56 } },
+                    onClick: (e, els) => { if (els.length) iqcDrillDown(groups[els[0].index].k); },
+                    plugins: { legend: { display: false }, hiAvgLine: { value: s.rate },
+                        tooltip: { callbacks: { label: c => { let g = groups[c.dataIndex]; return ` ${g.done}/${g.total} ca đạt cả 2 (${c.raw}%)`; } } },
+                        datalabels: { anchor: 'end', align: 'end', offset: 4, color: c => hiRateColor(c.dataset.data[c.dataIndex]), font: { weight: '800', size: 11, family: 'IBM Plex Mono' }, formatter: v => v.toFixed(1) + '%' } },
+                    scales: { x: { min: 0, max: 100, grid: { color: '#EEF0EB' }, ticks: { callback: v => v + '%' } },
+                              y: { grid: { display: false }, ticks: { font: { size: 11.5, weight: '600' }, color: '#12181B' } } } },
+                plugins: [ChartDataLabels, hiAvgLinePlugin]
+            });
+        }
+
+        // 5) Điểm nhấn — chỉ xét đơn vị đủ mẫu
+        let minN = iqcGroupBy === 'nhanVien' ? 5 : 10;
+        let all = iqcGroups(rows).filter(g => g.k !== '(Chưa map)');
+        let mostPend = all.filter(g => g.pending > 0).sort((a, b) => b.pending - a.pending).slice(0, 3);
+        let mostNot = all.filter(g => g.not > 0).sort((a, b) => b.not - a.not).slice(0, 3);
+        let best = all.filter(g => g.total >= minN && g.rate !== null).sort((a, b) => b.rate - a.rate).slice(0, 3);
+        let sub = g => iqcGroupBy === 'nhanVien' ? (g.dtr || '') : iqcGroupBy === 'doiTruong' ? (g.dt || '') : `${fmt(g.total)} ca`;
+        const li = (icon, g, val, color) => `<li><span class="hi-spot-medal">${icon}</span><span class="hi-spot-name">${escapeHtml(g.k)}<small>${escapeHtml(sub(g))}</small></span><span class="hi-spot-val" style="color:${color};">${val}</span></li>`;
+        const empty = '<li class="small" style="color:var(--slate-soft);">Không có</li>';
+        let medals = ['🥇', '🥈', '🥉'];
+        let unm = rows.filter(iqcUnmapped).length;
+        document.getElementById('iqcSpotlight').innerHTML = `
+            <div class="hi-card-title">Điểm nhấn theo ${label}</div>
+            <div class="hi-spot-head" style="color:var(--amber);">⏳ Còn nhiều ca chưa kiểm tra nhất</div>
+            <ul class="hi-spot-list mb-3">${mostPend.length ? mostPend.map(g => li('📌', g, fmt(g.pending) + ' ca', '#B26B00')).join('') : empty}</ul>
+            <div class="hi-spot-head" style="color:${HI_COLOR_BAD};">⚠️ Nhiều ca NOT nhất — cần nhắc KTV</div>
+            <ul class="hi-spot-list mb-3">${mostNot.length ? mostNot.map(g => li('📷', g, fmt(g.not) + ' ca', HI_COLOR_BAD)).join('') : empty}</ul>
+            <div class="hi-spot-head" style="color:${HI_COLOR_GOOD};">🏆 Tỉ lệ đạt cả 2 cao nhất <span class="fw-normal" style="color:var(--slate-soft);">(≥ ${minN} ca)</span></div>
+            <ul class="hi-spot-list">${best.length ? best.map((g, i) => li(medals[i], g, g.rate.toFixed(1) + '%', hiRateColor(g.rate))).join('') : empty}</ul>
+            ${unm ? `<div class="small mt-2" style="color:var(--red);">${fmt(unm)} ca "Chưa map" — nhân viên chưa có trong tab Nhân Sự.</div>` : ''}`;
+    }
+    function iqcDrillDown(k) {
+        if (!k || k === '(Chưa map)') return;
+        if (iqcGroupBy === 'doiTacQuanLy') { if (!isDoiTacLocked()) document.getElementById('iqcFilterDoiTac').value = k; iqcGroupBy = 'doiTruong'; iqcOnFilterChange(); }
+        else if (iqcGroupBy === 'doiTruong') { if (!isDoiTruongLocked()) document.getElementById('iqcFilterDoiTruong').value = k; iqcGroupBy = 'nhanVien'; iqcOnFilterChange('dtr'); }
+        else { document.getElementById('iqcFilterNhanVien').value = k; iqcApplyFilters(); document.getElementById('iqcDetailTable').scrollIntoView({ behavior: 'smooth' }); }
+    }
+    document.getElementById('iqcRankMetricSeg').addEventListener('click', e => {
+        let b = e.target.closest('button[data-metric]'); if (!b) return;
+        iqcRankMetric = b.dataset.metric; iqcRenderCharts(iqcStats(iqcFiltered));
+    });
+
+    function iqcRenderGroupTable() {
+        let g = new Map();
+        iqcFiltered.forEach(r => { let k = iqcKey(r); if (!g.has(k)) g.set(k, { k, rows: [], dtr: r.doiTruong }); g.get(k).rows.push(r); });
+        let list = [...g.values()].map(x => Object.assign(x, iqcStats(x.rows))).sort((a, b) => b.pending - a.pending || b.total - a.total);
+        let isNv = iqcGroupBy === 'nhanVien';
+        let first = { doiTacQuanLy: 'Đối tác', doiTruong: 'Đội trưởng', nhanVien: 'Nhân viên' }[iqcGroupBy];
+        let row = (x, cls, key) => `<tr class="${cls}" ${key !== undefined ? `data-key="${escapeHtml(key)}"` : ''}><td class="fw-semibold">${escapeHtml(x.k)}</td>${isNv ? `<td class="small">${escapeHtml(x.dtr || '')}</td>` : ''}
+            <td class="text-end mono">${x.total}</td><td class="text-end mono fw-bold" style="color:${x.pending ? 'var(--amber)' : 'inherit'};">${x.pending}</td>
+            <td class="text-end mono" style="color:${x.not ? 'var(--red)' : 'inherit'};">${x.not}</td><td class="text-end mono">${x.done}</td>
+            <td>${hiRateHtml(x.iqcRate)}</td><td>${hiRateHtml(x.dvRate)}</td></tr>`;
+        let total = Object.assign(iqcStats(iqcFiltered), { k: 'TỔNG' });
+        document.getElementById('iqcGroupTable').innerHTML = `<thead><tr><th>${first}</th>${isNv ? '<th>Đội trưởng</th>' : ''}<th class="text-end">Tổng ca</th><th class="text-end">Chưa kiểm tra</th><th class="text-end">Có NOT</th><th class="text-end">Đạt cả 2</th><th>Tỉ lệ đạt IQC</th><th>Tỉ lệ đạt Đầu Vào</th></tr></thead><tbody>` +
+            (list.length ? list.map(x => row(x, x.k === '(Chưa map)' ? '' : 'hi-group-row', x.k)).join('') + row(total, 'hi-total-row')
+                : `<tr><td colspan="8" class="text-center py-4 small" style="color:var(--slate);">Không có dữ liệu trong khoảng đang lọc.</td></tr>`) + '</tbody>' +
+            `<caption class="small px-3" style="color:var(--slate-soft);">Tỉ lệ đạt IQC / Đầu Vào = số ca OK / số ca đã kiểm tra (không tính ca chưa kiểm tra).</caption>`;
+    }
+    function iqcRenderDetail() {
+        let showDone = document.getElementById('iqcShowDone').checked;
+        let rows = iqcFiltered.filter(r => showDone || !iqcDone(r)).sort((a, b) => (iqcPending(b) - iqcPending(a)) || (b._t || 0) - (a._t || 0));
+        let pages = Math.max(1, Math.ceil(rows.length / IQC_PAGE_SIZE));
+        iqcPage = Math.min(iqcPage, pages);
+        let slice = rows.slice((iqcPage - 1) * IQC_PAGE_SIZE, iqcPage * IQC_PAGE_SIZE);
+        document.getElementById('iqcDetailCount').textContent = `— ${rows.length.toLocaleString('vi-VN')} ca${showDone ? '' : ' cần xử lý'}`;
+        let isAdmin = rknIsAdmin();
+        const sel = (r, f) => {
+            let cls = r[f] === 'OK' ? 'v-ok' : r[f] === 'NOT' ? 'v-not' : 'v-pending';
+            return `<select class="form-select form-select-sm iqc-sel ${cls}" data-id="${r.id}" data-field="${f}" aria-label="${f === 'checkIQC' ? 'Check IQC' : 'Check Đầu Vào'} ${escapeHtml(r.soHopDong)}">
+                ${IQC_VALUES.map(v => `<option ${v === r[f] ? 'selected' : ''}>${v}</option>`).join('')}</select>`;
+        };
+        document.getElementById('iqcDetailTable').innerHTML = `<thead><tr><th>Đối tác / Đội trưởng</th><th>Số HĐ</th><th>Ngày hoàn tất PTC</th><th>Nhân viên</th><th style="min-width:220px;">Ghi chú</th><th>Check IQC</th><th>Check Đầu Vào</th><th style="min-width:230px;">Ghi chú đội trưởng</th>${isAdmin ? '<th class="text-end">Xoá</th>' : ''}</tr></thead><tbody>` +
+            (slice.length ? slice.map(r => `<tr>
+                <td>${iqcUnmapped(r) ? '<span class="hi-tag no">Chưa map</span>' : `<span class="fw-semibold">${escapeHtml(r.doiTacQuanLy)}</span><br><span class="small">${escapeHtml(r.doiTruong || '')}</span>`}</td>
+                <td class="fw-bold mono">${escapeHtml(r.soHopDong)}</td><td class="mono small">${escapeHtml(r.ngayHoanTat || '')}</td>
+                <td class="small mono">${escapeHtml(r.nhanVien || '')}</td>
+                <td class="small" style="white-space:normal;">${escapeHtml(r.ghiChu || '')}</td>
+                <td>${sel(r, 'checkIQC')}</td><td>${sel(r, 'checkDauVao')}</td>
+                <td><div class="d-flex gap-1"><input type="text" class="form-control form-control-sm iqc-note" data-id="${r.id}" maxlength="${IQC_NOTE_MAX}" value="${escapeHtml(r.dtNote || '')}" placeholder="Nhập ghi chú..." aria-label="Ghi chú đội trưởng ${escapeHtml(r.soHopDong)}">
+                    <button class="btn btn-sm btn-outline-success iqc-note-save d-none" data-id="${r.id}" title="Lưu ghi chú" aria-label="Lưu ghi chú"><i class="bi bi-check-lg"></i></button></div>
+                    <div class="small mt-1" style="color:var(--slate-soft);">${r.updatedBy ? `${escapeHtml(r.updatedBy)} · ${formatDateTime(r.ngayCapNhat)}` : ''}</div></td>
+                ${isAdmin ? `<td class="text-end"><button class="btn btn-sm btn-link p-0 text-danger" title="Xoá" aria-label="Xoá ca ${escapeHtml(r.soHopDong)}" onclick="iqcDeleteRow(${r.id})"><i class="bi bi-trash"></i></button></td>` : ''}
+            </tr>`).join('') : `<tr><td colspan="9" class="text-center py-4 small" style="color:var(--slate);">${iqcData.length ? 'Không còn ca nào cần xử lý trong khoảng đang lọc 🎉' : 'Chưa có dữ liệu.'}</td></tr>`) + '</tbody>';
+        let nums = [...new Set([1, pages, iqcPage - 1, iqcPage, iqcPage + 1].filter(n => n >= 1 && n <= pages))].sort((a, b) => a - b);
+        let html = '', prev = 0;
+        nums.forEach(n => { if (n - prev > 1) html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+            html += `<li class="page-item ${n === iqcPage ? 'active' : ''}"><a class="page-link" href="#" data-iqcpage="${n}">${n}</a></li>`; prev = n; });
+        document.getElementById('iqcPagination').innerHTML = pages > 1 ? html : '';
+    }
+
+    async function iqcSave(id, payload) {
+        try {
+            let r = await (await apiFetch("api/iqc/update", { method: "POST", body: JSON.stringify(Object.assign({ id }, payload)) })).json();
+            if (!r.success) { alert(r.error || "Không lưu được!"); return false; }
+            let row = iqcData.find(x => x.id === id);
+            if (row) Object.assign(row, payload, { updatedBy: r.updatedBy, ngayCapNhat: r.ngayCapNhat });
+            return true;
+        } catch (e) { console.error("Lỗi lưu IQC:", e); alert("Lỗi kết nối, vui lòng thử lại!"); return false; }
+    }
+    document.getElementById('iqcDetailTable').addEventListener('change', async e => {
+        let s = e.target.closest('.iqc-sel'); if (!s) return;
+        let id = parseInt(s.dataset.id, 10), row = iqcData.find(x => x.id === id), old = row ? row[s.dataset.field] : null;
+        s.disabled = true;
+        if (!await iqcSave(id, { [s.dataset.field]: s.value })) s.value = old;
+        iqcRenderAll(); // ca đủ 2 OK sẽ tự ẩn
+    });
+    document.getElementById('iqcDetailTable').addEventListener('input', e => {
+        let inp = e.target.closest('.iqc-note'); if (!inp) return;
+        let row = iqcData.find(x => x.id === parseInt(inp.dataset.id, 10));
+        inp.parentElement.querySelector('.iqc-note-save').classList.toggle('d-none', !row || (row.dtNote || '') === inp.value.trim());
+    });
+    async function iqcSaveNote(inp) {
+        let id = parseInt(inp.dataset.id, 10), row = iqcData.find(x => x.id === id);
+        if (!row || (row.dtNote || '') === inp.value.trim()) return;
+        inp.disabled = true;
+        if (await iqcSave(id, { dtNote: inp.value.trim() })) inp.parentElement.querySelector('.iqc-note-save').classList.add('d-none');
+        inp.disabled = false;
+    }
+    document.getElementById('iqcDetailTable').addEventListener('click', e => { let b = e.target.closest('.iqc-note-save'); if (b) iqcSaveNote(b.parentElement.querySelector('.iqc-note')); });
+    document.getElementById('iqcDetailTable').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.closest('.iqc-note')) iqcSaveNote(e.target); });
+    document.getElementById('iqcPagination').addEventListener('click', e => { let a = e.target.closest('[data-iqcpage]'); if (!a) return; e.preventDefault(); iqcPage = parseInt(a.dataset.iqcpage, 10); iqcRenderDetail(); });
+    document.getElementById('iqcGroupSeg').addEventListener('click', e => { let b = e.target.closest('button[data-group]'); if (!b) return; iqcGroupBy = b.dataset.group; iqcRenderAll(); });
+    document.getElementById('iqcGroupTable').addEventListener('click', e => {
+        let tr = e.target.closest('tr.hi-group-row'); if (tr) iqcDrillDown(tr.dataset.key);
+    });
+    function iqcApplyCollapse(c) {
+        document.getElementById('iqcReportBody').classList.toggle('d-none', c);
+        document.getElementById('iqcReportToggle').innerHTML = c ? '<i class="bi bi-chevron-down me-1"></i>Mở báo cáo' : '<i class="bi bi-chevron-up me-1"></i>Thu gọn';
+    }
+    function iqcToggleReport() {
+        let c = !document.getElementById('iqcReportBody').classList.contains('d-none');
+        try { localStorage.setItem(IQC_COLLAPSE_KEY, c ? '1' : '0'); } catch (e) {}
+        iqcApplyCollapse(c); if (!c) iqcRenderAll();
+    }
+    iqcApplyCollapse(localStorage.getItem(IQC_COLLAPSE_KEY) === '1');
+    setCurrentMonthRange('iqcFilterFrom', 'iqcFilterTo');
+
+    // ---------- File mẫu / xuất / nhập ----------
+    function iqcSheet(rows) {
+        let ws = XLSX.utils.json_to_sheet(rows.map(r => { let o = {}; IQC_COLS.forEach(([f, l]) => o[l] = r[f] ?? ''); return o; }), { header: IQC_COLS.map(c => c[1]) });
+        ws['!cols'] = [{ wch: 14 }, { wch: 20 }, { wch: 50 }, { wch: 18 }, { wch: 14 }, { wch: 14 }, { wch: 40 }];
+        return ws;
+    }
+    function iqcDownloadTemplate() {
+        if (typeof XLSX === 'undefined') return;
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, iqcSheet([{ soHopDong: 'DNAAA0001', ngayHoanTat: '05/10/2026 10:00:00', ghiChu: 'Mô tả lỗi IQC', nhanVien: 'DNI02.ANHTT18', checkIQC: 'OK', checkDauVao: 'NOT', dtNote: 'Đã nhắc KTV chụp bổ sung' }]), 'dataIQCDV');
+        XLSX.writeFile(wb, 'mau_IQC_DauVao.xlsx');
+    }
+    // Xuất ca CHƯA KIỂM TRA theo bộ lọc hiện tại (VD đã chọn 1 Đội trưởng) — sửa xong nhập lại bằng "Nhập file đã xử lý"
+    function iqcExportPending() {
+        if (typeof XLSX === 'undefined') return;
+        let rows = iqcFiltered.filter(iqcPending);
+        if (!rows.length) { alert("Không có ca chưa kiểm tra trong phạm vi đang lọc."); return; }
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, iqcSheet(rows), 'dataIQCDV');
+        let dtr = document.getElementById('iqcFilterDoiTruong').value;
+        XLSX.writeFile(wb, `IQC_chua_kiem_tra_${(dtr || 'tat_ca').replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        if (rows.length > IQC_PROCESS_MAX) alert(`Đã xuất ${rows.length} ca. Lưu ý: mỗi lần nhập file đã xử lý tối đa ${IQC_PROCESS_MAX} dòng — hãy chia file khi nhập lại.`);
+    }
+    async function iqcReadFile(event) {
+        let file = event.target.files[0]; event.target.value = '';
+        if (!file || typeof XLSX === 'undefined') return null;
+        let wb = XLSX.read(await file.arrayBuffer(), { type: 'array' }), sh = wb.Sheets[wb.SheetNames[0]];
+        let raw = XLSX.utils.sheet_to_json(sh, { defval: '', raw: true }), txt = XLSX.utils.sheet_to_json(sh, { defval: '', raw: false });
+        if (!raw.length) { alert("File không có dữ liệu!"); return null; }
+        let colMap = {};
+        Object.keys(raw[0]).forEach(h => { let f = IQC_HEADER_MAP[hiNorm(h).replace(/[^a-z0-9]/g, '')]; if (f) colMap[h] = f; });
+        if (!Object.values(colMap).includes('soHopDong') || !Object.values(colMap).includes('ngayHoanTat')) {
+            alert('File thiếu cột "Số hợp đồng" hoặc "Ngày hoàn tất PTC". Hãy dùng "Tải file mẫu".'); return null;
+        }
+        let rows = [], errors = [];
+        raw.forEach((r, i) => {
+            let row = {};
+            Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayHoanTat' ? hiSmartDate(r[h], (txt[i] || {})[h], /\d:\d/.test(String((txt[i] || {})[h]))) : String((txt[i] || {})[h] ?? '').trim());
+            if (!row.soHopDong && !row.ngayHoanTat) return;
+            if (!row.soHopDong || !/^\d{2}\/\d{2}\/\d{4}/.test(row.ngayHoanTat || '')) { errors.push(`Dòng ${i + 2}: thiếu Số HĐ hoặc ngày "${row.ngayHoanTat || ''}" không đọc được`); return; }
+            rows.push(row);
+        });
+        return { rows, errors };
+    }
+    async function iqcHandleImportNew(event) {
+        let r = await iqcReadFile(event); if (!r) return;
+        let limit = currentUser.role === 'superadmin' ? 10000 : 1000;
+        if (r.rows.length > limit) { alert(`File có ${r.rows.length} dòng — tối đa ${limit.toLocaleString('vi-VN')} dòng mỗi lần nhập.`); return; }
+        let mobinets = new Set(), unmapped = 0;
+        try { // đối chiếu nhanh với Nhân Sự để báo trước số dòng "Chưa map"
+            let ns = await (await apiFetch("api/ns/data", { method: "GET" })).json();
+            (ns.dataNS || []).forEach(n => n.mobinet && mobinets.add(n.mobinet.trim().toLowerCase()));
+            unmapped = r.rows.filter(x => !mobinets.has(String(x.nhanVien || '').trim().toLowerCase())).length;
+        } catch (e) { unmapped = -1; }
+        let exist = new Set(iqcData.map(x => x.soHopDong + '||' + x.ngayHoanTat));
+        let fut = hiSuspiciousDates(r.rows.map(x => x.ngayHoanTat));
+        let msg = `${r.rows.length.toLocaleString('vi-VN')} dòng hợp lệ (≈ ${r.rows.filter(x => !exist.has(x.soHopDong + '||' + x.ngayHoanTat)).length} thêm mới).` +
+            (unmapped > 0 ? `\n⚠ ${unmapped} dòng có Nhân viên chưa có trong Nhân Sự (cột Mobinet) → sẽ ở trạng thái "Chưa map", chỉ Admin thấy.` : '') +
+            (fut ? `\n⚠ ${fut} dòng có ngày ở tương lai hoặc cũ hơn 120 ngày — kiểm tra đảo ngày/tháng.` : '') +
+            (r.errors.length ? `\n\n${r.errors.length} dòng lỗi (bỏ qua):\n${r.errors.slice(0, 6).join('\n')}` : '') +
+            `\n\nVí dụ dòng đầu: ${r.rows[0] ? `${r.rows[0].soHopDong} · ${r.rows[0].ngayHoanTat} · ${r.rows[0].nhanVien || ''}` : '--'}\n\nNhập vào hệ thống?`;
+        if (!r.rows.length || !confirm(msg)) return;
+        let ins = 0, upd = 0;
+        for (let i = 0; i < r.rows.length; i += IQC_CHUNK) {
+            document.getElementById('iqcLastLoaded').textContent = `Đang nhập ${Math.min(i + IQC_CHUNK, r.rows.length)}/${r.rows.length}...`;
+            let res = await (await apiFetch("api/iqc/import", { method: "POST", body: JSON.stringify({ rows: r.rows.slice(i, i + IQC_CHUNK).map(x => ({ soHopDong: x.soHopDong, ngayHoanTat: x.ngayHoanTat, ghiChu: x.ghiChu || '', nhanVien: x.nhanVien || '' })) }) })).json();
+            if (!res.success) { alert(`Dừng ở dòng ${i + 1}: ${res.error}\nĐã nhập trước đó: ${ins} thêm mới.`); break; }
+            ins += res.inserted; upd += res.updated;
+        }
+        alert(`Hoàn tất: ${ins} ca thêm mới, ${upd} ca đã có (giữ nguyên kết quả kiểm tra).`);
+        iqcFetchData(true);
+    }
+    async function iqcHandleImportProcess(event) {
+        let r = await iqcReadFile(event); if (!r) return;
+        if (r.rows.length > IQC_PROCESS_MAX) { alert(`File có ${r.rows.length} dòng — mỗi lần nhập file đã xử lý tối đa ${IQC_PROCESS_MAX} dòng.`); return; }
+        if (!r.rows.length || !confirm(`Cập nhật Check IQC / Check Đầu Vào / Ghi chú đội trưởng cho ${r.rows.length} ca? (Ô để trống trong file sẽ giữ nguyên giá trị đang có.)`)) return;
+        try {
+            let res = await (await apiFetch("api/iqc/process", { method: "POST", body: JSON.stringify({ rows: r.rows.map(x => ({ soHopDong: x.soHopDong, ngayHoanTat: x.ngayHoanTat, checkIQC: x.checkIQC ?? '', checkDauVao: x.checkDauVao ?? '', dtNote: x.dtNote ?? '' })) }) })).json();
+            if (!res.success) { alert(res.error || "Nhập thất bại!"); return; }
+            alert(`Đã cập nhật ${res.updated} ca · ${res.unchanged} không đổi · ${res.notFound} không tìm thấy / ngoài phạm vi` +
+                (res.errors && res.errors.length ? `\n\nLỗi:\n${res.errors.slice(0, 8).join('\n')}` : '') + (r.errors.length ? `\n\n${r.errors.length} dòng không đọc được.` : ''));
+        } catch (e) { console.error("Lỗi nhập file IQC:", e); alert("Lỗi kết nối, vui lòng thử lại!"); }
+        iqcFetchData(true);
+    }
+    async function iqcDeleteRow(id) {
+        let row = iqcData.find(r => r.id === id);
+        if (!row || !confirm(`Xoá ca ${row.soHopDong} (${row.ngayHoanTat})?`)) return;
+        let r = await (await apiFetch("api/iqc/delete", { method: "POST", body: JSON.stringify({ id }) })).json();
+        if (!r.success) { alert(r.error || "Không xoá được!"); return; }
+        iqcFetchData(true);
+    }
+    document.getElementById('iqc-tab').addEventListener('shown.bs.tab', () => iqcFetchData(false));
 
     function resetFilters() {
         let doiTacSelect = document.getElementById('filterDoiTac');
