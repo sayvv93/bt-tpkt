@@ -6198,9 +6198,15 @@
             (ns.dataNS || []).forEach(n => n.mobinet && mobinets.add(n.mobinet.trim().toLowerCase()));
             unmapped = r.rows.filter(x => !mobinets.has(String(x.nhanVien || '').trim().toLowerCase())).length;
         } catch (e) { unmapped = -1; }
+        // Cột Check trong file (nếu có) phải là OK / NOT / Chưa kiểm tra / trống — kiểm trước để không dừng giữa chừng
+        const okCheck = v => ['', 'ok', 'not', 'not ok', 'nok', 'chua kiem tra'].includes(hiNorm(v || ''));
+        let badChk = r.rows.filter(x => !okCheck(x.checkIQC) || !okCheck(x.checkDauVao));
+        if (badChk.length) { alert(`${badChk.length} dòng có Check IQC / Check Đầu Vào không hợp lệ (chỉ nhận OK / NOT / Chưa kiểm tra hoặc để trống). VD: ${badChk.slice(0, 3).map(x => `${x.soHopDong}: "${x.checkIQC || ''}" / "${x.checkDauVao || ''}"`).join('; ')}`); return; }
+        let withChk = r.rows.filter(x => ['ok', 'not', 'not ok', 'nok'].includes(hiNorm(x.checkIQC || '')) || ['ok', 'not', 'not ok', 'nok'].includes(hiNorm(x.checkDauVao || ''))).length;
         let exist = new Set(iqcData.map(x => x.soHopDong + '||' + x.ngayHoanTat));
         let fut = hiSuspiciousDates(r.rows.map(x => x.ngayHoanTat));
         let msg = `${r.rows.length.toLocaleString('vi-VN')} dòng hợp lệ (≈ ${r.rows.filter(x => !exist.has(x.soHopDong + '||' + x.ngayHoanTat)).length} thêm mới).` +
+            (withChk ? `\n✔ ${withChk.toLocaleString('vi-VN')} dòng có sẵn kết quả Check IQC / Đầu Vào trong file — sẽ được lưu (chỉ bù vào mục còn "Chưa kiểm tra").` : `\nℹ File không có kết quả Check IQC / Đầu Vào → các ca mới sẽ ở trạng thái "Chưa kiểm tra".`) +
             (unmapped > 0 ? `\n⚠ ${unmapped} dòng có Nhân viên chưa có trong Nhân Sự (cột Mobinet) → sẽ ở trạng thái "Chưa map", chỉ Admin thấy.` : '') +
             (fut ? `\n⚠ ${fut} dòng có ngày ở tương lai hoặc cũ hơn 120 ngày — kiểm tra đảo ngày/tháng.` : '') +
             (r.errors.length ? `\n\n${r.errors.length} dòng lỗi (bỏ qua):\n${r.errors.slice(0, 6).join('\n')}` : '') +
@@ -6209,11 +6215,11 @@
         let ins = 0, upd = 0;
         for (let i = 0; i < r.rows.length; i += IQC_CHUNK) {
             document.getElementById('iqcLastLoaded').textContent = `Đang nhập ${Math.min(i + IQC_CHUNK, r.rows.length)}/${r.rows.length}...`;
-            let res = await (await apiFetch("api/iqc/import", { method: "POST", body: JSON.stringify({ rows: r.rows.slice(i, i + IQC_CHUNK).map(x => ({ soHopDong: x.soHopDong, ngayHoanTat: x.ngayHoanTat, ghiChu: x.ghiChu || '', nhanVien: x.nhanVien || '' })) }) })).json();
+            let res = await (await apiFetch("api/iqc/import", { method: "POST", body: JSON.stringify({ rows: r.rows.slice(i, i + IQC_CHUNK).map(x => ({ soHopDong: x.soHopDong, ngayHoanTat: x.ngayHoanTat, ghiChu: x.ghiChu || '', nhanVien: x.nhanVien || '', checkIQC: x.checkIQC || '', checkDauVao: x.checkDauVao || '', dtNote: x.dtNote || '' })) }) })).json();
             if (!res.success) { alert(`Dừng ở dòng ${i + 1}: ${res.error}\nĐã nhập trước đó: ${ins} thêm mới.`); break; }
             ins += res.inserted; upd += res.updated;
         }
-        alert(`Hoàn tất: ${ins} ca thêm mới, ${upd} ca đã có (giữ nguyên kết quả kiểm tra).`);
+        alert(`Hoàn tất: ${ins} ca thêm mới, ${upd} ca đã có (kết quả kiểm tra trong file chỉ bù vào mục còn "Chưa kiểm tra", không ghi đè kết quả đã xử lý).`);
         iqcFetchData(true);
     }
     async function iqcHandleImportProcess(event) {
