@@ -4,14 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống Chất Lượng Dịch Vụ</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Chỉ cho tải mã/kết nối từ nguồn đã biết (giảm thiệt hại nếu có lỗ hổng XSS). Đổi URL Worker thì sửa connect-src. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob:; connect-src 'self' https://tpkt-backend.sayvv93.workers.dev https://*.fteldni.com; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" integrity="sha384-Ay26V7L8bsJTsX9Sxclnvsn+hkdiwRnrjZJXqKmkIDobPgIIWBOVguEcQQLDuhfN" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
     <style>
         :root {
             --ink: #12181B;
@@ -1457,7 +1460,7 @@
                     </div>
                 </div>
                 <div class="col-md-2 f-group"><label>Đối tác</label><select id="lichFilterDoiTac" class="form-select form-select-sm" onchange="lichRender()"></select></div>
-                <div class="col-md-3 f-group"><label>Tìm Đội trưởng</label><input type="text" id="lichSearch" class="form-control form-control-sm" placeholder="Nhập tên..." oninput="lichRender()"></div>
+                <div class="col-md-3 f-group"><label>Tìm Đội trưởng</label><input type="text" id="lichSearch" class="form-control form-control-sm" placeholder="Nhập tên..." oninput="clearTimeout(window._lichSearchT); window._lichSearchT = setTimeout(lichRender, 250);"></div>
                 <div class="col-md-3 f-group" id="lichBrushBox">
                     <label>Khai báo (chọn rồi bấm / kéo trên ô ngày)</label>
                     <div class="lich-brush" id="lichBrush">
@@ -1713,7 +1716,7 @@
                     <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g8pet">11. Tài khoản cus (Đối tác quản lý tạo)</button></h2>
                     <div id="g8pet" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
                         <div class="accordion-body small"><ul class="mb-0">
-                            <li>Đối tác quản lý tự tạo tài khoản cus cho nhân sự của mình (VD bộ phận chăm sóc khách hàng): <b>Tải file mẫu</b> (cột username, password) → điền → <b>Nhập Excel</b>, tối đa 50 tài khoản/lần. Bỏ trống password thì mật khẩu mặc định trùng username — nhắc nhân sự đổi mật khẩu ngay sau lần đăng nhập đầu.</li>
+                            <li>Đối tác quản lý tự tạo tài khoản cus cho nhân sự của mình (VD bộ phận chăm sóc khách hàng): <b>Tải file mẫu</b> (cột username, password) → điền → <b>Nhập Excel</b>, tối đa 50 tài khoản/lần. Bắt buộc điền password (từ 6 ký tự, khác username); username 3–50 ký tự gồm chữ, số, dấu . _ - @ — nhắc nhân sự đổi mật khẩu sau lần đăng nhập đầu.</li>
                             <li>Tài khoản cus thấy: <b>SH &amp; RKN</b> (theo đối tác, được đổi Hướng XL và nhập DVKH care note), <b>Trò chuyện</b>, <b>Linh Thú</b>, <b>Hướng dẫn</b>. Không xem được dữ liệu Bảo Trì, Cảnh Báo, HI FPT — Worker chặn cả khi gọi thẳng API.</li>
                             <li>Danh sách trong tab chỉ hiện tài khoản do chính Đối tác quản lý đó tạo.</li>
                         </ul></div>
@@ -1912,7 +1915,7 @@
         </div>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 <script>
     const WEB_APP_URL = "https://tpkt-backend.sayvv93.workers.dev/";
 
@@ -2338,7 +2341,7 @@
             return;
         }
         let ws = XLSX.utils.json_to_sheet([
-            { username: "nv_vidu1", password: "" },
+            { username: "nv_vidu1", password: "doimatkhau1" },
             { username: "nv_vidu2", password: "matkhaurieng123" }
         ]);
         ws['!cols'] = [{ wch: 20 }, { wch: 22 }];
@@ -2385,8 +2388,14 @@
                 alert("Không có username hợp lệ nào trong file!");
                 return;
             }
+            // Bắt buộc mật khẩu ≥ 6 ký tự, khác username; username 3–50 ký tự chữ/số . _ -
+            let badRows = rows.filter(r => !/^[A-Za-z0-9._@-]{3,50}$/.test(r.username) || r.password.length < 6 || r.password.toLowerCase() === r.username.toLowerCase());
+            if (badRows.length) {
+                alert(`${badRows.length} dòng không hợp lệ — mỗi tài khoản cần username 3–50 ký tự (chữ, số, . _ - @) và mật khẩu từ 6 ký tự, khác username:\n` + badRows.slice(0, 10).map(r => `• ${r.username || '(trống)'}`).join('\n') + '\n\nSửa file rồi nhập lại.');
+                return;
+            }
 
-            if (!confirm(`Xác nhận tạo ${rows.length} tài khoản cus mới?\nMật khẩu mặc định (nếu để trống trong file) sẽ trùng với username — nên báo nhân sự đổi lại sau khi đăng nhập lần đầu.`)) {
+            if (!confirm(`Xác nhận tạo ${rows.length} tài khoản cus mới?\nNên báo nhân sự đổi mật khẩu sau khi đăng nhập lần đầu.`)) {
                 return;
             }
 
@@ -2541,6 +2550,7 @@
     // danh sách thay vì chờ hết hạn tự nhiên.
     async function pingOnline(offline = false) {
         if (!currentUser || !currentUser.username) return;
+        if (!offline && document.hidden) return; // tab ẩn: tạm ngưng (giảm request + ghi D1)
         try {
             let response = await apiFetch("api/ping", {
                 method: "POST",
@@ -2574,6 +2584,12 @@
         if (pingTimer) { clearInterval(pingTimer); pingTimer = null; }
         document.getElementById('lblOnlineCount').textContent = '--';
     }
+
+    // Tab hiện lại sau khi ẩn: cập nhật ngay online / chat / dữ liệu Bảo Trì (các poll đã tạm ngưng khi ẩn)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden || !currentUser || !currentUser.username) return;
+        pingOnline(); fetchChatMessages(); refreshData();
+    });
 
     // Đóng tab / tắt trình duyệt (không kịp bấm Đăng xuất) — vẫn cố báo offline
     // bằng sendBeacon, vì fetch thường không đảm bảo hoàn tất khi trang đang đóng.
@@ -2638,7 +2654,9 @@
 
     async function refreshData() {
         if (!currentUser || !currentUser.username || isRestrictedRole()) return;
+        if (document.hidden && globalData.length) return; // tab đang ẩn: không tải ngầm (khi hiện lại sẽ tải ngay)
         try {
+            let wasIncremental = !!lastSyncTimestamp;
             let path = "api/get-data";
             if (lastSyncTimestamp) {
                 path += "?since=" + encodeURIComponent(lastSyncTimestamp);
@@ -2652,6 +2670,8 @@
             }
 
             let incoming = res.dataBT || [];
+            // Không có thay đổi: khỏi ghi lại cache, dựng lại bộ lọc và vẽ lại bảng
+            if (wasIncremental && incoming.length === 0) { updateLastSyncedLabel(); return; }
 
             // Giữ lại các dòng đang thao tác dở (đã chọn TPKT Check nhưng CHƯA bấm
             // Gửi — row._modified) thay vì để bản mới từ server ghi đè mất lựa chọn
@@ -2738,6 +2758,8 @@
                 document.getElementById('loginOverlay').style.display = 'none';
                 initSessionUI();
                 if (isRestrictedRole()) {
+                    globalData = []; // cus / HR không giữ dữ liệu Bảo Trì của phiên trước
+                    try { localStorage.removeItem('tpkt_cached_dataBT'); } catch (e) {}
                     fetchLinhThuSelections();
                 } else {
                     clearFilterSelections();
@@ -2786,6 +2808,8 @@
         localStorage.removeItem(AUTH_MODE_KEY);
         sessionStorage.removeItem(SESSION_TOKEN_KEY);
         localStorage.removeItem('tpkt_last_sync_ts');
+        localStorage.removeItem('tpkt_cached_dataBT'); // không để dữ liệu ca trên máy dùng chung sau khi đăng xuất
+        globalData = [];
         lastSyncTimestamp = null;
         currentUser = null;
         sessionToken = null;
@@ -3245,6 +3269,7 @@
 
     async function fetchChatMessages() {
         if (!currentUser || !currentUser.username) return;
+        if (document.hidden) return; // tab ẩn: tạm ngưng poll chat
         try {
             let response = await apiFetch("api/chat/messages?since_id=" + lastChatId, { method: "GET" });
             let res = await response.json();
@@ -3437,7 +3462,7 @@
 
     function ltOwnerLabel(p) {
         if (p.doiTruong && String(p.doiTruong).trim()) return { text: p.doiTruong, partner: false };
-        if (p.role === 'user' && p.doiTacQuanLy && p.doiTacQuanLy !== 'ALL') return { text: p.doiTacQuanLy, partner: true };
+        if ((p.is_partner === 1 || p.is_partner === true || p.role === 'user') && p.doiTacQuanLy && p.doiTacQuanLy !== 'ALL') return { text: p.doiTacQuanLy, partner: true };
         return { text: p.username, partner: false };
     }
 
@@ -4600,6 +4625,7 @@
     function canUseShd() {
         if (!currentUser) return false;
         if (currentUser.role === 'admin' || currentUser.role === 'superadmin') return true;
+        if (isRestrictedRole()) return false; // cus / HR không dùng Phân tích SHD
         if (SHD_EXTRA_DOITAC.includes(currentUser.doiTac)) return true;
         return currentUser.role === 'user' && !isDoiTruongLocked();
     }
@@ -4612,8 +4638,7 @@
             let data = await res.json();
             let st = data.settings && data.settings.shd_link;
             if (st && st.value) {
-                btn.href = st.value;
-                btn.classList.remove('disabled');
+                if (/^https:\/\//i.test(st.value)) { btn.href = st.value; btn.classList.remove('disabled'); } // chỉ nhận link https
                 info.textContent = `Link cập nhật ${formatDateTime(st.updatedAt)}${st.updatedBy ? ' bởi ' + st.updatedBy : ''}`;
                 if (isSA) document.getElementById('shdLinkInput').value = st.value;
             } else {
@@ -5136,11 +5161,13 @@
         rknData.filter(rknIsOpen).forEach(r => { let o = openMap.get(r.soHopDong); if (!o || dKey(r.ngayData) > dKey(o.ngayData)) openMap.set(r.soHopDong, r); });
         // Ca đang tồn: file mới hơn hoặc cùng ngày (nhập lại để bổ sung Suy Hao / Up/Down) → cập nhật
         let willUpdate = rows.filter(r => openMap.has(r.soHopDong) && dKey(r.ngayData) >= dKey(openMap.get(r.soHopDong).ngayData));
-        let willSkip = rows.filter(r => openMap.has(r.soHopDong) && !willUpdate.includes(r));
+        let willUpdateSet = new Set(willUpdate);
+        let willSkip = rows.filter(r => openMap.has(r.soHopDong) && !willUpdateSet.has(r));
         let doneMap = new Map();
         rknData.filter(r => r.huongXL === 'Đã XL').forEach(r => { let o = doneMap.get(r.soHopDong); if (!o || dKey(r.ngayData) > dKey(o.ngayData)) doneMap.set(r.soHopDong, r); });
         let willReopen = rows.filter(r => !openMap.has(r.soHopDong) && doneMap.has(r.soHopDong) && dKey(r.ngayData) > dKey(doneMap.get(r.soHopDong).ngayData));
-        let willSkipDone = rows.filter(r => !openMap.has(r.soHopDong) && doneMap.has(r.soHopDong) && !willReopen.includes(r));
+        let willReopenSet = new Set(willReopen);
+        let willSkipDone = rows.filter(r => !openMap.has(r.soHopDong) && doneMap.has(r.soHopDong) && !willReopenSet.has(r));
         let curDate = r => (openMap.get(r.soHopDong) || doneMap.get(r.soHopDong) || {}).ngayData;
         let skipAll = willSkip.concat(willSkipDone), sameDay = skipAll.filter(r => dKey(curDate(r)) === dKey(r.ngayData)), newerSys = skipAll.filter(r => dKey(curDate(r)) > dKey(r.ngayData));
         let byDt = {}; rows.forEach(r => byDt[r.doiTacQuanLy] = (byDt[r.doiTacQuanLy] || 0) + 1);
