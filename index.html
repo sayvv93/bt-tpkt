@@ -1132,8 +1132,8 @@
                     </select>
                 </div>
                 <div class="col-md-4 f-group">
-                    <label>Tìm Số HĐ / MAC / Tập điểm</label>
-                    <input type="text" id="rknSearch" class="form-control form-control-sm" placeholder="Nhập số HĐ, MAC hoặc tập điểm..." oninput="clearTimeout(window._rknSearchT); window._rknSearchT = setTimeout(rknApplyFilters, 250);">
+                    <label>Tìm Số HĐ / Suy Hao / Tập điểm</label>
+                    <input type="text" id="rknSearch" class="form-control form-control-sm" placeholder="Nhập số HĐ, suy hao hoặc tập điểm..." oninput="clearTimeout(window._rknSearchT); window._rknSearchT = setTimeout(rknApplyFilters, 250);">
                 </div>
                 <div class="col-md-8 f-group d-flex justify-content-end gap-2">
                     <span class="small align-self-center me-auto" id="rknLastLoaded" style="color:var(--slate-soft);"></span>
@@ -1631,7 +1631,7 @@
                             <li>Trên danh sách, mọi tài khoản chọn được Hướng XL. Tài khoản cus nhập <b>DVKH care note</b>; Đội trưởng / Đối tác nhập <b>Đội trưởng note</b> — tối đa 100 ký tự, bấm ✓ hoặc Enter để lưu.</li>
                             <li>Mọi thay đổi (Hướng XL, ghi chú, nhập/sửa/xoá ca) được ghi vào <b>Trò chuyện</b> dưới tên "Nhật ký SH &amp; RKN".</li>
                             <li>Báo cáo theo Đối tác / Đội trưởng / Hướng XL: tỉ lệ đã XL, cơ cấu Hướng XL, mức Up/Down của ca còn mở, diễn biến theo ngày data, điểm nhấn.</li>
-                            <li><b>Admin / SuperAdmin</b>: nhập Excel (tiêu đề như sheet "From-import"), sửa đủ cột, thêm / xoá ca. Mỗi Số HĐ chỉ có 1 ca mở. Khi nhập, Số HĐ đang tồn ca <b>Chưa XL</b> / <b>Đã Tạo CL</b> không tạo ca mới mà <b>tự cập nhật ca đó sang Ngày data mới nhất</b> (kèm Số lần Up/Down, DSP, Tập điểm, MAC), giữ nguyên Hướng XL và ghi chú; Số HĐ có ca <b>Đã XL</b> mà xuất hiện lại ở ngày mới hơn: ca đó được cập nhật ngày và chuyển sang <b>XL Lại</b> (tính là ca còn mở, giữ ghi chú lần trước). Một Số HĐ lặp nhiều ngày trong file thì lấy dòng ngày mới nhất.</li>
+                            <li><b>Admin / SuperAdmin</b>: nhập Excel (tiêu đề như sheet "From-import"), sửa đủ cột, thêm / xoá ca. Mỗi Số HĐ chỉ có 1 ca mở. Khi nhập, Số HĐ đang tồn ca <b>Chưa XL</b> / <b>Đã Tạo CL</b> không tạo ca mới mà <b>tự cập nhật ca đó sang Ngày data mới nhất</b> (kèm Số lần Up/Down, DSP, Tập điểm, Suy Hao), giữ nguyên Hướng XL và ghi chú; Số HĐ có ca <b>Đã XL</b> mà xuất hiện lại ở ngày mới hơn: ca đó được cập nhật ngày và chuyển sang <b>XL Lại</b> (tính là ca còn mở, giữ ghi chú lần trước). Một Số HĐ lặp nhiều ngày trong file thì lấy dòng ngày mới nhất.</li>
                         </ul></div>
                     </div>
                 </div>
@@ -4195,13 +4195,21 @@
     // dán vào là 10/01 (giá trị ngầm sai) nhưng vẫn HIỂN THỊ "01/10/2026" — đọc
     // giá trị ngầm sẽ ra 10/01/2026 (sự cố 03/10/2026 ở SH & RKN). Ngày/tháng lấy
     // từ chữ hiển thị, giờ:phút:giây lấy từ giá trị ngầm cho đủ giây.
-    function hiSmartDate(rawVal, txtVal, withTime) {
+    // Bối cảnh cả cột ngày trong file: nếu có ô ngày thật mang NGÀY > 12 thì giá trị ngầm chắc chắn đúng
+    // (sự cố locale Mỹ đọc "01/10" thành 10/01 chỉ sinh ra ngày ≤ 12) → tin giá trị ngầm cho cả cột.
+    function hiDateCtx(values) {
+        let serialTrusted = (values || []).some(v => { if (typeof v !== 'number' || !isFinite(v)) return false; let p = XLSX.SSF.parse_date_code(v); return p && p.d > 12; });
+        return { serialTrusted };
+    }
+    function hiSmartDate(rawVal, txtVal, withTime, ctx) {
         if (typeof rawVal === 'number' && isFinite(rawVal)) {
             let p = XLSX.SSF.parse_date_code(rawVal);
             if (!p) return '';
             let d = p.d, m = p.m, y = p.y;
             let t = String(txtVal ?? '').trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
-            if (t) { d = parseInt(t[1], 10); m = parseInt(t[2], 10); }
+            // Chữ hiển thị đọc theo dd/mm (sửa sự cố Google Sheet locale Mỹ) — TRỪ KHI cột có ngày > 12 ở giá trị ngầm,
+            // hoặc chữ hiển thị rõ ràng là tháng/ngày (số thứ 2 > 12, VD Excel định dạng m/d/yyyy hiện "10/15/2026").
+            if (t && !(ctx && ctx.serialTrusted) && parseInt(t[2], 10) <= 12) { d = parseInt(t[1], 10); m = parseInt(t[2], 10); }
             let date = `${hiPad(d)}/${hiPad(m)}/${y}`;
             return withTime ? `${date} ${hiPad(p.H)}:${hiPad(p.M)}:${hiPad(Math.floor(p.S))}` : date;
         }
@@ -4237,12 +4245,13 @@
             return;
         }
 
-        let errors = [], byKey = new Map(), dupInFile = 0;
+        let errors = [], byKey = new Map(), dupInFile = 0, dctx = {};
+        Object.keys(colMap).forEach(h => dctx[h] = hiDateCtx(raw.map(r => r[h])));
         raw.forEach((r, i) => {
             let row = {};
             HI_FIELDS.forEach(f => row[f] = '');
             Object.entries(colMap).forEach(([h, f]) => {
-                row[f] = f === 'ngayHoanTat' ? hiSmartDate(r[h], (txt[i] || {})[h], true) : String(r[h] ?? '').trim();
+                row[f] = f === 'ngayHoanTat' ? hiSmartDate(r[h], (txt[i] || {})[h], true, dctx[h]) : String(r[h] ?? '').trim();
             });
             if (!row.soHopDong && !row.doiTacQuanLy && !row.ngayHoanTat) return; // dòng trống
             if (!row.soHopDong || !row.doiTacQuanLy || !row.ngayHoanTat) { errors.push(`Dòng ${i + 2}: thiếu Số HĐ / Đối tác / Ngày hoàn tất`); return; }
@@ -4643,7 +4652,7 @@
                         'tapDiem', 'macAddress', 'soLanUpDown', 'huongXL', 'dvkhNote', 'doiTruongNote'];
     const RKN_LABELS = {
         doiTacQuanLy: 'Đối tác quản lý', doiTruong: 'Đội trưởng', blockQuanLy: 'Block quản lý', soHopDong: 'Số hợp đồng',
-        ngayData: 'Ngày data', thongTinDSP: 'Thông tin DSP', tapDiem: 'Tập điểm', macAddress: 'Mac Address',
+        ngayData: 'Ngày data', thongTinDSP: 'Thông tin DSP', tapDiem: 'Tập điểm', macAddress: 'Suy Hao',
         soLanUpDown: 'Số lần Up/Down', huongXL: 'Hướng XL', dvkhNote: 'DVKH care note', doiTruongNote: 'Đội trưởng note'
     };
     const RKN_STATUSES = ['Chưa XL', 'XL Lại', 'Đã Tạo CL', 'Đã XL'];
@@ -4961,7 +4970,7 @@
             ? `<div class="d-flex gap-1"><input type="text" class="form-control form-control-sm rkn-note" data-id="${r.id}" data-field="${f}" maxlength="${RKN_NOTE_MAX}" value="${escapeHtml(r[f] || '')}" placeholder="Nhập ghi chú..." style="min-width:150px;">
                <button class="btn btn-sm btn-outline-success rkn-note-save d-none" data-id="${r.id}" data-field="${f}" title="Lưu"><i class="bi bi-check-lg"></i></button></div>`
             : `<span class="small">${escapeHtml(r[f] || '')}</span>`;
-        let head = `<thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Số HĐ</th><th>Ngày data</th><th>Tập điểm / DSP</th><th>MAC</th><th class="text-end">Up/Down</th>
+        let head = `<thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Số HĐ</th><th>Ngày data</th><th>Tập điểm / DSP</th><th>Suy Hao</th><th class="text-end">Up/Down</th>
             <th style="min-width:140px;">Hướng XL</th><th>DVKH care note</th><th>Đội trưởng note</th>${isAdmin ? '<th class="text-end">Sửa</th>' : ''}</tr></thead>`;
         let body = slice.length === 0
             ? `<tr><td colspan="${isAdmin ? 11 : 10}" class="text-center py-4 small" style="color:var(--slate);">${rknData.length ? 'Không còn ca nào cần xử lý 🎉' : 'Chưa có dữ liệu.'}</td></tr>`
@@ -5069,7 +5078,7 @@
     // ---------- Admin: file mẫu, nhập Excel ----------
     function rknDownloadTemplate() {
         let sample = [{ 'Đối tác quản lý': 'BHA2', 'Đội trưởng': 'Thiều Khắc Thắng', 'Block quản lý': 'Phuong Long Binh-003', 'Số hợp đồng': 'DNH012195',
-            'Ngày data': '01/10/2026', 'Thông tin DSP': 'DNIP012.0471/HO-4/4-XGS', 'Tập điểm': 'DNIP012.0471/HO', 'Mac Address': '00:c8:96:0e:67:81',
+            'Ngày data': '01/10/2026', 'Thông tin DSP': 'DNIP012.0471/HO-4/4-XGS', 'Tập điểm': 'DNIP012.0471/HO', 'Suy Hao': '00:c8:96:0e:67:81',
             'Số lần Up/Down': 15, 'Hướng XL': 'Chưa XL', 'DVKH care note': '', 'Đội trưởng note': '' }];
         let wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sample), 'From-import');
@@ -5078,7 +5087,7 @@
     const RKN_HEADER_MAP = {
         doitacquanly: 'doiTacQuanLy', doitac: 'doiTacQuanLy', doitruong: 'doiTruong', blockquanly: 'blockQuanLy',
         sohopdong: 'soHopDong', sohd: 'soHopDong', ngaydata: 'ngayData', thongtindsp: 'thongTinDSP', tapdiem: 'tapDiem',
-        macaddress: 'macAddress', mac: 'macAddress', solanupdown: 'soLanUpDown', huongxl: 'huongXL',
+        macaddress: 'macAddress', mac: 'macAddress', suyhao: 'macAddress', solanupdown: 'soLanUpDown', huongxl: 'huongXL',
         dvkhcarenote: 'dvkhNote', dvkhnote: 'dvkhNote', doitruongnote: 'doiTruongNote'
     };
     function rknNormalizeDate(v) {
@@ -5101,14 +5110,15 @@
         if (missing.length) { alert(`File thiếu cột bắt buộc: ${missing.map(f => RKN_LABELS[f]).join(', ')}.\nHãy dùng "Tải file mẫu" để xem đúng tiêu đề cột.`); return; }
 
         const dKey = d => { let m = String(d || '').match(/^(\d{2})\/(\d{2})\/(\d{4})/); return m ? m[3] + m[2] + m[1] : ''; };
-        let errors = [], latest = new Map(), dupInFile = 0;
+        let errors = [], latest = new Map(), dupInFile = 0, dctx = {};
+        Object.keys(colMap).forEach(h => dctx[h] = hiDateCtx(raw.map(r => r[h])));
         raw.forEach((r, i) => {
             let row = {}; RKN_FIELDS.forEach(f => row[f] = '');
-            Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayData' ? hiSmartDate(r[h], (txt[i] || {})[h], false) : String(r[h] ?? '').trim());
+            Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayData' ? hiSmartDate(r[h], (txt[i] || {})[h], false, dctx[h]) : String(r[h] ?? '').trim());
             if (!row.soHopDong && !row.doiTacQuanLy && !row.ngayData) return;
             let st = rknStatus(row.huongXL);
             if (!row.soHopDong || !row.doiTacQuanLy || !row.ngayData) { errors.push(`Dòng ${i + 2}: thiếu Số HĐ / Đối tác / Ngày data`); return; }
-            if (!/^\d{2}\/\d{2}\/\d{4}$/.test(row.ngayData)) { errors.push(`Dòng ${i + 2} (${row.soHopDong}): Ngày data "${row.ngayData}" không đọc được`); return; }
+            if (!/^\d{2}\/(0[1-9]|1[0-2])\/\d{4}$/.test(row.ngayData)) { errors.push(`Dòng ${i + 2} (${row.soHopDong}): Ngày data "${row.ngayData}" không đọc được (cần dd/mm/yyyy)`); return; }
             if (!st) { errors.push(`Dòng ${i + 2} (${row.soHopDong}): Hướng XL "${row.huongXL}" không hợp lệ`); return; }
             row.huongXL = st;
             // Trùng Số HĐ trong file: giữ dòng có Ngày data mới nhất
@@ -5126,18 +5136,21 @@
         rknData.filter(r => r.huongXL === 'Đã XL').forEach(r => { let o = doneMap.get(r.soHopDong); if (!o || dKey(r.ngayData) > dKey(o.ngayData)) doneMap.set(r.soHopDong, r); });
         let willReopen = rows.filter(r => !openMap.has(r.soHopDong) && doneMap.has(r.soHopDong) && dKey(r.ngayData) > dKey(doneMap.get(r.soHopDong).ngayData));
         let willSkipDone = rows.filter(r => !openMap.has(r.soHopDong) && doneMap.has(r.soHopDong) && !willReopen.includes(r));
+        let curDate = r => (openMap.get(r.soHopDong) || doneMap.get(r.soHopDong) || {}).ngayData;
+        let skipAll = willSkip.concat(willSkipDone), sameDay = skipAll.filter(r => dKey(curDate(r)) === dKey(r.ngayData)), newerSys = skipAll.filter(r => dKey(curDate(r)) > dKey(r.ngayData));
         let byDt = {}; rows.forEach(r => byDt[r.doiTacQuanLy] = (byDt[r.doiTacQuanLy] || 0) + 1);
         let st = rknStats(rows);
         document.getElementById('rknImportPreview').innerHTML = `
             <div class="row g-2 mb-3 small">
                 <div class="col-md-3"><b>${rows.length.toLocaleString('vi-VN')}</b> dòng hợp lệ</div>
                 <div class="col-md-3">≈ <b>${(rows.length - willSkip.length - willUpdate.length - willReopen.length - willSkipDone.length).toLocaleString('vi-VN')}</b> sẽ thêm mới · <b>${willUpdate.length.toLocaleString('vi-VN')}</b> ca đang tồn cập nhật ngày mới · <b style="color:#6B3FA0;">${willReopen.length.toLocaleString('vi-VN')}</b> ca Đã XL → XL Lại</div>
-                <div class="col-md-3" style="color:var(--slate);"><b>${willSkip.length + willSkipDone.length}</b> ca đã có ngày mới hơn/bằng — giữ nguyên</div>
+                <div class="col-md-3" style="color:var(--slate);"><b>${sameDay.length}</b> HĐ đã có đúng Ngày data này (đã nhập rồi)${newerSys.length ? ` · <b>${newerSys.length}</b> HĐ hệ thống đã có ngày mới hơn` : ''} — giữ nguyên</div>
                 <div class="col-md-3">Chưa XL ${st.chua} · XL Lại ${st.lai} · Đã Tạo CL ${st.cl} · Đã XL ${st.done}</div>
             </div>
             <div class="small mb-2"><b>Theo đối tác:</b> ${Object.entries(byDt).map(([k, v]) => `${escapeHtml(k)} (${v})`).join(' · ')}</div>
-            ${willUpdate.length ? `<div class="alert alert-info small py-2"><b>Ca đang tồn (Chưa XL / XL Lại / Đã Tạo CL) — cập nhật Ngày data mới nhất</b>, Số lần Up/Down, DSP, Tập điểm, MAC theo file; giữ nguyên Hướng XL và ghi chú: ${willUpdate.slice(0, 20).map(r => `${escapeHtml(r.soHopDong)} (${escapeHtml(openMap.get(r.soHopDong).ngayData)} → ${escapeHtml(r.ngayData)})`).join(', ')}${willUpdate.length > 20 ? ` … và ${willUpdate.length - 20} HĐ khác` : ''}</div>` : ''}
+            ${willUpdate.length ? `<div class="alert alert-info small py-2"><b>Ca đang tồn (Chưa XL / XL Lại / Đã Tạo CL) — cập nhật Ngày data mới nhất</b>, Số lần Up/Down, DSP, Tập điểm, Suy Hao theo file; giữ nguyên Hướng XL và ghi chú: ${willUpdate.slice(0, 20).map(r => `${escapeHtml(r.soHopDong)} (${escapeHtml(openMap.get(r.soHopDong).ngayData)} → ${escapeHtml(r.ngayData)})`).join(', ')}${willUpdate.length > 20 ? ` … và ${willUpdate.length - 20} HĐ khác` : ''}</div>` : ''}
             ${willReopen.length ? `<div class="alert small py-2" style="background:#F1EAF8;color:#4A2A70;"><b>Ca Đã XL bị lại — chuyển "XL Lại"</b> và cập nhật Ngày data mới (giữ ghi chú lần xử lý trước): ${willReopen.slice(0, 20).map(r => `${escapeHtml(r.soHopDong)} (${escapeHtml(doneMap.get(r.soHopDong).ngayData)} → ${escapeHtml(r.ngayData)})`).join(', ')}${willReopen.length > 20 ? ` … và ${willReopen.length - 20} HĐ khác` : ''}</div>` : ''}
+            ${newerSys.length ? `<div class="small mb-2" style="color:var(--slate);">Hệ thống đã có ngày mới hơn file: ${newerSys.slice(0, 10).map(r => `${escapeHtml(r.soHopDong)} (hệ thống ${escapeHtml(curDate(r))} · file ${escapeHtml(r.ngayData)})`).join(', ')}${newerSys.length > 10 ? ' …' : ''}</div>` : ''}
             ${dupInFile ? `<div class="small mb-2" style="color:var(--amber);">${dupInFile} dòng trùng Số HĐ trong file — giữ dòng có Ngày data mới nhất.</div>` : ''}
             ${(n => n ? `<div class="alert alert-warning small py-2"><b>${n} dòng có Ngày data bất thường</b> (ở tương lai hoặc cũ hơn 120 ngày) — có thể bị đảo ngày/tháng. Kiểm tra lại file trước khi nhập.</div>` : '')(hiSuspiciousDates(rows.map(r => r.ngayData)))}
             ${errors.length ? `<div class="alert alert-danger small py-2"><b>${errors.length} dòng lỗi (không nhập):</b><br>${errors.slice(0, 10).map(escapeHtml).join('<br>')}${errors.length > 10 ? `<br>… và ${errors.length - 10} dòng khác` : ''}</div>` : ''}
@@ -5467,11 +5480,12 @@
         Object.keys(raw[0]).forEach(h => { let f = NS_HEADER_MAP[hiNorm(h).replace(/[^a-z0-9]/g, '')]; if (f) colMap[h] = f; });
         let missing = ['doiTacQuanLy', 'maNhanVien'].filter(f => !Object.values(colMap).includes(f));
         if (missing.length) { alert(`File thiếu cột: ${missing.map(f => NS_LABELS[f]).join(', ')}`); return; }
-        let rows = [], errors = [], seen = new Set();
+        let rows = [], errors = [], seen = new Set(), dctx = {};
+        Object.keys(colMap).forEach(h => dctx[h] = hiDateCtx(raw.map(r => r[h])));
         raw.forEach((r, i) => {
             let row = {}; NS_FIELDS.forEach(f => row[f] = '');
             // Dùng chữ hiển thị (giữ số 0 đầu của Mã NV), riêng ngày đọc theo dd/mm
-            Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayVaoCT' ? hiSmartDate(r[h], (txt[i] || {})[h], false) : String((txt[i] || {})[h] ?? '').normalize('NFC').replace(/\s+/g, ' ').trim());
+            Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayVaoCT' ? hiSmartDate(r[h], (txt[i] || {})[h], false, dctx[h]) : String((txt[i] || {})[h] ?? '').normalize('NFC').replace(/\s+/g, ' ').trim());
             if (!row.maNhanVien && !row.ten) return;
             if (!row.maNhanVien || !row.doiTacQuanLy) { errors.push(`Dòng ${i + 2}: thiếu Mã NV / Đối tác`); return; }
             if (row.ngayVaoCT && !/^\d{2}\/\d{2}\/\d{4}$/.test(row.ngayVaoCT)) { errors.push(`Dòng ${i + 2} (${row.maNhanVien}): Ngày vào CT "${row.ngayVaoCT}" không đọc được`); return; }
@@ -6193,10 +6207,11 @@
         if (!Object.values(colMap).includes('soHopDong') || !Object.values(colMap).includes('ngayHoanTat')) {
             alert('File thiếu cột "Số hợp đồng" hoặc "Ngày hoàn tất PTC". Hãy dùng "Tải file mẫu".'); return null;
         }
-        let rows = [], errors = [];
+        let rows = [], errors = [], dctx = {};
+        Object.keys(colMap).forEach(h => dctx[h] = hiDateCtx(raw.map(r => r[h])));
         raw.forEach((r, i) => {
             let row = {};
-            Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayHoanTat' ? hiSmartDate(r[h], (txt[i] || {})[h], /\d:\d/.test(String((txt[i] || {})[h]))) : String((txt[i] || {})[h] ?? '').trim());
+            Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayHoanTat' ? hiSmartDate(r[h], (txt[i] || {})[h], /\d:\d/.test(String((txt[i] || {})[h])), dctx[h]) : String((txt[i] || {})[h] ?? '').trim());
             if (!row.soHopDong && !row.ngayHoanTat) return;
             if (!row.soHopDong || !/^\d{2}\/\d{2}\/\d{4}/.test(row.ngayHoanTat || '')) { errors.push(`Dòng ${i + 2}: thiếu Số HĐ hoặc ngày "${row.ngayHoanTat || ''}" không đọc được`); return; }
             rows.push(row);
