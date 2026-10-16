@@ -4688,6 +4688,8 @@
         return null;
     }
     const rknIsOpen = r => r.huongXL !== 'Đã XL';
+    // Suy hao (lưu ở cột macAddress, hiển thị "Suy Hao"): số dBm, chấp nhận dấu phẩy thập phân; "#N/A"/trống = không có
+    const rknSuyHao = r => { let v = String(r.macAddress ?? '').trim().replace(',', '.'); return /^-?\d+(\.\d+)?$/.test(v) ? parseFloat(v) : null; };
     const rknUd = r => (r.soLanUpDown === null || r.soLanUpDown === undefined || r.soLanUpDown === '') ? null : Number(r.soLanUpDown);
 
     function rknStats(rows) {
@@ -4970,18 +4972,18 @@
             ? `<div class="d-flex gap-1"><input type="text" class="form-control form-control-sm rkn-note" data-id="${r.id}" data-field="${f}" maxlength="${RKN_NOTE_MAX}" value="${escapeHtml(r[f] || '')}" placeholder="Nhập ghi chú..." style="min-width:150px;">
                <button class="btn btn-sm btn-outline-success rkn-note-save d-none" data-id="${r.id}" data-field="${f}" title="Lưu"><i class="bi bi-check-lg"></i></button></div>`
             : `<span class="small">${escapeHtml(r[f] || '')}</span>`;
-        let head = `<thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Số HĐ</th><th>Ngày data</th><th>Tập điểm / DSP</th><th>Suy Hao</th><th class="text-end">Up/Down</th>
+        let head = `<thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Số HĐ</th><th>Ngày data</th><th>Tập điểm / DSP</th><th class="text-end">Suy Hao · Up/Down</th>
             <th style="min-width:140px;">Hướng XL</th><th>DVKH care note</th><th>Đội trưởng note</th>${isAdmin ? '<th class="text-end">Sửa</th>' : ''}</tr></thead>`;
         let body = slice.length === 0
-            ? `<tr><td colspan="${isAdmin ? 11 : 10}" class="text-center py-4 small" style="color:var(--slate);">${rknData.length ? 'Không còn ca nào cần xử lý 🎉' : 'Chưa có dữ liệu.'}</td></tr>`
+            ? `<tr><td colspan="${isAdmin ? 10 : 9}" class="text-center py-4 small" style="color:var(--slate);">${rknData.length ? 'Không còn ca nào cần xử lý 🎉' : 'Chưa có dữ liệu.'}</td></tr>`
             : slice.map(r => {
                 let ud = rknUd(r);
                 return `<tr>
                     <td>${escapeHtml(r.doiTacQuanLy || '')}</td><td class="small">${escapeHtml(r.doiTruong || '')}<br><span style="color:var(--slate-soft);">${escapeHtml(r.blockQuanLy || '')}</span></td>
                     <td class="fw-bold mono">${escapeHtml(r.soHopDong || '')}</td><td class="mono small">${escapeHtml(r.ngayData || '')}</td>
                     <td class="small mono">${escapeHtml(r.tapDiem || '')}<br><span style="color:var(--slate-soft);">${escapeHtml(r.thongTinDSP || '')}</span></td>
-                    <td class="small mono">${escapeHtml(r.macAddress || '')}</td>
-                    <td class="text-end mono fw-bold" style="color:${ud >= 100 ? 'var(--red)' : ud >= 50 ? 'var(--amber)' : 'inherit'};">${ud === null ? '' : ud}</td>
+                    <td class="text-end mono text-nowrap">${(sh => sh === null ? `<span class="small" style="color:var(--slate-soft);" title="Chưa có suy hao">—</span>` : `<span class="small" style="color:${sh <= -27 ? 'var(--red)' : sh <= -25 ? 'var(--amber)' : 'inherit'};" title="Suy hao (dBm)">${sh.toFixed(2)} dBm</span>`)(rknSuyHao(r))}<br>
+                        <b style="color:${ud >= 100 ? 'var(--red)' : ud >= 50 ? 'var(--amber)' : 'inherit'};" title="Số lần Up/Down">${ud === null ? '' : ud + ' lần'}</b></td>
                     <td><select class="form-select form-select-sm rkn-status" data-id="${r.id}" style="border-left:4px solid ${RKN_STATUS_COLOR[r.huongXL] || '#ccc'};">
                         ${RKN_STATUSES.map(s => `<option ${s === r.huongXL ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
                     <td>${noteCell(r, 'dvkhNote')}</td><td>${noteCell(r, 'doiTruongNote')}</td>
@@ -5121,6 +5123,8 @@
             if (!/^\d{2}\/(0[1-9]|1[0-2])\/\d{4}$/.test(row.ngayData)) { errors.push(`Dòng ${i + 2} (${row.soHopDong}): Ngày data "${row.ngayData}" không đọc được (cần dd/mm/yyyy)`); return; }
             if (!st) { errors.push(`Dòng ${i + 2} (${row.soHopDong}): Hướng XL "${row.huongXL}" không hợp lệ`); return; }
             row.huongXL = st;
+            if (/^#n\/?a$/i.test(row.macAddress)) row.macAddress = ''; // "#N/A" từ công thức Excel = không có suy hao
+            else if (/^-?\d+,\d+$/.test(row.macAddress)) row.macAddress = row.macAddress.replace(',', '.');
             // Trùng Số HĐ trong file: giữ dòng có Ngày data mới nhất
             let old = latest.get(row.soHopDong);
             if (old) { dupInFile++; if (dKey(row.ngayData) <= dKey(old.ngayData)) return; }
@@ -5130,7 +5134,8 @@
         rknPendingImport = rows;
         let openMap = new Map();
         rknData.filter(rknIsOpen).forEach(r => { let o = openMap.get(r.soHopDong); if (!o || dKey(r.ngayData) > dKey(o.ngayData)) openMap.set(r.soHopDong, r); });
-        let willUpdate = rows.filter(r => openMap.has(r.soHopDong) && dKey(r.ngayData) > dKey(openMap.get(r.soHopDong).ngayData));
+        // Ca đang tồn: file mới hơn hoặc cùng ngày (nhập lại để bổ sung Suy Hao / Up/Down) → cập nhật
+        let willUpdate = rows.filter(r => openMap.has(r.soHopDong) && dKey(r.ngayData) >= dKey(openMap.get(r.soHopDong).ngayData));
         let willSkip = rows.filter(r => openMap.has(r.soHopDong) && !willUpdate.includes(r));
         let doneMap = new Map();
         rknData.filter(r => r.huongXL === 'Đã XL').forEach(r => { let o = doneMap.get(r.soHopDong); if (!o || dKey(r.ngayData) > dKey(o.ngayData)) doneMap.set(r.soHopDong, r); });
@@ -5143,12 +5148,12 @@
         document.getElementById('rknImportPreview').innerHTML = `
             <div class="row g-2 mb-3 small">
                 <div class="col-md-3"><b>${rows.length.toLocaleString('vi-VN')}</b> dòng hợp lệ</div>
-                <div class="col-md-3">≈ <b>${(rows.length - willSkip.length - willUpdate.length - willReopen.length - willSkipDone.length).toLocaleString('vi-VN')}</b> sẽ thêm mới · <b>${willUpdate.length.toLocaleString('vi-VN')}</b> ca đang tồn cập nhật ngày mới · <b style="color:#6B3FA0;">${willReopen.length.toLocaleString('vi-VN')}</b> ca Đã XL → XL Lại</div>
-                <div class="col-md-3" style="color:var(--slate);"><b>${sameDay.length}</b> HĐ đã có đúng Ngày data này (đã nhập rồi)${newerSys.length ? ` · <b>${newerSys.length}</b> HĐ hệ thống đã có ngày mới hơn` : ''} — giữ nguyên</div>
+                <div class="col-md-3">≈ <b>${(rows.length - willSkip.length - willUpdate.length - willReopen.length - willSkipDone.length).toLocaleString('vi-VN')}</b> sẽ thêm mới · <b>${willUpdate.length.toLocaleString('vi-VN')}</b> ca đang tồn cập nhật (ngày mới / bổ sung thông tin) · <b style="color:#6B3FA0;">${willReopen.length.toLocaleString('vi-VN')}</b> ca Đã XL → XL Lại</div>
+                <div class="col-md-3" style="color:var(--slate);"><b>${sameDay.length}</b> HĐ có ca Đã XL đúng Ngày data này${newerSys.length ? ` · <b>${newerSys.length}</b> HĐ hệ thống đã có ngày mới hơn` : ''} — giữ nguyên</div>
                 <div class="col-md-3">Chưa XL ${st.chua} · XL Lại ${st.lai} · Đã Tạo CL ${st.cl} · Đã XL ${st.done}</div>
             </div>
             <div class="small mb-2"><b>Theo đối tác:</b> ${Object.entries(byDt).map(([k, v]) => `${escapeHtml(k)} (${v})`).join(' · ')}</div>
-            ${willUpdate.length ? `<div class="alert alert-info small py-2"><b>Ca đang tồn (Chưa XL / XL Lại / Đã Tạo CL) — cập nhật Ngày data mới nhất</b>, Số lần Up/Down, DSP, Tập điểm, Suy Hao theo file; giữ nguyên Hướng XL và ghi chú: ${willUpdate.slice(0, 20).map(r => `${escapeHtml(r.soHopDong)} (${escapeHtml(openMap.get(r.soHopDong).ngayData)} → ${escapeHtml(r.ngayData)})`).join(', ')}${willUpdate.length > 20 ? ` … và ${willUpdate.length - 20} HĐ khác` : ''}</div>` : ''}
+            ${willUpdate.length ? `<div class="alert alert-info small py-2"><b>Ca đang tồn (Chưa XL / XL Lại / Đã Tạo CL) — cập nhật Ngày data mới nhất</b>, Số lần Up/Down, DSP, Tập điểm, Suy Hao theo file; giữ nguyên Hướng XL và ghi chú: ${willUpdate.filter(r => dKey(r.ngayData) > dKey(openMap.get(r.soHopDong).ngayData)).slice(0, 20).map(r => `${escapeHtml(r.soHopDong)} (${escapeHtml(openMap.get(r.soHopDong).ngayData)} → ${escapeHtml(r.ngayData)})`).join(', ')}${willUpdate.length > 20 ? ` … và ${willUpdate.length - 20} HĐ khác` : ''}</div>` : ''}
             ${willReopen.length ? `<div class="alert small py-2" style="background:#F1EAF8;color:#4A2A70;"><b>Ca Đã XL bị lại — chuyển "XL Lại"</b> và cập nhật Ngày data mới (giữ ghi chú lần xử lý trước): ${willReopen.slice(0, 20).map(r => `${escapeHtml(r.soHopDong)} (${escapeHtml(doneMap.get(r.soHopDong).ngayData)} → ${escapeHtml(r.ngayData)})`).join(', ')}${willReopen.length > 20 ? ` … và ${willReopen.length - 20} HĐ khác` : ''}</div>` : ''}
             ${newerSys.length ? `<div class="small mb-2" style="color:var(--slate);">Hệ thống đã có ngày mới hơn file: ${newerSys.slice(0, 10).map(r => `${escapeHtml(r.soHopDong)} (hệ thống ${escapeHtml(curDate(r))} · file ${escapeHtml(r.ngayData)})`).join(', ')}${newerSys.length > 10 ? ' …' : ''}</div>` : ''}
             ${dupInFile ? `<div class="small mb-2" style="color:var(--amber);">${dupInFile} dòng trùng Số HĐ trong file — giữ dòng có Ngày data mới nhất.</div>` : ''}
