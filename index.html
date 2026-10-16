@@ -250,6 +250,29 @@
         .lt-btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
         .lt-btn.primary:hover:not(:disabled) { background: var(--brand-dark); color: #fff; }
         .lt-btn:disabled { opacity: .5; cursor: not-allowed; }
+        .lt-care { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 18px; }
+        .lt-care-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+        .lt-care-row + .lt-care-row { margin-top: 10px; }
+        .lt-care-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+        .lt-care-btn { min-height: 40px; padding: 6px 14px; font-size: 13px; }
+        .lt-care-btn.done { opacity: .55; }
+        .lt-shop-seeds { font-weight: 700; font-size: 14px; margin-bottom: 10px; }
+        .lt-shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+        .lt-shop-item { border: 1px solid var(--line); border-radius: 10px; padding: 8px; text-align: center; background: var(--card); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .lt-shop-item .em { font-size: 26px; line-height: 1.2; }
+        .lt-shop-item .nm { font-size: 12.5px; font-weight: 600; }
+        .lt-shop-item .st { font-size: 12px; color: var(--slate); min-height: 18px; }
+        .lt-shop-item .lt-btn { width: 100%; margin-top: 4px; }
+        .lt-decor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+        .lt-decor-grid select { width: 100%; min-height: 40px; }
+        .lt-care-stat { font-size: 13px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+        .lt-care-stat small { font-weight: 500; color: var(--slate); }
+        .lt-gift-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .lt-gift-chip { border: 1px solid var(--line); border-radius: 8px; padding: 3px 9px; font-size: 12.5px; background: var(--card); }
+        .lt-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #D9381E; margin-left: 6px; vertical-align: middle; }
+        .lt-dot[hidden] { display: none; }
+        .lt-top-pet { min-height: 32px; display: inline-flex; align-items: center; gap: 4px; }
+        @media (pointer: coarse) { .lt-top-pet { min-height: 40px; } }
 
         .lt-pick-banner {
             background: #FFF6DD; border: 1px solid #EBD38C; color: #6B4E06; border-radius: 8px;
@@ -259,6 +282,7 @@
         .lt-yard { position: relative; width: 100%; min-width: 960px; aspect-ratio: 1200 / 1336; user-select: none; }
         .lt-yard > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
         .lt-yard .lt-lot { cursor: default; transition: fill .15s; }
+        .lt-yard:not(.picking) .lt-lot.taken { cursor: pointer; }
         .lt-yard.picking .lt-lot.free { cursor: pointer; fill: #FFF3C4; stroke: #D9A520; stroke-width: 2.5; }
         .lt-yard.picking .lt-lot.free:hover { fill: #FFE48A; }
         .lt-pets { position: absolute; inset: 0; pointer-events: none; }
@@ -267,6 +291,7 @@
             display: flex; flex-direction: column; align-items: center; pointer-events: auto;
             touch-action: none;
         }
+        .lt-pet:not(.mine) { cursor: pointer; }
         .lt-pet.mine { cursor: grab; }
         .lt-pet.dragging { cursor: grabbing; z-index: 9999 !important; }
         .lt-pet.dragging .lt-pet-emoji { transform: scale(1.18); filter: drop-shadow(0 6px 6px rgba(0,0,0,.35)); }
@@ -532,6 +557,7 @@
         <div class="d-flex flex-wrap align-items-center gap-2 mt-3 mt-md-0">
             <span class="text-end small me-1" style="color:#9AA39C;">Xin chào, <strong id="lblCurrentUsername" style="color:#fff;">--</strong></span>
             <span class="ops-pill" id="lblCurrentRole">Role: --</span>
+            <button type="button" class="ops-btn lt-top-pet d-none" id="btnTopPet" title="Mở Linh Thú"></button>
             <span class="ops-pill is-brand" id="lblCurrentDoiTac">Đối tác: Tất cả</span>
             <span class="ops-pill is-brand d-none" id="lblCurrentDoiTruong">Đội trưởng: --</span>
             <button class="ops-btn" id="btnManualRefresh" onclick="refreshData()" title="Làm mới dữ liệu ngay"><i class="bi bi-arrow-clockwise me-1"></i>Làm mới</button>
@@ -584,7 +610,7 @@
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="linhthu-tab" data-bs-toggle="tab" data-bs-target="#linhThuContent" type="button" role="tab">
-                <i class="bi bi-stars me-1" style="color:#C9A227;"></i> Linh Thú
+                <i class="bi bi-stars me-1" style="color:#C9A227;"></i> Linh Thú<span class="lt-dot" id="ltTabDot" role="img" aria-label="Có việc chăm hoặc quà cần xem" hidden></span>
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -1481,6 +1507,8 @@
                 <div class="text-center small py-3" style="color:var(--slate);">Đang tải Linh thú của bạn...</div>
             </div>
 
+            <div id="ltCare" class="lt-care mb-3"></div>
+
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
                 <div class="fw-bold small" style="color:var(--slate);">
                     KHU DÂN CƯ LINH THÚ <span id="linhThuLotStats" class="fw-normal" style="color:var(--slate-soft);"></span>
@@ -1694,9 +1722,13 @@
                     <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g6">9. Linh Thú</button></h2>
                     <div id="g6" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
                         <div class="accordion-body small"><ul class="mb-0">
-                            <li>Mỗi tài khoản có 1 Linh thú, chọn tự do 1 trong 32 loài, đặt tên (≤ 20 ký tự) và trạng thái (≤ 50 ký tự, hiện thành bong bóng trên đầu thú) → bấm Lưu. Không có cấp hay xếp hạng.</li>
-                            <li>Khu dân cư 112 lô quanh công viên: bấm <b>Chọn lô</b> rồi bấm 1 lô tô vàng để nhận; có thể Đổi lô / Trả lô. Chưa có lô thì thú đứng ở công viên.</li>
-                            <li>Thú đứng yên — giữ chuột (hoặc ngón tay) vào thú của mình và kéo đi bất kỳ đâu; vị trí được lưu cho mọi người cùng thấy. Nút <b>Gọi thú về lô</b> đưa thú về giữa lô.</li>
+                            <li><b>Nhận thú và lô:</b> mỗi tài khoản (mọi vai trò) có 1 Linh thú, chọn 1 trong 32 loài, đặt tên (≤ 20 ký tự) và trạng thái (≤ 50 ký tự, hiện thành bong bóng trên đầu thú) → bấm Lưu. Khu dân cư 112 lô: bấm <b>Chọn lô</b> rồi bấm 1 lô tô vàng để nhận (có Đổi lô / Trả lô). Giữ và kéo thú của mình để dắt đi chơi; <b>Gọi thú về lô</b> đưa thú về giữa lô.</li>
+                            <li><b>Chăm hằng ngày:</b> 3 việc mỗi ngày — 🍚 Cho ăn, 🎾 Chơi, 🫧 Tắm (mỗi việc làm 1 lần/ngày). Tâm trạng: 😄 Vui (đủ 3 việc hôm nay), 🙂 Ổn (1–2 việc), 😟 Nhớ chủ (hôm nay chưa chăm, hôm qua có chăm), 😿 Đói (từ 2 ngày không chăm).</li>
+                            <li><b>Chuỗi ngày 🔥:</b> chăm ít nhất 1 việc mỗi ngày liên tiếp thì chuỗi tăng; bỏ 1 ngày chuỗi về 0. Đạt mốc <b>3 / 7 / 14 / 30 ngày</b> nhận cúp độc quyền 🥉 🥈 🥇 👑 (không mua được); mốc 7/14/30 có thông báo trong Trò chuyện.</li>
+                            <li><b>Hạt 🌰:</b> mỗi việc chăm +5; làm đủ việc thứ 3 trong ngày +5 thưởng; được bạn tặng quà +3; ghé thăm lô người khác +1 (tối đa 5 lô khác nhau mỗi ngày). Hạt chỉ để mua đồ — không có điểm kinh nghiệm, cấp độ hay bảng xếp hạng.</li>
+                            <li><b>Cửa hàng &amp; trang trí:</b> nút <b>Cửa hàng &amp; Trang trí</b> bán 20 món (20–200 hạt) và 4 cúp độc quyền; mỗi món mua 1 lần, giữ vĩnh viễn. Lô có 6 ô trang trí — chọn mỗi món 1 ô rồi Lưu; cần đang có lô, trả lô thì đồ vẫn giữ trong kho. Mọi người nhìn sân đều thấy đồ của bạn.</li>
+                            <li><b>Ghé thăm &amp; tặng quà:</b> bấm vào thú hoặc lô của người khác để mở thẻ (chủ, tâm trạng, chuỗi, đồ trang trí). 👋 <b>Ghé thăm</b> mỗi người 1 lần/ngày; 🎁 <b>Tặng quà</b> (🌸 🍰 🐟 🎈 🍬 🦴) chỉ 1 quà/ngày cho 1 người, không tự tặng mình, người nhận phải có thú.</li>
+                            <li><b>Nhắc nhở:</b> chấm đỏ trên tab Linh Thú khi còn việc chưa chăm hoặc có quà chưa mở; nút thú nhỏ trên thanh trên cùng hiện tâm trạng, bấm để vào tab; khi bạn bè ghé thăm hoặc tặng quà sẽ hiện trong khung "Linh thú của tôi" (Mở quà để tắt). Tin chat tự báo khi thú nhận đủ 5 quà trong ngày.</li>
                         </ul></div>
                     </div>
                 </div>
@@ -1824,7 +1856,32 @@
   </div>
 </div>
 
-    <!-- MODAL: Sửa / thêm dòng HI FPT (SuperAdmin) -->
+    <!-- MODAL: Thẻ Linh thú của người khác -->
+    <div class="modal fade" id="ltCardModal" tabindex="-1" aria-labelledby="ltCardTitle">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold" id="ltCardTitle">Linh thú</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body" id="ltCardBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Cửa hàng Linh Thú -->
+    <div class="modal fade" id="ltShopModal" tabindex="-1" aria-labelledby="ltShopTitle">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold" id="ltShopTitle">🛍️ Cửa hàng &amp; Trang trí</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body" id="ltShopBody"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="hiEditModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -2513,6 +2570,7 @@
                     startAutoRefresh();
                 }
                 startPingOnline();
+                fetchLinhThuMe(); ltEnsureMeTimer();
                 startChatPolling();
                 startIdleWatcher();
                 return;
@@ -2588,7 +2646,7 @@
     // Tab hiện lại sau khi ẩn: cập nhật ngay online / chat / dữ liệu Bảo Trì (các poll đã tạm ngưng khi ẩn)
     document.addEventListener('visibilitychange', () => {
         if (document.hidden || !currentUser || !currentUser.username) return;
-        pingOnline(); fetchChatMessages(); refreshData();
+        pingOnline(); fetchChatMessages(); refreshData(); fetchLinhThuMe();
     });
 
     // Đóng tab / tắt trình duyệt (không kịp bấm Đăng xuất) — vẫn cố báo offline
@@ -2772,6 +2830,7 @@
                     startAutoRefresh();
                 }
                 startPingOnline();
+                fetchLinhThuMe(); ltEnsureMeTimer();
                 startChatPolling();
                 startIdleWatcher();
             } else {
@@ -3486,12 +3545,208 @@
         return { x: px / LT_W, y: py / LT_H };
     }
 
+    // ---------- Linh Thú v2: chăm sóc, hạt, chuỗi, quà ----------
+    const LT_MOOD_UI = {vui:'😄 Vui', on:'🙂 Ổn', nho:'😟 Nhớ chủ', doi:'😿 Đói'};
+    const LT_GIFT_UI = {hoa:['🌸','Hoa'], banh:['🍰','Bánh'], ca:['🐟','Cá'], bong:['🎈','Bóng bay'], keo:['🍬','Kẹo'], xuong:['🦴','Xương']};
+    const LT_SHOP_UI = {
+        hoa_hong:{emoji:'🌹',name:'Hoa hồng',price:20}, co_non:{emoji:'🌱',name:'Cỏ non',price:20},
+        da_cuoi:{emoji:'🪨',name:'Đá cuội',price:30}, bui_hoa:{emoji:'🌼',name:'Bụi hoa',price:40},
+        den_long:{emoji:'🏮',name:'Đèn lồng',price:50}, ghe_da:{emoji:'🪑',name:'Ghế đá',price:60},
+        ban_go:{emoji:'🍽️',name:'Bàn gỗ',price:70}, o_du:{emoji:'⛱️',name:'Ô dù',price:80},
+        hang_rao:{emoji:'🚧',name:'Hàng rào',price:90}, nha_go:{emoji:'🛖',name:'Nhà gỗ',price:100},
+        ho_ca:{emoji:'🐠',name:'Hồ cá',price:110}, cay_xanh:{emoji:'🌳',name:'Cây xanh',price:120},
+        dai_phun:{emoji:'⛲',name:'Đài phun nước',price:130}, xich_du:{emoji:'🎠',name:'Xích đu',price:140},
+        cau_truot:{emoji:'🛝',name:'Cầu trượt',price:150}, leu_tranh:{emoji:'⛺',name:'Lều trại',price:160},
+        dai_bung:{emoji:'🎪',name:'Rạp xiếc',price:170}, cay_den:{emoji:'🎄',name:'Cây thông đèn',price:180},
+        thap_nho:{emoji:'🗼',name:'Tháp nhỏ',price:190}, cau_vong:{emoji:'🌈',name:'Cầu vồng',price:200},
+        streak3:{emoji:'🥉',name:'Cúp đồng',price:null,exclusive:3}, streak7:{emoji:'🥈',name:'Cúp bạc',price:null,exclusive:7},
+        streak14:{emoji:'🥇',name:'Cúp vàng',price:null,exclusive:14}, streak30:{emoji:'👑',name:'Vương miện',price:null,exclusive:30}
+    };
+    const LT_CARE_UI = [['feed','🍚','Cho ăn'], ['play','🎾','Chơi'], ['bath','🫧','Tắm']];
+    let ltMe = null;            // kết quả /api/linhthu/me gần nhất
+    let ltMeTimer = null;
+    let ltMeBusy = false;
+
+    async function fetchLinhThuMe() {
+        if (!currentUser) return null;
+        let who = currentUser.username;
+        try {
+            let res = await apiFetch("api/linhthu/me", { method: "GET" });
+            let data = await res.json();
+            if (!currentUser || currentUser.username !== who) return null; // phiên đã đổi: bỏ kết quả cũ
+            if (!data || !data.success) return ltMe;
+            ltMe = data;
+        } catch (e) { return ltMe; }
+        ltRenderCare(); ltRenderReminders();
+        return ltMe;
+    }
+    function ltEnsureMeTimer() {
+        if (ltMeTimer) return;
+        ltMeTimer = setInterval(() => { if (currentUser && !document.hidden) fetchLinhThuMe(); }, 5 * 60 * 1000);
+    }
+    function ltCareLeft() {
+        if (!ltMe || !ltMe.hasPet) return false;
+        let t = ltMe.today || {};
+        return !(t.feed && t.play && t.bath);
+    }
+    // Chấm đỏ trên tab + thú nhỏ trên thanh trên cùng
+    function ltRenderReminders() {
+        let dot = document.getElementById('ltTabDot');
+        if (dot) dot.hidden = !(currentUser && ltMe && (ltCareLeft() || (ltMe.giftsUnopened || []).length > 0));
+        let btn = document.getElementById('btnTopPet');
+        if (!btn) return;
+        if (!currentUser || !ltMe) { btn.classList.add('d-none'); btn.innerHTML = ''; return; }
+        btn.classList.remove('d-none');
+        if (!ltMe.hasPet) {
+            btn.innerHTML = '🥚 Nhận thú'; btn.setAttribute('aria-label', 'Nhận Linh thú');
+        } else {
+            let sp = ltSpecies(ltMe.species);
+            let mood = LT_MOOD_UI[ltMe.mood] || LT_MOOD_UI.on;
+            btn.innerHTML = `${sp ? sp.emoji : '🐾'} ${escapeHtml(mood)}`;
+            btn.setAttribute('aria-label', 'Linh thú: ' + mood.replace(/^\S+\s*/, ''));
+        }
+    }
+    document.getElementById('btnTopPet').addEventListener('click', () => {
+        bootstrap.Tab.getOrCreateInstance(document.getElementById('linhthu-tab')).show();
+    });
+
+    function ltRenderCare() {
+        let box = document.getElementById('ltCare');
+        if (!box) return;
+        if (!currentUser || !ltMe) { box.innerHTML = ''; return; }
+        if (!ltMe.hasPet) {
+            box.innerHTML = `<div class="small" style="color:var(--slate);">🥚 Hãy chọn loài và bấm <b>Lưu</b> ở khung trên để nhận Linh thú, rồi mới chăm sóc được.</div>`;
+            return;
+        }
+        let t = ltMe.today || {};
+        let btns = LT_CARE_UI.map(([k, em, nm]) => t[k]
+            ? `<button type="button" class="lt-btn lt-care-btn done" data-care="${k}" disabled>${em} ${nm} ✓</button>`
+            : `<button type="button" class="lt-btn lt-care-btn" data-care="${k}">${em} ${nm}</button>`).join('');
+        let gifts = ltMe.giftsUnopened || [];
+        let giftHtml;
+        if (gifts.length) {
+            let chips = gifts.map(g => {
+                let ui = LT_GIFT_UI[g.item] || ['🎁', g.item];
+                return `<span class="lt-gift-chip">${ui[0]} ${escapeHtml(ui[1])} · từ ${escapeHtml(g.from)}</span>`;
+            }).join('');
+            giftHtml = `<span class="lt-care-stat">🎁 Hộp quà <small>(${gifts.length})</small></span>
+                <button type="button" class="lt-btn primary lt-care-btn" data-act="open-gifts">Mở quà</button>
+                <div class="lt-gift-list">${chips}</div>`;
+        } else {
+            giftHtml = `<span class="lt-care-stat">🎁 Hộp quà <small>(trống)</small></span>`;
+        }
+        let vis = ltMe.visitorsToday || [];
+        box.innerHTML = `
+            <div class="lt-care-row">
+                <span class="lt-label mb-0">Chăm hôm nay</span>
+                <div class="lt-care-btns">${btns}</div>
+            </div>
+            <div class="lt-care-row">
+                <span class="lt-care-stat" id="ltSeeds">🌰 ${Number(ltMe.seeds) || 0} <small>hạt</small></span>
+                <span class="lt-care-stat">🔥 ${Number(ltMe.streak) || 0} ngày <small>(dài nhất ${Number(ltMe.bestStreak) || 0})</small></span>
+                <span class="lt-care-stat">${escapeHtml(LT_MOOD_UI[ltMe.mood] || '')}</span>
+            </div>
+            <div class="lt-care-row">${giftHtml}</div>
+            <div class="lt-care-row"><button type="button" class="lt-btn lt-care-btn" data-act="open-shop">🛍️ Cửa hàng &amp; Trang trí</button></div>
+            <div class="lt-care-row small" style="color:var(--slate);">Hôm nay có ai ghé: ${vis.length ? vis.map(v => `<b>${escapeHtml(v)}</b>`).join(', ') : 'chưa có ai'}</div>`;
+    }
+    document.getElementById('ltCare').addEventListener('click', async (e) => {
+        let b = e.target.closest('button');
+        if (!b || b.disabled || ltMeBusy) return;
+        let path, body;
+        if (b.dataset.care) { path = 'api/linhthu/care'; body = { action: b.dataset.care }; }
+        else if (b.dataset.act === 'open-gifts') { path = 'api/linhthu/open-gifts'; body = {}; }
+        else if (b.dataset.act === 'open-shop') { ltOpenShop(); return; }
+        else return;
+        ltMeBusy = true; b.disabled = true;
+        try {
+            let res = await apiFetch(path, { method: 'POST', body: JSON.stringify(body) });
+            let data = await res.json().catch(() => ({}));
+            if (!res.ok && data && data.error && res.status !== 409) alert(data.error);
+        } catch (err) { /* apiFetch đã xử lý 401 */ }
+        ltMeBusy = false;
+        await fetchLinhThuMe();
+    });
+
+
+    // ---------- Cửa hàng & Trang trí ----------
+    let ltShopBusy = false;
+    let ltShopMsg = '';
+    function ltOpenShop() {
+        ltShopMsg = '';
+        document.getElementById('ltShopBody').innerHTML = '';   // bỏ lựa chọn nháp cũ
+        ltRenderShop();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('ltShopModal')).show();
+    }
+    function ltRenderShop() {
+        let body = document.getElementById('ltShopBody');
+        if (!body) return;
+        if (!ltMe || !ltMe.hasPet) { body.innerHTML = '<div class="small">Hãy nhận Linh thú trước.</div>'; return; }
+        let seeds = Number(ltMe.seeds) || 0;
+        let owned = Array.isArray(ltMe.owned) ? ltMe.owned : [];
+        let items = Object.keys(LT_SHOP_UI).map(k => {
+            let u = LT_SHOP_UI[k], st, btn = '';
+            if (owned.includes(k)) st = '✓ Đã có';
+            else if (u.exclusive) st = `🔒 Giữ chuỗi ${u.exclusive} ngày`;
+            else {
+                st = `🌰 ${u.price}`;
+                btn = `<button type="button" class="lt-btn primary" data-buy="${escapeHtml(k)}" ${seeds < u.price || ltShopBusy ? 'disabled' : ''}>Mua</button>`;
+            }
+            return `<div class="lt-shop-item" data-item="${escapeHtml(k)}"><span class="em">${u.emoji}</span><span class="nm">${escapeHtml(u.name)}</span><span class="st">${escapeHtml(st)}</span>${btn}</div>`;
+        }).join('');
+        let myPet = ltMyPet();
+        let hasLot = !!(myPet && myPet.lot_id);
+        let decor = Array.isArray(ltMe.decor) ? ltMe.decor : [];
+        let liveSel = [...body.querySelectorAll('select[data-slot]')];   // giữ lựa chọn chưa lưu qua các lần vẽ lại
+        if (liveSel.length === 6) decor = liveSel.map(sel => sel.value || null);
+        decor = decor.map(k => (typeof k === 'string' && owned.includes(k)) ? k : null);
+        let selects = '';
+        for (let i = 0; i < 6; i++) {
+            let cur = decor[i] || '';
+            let opts = '<option value="">— trống —</option>' + owned.filter(k => LT_SHOP_UI[k]).map(k =>
+                `<option value="${escapeHtml(k)}" ${k === cur ? 'selected' : ''}>${LT_SHOP_UI[k].emoji} ${escapeHtml(LT_SHOP_UI[k].name)}</option>`).join('');
+            selects += `<label class="small" style="color:var(--slate);">Ô ${i + 1}<select class="form-select form-select-sm" data-slot="${i}" ${hasLot ? '' : 'disabled'}>${opts}</select></label>`;
+        }
+        body.innerHTML = `
+            <div class="lt-shop-seeds" id="ltShopSeeds">🌰 ${seeds} hạt</div>
+            <div class="lt-shop-grid">${items}</div>
+            <hr>
+            <div class="fw-bold small mb-2">Trang trí lô (6 ô)</div>
+            ${hasLot ? '' : '<div class="small mb-2" style="color:var(--danger,#B3261E);" id="ltDecorHint">Nhận lô trước để trang trí.</div>'}
+            <div class="lt-decor-grid">${selects}</div>
+            <div class="mt-2 d-flex flex-wrap align-items-center gap-2">
+                <button type="button" class="lt-btn primary" id="ltDecorSave" ${hasLot && !ltShopBusy ? '' : 'disabled'}>Lưu trang trí</button>
+                <span class="small" id="ltShopMsg" role="status" style="color:var(--slate);">${escapeHtml(ltShopMsg)}</span>
+            </div>`;
+    }
+    document.getElementById('ltShopBody').addEventListener('click', async (e) => {
+        let b = e.target.closest('button');
+        if (!b || b.disabled || ltShopBusy) return;
+        let path, body;
+        if (b.dataset.buy) { path = 'api/linhthu/buy'; body = { item: b.dataset.buy }; }
+        else if (b.id === 'ltDecorSave') {
+            let slots = [...document.querySelectorAll('#ltShopBody select[data-slot]')].map(sel => sel.value || null);
+            let used = slots.filter(Boolean);
+            if (new Set(used).size !== used.length) { ltShopMsg = 'Mỗi món chỉ đặt một lần.'; let m = document.getElementById('ltShopMsg'); if (m) m.textContent = ltShopMsg; return; }
+            path = 'api/linhthu/decor'; body = { slots };
+        } else return;
+        ltShopBusy = true; ltShopMsg = ''; ltRenderShop();
+        try {
+            let res = await apiFetch(path, { method: 'POST', body: JSON.stringify(body) });
+            let data = await res.json().catch(() => ({}));
+            ltShopMsg = res.ok && data.success ? (body.item ? 'Đã mua!' : 'Đã lưu trang trí!') : (data.error || 'Không thực hiện được.');
+        } catch (err) { ltShopMsg = 'Lỗi kết nối.'; }
+        await fetchLinhThuMe(); await fetchLinhThuPets();
+        ltShopBusy = false; ltRenderShop();
+    });
+
     // ---------- Tải dữ liệu ----------
     async function fetchLinhThuPets() {
         try {
             let res = await apiFetch("api/linhthu/pets", { method: "GET" });
             let data = await res.json();
             ltPets = data.pets || [];
+            ltRenderReminders();
         } catch (e) {
             console.error("Lỗi tải Linh thú:", e);
             return;
@@ -3505,6 +3760,9 @@
     function ltResetOnLogout() {
         if (ltPollTimer) { clearInterval(ltPollTimer); ltPollTimer = null; }
         ltPets = [];
+        ltMe = null;
+        if (ltMeTimer) { clearInterval(ltMeTimer); ltMeTimer = null; }
+        ltRenderCare(); ltRenderReminders();
         ltDragging = null;
         ltMePanelUser = null;
         if (ltPickMode) ltSetPickMode(false);
@@ -3643,7 +3901,7 @@
             let result = await res.json();
             if (!result.success) { alert(result.error || "Không lưu được, vui lòng thử lại!"); return; }
             btn.textContent = 'Đã lưu ✓';
-            await fetchLinhThuPets();
+            await fetchLinhThuPets(); fetchLinhThuMe();
         } catch (e) {
             console.error("Lỗi lưu Linh thú:", e);
             alert("Lỗi kết nối, vui lòng thử lại!");
@@ -3775,6 +4033,11 @@
             if (owner) {
                 let label = ltOwnerLabel(owner).text;
                 parts.push(`<text x="${l.x + l.w - 6}" y="${l.y + 17}" font-size="13" text-anchor="end" pointer-events="none">🏠</text>`);
+                (Array.isArray(owner.decor) ? owner.decor : []).slice(0, 6).forEach((k, i) => {
+                    if (typeof k !== 'string' || !LT_SHOP_UI[k]) return;
+                    let cx = l.x + l.w * (0.2 + 0.3 * (i % 3)), cy = l.y + l.h * 0.5 + Math.floor(i / 3) * 18 + 12;
+                    parts.push(`<text class="lt-decor" x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" font-size="14" text-anchor="middle" pointer-events="none">${LT_SHOP_UI[k].emoji}</text>`);
+                });
                 parts.push(`<text x="${l.x + l.w / 2}" y="${l.y + l.h - 7}" font-size="9.5" font-weight="600" text-anchor="middle" fill="#6A5528" font-family="IBM Plex Sans, sans-serif" pointer-events="none">${escapeHtml(ltCut(label, 14))}</text>`);
             }
         });
@@ -3782,11 +4045,100 @@
     }
 
     document.getElementById('linhThuYardSvg').addEventListener('click', (e) => {
-        if (!ltPickMode) return;
+        if (!ltPickMode) {
+            let tk = e.target.closest('.lt-lot.taken');
+            if (tk) {
+                let owner = ltPets.find(p => Number(p.lot_id) === Number(tk.dataset.lot));
+                if (owner) ltOpenCard(owner.username);
+            }
+            return;
+        }
         let rect = e.target.closest('.lt-lot.free');
         if (!rect) return;
         let lot = ltLotById(rect.dataset.lot);
         if (lot) ltClaimLot(lot);
+    });
+
+
+    // ---------- Thẻ Linh thú của người khác: ghé thăm / tặng quà ----------
+    let ltCardUser = null;
+    let ltCardBusy = false;
+    let ltCardMsg = '';
+    let ltCardMsgErr = false;
+    let ltVisited = {};   // { username: true } — ghé trong phiên, bổ sung cho ltMe.visitedToday (server)
+    function ltOpenCard(username) {
+        if (!currentUser || username === currentUser.username) return;
+        if (!ltPets.some(p => p.username === username)) return;
+        ltCardUser = username; ltCardMsg = ''; ltCardMsgErr = false;
+        ltRenderCard();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('ltCardModal')).show();
+    }
+    function ltRenderCard() {
+        let body = document.getElementById('ltCardBody');
+        let p = ltPets.find(x => x.username === ltCardUser);
+        if (!body || !p) return;
+        let sp = ltSpecies(p.species) || { emoji: '🐾', name: 'Linh thú' };
+        let owner = ltOwnerLabel(p);
+        let name = p.pet_name || sp.name;
+        document.getElementById('ltCardTitle').textContent = name;
+        let decor = (Array.isArray(p.decor) ? p.decor : []).filter(k => typeof k === 'string' && LT_SHOP_UI[k]).map(k => LT_SHOP_UI[k].emoji).join(' ');
+        let lot = ltLotById(p.lot_id);
+        let visited = !!ltVisited[p.username] || !!(ltMe && Array.isArray(ltMe.visitedToday) && ltMe.visitedToday.includes(p.username));
+        let left = ltMe && Number.isFinite(Number(ltMe.visitsLeft)) ? Number(ltMe.visitsLeft) : 0;
+        let gifted = !!(ltMe && ltMe.giftedToday);
+        let visitLabel = visited ? '✓ Đã ghé hôm nay' : '👋 Ghé thăm' + (left > 0 ? ' <span class="small">+1 🌰</span>' : '');
+        let gifts = Object.keys(LT_GIFT_UI).map(k => `<button type="button" class="btn btn-outline-secondary lt-gift-btn" data-gift="${escapeHtml(k)}" ${(gifted || ltCardBusy) ? 'disabled' : ''} title="${escapeHtml(LT_GIFT_UI[k][1])}" aria-label="Tặng ${escapeHtml(LT_GIFT_UI[k][1])}" style="min-height:44px;min-width:44px;font-size:20px;">${LT_GIFT_UI[k][0]}</button>`).join('');
+        body.innerHTML = `
+            <div class="text-center mb-3">
+                <div style="font-size:56px;line-height:1.1;">${sp.emoji}</div>
+                <div class="fw-bold">${escapeHtml(name)}</div>
+                <div class="small" style="color:var(--slate);">${owner.partner ? '<span class="sparkle-name">' + escapeHtml(owner.text) + '</span>' : escapeHtml(owner.text)}${lot ? ' · Lô ' + escapeHtml(String(lot.code)) : ''}</div>
+            </div>
+            <div class="d-flex flex-wrap justify-content-center gap-3 small mb-2">
+                <span>${escapeHtml(LT_MOOD_UI[p.mood] || LT_MOOD_UI.on)}</span>
+                <span>🔥 ${Number(p.streak) || 0} ngày</span>
+            </div>
+            <div class="text-center small mb-3" style="color:var(--slate);">${decor ? 'Đồ trang trí: <span style="font-size:18px;">' + escapeHtml(decor) + '</span>' : 'Chưa có đồ trang trí'}</div>
+            <button type="button" class="btn btn-primary w-100 mb-3" id="ltCardVisit" style="min-height:44px;" ${(visited || ltCardBusy) ? 'disabled' : ''}>${visitLabel}</button>
+            <div class="fw-bold small mb-1">🎁 Tặng quà</div>
+            ${gifted ? '<div class="small mb-2" style="color:var(--slate);">Hôm nay bạn đã tặng quà</div>' : ''}
+            <div class="d-flex flex-wrap gap-2" id="ltCardGifts">${gifts}</div>
+            <div class="small mt-3 ${ltCardMsgErr ? 'text-danger' : ''}" id="ltCardMsg" role="status" style="${ltCardMsgErr ? '' : 'color:var(--slate);'}">${escapeHtml(ltCardMsg)}</div>`;
+    }
+    async function ltCardAct(kind, item) {
+        if (ltCardBusy || !ltCardUser) return;
+        let to = ltCardUser;
+        ltCardBusy = true; ltCardMsg = ''; ltCardMsgErr = false; ltRenderCard();
+        try {
+            let res = await apiFetch(kind === 'visit' ? 'api/linhthu/visit' : 'api/linhthu/gift', { method: 'POST', body: JSON.stringify(kind === 'visit' ? { to } : { to, item }) });
+            let data = await res.json().catch(() => ({}));
+            if (res.ok && data && data.success) {
+                if (kind === 'visit') {
+                    ltVisited[to] = true;
+                    ltCardMsg = data.gained ? 'Đã ghé thăm! +1 🌰' : (data.repeat ? 'Đã ghé hôm nay' : 'Đã ghé thăm (hôm nay hết lượt nhận hạt).');
+                } else {
+                    ltCardMsg = 'Đã gửi quà ' + (LT_GIFT_UI[item] ? LT_GIFT_UI[item][0] : '🎁') + '! Người nhận được +3 🌰.';
+                }
+            } else {
+                ltCardMsg = (data && data.error) || 'Không thực hiện được, thử lại sau.'; ltCardMsgErr = true;
+            }
+        } catch (err) { ltCardMsg = 'Lỗi kết nối, thử lại sau.'; ltCardMsgErr = true; }
+        ltCardBusy = false;
+        await fetchLinhThuMe();
+        if (kind === 'gift' && ltMe && !ltCardMsgErr) ltMe.giftedToday = true;
+        if (ltCardMsgErr && /đã tặng quà/i.test(ltCardMsg) && ltMe) ltMe.giftedToday = true;
+        ltRenderCard();
+    }
+    document.getElementById('ltCardBody').addEventListener('click', (e) => {
+        if (e.target.closest('#ltCardVisit')) return ltCardAct('visit');
+        let g = e.target.closest('[data-gift]');
+        if (g) ltCardAct('gift', g.dataset.gift);
+    });
+    document.getElementById('linhThuPets').addEventListener('click', (e) => {
+        if (ltPickMode) return;
+        let el = e.target.closest('.lt-pet');
+        if (!el || el.classList.contains('mine')) return;
+        ltOpenCard(el.dataset.username);
     });
 
     // ---------- Vẽ thú ----------
@@ -3801,13 +4153,14 @@
             let mine = p.username === myName;
             let owner = ltOwnerLabel(p);
             let ownerHtml = owner.partner ? `<span class="sparkle-name">${escapeHtml(owner.text)}</span>` : escapeHtml(owner.text);
+            let moodFace = LT_MOOD_UI[p.mood] ? escapeHtml(LT_MOOD_UI[p.mood].split(' ')[0]) : '';
             let title = `${p.pet_name || sp.name} — ${owner.text}${mine ? ' (thú của bạn — kéo để di chuyển)' : ''}`;
             return `
                 <div class="lt-pet ${mine ? 'mine' : ''}" data-username="${escapeHtml(p.username)}" title="${escapeHtml(title)}"
                      style="left:${(pos.x * 100).toFixed(3)}%; top:${(pos.y * 100).toFixed(3)}%; z-index:${mine ? 5000 : Math.round(pos.y * 1000)};">
                     ${p.status ? `<div class="lt-pet-status">${escapeHtml(p.status)}</div>` : ''}
                     <div class="lt-pet-emoji">${sp.emoji}</div>
-                    <div class="lt-pet-name">${escapeHtml(p.pet_name || sp.name)} · ${ownerHtml}</div>
+                    <div class="lt-pet-name">${escapeHtml(p.pet_name || sp.name)} · ${ownerHtml}${moodFace ? ' ' + moodFace : ''}</div>
                 </div>`;
         }).join('');
     }
@@ -3852,6 +4205,7 @@
     }
     document.getElementById('linhthu-tab').addEventListener('shown.bs.tab', () => {
         fetchLinhThuPets();
+        fetchLinhThuMe();
     });
     document.getElementById('linhthu-tab').addEventListener('hidden.bs.tab', () => {
         if (ltPickMode) ltSetPickMode(false);
