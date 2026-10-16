@@ -7,6 +7,7 @@
     <!-- Chỉ cho tải mã/kết nối từ nguồn đã biết (giảm thiệt hại nếu có lỗ hổng XSS). Đổi URL Worker thì sửa connect-src. -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob:; connect-src 'self' https://tpkt-backend.sayvv93.workers.dev https://*.fteldni.com; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
     <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Cache-Control" content="no-cache">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" integrity="sha384-Ay26V7L8bsJTsX9Sxclnvsn+hkdiwRnrjZJXqKmkIDobPgIIWBOVguEcQQLDuhfN" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2647,6 +2648,54 @@
     document.addEventListener('visibilitychange', () => {
         if (document.hidden || !currentUser || !currentUser.username) return;
         pingOnline(); fetchChatMessages(); refreshData(); fetchLinhThuMe();
+    });
+
+    // ================== TỰ CẬP NHẬT KHI CÓ PHIÊN BẢN MỚI ==================
+    // MỖI LẦN DEPLOY index.html PHẢI ĐỔI APP_BUILD. Trang tự tải bản trên server (không dùng cache) để so:
+    // - vừa mở trang mà trình duyệt đưa bản cũ trong cache → tự tải lại ngay (1 lần / phiên);
+    // - đang mở lâu → hiện thanh "Có phiên bản mới", tự tải lại khi quay lại tab.
+    const APP_BUILD = "2026-10-16.1";
+    const APP_CHECK_MS = 15 * 60 * 1000;
+    let appUpdatePending = null;
+    async function appServerBuild() {
+        if (!/^https?:$/.test(location.protocol)) return null;
+        try {
+            let r = await fetch(location.pathname + '?_build=' + Date.now(), { cache: 'no-store', credentials: 'same-origin' });
+            if (!r.ok) return null;
+            let m = (await r.text()).match(/const APP_BUILD = "([^"]+)"/);
+            return m ? m[1] : null;
+        } catch (e) { return null; }
+    }
+    function appReloadTo(build) {
+        try { sessionStorage.setItem('tpkt_reloaded_for', build); } catch (e) {}
+        location.replace(location.pathname + '?v=' + encodeURIComponent(build) + location.hash);
+    }
+    function appShowUpdateBar(build) {
+        appUpdatePending = build;
+        if (document.getElementById('appUpdateBar')) return;
+        let bar = document.createElement('div');
+        bar.id = 'appUpdateBar';
+        bar.setAttribute('role', 'status');
+        bar.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:3000;background:#12181B;color:#fff;border-radius:10px;padding:10px 14px;display:flex;gap:12px;align-items:center;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px);font-size:14px;';
+        bar.innerHTML = '<span>🔄 Hệ thống đã có phiên bản mới.</span><button type="button" class="btn btn-sm btn-light fw-bold" style="min-height:40px;">Tải lại ngay</button>';
+        bar.querySelector('button').addEventListener('click', () => appReloadTo(build));
+        document.body.appendChild(bar);
+    }
+    async function appCheckVersion(atStartup) {
+        if (document.hidden && !atStartup) return;
+        let build = await appServerBuild();
+        if (!build || build === APP_BUILD) return;
+        let already = null;
+        try { already = sessionStorage.getItem('tpkt_reloaded_for'); } catch (e) {}
+        if (atStartup && already !== build) { appReloadTo(build); return; } // trang vừa mở là bản cũ trong cache
+        appShowUpdateBar(build);
+    }
+    appCheckVersion(true);
+    setInterval(() => appCheckVersion(false), APP_CHECK_MS);
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) return;
+        if (appUpdatePending) { appReloadTo(appUpdatePending); return; } // quay lại tab → tự lên bản mới
+        appCheckVersion(false);
     });
 
     // Đóng tab / tắt trình duyệt (không kịp bấm Đăng xuất) — vẫn cố báo offline
