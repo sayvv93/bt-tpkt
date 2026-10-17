@@ -1575,12 +1575,12 @@
                                         <tr><td><b>Cảnh Báo</b></td><td>Số HĐ vừa có ca Bảo Trì vừa bị Suy hao / Rớt kết nối — ghi chú hướng xử lý</td><td>Mọi tài khoản trừ cus</td></tr>
                                         <tr><td><b>HI FPT</b></td><td>Tỉ lệ cài đặt và tỉ lệ tương tác ứng dụng HI FPT</td><td>Mọi tài khoản trừ cus</td></tr>
                                         <tr><td><b>SH &amp; RKN</b></td><td>Theo dõi và xử lý ca Suy hao / Rớt kết nối liên tục</td><td>Tất cả</td></tr>
-                                        <tr><td><b>IQC &amp; Đầu Vào</b></td><td>Đội trưởng kiểm tra ca IQC / Đầu Vào (OK / NOT + ghi chú), link tới trang ảnh IQC</td><td>Mọi tài khoản trừ cus, HR</td></tr>
+                                        <tr><td><b>IQC &amp; Đầu Vào</b></td><td>Đội trưởng kiểm tra ca IQC / Đầu Vào (OK / NOT + ghi chú), link tới trang ảnh IQC</td><td>Mọi tài khoản trừ HR (cus xem Đối tác mình + ghi chú DVKH)</td></tr>
                                         <tr><td><b>Nhân Sự</b></td><td>Danh sách nhân sự, thâm niên tự tính, cơ cấu theo thâm niên / bậc</td><td>Tất cả (cus chỉ xem)</td></tr>
                                         <tr><td><b>Lịch Trực ĐT</b></td><td>Khai báo lịch ON / OFF của Đội trưởng, xem nhanh lịch hôm nay và ngày mai</td><td>Tất cả (cus chỉ xem)</td></tr>
                                         <tr><td><b>Trò chuyện</b></td><td>Chat nội bộ + nhật ký tự động (XL Lại, SH &amp; RKN)</td><td>Tất cả</td></tr>
                                         <tr><td><b>Linh Thú</b></td><td>Nuôi thú, chọn lô đất trong khu dân cư — cho vui, không tính hiệu suất</td><td>Tất cả</td></tr>
-                                        <tr><td><b>Phân tích SHD</b></td><td>Mở công cụ n8n chẩn đoán số hợp đồng</td><td>Admin, SuperAdmin, Đối tác quản lý, mọi tài khoản DNI02</td></tr>
+                                        <tr><td><b>Phân tích SHD</b></td><td>Mở công cụ n8n chẩn đoán số hợp đồng</td><td>Admin, SuperAdmin, Đối tác quản lý, Đội trưởng DNI02</td></tr>
                                         <tr><td><b>Tài khoản cus</b></td><td>Tạo tài khoản cus cho nhân sự của đối tác</td><td>Chỉ Đối tác quản lý</td></tr>
                                     </tbody>
                                 </table>
@@ -1740,7 +1740,7 @@
                     <div id="g7" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
                         <div class="accordion-body small"><ul class="mb-0">
                             <li>Bấm nút để mở công cụ chẩn đoán trên n8n ở tab mới: đăng nhập MyPT bằng OTP, dán danh sách Số HĐ → nhận nguyên nhân và hướng xử lý gợi ý.</li>
-                            <li>Ai dùng được: Admin, SuperAdmin, Đối tác quản lý và <b>mọi tài khoản thuộc đối tác DNI02</b> (cả Đội trưởng và tài khoản cus của DNI02).</li>
+                            <li>Ai dùng được: Admin, SuperAdmin, Đối tác quản lý và <b>Đội trưởng thuộc đối tác DNI02</b>. Tài khoản cus và HR không dùng được tab này.</li>
                             <li>Khi link hết hạn (khoảng 15 ngày/lần), <b>SuperAdmin</b> dán link mới vào ô "Đổi link" ngay trong tab — mọi người thấy link mới ngay.</li>
                         </ul></div>
                     </div>
@@ -1751,7 +1751,7 @@
                     <div id="g8pet" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
                         <div class="accordion-body small"><ul class="mb-0">
                             <li>Đối tác quản lý tự tạo tài khoản cus cho nhân sự của mình (VD bộ phận chăm sóc khách hàng): <b>Tải file mẫu</b> (cột username, password) → điền → <b>Nhập Excel</b>, tối đa 50 tài khoản/lần. Bắt buộc điền password (từ 6 ký tự, khác username); username 3–50 ký tự gồm chữ, số, dấu . _ - @ — nhắc nhân sự đổi mật khẩu sau lần đăng nhập đầu.</li>
-                            <li>Tài khoản cus thấy: <b>SH &amp; RKN</b> (theo đối tác, được đổi Hướng XL và nhập DVKH care note), <b>Trò chuyện</b>, <b>Linh Thú</b>, <b>Hướng dẫn</b>. Không xem được dữ liệu Bảo Trì, Cảnh Báo, HI FPT — Worker chặn cả khi gọi thẳng API.</li>
+                            <li>Tài khoản cus thấy: <b>SH &amp; RKN</b> (theo đối tác, được đổi Hướng XL và nhập DVKH care note), <b>IQC &amp; Đầu Vào</b> (theo đối tác, chỉ ghi cột Ghi chú DVKH), <b>Nhân Sự</b> và <b>Lịch Trực ĐT</b> (chỉ xem), <b>Trò chuyện</b>, <b>Linh Thú</b>, <b>Hướng dẫn</b>. Không xem được dữ liệu Bảo Trì, Cảnh Báo, HI FPT, Phân tích SHD — Worker chặn cả khi gọi thẳng API.</li>
                             <li>Danh sách trong tab chỉ hiện tài khoản do chính Đối tác quản lý đó tạo.</li>
                         </ul></div>
                     </div>
@@ -1774,14 +1774,14 @@
                         <div class="accordion-body small">
                             <div class="table-responsive">
                                 <table class="table table-sm table-bordered align-middle mb-0">
-                                    <thead><tr><th>Tài khoản</th><th>Bảo Trì · Cảnh Báo · HI FPT</th><th>SH &amp; RKN</th><th>Nhân Sự · Lịch Trực</th><th>Phân tích SHD</th><th>Quyền riêng</th></tr></thead>
+                                    <thead><tr><th>Tài khoản</th><th>Bảo Trì · Cảnh Báo · HI FPT</th><th>SH &amp; RKN</th><th>IQC &amp; Đầu Vào</th><th>Nhân Sự · Lịch Trực</th><th>Phân tích SHD</th><th>Quyền riêng</th></tr></thead>
                                     <tbody>
-                                        <tr><td><b>Đội trưởng</b></td><td>Đội mình</td><td>Đội mình · Hướng XL + Đội trưởng note</td><td>Đội mình · sửa / khai báo lịch của mình</td><td>✗ (✓ nếu thuộc DNI02)</td><td>Nhập Excel cập nhật ca: 300 dòng</td></tr>
-                                        <tr><td><b>Đối tác quản lý</b></td><td>Cả đối tác</td><td>Cả đối tác · Hướng XL + Đội trưởng note</td><td>Cả đối tác · sửa / khai báo lịch</td><td>✓</td><td>Tạo tài khoản cus</td></tr>
-                                        <tr><td><b>Admin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Quản lý dữ liệu SH &amp; RKN</td></tr>
-                                        <tr><td><b>SuperAdmin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Nhập ca bảo trì mới, quản lý HI FPT, đổi link Phân tích SHD, nhập Excel 1000 dòng</td></tr>
-                                        <tr><td><b>cus</b></td><td>✗</td><td>Đối tác mình · Hướng XL + DVKH care note</td><td>Đối tác mình · chỉ xem</td><td>✗ (✓ nếu thuộc DNI02)</td><td>—</td></tr>
-                                        <tr><td><b>HR</b></td><td>✗</td><td>✗</td><td>Nhân Sự: toàn bộ · nhập / sửa / xoá · Lịch: chỉ xem</td><td>✗</td><td>Mọi thao tác Nhân Sự ghi "Nhật ký Nhân Sự" vào Trò chuyện</td></tr>
+                                        <tr><td><b>Đội trưởng</b></td><td>Đội mình</td><td>Đội mình · Hướng XL + Đội trưởng note</td><td>Đội mình · Check + ghi chú</td><td>Đội mình · sửa / khai báo lịch của mình</td><td>✗ (✓ nếu thuộc DNI02)</td><td>Nhập Excel cập nhật ca: 300 dòng</td></tr>
+                                        <tr><td><b>Đối tác quản lý</b></td><td>Cả đối tác</td><td>Cả đối tác · Hướng XL + Đội trưởng note</td><td>Cả đối tác · Check + ghi chú</td><td>Cả đối tác · sửa / khai báo lịch</td><td>✓</td><td>Tạo tài khoản cus</td></tr>
+                                        <tr><td><b>Admin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Quản lý dữ liệu SH &amp; RKN</td></tr>
+                                        <tr><td><b>SuperAdmin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Nhập ca bảo trì mới, quản lý HI FPT, đổi link Phân tích SHD, nhập Excel 1000 dòng</td></tr>
+                                        <tr><td><b>cus</b></td><td>✗</td><td>Đối tác mình · Hướng XL + DVKH care note</td><td>Đối tác mình · Ghi chú DVKH</td><td>Đối tác mình · chỉ xem</td><td>✗</td><td>—</td></tr>
+                                        <tr><td><b>HR</b></td><td>✗</td><td>✗</td><td>✗</td><td>Nhân Sự: toàn bộ · nhập / sửa / xoá · Lịch: chỉ xem</td><td>✗</td><td>Mọi thao tác Nhân Sự ghi "Nhật ký Nhân Sự" vào Trò chuyện</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -2655,7 +2655,7 @@
     // MỖI LẦN DEPLOY index.html PHẢI ĐỔI APP_BUILD. Trang tự tải bản trên server (không dùng cache) để so:
     // - vừa mở trang mà trình duyệt đưa bản cũ trong cache → tự tải lại ngay (1 lần / phiên);
     // - đang mở lâu → hiện thanh "Có phiên bản mới", tự tải lại khi quay lại tab.
-    const APP_BUILD = "2026-10-17.2";
+    const APP_BUILD = "2026-10-17.3";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
