@@ -2655,7 +2655,7 @@
     // MỖI LẦN DEPLOY index.html PHẢI ĐỔI APP_BUILD. Trang tự tải bản trên server (không dùng cache) để so:
     // - vừa mở trang mà trình duyệt đưa bản cũ trong cache → tự tải lại ngay (1 lần / phiên);
     // - đang mở lâu → hiện thanh "Có phiên bản mới", tự tải lại khi quay lại tab.
-    const APP_BUILD = "2026-10-17.1";
+    const APP_BUILD = "2026-10-17.2";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -2691,6 +2691,12 @@
         if (atStartup && already !== build) { appReloadTo(build); return; } // trang vừa mở là bản cũ trong cache
         appShowUpdateBar(build);
     }
+    // Tải lại lên bản mới dùng "?v=<build>" để vượt cache — xoá ngay khỏi thanh địa chỉ cho gọn (chỉ còn baotri.fteldni.com)
+    (function appCleanUrl() {
+        if (!/[?&](v|_build)=/.test(location.search) || !history.replaceState) return;
+        let clean = location.pathname.replace(/index\.html$/, '') || '/';
+        try { history.replaceState(null, '', clean + location.hash); } catch (e) {}
+    })();
     appCheckVersion(true);
     setInterval(() => appCheckVersion(false), APP_CHECK_MS);
     document.addEventListener('visibilitychange', () => {
