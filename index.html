@@ -500,6 +500,18 @@
             .filter-reset-btn, .lt-btn, .hi-seg button, .lich-brush button { min-height: 40px; }
             .lich-cell { height: 40px; }
         }
+        /* ---------- TÀI KHOẢN CHỈ XEM (role viewer) ---------- */
+        .ops-pill.ro-pill { background:#FFF4D6; color:#7A4B00; border-color:#E8C46A; }
+        body.ro-mode [onclick*="Template"], body.ro-mode [onclick*="triggerImport"], body.ro-mode [onclick*="Export"],
+        body.ro-mode [onclick*="exportFiltered"], body.ro-mode [onclick*="OpenEditModal"], body.ro-mode [onclick*="DeleteRow"],
+        body.ro-mode [onclick^="submit"], body.ro-mode [onclick^="applyBatch"], body.ro-mode label.filter-reset-btn:has(input[type="file"]),
+        body.ro-mode #iqcProcessLbl, body.ro-mode [onclick="openChangePasswordModal()"], body.ro-mode #btnTopPet,
+        body.ro-mode #linhThuMe, body.ro-mode #ltCare, body.ro-mode #ltCardVisit, body.ro-mode #ltCardGifts, body.ro-mode #linhThuPickBanner,
+        body.ro-mode .rkn-note-save, body.ro-mode .cb-note-save, body.ro-mode .iqc-note-save, body.ro-mode .iqc-dvkh-save,
+        body.ro-mode .chat-input-bar, body.ro-mode #superAdminImportBar, body.ro-mode #hiAdminBar, body.ro-mode #shdAdminBox { display:none !important; }
+        body.ro-mode tbody select:disabled, body.ro-mode tbody input:disabled, body.ro-mode tbody textarea:disabled { cursor:not-allowed; }
+        .ro-chat-note { display:none; }
+        body.ro-mode .ro-chat-note { display:block; }
 </style>
 </head>
 <body>
@@ -558,6 +570,7 @@
         <div class="d-flex flex-wrap align-items-center gap-2 mt-3 mt-md-0">
             <span class="text-end small me-1" style="color:#9AA39C;">Xin chào, <strong id="lblCurrentUsername" style="color:#fff;">--</strong></span>
             <span class="ops-pill" id="lblCurrentRole">Role: --</span>
+            <span class="ops-pill ro-pill d-none" id="lblReadOnly"><i class="bi bi-eye me-1"></i>Chế độ chỉ xem — dữ liệu nhạy cảm đã được che</span>
             <button type="button" class="ops-btn lt-top-pet d-none" id="btnTopPet" title="Mở Linh Thú"></button>
             <span class="ops-pill is-brand" id="lblCurrentDoiTac">Đối tác: Tất cả</span>
             <span class="ops-pill is-brand d-none" id="lblCurrentDoiTruong">Đội trưởng: --</span>
@@ -958,6 +971,7 @@
                 <div class="chat-messages" id="chatMessagesBody">
                     <div class="text-center small py-4" style="color:var(--slate);">Đang tải tin nhắn...</div>
                 </div>
+                <div class="ro-chat-note small text-center py-2" style="color:var(--slate);"><i class="bi bi-eye me-1"></i>Tài khoản chỉ xem — không gửi được tin nhắn.</div>
                 <div class="chat-input-bar">
                     <input type="text" id="chatInput" class="form-control" placeholder="Nhập tin nhắn..." maxlength="500" onkeydown="if(event.key==='Enter'){event.preventDefault();sendChatMessage();}">
                     <button class="btn fw-bold" style="background:var(--brand); color:#fff;" onclick="sendChatMessage()"><i class="bi bi-send-fill"></i></button>
@@ -1781,6 +1795,7 @@
                                         <tr><td><b>Admin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Quản lý dữ liệu SH &amp; RKN</td></tr>
                                         <tr><td><b>SuperAdmin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Nhập ca bảo trì mới, quản lý HI FPT, đổi link Phân tích SHD, nhập Excel 1000 dòng</td></tr>
                                         <tr><td><b>cus</b></td><td>✗</td><td>Đối tác mình · Hướng XL + DVKH care note</td><td>Đối tác mình · Ghi chú DVKH</td><td>Đối tác mình · chỉ xem</td><td>✗</td><td>—</td></tr>
+                                        <tr><td><b>Chỉ xem</b></td><td>Tất cả · chỉ xem</td><td>Tất cả · chỉ xem</td><td>Tất cả · chỉ xem</td><td>Tất cả · chỉ xem</td><td>Thấy tab, không mở được công cụ</td><td>Dành cho khách tham quan / ban giám khảo: không thao tác, không xuất Excel; Số HĐ hiện mã giả, mail và dãy số trong ghi chú / chat bị che</td></tr>
                                         <tr><td><b>HR</b></td><td>✗</td><td>✗</td><td>✗</td><td>Nhân Sự: toàn bộ · nhập / sửa / xoá · Lịch: chỉ xem</td><td>✗</td><td>Mọi thao tác Nhân Sự ghi "Nhật ký Nhân Sự" vào Trò chuyện</td></tr>
                                     </tbody>
                                 </table>
@@ -2655,7 +2670,7 @@
     // MỖI LẦN DEPLOY index.html PHẢI ĐỔI APP_BUILD. Trang tự tải bản trên server (không dùng cache) để so:
     // - vừa mở trang mà trình duyệt đưa bản cũ trong cache → tự tải lại ngay (1 lần / phiên);
     // - đang mở lâu → hiện thanh "Có phiên bản mới", tự tải lại khi quay lại tab.
-    const APP_BUILD = "2026-10-17.3";
+    const APP_BUILD = "2026-10-17.4";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -2764,6 +2779,20 @@
     let lastSyncTimestamp = null;
 
     // cus (petonly) và HR không được tải dữ liệu vận hành (Bảo Trì, Cảnh Báo…)
+    // Tài khoản Chỉ xem: khoá mọi ô chọn / ô nhập trong bảng dữ liệu (bảng vẽ lại liên tục nên theo dõi DOM)
+    const isViewerRole = () => !!currentUser && currentUser.role === 'viewer';
+    let roLockQueued = false;
+    function roLockControls() {
+        if (!document.body.classList.contains('ro-mode')) return;
+        document.querySelectorAll('tbody select, tbody input, tbody textarea, #ltShopBody button, #ltShopBody select').forEach(el => {
+            if (!el.disabled) { el.disabled = true; el.title = 'Tài khoản chỉ xem'; }
+        });
+    }
+    new MutationObserver(() => {
+        if (roLockQueued || !document.body.classList.contains('ro-mode')) return;
+        roLockQueued = true;
+        requestAnimationFrame(() => { roLockQueued = false; roLockControls(); });
+    }).observe(document.body, { childList: true, subtree: true });
     function isRestrictedRole() { return !!currentUser && (currentUser.role === 'petonly' || currentUser.role === 'hr'); }
 
     async function refreshData() {
@@ -2966,9 +2995,15 @@
         if (!currentUser) return;
         document.getElementById('lblCurrentUsername').innerText = currentUser.username;
         // Role "petonly" trong DB hiển thị là "cus"
-        document.getElementById('lblCurrentRole').innerText = `Role: ${currentUser.role === 'petonly' ? 'cus' : currentUser.role}`;
+        document.getElementById('lblCurrentRole').innerText = `Role: ${currentUser.role === 'petonly' ? 'cus' : currentUser.role === 'viewer' ? 'Chỉ xem' : currentUser.role}`;
+        // Tài khoản Chỉ xem: thấy mọi tab, mọi nút ghi bị ẩn / khoá (Worker cũng chặn mọi lệnh ghi)
+        let isViewer = currentUser.role === 'viewer';
+        document.body.classList.toggle('ro-mode', isViewer);
+        document.getElementById('lblReadOnly').classList.toggle('d-none', !isViewer);
+        if (isViewer) roLockControls();
         
         let dtLabel = currentUser.role === 'hr' ? "Tất cả (HR)"
+            : currentUser.role === 'viewer' ? "Tất cả (Chỉ xem)"
             : currentUser.role === 'petonly'
             ? (currentUser.doiTac && currentUser.doiTac !== "ALL" ? `${currentUser.doiTac} (tài khoản cus)` : "Chưa gắn đối tác")
             : (currentUser.doiTac && currentUser.doiTac.trim() !== "" && currentUser.doiTac !== "ALL") ? currentUser.doiTac : "Tất cả (Full quyền)";
@@ -5035,6 +5070,7 @@
     function canUseShd() {
         if (!currentUser) return false;
         if (currentUser.role === 'admin' || currentUser.role === 'superadmin') return true;
+        if (currentUser.role === 'viewer') return true; // thấy tab (giới thiệu tính năng) nhưng không có link
         if (isRestrictedRole()) return false; // cus / HR không dùng Phân tích SHD
         if (SHD_EXTRA_DOITAC.includes(currentUser.doiTac)) return true;
         return currentUser.role === 'user' && !isDoiTruongLocked();
@@ -5043,6 +5079,11 @@
         let btn = document.getElementById('shdLinkBtn'), info = document.getElementById('shdLinkInfo');
         let isSA = currentUser && currentUser.role === 'superadmin';
         document.getElementById('shdAdminBox').classList.toggle('d-none', !isSA);
+        if (isViewerRole()) {
+            btn.classList.add('disabled'); btn.removeAttribute('href');
+            info.textContent = 'Tài khoản chỉ xem không mở được công cụ này vì công cụ tra cứu dữ liệu khách hàng thật.';
+            return;
+        }
         try {
             let res = await apiFetch("api/settings", { method: "GET" });
             let data = await res.json();
@@ -5111,6 +5152,7 @@
     function rknMyNoteFields() {
         if (!currentUser) return [];
         if (rknIsAdmin()) return ['dvkhNote', 'doiTruongNote'];
+        if (currentUser.role === 'viewer') return [];
         if (currentUser.role === 'petonly') return ['dvkhNote'];
         return ['doiTruongNote'];
     }
@@ -5688,7 +5730,7 @@
     const NS_TN_BUCKETS = [['lt6', '< 6 tháng', 0, 182], ['6to12', '6–12 tháng', 183, 365], ['1to3', '1–3 năm', 366, 1095],
                            ['3to5', '3–5 năm', 1096, 1826], ['gt5', '> 5 năm', 1827, Infinity]];
     let nsData = [], nsFiltered = [], nsLoadedFor = null, nsLoadedAt = 0, nsPage = 1, nsGroupBy = 'doiTacQuanLy', nsEditingId = null;
-    const nsCanEdit = () => currentUser && currentUser.role !== 'petonly';
+    const nsCanEdit = () => currentUser && currentUser.role !== 'petonly' && currentUser.role !== 'viewer';
     // Quản trị Nhân sự (nhập file, thêm, xoá, chuyển Đối tác/Đội trưởng): Admin, SuperAdmin, HR
     const nsIsAdmin = () => currentUser && ['admin', 'superadmin', 'hr'].includes(currentUser.role);
 
@@ -5978,7 +6020,7 @@
     const lichIso = d => `${d.getFullYear()}-${hiPad(d.getMonth() + 1)}-${hiPad(d.getDate())}`;
     const LICH_WD = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
     function lichCanEditRow(dt, dtr) {
-        if (!currentUser || currentUser.role === 'petonly' || !lichCanWrite) return false;
+        if (!currentUser || currentUser.role === 'petonly' || isViewerRole() || !lichCanWrite) return false;
         if (rknIsAdmin() || !currentUser.doiTac || currentUser.doiTac === 'ALL') return true;
         if (dt !== currentUser.doiTac) return false;
         return isDoiTruongLocked() ? dtr === currentUser.doiTruong : true;
@@ -6006,7 +6048,7 @@
                 apiFetch(`api/lich/data?from=${lichIso(today)}&to=${lichIso(tomorrow)}`, { method: "GET" }).then(r => r.json())
             ]);
             if (!a.roster) { alert(a.error || "Không tải được lịch trực"); return; }
-            lichRoster = a.roster; lichCanWrite = !!a.canWrite;
+            lichRoster = a.roster; lichCanWrite = !!a.canWrite && !isViewerRole();
             lichEntries = new Map(a.entries.map(e => [lichKey(e.ngay, e.doiTacQuanLy, e.doiTruong), e]));
             lichQuickEntries = new Map((b.entries || []).map(e => [lichKey(e.ngay, e.doiTacQuanLy, e.doiTruong), e]));
         } catch (e) { console.error("Lỗi tải lịch trực:", e); return; }
@@ -6043,7 +6085,7 @@
             `<tr><td class="lich-name" style="color:var(--slate);">Chưa có Đội trưởng nào trong phạm vi.</td></tr>`) + '</tbody>';
         document.getElementById('lichNote').textContent = lichCanWrite
             ? 'Chọn ON / OFF / Xoá ở ô "Khai báo", sau đó bấm hoặc giữ chuột kéo qua các ô ngày để khai báo. Bạn chỉ khai báo được cho Đội trưởng trong phạm vi của mình (ô hiện viền khi rê chuột).'
-            : 'Tài khoản cus chỉ xem lịch trực.';
+            : 'Tài khoản của bạn chỉ xem lịch trực.';
         let wrap = document.querySelector('.lich-wrap'), td = wrap.querySelector('th.today');
         if (td && !wrap.dataset.scrolled) { wrap.scrollLeft = Math.max(0, td.offsetLeft - 260); wrap.dataset.scrolled = '1'; }
     }
