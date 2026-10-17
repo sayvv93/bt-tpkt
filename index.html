@@ -1309,7 +1309,7 @@
                     <button class="filter-reset-btn" onclick="iqcFetchData(true)"><i class="bi bi-arrow-clockwise me-1"></i>Tải lại</button>
                     <button class="filter-reset-btn" onclick="iqcDownloadTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu</button>
                     <button class="filter-reset-btn" onclick="iqcExportPending()"><i class="bi bi-file-earmark-arrow-down me-1"></i>Xuất ca chưa kiểm tra</button>
-                    <label class="filter-reset-btn mb-0" style="cursor:pointer;"><i class="bi bi-file-earmark-arrow-up me-1"></i>Nhập file đã xử lý (≤100)
+                    <label class="filter-reset-btn mb-0" id="iqcProcessLbl" style="cursor:pointer;"><i class="bi bi-file-earmark-arrow-up me-1"></i>Nhập file đã xử lý (≤100)
                         <input type="file" accept=".xlsx,.xls,.csv" class="d-none" onchange="iqcHandleImportProcess(event)">
                     </label>
                 </div>
@@ -1676,6 +1676,7 @@
                             <li>Đội trưởng chọn <b>Check IQC</b> và <b>Check Đầu Vào</b> (mặc định "Chưa kiểm tra" → OK / NOT) và nhập ghi chú (≤ 500 ký tự, Enter để lưu). Ca <b>cả 2 OK</b> tự ẩn khỏi danh sách (tick "Hiện cả ca đã đạt" để xem lại).</li>
                             <li>Làm hàng loạt: <b>Xuất ca chưa kiểm tra</b> (theo bộ lọc, VD chọn đội của mình) → điền OK / NOT / ghi chú trong Excel → <b>Nhập file đã xử lý</b> (tối đa 100 dòng/lần; ô để trống giữ nguyên giá trị cũ).</li>
                             <li>Mặc định chỉ hiện ca có Ngày hoàn tất PTC trong tháng hiện tại; chọn ngày để xem tháng cũ.</li>
+                            <li><b>Tài khoản cus</b>: xem báo cáo và danh sách IQC của Đối tác mình (không thấy ca "Chưa map"), không đổi được Check IQC / Check Đầu Vào; ghi được cột <b>Ghi chú DVKH</b> (≤ 500 ký tự, Enter để lưu). Admin cũng sửa được cột này; Đội trưởng / Đối tác chỉ xem.</li>
                             <li><b>Admin / SuperAdmin</b>: nhập dữ liệu mới (Admin 1.000 dòng, SuperAdmin 10.000 dòng mỗi lần), xoá ca. Nhập lại ca đã có giữ nguyên kết quả kiểm tra.</li>
                             <li>Hai ô link trên đầu tab: <b>uploadiqc.fteldni.com</b> (ảnh lỗi KTV khắc phục lại) và <b>iqc.fpt.net</b> (xem ảnh KTV upload khi TKM).</li>
                         </ul></div>
@@ -2654,7 +2655,7 @@
     // MỖI LẦN DEPLOY index.html PHẢI ĐỔI APP_BUILD. Trang tự tải bản trên server (không dùng cache) để so:
     // - vừa mở trang mà trình duyệt đưa bản cũ trong cache → tự tải lại ngay (1 lần / phiên);
     // - đang mở lâu → hiện thanh "Có phiên bản mới", tự tải lại khi quay lại tab.
-    const APP_BUILD = "2026-10-16.1";
+    const APP_BUILD = "2026-10-17.1";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -2998,7 +2999,7 @@
         document.getElementById('cb-tab').classList.toggle('d-none', isRestrictedUi);
         document.getElementById('hifpt-tab').classList.toggle('d-none', isRestrictedUi);
         document.getElementById('rkn-tab').classList.toggle('d-none', isHr);
-        document.getElementById('iqc-tab').classList.toggle('d-none', isRestrictedUi);
+        document.getElementById('iqc-tab').classList.toggle('d-none', isHr); // cus xem IQC của Đối tác mình (+ Ghi chú DVKH)
         if (isHr) {
             document.getElementById('phantich-tab').classList.add('d-none');
             // Tab mặc định cho HR là Nhân Sự
@@ -6292,7 +6293,7 @@
     const iqcKey = r => (r.doiTacQuanLy ? r[iqcGroupBy] : '') || '(Chưa map)';
 
     async function iqcFetchData(force) {
-        if (!currentUser || isRestrictedRole()) return;
+        if (!currentUser || currentUser.role === 'hr') return; // cus được xem IQC của Đối tác mình
         if (!force && iqcLoadedFor === currentUser.username && Date.now() - iqcLoadedAt < HI_STALE_MS) { iqcRenderAll(); return; }
         try {
             let res = await apiFetch("api/iqc/data", { method: "GET" });
@@ -6537,23 +6538,29 @@
         let slice = rows.slice((iqcPage - 1) * IQC_PAGE_SIZE, iqcPage * IQC_PAGE_SIZE);
         document.getElementById('iqcDetailCount').textContent = `— ${rows.length.toLocaleString('vi-VN')} ca${showDone ? '' : ' cần xử lý'}`;
         let isAdmin = rknIsAdmin();
+        let isCus = !!currentUser && currentUser.role === 'petonly';   // cus: chỉ xem Check, ghi Ghi chú DVKH
+        let canDvkh = isCus || isAdmin;
+        let pl = document.getElementById('iqcProcessLbl'); if (pl) pl.classList.toggle('d-none', isCus);
         const sel = (r, f) => {
             let cls = r[f] === 'OK' ? 'v-ok' : r[f] === 'NOT' ? 'v-not' : 'v-pending';
-            return `<select class="form-select form-select-sm iqc-sel ${cls}" data-id="${r.id}" data-field="${f}" aria-label="${f === 'checkIQC' ? 'Check IQC' : 'Check Đầu Vào'} ${escapeHtml(r.soHopDong)}">
+            return `<select class="form-select form-select-sm iqc-sel ${cls}" data-id="${r.id}" data-field="${f}" ${isCus ? 'disabled' : ''} aria-label="${f === 'checkIQC' ? 'Check IQC' : 'Check Đầu Vào'} ${escapeHtml(r.soHopDong)}">
                 ${IQC_VALUES.map(v => `<option ${v === r[f] ? 'selected' : ''}>${v}</option>`).join('')}</select>`;
         };
-        document.getElementById('iqcDetailTable').innerHTML = `<thead><tr><th>Đối tác / Đội trưởng</th><th>Số HĐ</th><th>Ngày hoàn tất PTC</th><th>Nhân viên</th><th style="min-width:220px;">Ghi chú</th><th>Check IQC</th><th>Check Đầu Vào</th><th style="min-width:230px;">Ghi chú đội trưởng</th>${isAdmin ? '<th class="text-end">Xoá</th>' : ''}</tr></thead><tbody>` +
+        document.getElementById('iqcDetailTable').innerHTML = `<thead><tr><th>Đối tác / Đội trưởng</th><th>Số HĐ</th><th>Ngày hoàn tất PTC</th><th>Nhân viên</th><th style="min-width:220px;">Ghi chú</th><th>Check IQC</th><th>Check Đầu Vào</th><th style="min-width:230px;">Ghi chú đội trưởng</th><th style="min-width:200px;">Ghi chú DVKH</th>${isAdmin ? '<th class="text-end">Xoá</th>' : ''}</tr></thead><tbody>` +
             (slice.length ? slice.map(r => `<tr>
                 <td>${iqcUnmapped(r) ? '<span class="hi-tag no">Chưa map</span>' : `<span class="fw-semibold">${escapeHtml(r.doiTacQuanLy)}</span><br><span class="small">${escapeHtml(r.doiTruong || '')}</span>`}</td>
                 <td class="fw-bold mono">${escapeHtml(r.soHopDong)}</td><td class="mono small">${escapeHtml(r.ngayHoanTat || '')}</td>
                 <td class="small mono">${escapeHtml(r.nhanVien || '')}</td>
                 <td class="small" style="white-space:normal;">${escapeHtml(r.ghiChu || '')}</td>
                 <td>${sel(r, 'checkIQC')}</td><td>${sel(r, 'checkDauVao')}</td>
-                <td><div class="d-flex gap-1"><input type="text" class="form-control form-control-sm iqc-note" data-id="${r.id}" maxlength="${IQC_NOTE_MAX}" value="${escapeHtml(r.dtNote || '')}" placeholder="Nhập ghi chú..." aria-label="Ghi chú đội trưởng ${escapeHtml(r.soHopDong)}">
-                    <button class="btn btn-sm btn-outline-success iqc-note-save d-none" data-id="${r.id}" title="Lưu ghi chú" aria-label="Lưu ghi chú"><i class="bi bi-check-lg"></i></button></div>
+                <td>${isCus ? `<span class="small" style="white-space:normal;">${escapeHtml(r.dtNote || '')}</span>` : `<div class="d-flex gap-1"><input type="text" class="form-control form-control-sm iqc-note" data-id="${r.id}" maxlength="${IQC_NOTE_MAX}" value="${escapeHtml(r.dtNote || '')}" placeholder="Nhập ghi chú..." aria-label="Ghi chú đội trưởng ${escapeHtml(r.soHopDong)}">
+                    <button class="btn btn-sm btn-outline-success iqc-note-save d-none" data-id="${r.id}" title="Lưu ghi chú" aria-label="Lưu ghi chú"><i class="bi bi-check-lg"></i></button></div>`}
                     <div class="small mt-1" style="color:var(--slate-soft);">${r.updatedBy ? `${escapeHtml(r.updatedBy)} · ${formatDateTime(r.ngayCapNhat)}` : ''}</div></td>
+                <td>${canDvkh ? `<div class="d-flex gap-1"><input type="text" class="form-control form-control-sm iqc-dvkh" data-id="${r.id}" maxlength="${IQC_NOTE_MAX}" value="${escapeHtml(r.dvkhNote || '')}" placeholder="Ghi chú DVKH..." aria-label="Ghi chú DVKH ${escapeHtml(r.soHopDong)}">
+                    <button class="btn btn-sm btn-outline-success iqc-dvkh-save d-none" data-id="${r.id}" title="Lưu ghi chú DVKH" aria-label="Lưu ghi chú DVKH"><i class="bi bi-check-lg"></i></button></div>`
+                    : `<span class="small" style="white-space:normal;">${escapeHtml(r.dvkhNote || '')}</span>`}</td>
                 ${isAdmin ? `<td class="text-end"><button class="btn btn-sm btn-link p-0 text-danger" title="Xoá" aria-label="Xoá ca ${escapeHtml(r.soHopDong)}" onclick="iqcDeleteRow(${r.id})"><i class="bi bi-trash"></i></button></td>` : ''}
-            </tr>`).join('') : `<tr><td colspan="9" class="text-center py-4 small" style="color:var(--slate);">${iqcData.length ? 'Không còn ca nào cần xử lý trong khoảng đang lọc 🎉' : 'Chưa có dữ liệu.'}</td></tr>`) + '</tbody>';
+            </tr>`).join('') : `<tr><td colspan="10" class="text-center py-4 small" style="color:var(--slate);">${iqcData.length ? 'Không còn ca nào cần xử lý trong khoảng đang lọc 🎉' : 'Chưa có dữ liệu.'}</td></tr>`) + '</tbody>';
         let nums = [...new Set([1, pages, iqcPage - 1, iqcPage, iqcPage + 1].filter(n => n >= 1 && n <= pages))].sort((a, b) => a - b);
         let html = '', prev = 0;
         nums.forEach(n => { if (n - prev > 1) html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
@@ -6591,6 +6598,25 @@
     }
     document.getElementById('iqcDetailTable').addEventListener('click', e => { let b = e.target.closest('.iqc-note-save'); if (b) iqcSaveNote(b.parentElement.querySelector('.iqc-note')); });
     document.getElementById('iqcDetailTable').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.closest('.iqc-note')) iqcSaveNote(e.target); });
+    // Ghi chú DVKH (cus / Admin)
+    document.getElementById('iqcDetailTable').addEventListener('input', e => {
+        let inp = e.target.closest('.iqc-dvkh'); if (!inp) return;
+        let row = iqcData.find(x => x.id === parseInt(inp.dataset.id, 10));
+        inp.parentElement.querySelector('.iqc-dvkh-save').classList.toggle('d-none', !row || (row.dvkhNote || '') === inp.value.trim());
+    });
+    async function iqcSaveDvkh(inp) {
+        let id = parseInt(inp.dataset.id, 10), row = iqcData.find(x => x.id === id), note = inp.value.trim();
+        if (!row || (row.dvkhNote || '') === note) return;
+        inp.disabled = true;
+        try {
+            let r = await (await apiFetch("api/iqc/dvkh-note", { method: "POST", body: JSON.stringify({ id, note }) })).json();
+            if (!r.success) alert(r.error || "Không lưu được!");
+            else { Object.assign(row, { dvkhNote: note, updatedBy: r.updatedBy, ngayCapNhat: r.ngayCapNhat }); inp.parentElement.querySelector('.iqc-dvkh-save').classList.add('d-none'); }
+        } catch (e) { console.error("Lỗi lưu ghi chú DVKH:", e); alert("Lỗi kết nối, vui lòng thử lại!"); }
+        inp.disabled = false;
+    }
+    document.getElementById('iqcDetailTable').addEventListener('click', e => { let b = e.target.closest('.iqc-dvkh-save'); if (b) iqcSaveDvkh(b.parentElement.querySelector('.iqc-dvkh')); });
+    document.getElementById('iqcDetailTable').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.closest('.iqc-dvkh')) iqcSaveDvkh(e.target); });
     document.getElementById('iqcPagination').addEventListener('click', e => { let a = e.target.closest('[data-iqcpage]'); if (!a) return; e.preventDefault(); iqcPage = parseInt(a.dataset.iqcpage, 10); iqcRenderDetail(); });
     document.getElementById('iqcGroupSeg').addEventListener('click', e => { let b = e.target.closest('button[data-group]'); if (!b) return; iqcGroupBy = b.dataset.group; iqcRenderAll(); });
     document.getElementById('iqcGroupTable').addEventListener('click', e => {
