@@ -512,18 +512,93 @@
         body.ro-mode tbody select:disabled, body.ro-mode tbody input:disabled, body.ro-mode tbody textarea:disabled { cursor:not-allowed; }
         .ro-chat-note { display:none; }
         body.ro-mode .ro-chat-note { display:block; }
+        /* ---------- GIAO DIỆN THEO DỊP (SEASONAL_THEMES) ---------- */
+        .sx-deco { display: none; position: absolute; pointer-events: none; }
+        .sx-banner[hidden], .sx-login-wish[hidden] { display: none !important; }
+        /* 20/10 — Ngày Phụ nữ Việt Nam: tông hồng mận, hoa vẽ tay */
+        .theme-2010 .ops-header {
+            position: relative;
+            background: linear-gradient(118deg, #2A1220 0%, #4E1634 52%, #7A1F4C 100%);
+            box-shadow: 0 10px 28px -14px rgba(122, 31, 76, 0.55);
+        }
+        .theme-2010 .ops-header > :not(.sx-deco) { position: relative; z-index: 1; }
+        .theme-2010 .ops-header .ops-mark { color: #FFC2D9; background: rgba(255, 194, 217, 0.12); border-color: rgba(255, 194, 217, 0.4); }
+        .theme-2010 .ops-pill.is-brand { color: #FFC2D9; border-color: rgba(255, 194, 217, 0.42); background: rgba(255, 194, 217, 0.1); }
+        .theme-2010 .ops-pill { border-color: rgba(255, 220, 232, 0.22); }
+        .theme-2010 .sx-deco-header {
+            display: block; right: 6px; bottom: 0; width: 260px; height: 142px;
+            color: #FF8FBA; opacity: 0.22; z-index: 0;
+        }
+        .theme-2010 #loginOverlay {
+            background:
+                radial-gradient(ellipse at 50% 0%, rgba(214, 64, 130, 0.30) 0%, rgba(18, 24, 27, 0) 58%),
+                linear-gradient(180deg, #17121A 0%, #2A1220 60%, #14121A 100%);
+        }
+        .theme-2010 #loginOverlay > div[style*="border-top"] { border-top-color: #D6417F !important; }
+        .theme-2010 .sx-deco-login-a { display: block; left: -30px; bottom: 4%; width: 420px; height: 230px; color: #FF8FBA; opacity: 0.16; }
+        .theme-2010 .sx-deco-login-b { display: block; right: -40px; top: 6%; width: 360px; height: 196px; color: #FFB3CF; opacity: 0.12; transform: scaleX(-1) rotate(10deg); }
+        .sx-login-wish {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+            color: #FFC2D9; font-size: 13px; font-weight: 600; line-height: 1.4;
+        }
+        .sx-login-wish svg { width: 18px; height: 18px; flex: none; color: #FF7FAF; }
+        .sx-banner {
+            display: flex; align-items: center; gap: 12px;
+            background: #FDF0F5; border: 1px solid #F2C6D7; border-radius: 10px;
+            padding: 10px 10px 10px 14px; color: #5C1838;
+        }
+        .sx-banner-flower { width: 26px; height: 26px; flex: none; color: #D6417F; }
+        .sx-banner-text { flex: 1; min-width: 0; font-size: 13.5px; line-height: 1.45; }
+        .sx-banner-text strong { font-weight: 700; margin-right: 6px; color: #7A1F4C; }
+        .sx-banner-close {
+            flex: none; width: 36px; height: 36px; border-radius: 8px; border: 0;
+            background: transparent; color: #7A1F4C; display: inline-flex; align-items: center; justify-content: center;
+        }
+        .sx-banner-close:hover { background: rgba(122, 31, 76, 0.08); }
+        .sx-banner-close:focus-visible { outline: 2px solid #D6417F; outline-offset: 2px; }
+        @media (max-width: 576px) {
+            .theme-2010 .sx-deco-header { width: 170px; height: 92px; opacity: 0.16; }
+            .sx-banner { align-items: flex-start; }
+            .sx-banner-text strong { display: block; margin: 0 0 2px; }
+            .sx-banner-close { width: 40px; height: 40px; margin: -6px -4px -6px 0; }
+        }
 </style>
 </head>
 <body>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="sx-flower" viewBox="-12 -12 24 24">
+      <g fill="currentColor">
+        <ellipse cx="0" cy="-6" rx="3.6" ry="5.6"/>
+        <ellipse cx="0" cy="-6" rx="3.6" ry="5.6" transform="rotate(72)"/>
+        <ellipse cx="0" cy="-6" rx="3.6" ry="5.6" transform="rotate(144)"/>
+        <ellipse cx="0" cy="-6" rx="3.6" ry="5.6" transform="rotate(216)"/>
+        <ellipse cx="0" cy="-6" rx="3.6" ry="5.6" transform="rotate(288)"/>
+      </g>
+      <circle r="2.6" fill="#FFD27A"/>
+    </symbol>
+    <symbol id="sx-branch" viewBox="0 0 220 120">
+      <path d="M8 112 C 60 96, 110 70, 212 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+      <path d="M70 92 q 6 -18 22 -22 M120 66 q -2 -18 12 -28 M160 42 q 14 -6 24 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".6"/>
+      <use href="#sx-flower" x="78" y="54" width="34" height="34"/>
+      <use href="#sx-flower" x="118" y="22" width="28" height="28"/>
+      <use href="#sx-flower" x="170" y="20" width="40" height="40"/>
+      <use href="#sx-flower" x="30" y="78" width="22" height="22"/>
+    </symbol>
+  </defs>
+</svg>
 <!-- MÀN HÌNH ĐĂNG NHẬP -->
 <div id="loginOverlay">
+  <svg class="sx-deco sx-deco-login-a" aria-hidden="true" focusable="false"><use href="#sx-branch"/></svg>
+  <svg class="sx-deco sx-deco-login-b" aria-hidden="true" focusable="false"><use href="#sx-branch"/></svg>
   <div class="q4-finish-strip top"></div>
   <div class="q4-finish-strip bottom"></div>
   <div style="position: relative; width: 100%; max-width: 400px; background: var(--ink); border-radius: 10px; box-shadow: 0 24px 60px rgba(0,0,0,0.45); padding: 32px 34px; border-top: 3px solid var(--brand);">
 
     <span class="ops-mark">TPKT · OPS</span>
     <div style="margin: 14px 0 26px;">
+      <div class="sx-login-wish" id="sxLoginWish" hidden><svg aria-hidden="true" focusable="false"><use href="#sx-flower"/></svg><span id="sxLoginWishText"></span></div>
       <div style="margin-bottom:8px;"><span class="q4-badge">🏁 Nước rút Quý 4</span></div>
       <div style="color:#FFB27A; font-size:12.5px; font-weight:600; margin-bottom:6px;">Tập trung cao độ — về đích năm <span id="loginYear">2026</span> · <span id="loginCountdown">--</span></div>
       <h3 style="color: #fff; font-weight: 700; font-size: 19px; margin: 0; letter-spacing: -0.01em;">Hệ thống Chất Lượng Dịch Vụ</h3>
@@ -550,6 +625,7 @@
 
 <div class="container-fluid py-4">
     <div class="ops-header d-flex flex-wrap align-items-center justify-content-between mb-3">
+        <svg class="sx-deco sx-deco-header" aria-hidden="true" focusable="false"><use href="#sx-branch"/></svg>
         <div>
             <span class="ops-mark mb-2 d-inline-block">TPKT · OPS</span>
             <h2 class="fw-bold mb-0 fs-4">Hệ thống Chất Lượng Dịch Vụ</h2>
@@ -578,6 +654,13 @@
             <button class="ops-btn" onclick="openChangePasswordModal()"><i class="bi bi-key me-1"></i>Đổi mật khẩu</button>
             <button class="ops-btn is-danger" onclick="handleLogout()"><i class="bi bi-box-arrow-right me-1"></i>Đăng xuất</button>
         </div>
+    </div>
+
+    <!-- Dải chúc mừng theo dịp (20/10, …) — bật/tắt tự động theo ngày, xem SEASONAL_THEMES -->
+    <div class="sx-banner mb-3" id="sxBanner" role="status" hidden>
+        <svg class="sx-banner-flower" aria-hidden="true" focusable="false"><use href="#sx-flower"/></svg>
+        <div class="sx-banner-text"><strong id="sxBannerTitle"></strong><span id="sxBannerMsg"></span></div>
+        <button type="button" class="sx-banner-close" id="sxBannerClose" aria-label="Đóng lời chúc"><i class="bi bi-x-lg"></i></button>
     </div>
 
     <!-- TABS -->
@@ -2670,7 +2753,41 @@
     // MỖI LẦN DEPLOY index.html PHẢI ĐỔI APP_BUILD. Trang tự tải bản trên server (không dùng cache) để so:
     // - vừa mở trang mà trình duyệt đưa bản cũ trong cache → tự tải lại ngay (1 lần / phiên);
     // - đang mở lâu → hiện thanh "Có phiên bản mới", tự tải lại khi quay lại tab.
-    const APP_BUILD = "2026-10-17.4";
+    // ===== GIAO DIỆN THEO DỊP: tự bật / tắt theo ngày giờ Việt Nam (from/to dạng MM-DD, tính cả 2 đầu) =====
+    // Thêm dịp mới (8/3, Tết…) = thêm 1 phần tử + CSS cho class tương ứng.
+    const SEASONAL_THEMES = [
+        { key: 'pnvn-2010', from: '10-18', to: '10-21', cls: 'theme-2010',
+          title: 'Chúc mừng ngày Phụ nữ Việt Nam 20/10',
+          msg: 'Gửi lời chúc sức khoẻ, hạnh phúc và thật nhiều niềm vui đến các chị em đang đồng hành cùng Hệ thống Chất Lượng Dịch Vụ.',
+          login: 'Chúc mừng ngày Phụ nữ Việt Nam 20/10' },
+    ];
+    function activeSeasonalTheme(now = new Date()) {
+        let md = new Date(now.getTime() + 7 * 3600 * 1000).toISOString().slice(5, 10); // MM-DD giờ VN
+        return SEASONAL_THEMES.find(t => md >= t.from && md <= t.to) || null;
+    }
+    (function applySeasonalTheme() {
+        let t = activeSeasonalTheme();
+        if (!t) return;
+        let year = new Date(Date.now() + 7 * 3600 * 1000).getUTCFullYear();
+        let closedKey = `tpkt_season_closed_${t.key}_${year}`;
+        document.documentElement.classList.add(t.cls);
+        let wish = document.getElementById('sxLoginWish');
+        document.getElementById('sxLoginWishText').textContent = t.login;
+        wish.hidden = false;
+        let closed = false;
+        try { closed = localStorage.getItem(closedKey) === '1'; } catch (e) {}
+        if (closed) return;
+        document.getElementById('sxBannerTitle').textContent = t.title;
+        document.getElementById('sxBannerMsg').textContent = t.msg;
+        let banner = document.getElementById('sxBanner');
+        banner.hidden = false;
+        document.getElementById('sxBannerClose').addEventListener('click', () => {
+            banner.hidden = true;
+            try { localStorage.setItem(closedKey, '1'); } catch (e) {}
+        });
+    })();
+
+    const APP_BUILD = "2026-10-18.1";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
