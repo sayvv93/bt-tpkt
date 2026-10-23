@@ -121,7 +121,7 @@
         .seg-tabs .nav-item { margin: 0; }
         .seg-tabs .nav-link {
             border: 1px solid var(--line); background: var(--card); color: var(--slate);
-            border-radius: 7px; font-size: 13.5px; font-weight: 600; padding: 9px 16px;
+            border-radius: 7px; font-size: 13.5px; font-weight: 600; padding: 9px 12px;
         }
         .seg-tabs .nav-link.active {
             background: var(--ink); color: #fff; border-color: var(--ink);
@@ -603,6 +603,33 @@
             .sx-q4 { flex: 1 1 100%; order: 3; }
             .theme-finish .ops-header { padding-bottom: 22px; }
         }
+        /* ---------- CLL3 ---------- */
+        .cll3-table th { font-size: 11.5px; vertical-align: bottom; min-width: 76px; }
+        .cll3-table td { font-size: 12.5px; vertical-align: top; }
+        .cll3-table .c3-long { min-width: 230px; max-width: 340px; white-space: pre-wrap; word-break: break-word; line-height: 1.45; }
+        .cll3-table .c3-mid { min-width: 150px; white-space: pre-wrap; }
+        .cll3-table .c3-rate { font-weight: 700; color: var(--red); background: #FFF6CC; text-align: center; }
+        .cll3-table .c3-need { outline: 1px dashed #C24E03; outline-offset: -3px; color: #9A3A02; }
+        .cll3-thumbs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+        .cll3-thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 4px; border: 1px solid var(--line); background: #EEF0EB; cursor: zoom-in; padding: 0; }
+        .cll3-thumb:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+        .cll3-lbl { font-size: 11.5px; font-weight: 600; color: var(--slate); margin-bottom: 3px; display: block; }
+        .cll3-count { font-weight: 400; color: var(--slate-soft); }
+        .cll3-img-zone { border: 1px dashed #C9CFC6; border-radius: 8px; padding: 12px; background: #FAFBF8; }
+        .cll3-img-zone.is-drop { border-color: var(--brand); background: #F1F7EC; }
+        .cll3-img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+        .cll3-img-cell { position: relative; }
+        .cll3-img-cell img, .cll3-img-cell .c3-ph { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); background: #EEF0EB; cursor: zoom-in; display: block; }
+        .cll3-img-cell .c3-ph { display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--slate); cursor: default; }
+        .cll3-img-del { position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; border-radius: 50%; border: 0; background: rgba(18, 24, 27, 0.75); color: #fff; display: flex; align-items: center; justify-content: center; }
+        .cll3-lightbox { position: fixed; inset: 0; z-index: 2000; background: rgba(12, 16, 18, 0.92); display: flex; align-items: center; justify-content: center; padding: 56px 16px 24px; }
+        .cll3-lightbox[hidden] { display: none; }
+        .cll3-lightbox img { max-width: 100%; max-height: 100%; border-radius: 6px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
+        .cll3-lb-bar { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 10px 12px 10px 18px; color: #D7DBD5; font-size: 13px; }
+        .cll3-lb-close { width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, 0.12); color: #fff; }
+        .cll3-lb-close:focus-visible, .cll3-nav:focus-visible { outline: 2px solid #9FD971; outline-offset: 2px; }
+        .cll3-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, 0.14); color: #fff; }
+        .cll3-nav.prev { left: 12px; } .cll3-nav.next { right: 12px; }
 </style>
 </head>
 <body>
@@ -721,6 +748,11 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="cb-tab" data-bs-toggle="tab" data-bs-target="#cbContent" type="button" role="tab">
                 <i class="bi bi-exclamation-triangle-fill me-1" style="color:var(--red);"></i> Cảnh Báo <span id="badgeCanhBao" class="count-chip d-none" title="Số HĐ chưa ghi chú">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="cll3-tab" data-bs-toggle="tab" data-bs-target="#cll3Content" type="button" role="tab">
+                <i class="bi bi-arrow-repeat me-1" style="color:var(--red);"></i> CLL3
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -1092,6 +1124,49 @@
                 <div class="p-3 pb-2 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2" style="color:var(--red);"></i>Danh sách cảnh báo <span class="small fw-normal" id="cbDetailCount" style="color:var(--slate-soft);"></span></div>
                 <div class="table-responsive"><table class="table table-hover align-middle mb-0" id="cbDetailTable"></table></div>
                 <div class="d-flex justify-content-end p-3"><nav><ul class="pagination pagination-sm mb-0" id="cbPagination"></ul></nav></div>
+            </div>
+        </div>
+
+
+        <!-- TAB: CLL3 — ghi chép ca chất lượng lặp lần 3 (dataCLL3 + ảnh cll3_images) -->
+        <div class="tab-pane fade" id="cll3Content" role="tabpanel">
+            <div class="filter-strip row g-2 mb-3 align-items-end">
+                <div class="col-md-3 f-group"><label>Ngày PS lặp (từ - đến) · mặc định tháng này</label>
+                    <div class="d-flex gap-1"><input type="date" id="cll3FilterFrom" class="form-control form-control-sm" onchange="cll3ApplyFilters()"><input type="date" id="cll3FilterTo" class="form-control form-control-sm" onchange="cll3ApplyFilters()"></div></div>
+                <div class="col-md-2 f-group"><label>Đối tác</label><select id="cll3FilterDoiTac" class="form-select form-select-sm" onchange="cll3OnFilterChange()"></select></div>
+                <div class="col-md-2 f-group"><label>Đội trưởng</label><select id="cll3FilterDoiTruong" class="form-select form-select-sm" onchange="cll3ApplyFilters()"></select></div>
+                <div class="col-md-2 f-group"><label>Đánh giá</label>
+                    <select id="cll3FilterDanhGia" class="form-select form-select-sm" onchange="cll3ApplyFilters()">
+                        <option value="">Tất cả</option><option>Chủ quan</option><option>Khách quan</option><option value="none">Chưa đánh giá</option>
+                    </select></div>
+                <div class="col-md-3 f-group"><label>Tìm Số HĐ / Nhân viên</label>
+                    <input type="text" id="cll3Search" class="form-control form-control-sm" placeholder="Nhập số hợp đồng hoặc Mobinet..." oninput="clearTimeout(window._c3T); window._c3T = setTimeout(cll3ApplyFilters, 250);"></div>
+                <div class="col-12 f-group d-flex flex-wrap justify-content-end gap-2">
+                    <span class="small align-self-center me-auto" id="cll3LastLoaded" style="color:var(--slate-soft);"></span>
+                    <button class="filter-reset-btn" onclick="cll3ResetFilters()"><i class="bi bi-x-circle me-1"></i>Đặt lại</button>
+                    <button class="filter-reset-btn" onclick="cll3FetchData(true)"><i class="bi bi-arrow-clockwise me-1"></i>Tải lại</button>
+                    <span id="cll3AdminTools" class="d-none gap-2">
+                        <button class="filter-reset-btn" onclick="cll3DownloadTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu</button>
+                        <label class="filter-reset-btn mb-0" style="cursor:pointer;"><i class="bi bi-upload me-1"></i>Nhập Excel
+                            <input type="file" accept=".xlsx,.xls,.csv" class="d-none" onchange="cll3HandleImportFile(event)"></label>
+                    </span>
+                    <button class="filter-reset-btn" onclick="cll3ExportExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Xuất Excel</button>
+                    <button class="btn btn-sm fw-bold text-white" id="cll3AddBtn" style="background:var(--brand); color:#fff;" onclick="cll3OpenEditModal(null)"><i class="bi bi-plus-lg me-1"></i>Thêm ca</button>
+                </div>
+            </div>
+
+            <div class="stat-strip">
+                <div class="stat-item accent-neutral"><div class="stat-label">TỔNG CA CLL3</div><div class="stat-value" id="cll3KpiTotal">0</div></div>
+                <div class="stat-item accent-red"><div class="stat-label">CHỦ QUAN</div><div class="stat-value" id="cll3KpiChu">0</div></div>
+                <div class="stat-item accent-brand"><div class="stat-label">KHÁCH QUAN</div><div class="stat-value" id="cll3KpiKhach">0</div></div>
+                <div class="stat-item accent-amber"><div class="stat-label">CHƯA ĐÁNH GIÁ</div><div class="stat-value" id="cll3KpiNone">0</div></div>
+                <div class="stat-item accent-neutral"><div class="stat-label">CHƯA CÓ HÀNH ĐỘNG</div><div class="stat-value" id="cll3KpiNoAct">0</div></div>
+            </div>
+
+            <div class="table-panel">
+                <div class="p-3 pb-2 fw-bold"><i class="bi bi-arrow-repeat me-2" style="color:var(--red);"></i>Danh sách ca CLL3 <span class="small fw-normal" id="cll3Count" style="color:var(--slate-soft);"></span></div>
+                <div class="table-responsive"><table class="table align-middle mb-0 cll3-table" id="cll3Table"></table></div>
+                <div class="d-flex justify-content-end p-3"><nav><ul class="pagination pagination-sm mb-0" id="cll3Pagination"></ul></nav></div>
             </div>
         </div>
 
@@ -1718,6 +1793,7 @@
                                     <tbody>
                                         <tr><td><b>Bảo Trì</b></td><td>Kiểm tra checklist ca bảo trì (TPKT Check), xử lý lại ca lỗi (XL Lại) và xem báo cáo tiến độ</td><td>Mọi tài khoản trừ cus</td></tr>
                                         <tr><td><b>Cảnh Báo</b></td><td>Số HĐ vừa có ca Bảo Trì vừa bị Suy hao / Rớt kết nối — ghi chú hướng xử lý</td><td>Mọi tài khoản trừ cus</td></tr>
+                                        <tr><td><b>CLL3</b></td><td>Ghi chép ca chất lượng lặp lần 3: thông tin xử lý, đánh giá Khách quan / Chủ quan, hành động TPPKT / ĐT kèm ảnh</td><td>Mọi tài khoản trừ HR (Chỉ xem: không xem ảnh)</td></tr>
                                         <tr><td><b>HI FPT</b></td><td>Tỉ lệ cài đặt và tỉ lệ tương tác ứng dụng HI FPT</td><td>Mọi tài khoản trừ cus</td></tr>
                                         <tr><td><b>SH &amp; RKN</b></td><td>Theo dõi và xử lý ca Suy hao / Rớt kết nối liên tục</td><td>Tất cả</td></tr>
                                         <tr><td><b>IQC &amp; Đầu Vào</b></td><td>Đội trưởng kiểm tra ca IQC / Đầu Vào (OK / NOT + ghi chú), link tới trang ảnh IQC</td><td>Mọi tài khoản trừ HR (cus xem Đối tác mình + ghi chú DVKH)</td></tr>
@@ -1813,6 +1889,18 @@
                     </div>
                 </div>
 
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gcll3">6a. CLL3 — ca chất lượng lặp lần 3</button></h2>
+                    <div id="gcll3" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
+                        <div class="accordion-body small"><ul class="mb-0">
+                            <li><b>Thêm ca</b>: nhập Số HĐ, Ngày PS lặp, Nhân viên (Mobinet) — Đối tác và Đội trưởng tự điền theo tab Nhân Sự. Nhân viên chưa có trong Nhân Sự thì nhờ Admin bổ sung (Admin nhập tay được). Mỗi cặp Số HĐ + Ngày PS lặp chỉ có 1 ca.</li>
+                            <li>Điền Tỷ lệ CLL2 lũy kế, Tình trạng (nguyên nhân đầu vào), Số lần lặp, Thông tin xử lý KTV / ĐT / TPPKT (≤ 2000 ký tự), Đánh giá (Khách quan / Chủ quan), Hành động TPPKT, ĐT (≤ 1000 ký tự) → <b>Lưu</b>.</li>
+                            <li><b>Ảnh minh chứng</b>: sau khi lưu, bấm <b>Chọn ảnh</b>, kéo thả hoặc dán ảnh (Ctrl+V) vào form — tối đa 6 ảnh/ca, ảnh tự nén trước khi tải lên. Bấm ảnh nhỏ trong bảng để xem to (phím ← → chuyển ảnh, Esc đóng).</li>
+                            <li><b>Phạm vi</b>: Đội trưởng — đội mình; Đối tác quản lý và tài khoản cus — đối tác mình; Admin — tất cả. Ai trong phạm vi cũng thêm / sửa / đính ảnh được. Xoá ca: Admin hoặc người tạo ca; xoá ảnh: Admin hoặc người tải ảnh. HR không thấy tab; tài khoản Chỉ xem không xem được ảnh.</li>
+                            <li>Bộ lọc mặc định tháng hiện tại theo Ngày PS lặp. Ô Đánh giá chưa điền có viền cam nhắc. Admin có <b>Tải file mẫu</b> / <b>Nhập Excel</b> (tiêu đề cột giống mẫu báo cáo, ≤ 1000 dòng/lần): ca mới được thêm, ca đã có chỉ cập nhật ô có chữ — ô trống giữ nội dung đã nhập trên web.</li>
+                        </ul></div>
+                    </div>
+                </div>
                 <div class="accordion-item">
                     <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#giqc">7a. IQC &amp; Đầu Vào</button></h2>
                     <div id="giqc" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
@@ -2084,6 +2172,60 @@
                 </div>
             </div>
         </div>
+    </div>
+
+
+    <!-- MODAL: Thêm / sửa ca CLL3 + đính ảnh -->
+    <div class="modal fade" id="cll3EditModal" tabindex="-1" aria-labelledby="cll3EditTitle">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold" id="cll3EditTitle">Thêm ca CLL3</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-2">
+                        <div class="col-md-4"><label class="cll3-lbl" for="c3_soHopDong">Số HĐ *</label><input id="c3_soHopDong" class="form-control form-control-sm" maxlength="50"></div>
+                        <div class="col-md-4"><label class="cll3-lbl" for="c3_ngayPsLap">Ngày PS lặp *</label><input id="c3_ngayPsLap" type="date" class="form-control form-control-sm"></div>
+                        <div class="col-md-4"><label class="cll3-lbl" for="c3_nhanVien">Nhân viên (Mobinet) *</label><input id="c3_nhanVien" class="form-control form-control-sm" maxlength="100" placeholder="VD: DNI02.TRIEUNX"></div>
+                        <div class="col-12 small" id="c3_mapInfo" role="status" style="color:var(--slate);"></div>
+                        <div class="col-md-6 d-none c3-manual"><label class="cll3-lbl" for="c3_doiTacQuanLy">Đối tác (Admin chọn tay)</label><input id="c3_doiTacQuanLy" class="form-control form-control-sm" maxlength="100" placeholder="VD: DNI02"></div>
+                        <div class="col-md-6 d-none c3-manual"><label class="cll3-lbl" for="c3_doiTruong">Đội trưởng (Admin chọn tay)</label><input id="c3_doiTruong" class="form-control form-control-sm" maxlength="200"></div>
+                        <div class="col-md-4"><label class="cll3-lbl" for="c3_tyLeCll2">Tỷ lệ CLL2 lũy kế</label><input id="c3_tyLeCll2" class="form-control form-control-sm" maxlength="20" placeholder="VD: 15%"></div>
+                        <div class="col-md-4"><label class="cll3-lbl" for="c3_soLanLap">Số lần lặp</label><input id="c3_soLanLap" type="number" min="0" step="1" class="form-control form-control-sm"></div>
+                        <div class="col-md-4"><label class="cll3-lbl" for="c3_danhGia">Đánh giá</label>
+                            <select id="c3_danhGia" class="form-select form-select-sm"><option value="">— Chưa đánh giá —</option><option>Chủ quan</option><option>Khách quan</option></select></div>
+                        <div class="col-12"><label class="cll3-lbl" for="c3_tinhTrang">Tình trạng (nguyên nhân đầu vào)</label><input id="c3_tinhTrang" class="form-control form-control-sm" maxlength="300" placeholder="VD: Không có tín hiệu quang"></div>
+                        <div class="col-12"><label class="cll3-lbl" for="c3_thongTinXuLy">Thông tin xử lý KTV / ĐT / TPPKT <span class="cll3-count" data-for="c3_thongTinXuLy"></span></label>
+                            <textarea id="c3_thongTinXuLy" class="form-control form-control-sm" rows="5" maxlength="2000" placeholder="CL1: ...&#10;Cách xử lý: ...&#10;CL2: ..."></textarea></div>
+                        <div class="col-12"><label class="cll3-lbl" for="c3_hanhDong">Hành động TPPKT, ĐT <span class="cll3-count" data-for="c3_hanhDong"></span></label>
+                            <textarea id="c3_hanhDong" class="form-control form-control-sm" rows="3" maxlength="1000"></textarea></div>
+                    </div>
+                    <div class="cll3-img-zone mt-3" id="c3_imgZone">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                            <div class="fw-semibold small">Ảnh minh chứng <span id="c3_imgCount" style="color:var(--slate);"></span></div>
+                            <label class="filter-reset-btn mb-0" id="c3_imgPick" style="cursor:pointer;"><i class="bi bi-image me-1"></i>Chọn ảnh
+                                <input type="file" accept="image/*" multiple class="d-none" id="c3_imgInput"></label>
+                        </div>
+                        <div class="small mb-2" id="c3_imgHint" style="color:var(--slate);">Chọn ảnh hoặc dán ảnh (Ctrl+V) vào đây — tối đa 6 ảnh, tự nén trước khi tải lên.</div>
+                        <div class="cll3-img-grid" id="c3_imgGrid"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span class="small me-auto" id="c3_msg" role="status" style="color:var(--slate);"></span>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-sm text-white" id="c3_saveBtn" onclick="cll3SaveEdit()" style="background:var(--brand); color:#fff;">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lớp xem ảnh CLL3 cỡ lớn (lớp phủ riêng, không lồng modal Bootstrap → Esc chỉ đóng ảnh) -->
+    <div class="cll3-lightbox" id="cll3Lightbox" role="dialog" aria-modal="true" aria-label="Xem ảnh minh chứng" hidden>
+        <div class="cll3-lb-bar"><span id="c3_viewCap"></span><button type="button" class="cll3-lb-close" id="c3_viewClose" aria-label="Đóng xem ảnh"><i class="bi bi-x-lg"></i></button></div>
+        <img id="c3_viewImg" alt="Ảnh minh chứng CLL3" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">
+        <button type="button" class="cll3-nav prev" id="c3_viewPrev" aria-label="Ảnh trước"><i class="bi bi-chevron-left"></i></button>
+        <button type="button" class="cll3-nav next" id="c3_viewNext" aria-label="Ảnh sau"><i class="bi bi-chevron-right"></i></button>
     </div>
 
     <!-- MODAL: Xem trước file import SH & RKN -->
@@ -2866,7 +3008,7 @@
         });
     })();
 
-    const APP_BUILD = "2026-10-23.1";
+    const APP_BUILD = "2026-10-23.2";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -3174,7 +3316,7 @@
         document.getElementById(toId).value = `${t.getFullYear()}-${p(t.getMonth() + 1)}-${p(last)}`;
     }
     // Đặt mặc định ngay khi tải trang — áp dụng cho mọi vai trò (kể cả cus ở tab SH & RKN)
-    [['filterTgHoanTatFrom', 'filterTgHoanTatTo'], ['hiFilterFrom', 'hiFilterTo'], ['rknFilterFrom', 'rknFilterTo']]
+    [['filterTgHoanTatFrom', 'filterTgHoanTatTo'], ['hiFilterFrom', 'hiFilterTo'], ['rknFilterFrom', 'rknFilterTo'], ['cll3FilterFrom', 'cll3FilterTo']]
         .forEach(([f, t]) => setCurrentMonthRange(f, t));
     function clearFilterSelections() {
         document.getElementById('filterDoiTac').value = "";
@@ -3236,7 +3378,10 @@
         document.getElementById('cb-tab').classList.toggle('d-none', isRestrictedUi);
         document.getElementById('hifpt-tab').classList.toggle('d-none', isRestrictedUi);
         document.getElementById('rkn-tab').classList.toggle('d-none', isHr);
-        document.getElementById('iqc-tab').classList.toggle('d-none', isHr); // cus xem IQC của Đối tác mình (+ Ghi chú DVKH)
+        document.getElementById('iqc-tab').classList.toggle('d-none', isHr);
+        document.getElementById('cll3-tab').classList.toggle('d-none', isHr); // CLL3: mọi người trừ HR (Chỉ xem: xem, không ảnh)
+        { let ad = ['admin', 'superadmin'].includes(currentUser.role), t = document.getElementById('cll3AdminTools'); t.classList.toggle('d-none', !ad); t.classList.toggle('d-flex', ad); }
+        document.getElementById('cll3AddBtn').classList.toggle('d-none', ['hr', 'viewer'].includes(currentUser.role)); // cus xem IQC của Đối tác mình (+ Ghi chú DVKH)
         if (isHr) {
             document.getElementById('phantich-tab').classList.add('d-none');
             // Tab mặc định cho HR là Nhân Sự
@@ -6516,6 +6661,393 @@
         XLSX.writeFile(wb, `CanhBao_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
     document.getElementById('cb-tab').addEventListener('shown.bs.tab', () => cbFetchData(false));
+
+    // ================== CLL3 (dataCLL3 + ảnh) ==================
+    // Ai trong phạm vi cũng thêm / sửa / đính ảnh (trừ HR, Chỉ xem). Xoá ca: Admin hoặc người tạo; xoá ảnh: Admin hoặc người tải.
+    const CLL3_PAGE_SIZE = 50, CLL3_MAX_IMAGES = 6, CLL3_IMPORT_CHUNK = 500;
+    const CLL3_COLS = [['soHopDong', 'Số HĐ'], ['doiTacQuanLy', 'Đối tác'], ['nhanVien', 'Nhân viên'], ['tyLeCll2', 'Tỷ lệ CLL2 Lũy kế'],
+        ['tinhTrang', 'Tình trạng (nguyên nhân đầu vào)'], ['soLanLap', 'Số lần lặp'], ['ngayPsLap', 'NGÀY PS LẶP'], ['doiTruong', 'Đội Trưởng'],
+        ['thongTinXuLy', 'Thông tin xử lý KTV/ ĐT/ TPPKT'], ['danhGia', 'Đánh giá (Khách quan/ Chủ quan)'], ['hanhDong', 'Hành động TPPKT, ĐT']];
+    // Tiêu đề cột trong file Excel (bỏ dấu, bỏ ký tự lạ) → trường; so khớp theo tiền tố để chịu được "(nguyên nhân đầu vào)"…
+    const CLL3_HEADER_PREFIX = [['sohopdong', 'soHopDong'], ['sohd', 'soHopDong'], ['doitac', 'doiTacQuanLy'], ['nhanvien', 'nhanVien'],
+        ['tylecll2', 'tyLeCll2'], ['tinhtrang', 'tinhTrang'], ['solanlap', 'soLanLap'], ['ngaypslap', 'ngayPsLap'], ['doitruong', 'doiTruong'],
+        ['thongtinxuly', 'thongTinXuLy'], ['danhgia', 'danhGia'], ['hanhdong', 'hanhDong']];
+    let cll3Data = [], cll3Filtered = [], cll3Page = 1, cll3LoadedFor = null, cll3LoadedAt = 0;
+    let cll3Editing = null;              // ca đang mở trong form (null = thêm mới chưa lưu)
+    const cll3ImgUrl = new Map();        // id ảnh → objectURL (tải 1 lần)
+    let cll3View = { list: [], i: 0, label: '' };
+    const cll3IsAdmin = () => !!currentUser && ['admin', 'superadmin'].includes(currentUser.role);
+    const cll3CanWrite = () => !!currentUser && !['hr', 'viewer'].includes(currentUser.role);
+    const cll3CanSeeImages = () => !!currentUser && !['hr', 'viewer'].includes(currentUser.role);
+    const cll3IsoToDmy = v => v ? v.split('-').reverse().join('/') : '';
+    const cll3DmyToIso = v => { let m = String(v || '').match(/^(\d{2})\/(\d{2})\/(\d{4})/); return m ? `${m[3]}-${m[2]}-${m[1]}` : ''; };
+
+    async function cll3FetchData(force) {
+        if (!currentUser || currentUser.role === 'hr') return;
+        if (!force && cll3LoadedFor === currentUser.username && Date.now() - cll3LoadedAt < HI_STALE_MS) { cll3ApplyFilters(); return; }
+        try {
+            let res = await apiFetch("api/cll3/data", { method: "GET" });
+            let j = await res.json();
+            if (!res.ok) { console.warn(j.error); return; }
+            cll3Data = j.data || [];
+            cll3Data.forEach(r => { let d = parseFlexibleDate(r.ngayPsLap); r._t = d ? d.getTime() : null; });
+            cll3LoadedFor = currentUser.username; cll3LoadedAt = Date.now();
+            document.getElementById('cll3LastLoaded').textContent = `Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN')} · ${cll3Data.length} ca`;
+        } catch (e) { console.error("Lỗi tải CLL3:", e); return; }
+        hiFillSelect('cll3FilterDoiTac', hiUniq(cll3Data, 'doiTacQuanLy'), 'Tất cả Đối tác', true);
+        let sel = document.getElementById('cll3FilterDoiTac');
+        if (isDoiTacLocked()) { if (![...sel.options].some(o => o.value === currentUser.doiTac)) sel.add(new Option(currentUser.doiTac, currentUser.doiTac)); sel.value = currentUser.doiTac; sel.disabled = true; }
+        else sel.disabled = false;
+        cll3OnFilterChange();
+    }
+    function cll3OnFilterChange() {
+        let dt = document.getElementById('cll3FilterDoiTac').value;
+        hiFillSelect('cll3FilterDoiTruong', hiUniq(cll3Data.filter(r => !dt || r.doiTacQuanLy === dt), 'doiTruong'), 'Tất cả Đội trưởng', true);
+        let s = document.getElementById('cll3FilterDoiTruong');
+        if (isDoiTruongLocked()) { if (![...s.options].some(o => o.value === currentUser.doiTruong)) s.add(new Option(currentUser.doiTruong, currentUser.doiTruong)); s.value = currentUser.doiTruong; s.disabled = true; }
+        else s.disabled = false;
+        cll3ApplyFilters();
+    }
+    function cll3ResetFilters() {
+        ['cll3FilterDanhGia', 'cll3Search'].forEach(id => document.getElementById(id).value = '');
+        if (!isDoiTacLocked()) document.getElementById('cll3FilterDoiTac').value = '';
+        if (!isDoiTruongLocked()) document.getElementById('cll3FilterDoiTruong').value = '';
+        setCurrentMonthRange('cll3FilterFrom', 'cll3FilterTo');
+        cll3OnFilterChange();
+    }
+    function cll3ApplyFilters() {
+        let dt = document.getElementById('cll3FilterDoiTac').value, dtr = document.getElementById('cll3FilterDoiTruong').value;
+        let dg = document.getElementById('cll3FilterDanhGia').value, q = hiNorm(document.getElementById('cll3Search').value);
+        let f = document.getElementById('cll3FilterFrom').value, t = document.getElementById('cll3FilterTo').value;
+        let fromT = f ? new Date(f + 'T00:00:00').getTime() : null, toT = t ? new Date(t + 'T23:59:59').getTime() : null;
+        cll3Filtered = cll3Data.filter(r => {
+            if (dt && r.doiTacQuanLy !== dt) return false;
+            if (dtr && r.doiTruong !== dtr) return false;
+            if (dg === 'none' ? !!r.danhGia : (dg && r.danhGia !== dg)) return false;
+            if (q && ![r.soHopDong, r.nhanVien].some(v => hiNorm(v).includes(q))) return false;
+            if (fromT !== null && !(r._t >= fromT)) return false;
+            if (toT !== null && !(r._t <= toT)) return false;
+            return true;
+        });
+        // Mới nhất lên đầu (Ngày PS lặp giảm dần, cùng ngày thì ca thêm sau lên trước)
+        cll3Filtered.sort((a, b) => (b._t || 0) - (a._t || 0) || b.id - a.id);
+        let rs = cll3Filtered, n = v => v.toLocaleString('vi-VN');
+        document.getElementById('cll3KpiTotal').textContent = n(rs.length);
+        document.getElementById('cll3KpiChu').textContent = n(rs.filter(r => r.danhGia === 'Chủ quan').length);
+        document.getElementById('cll3KpiKhach').textContent = n(rs.filter(r => r.danhGia === 'Khách quan').length);
+        document.getElementById('cll3KpiNone').textContent = n(rs.filter(r => !r.danhGia).length);
+        document.getElementById('cll3KpiNoAct').textContent = n(rs.filter(r => !String(r.hanhDong || '').trim()).length);
+        cll3Page = 1;
+        cll3RenderTable();
+    }
+    function cll3RenderTable() {
+        let pages = Math.max(1, Math.ceil(cll3Filtered.length / CLL3_PAGE_SIZE));
+        if (cll3Page > pages) cll3Page = pages;
+        let list = cll3Filtered.slice((cll3Page - 1) * CLL3_PAGE_SIZE, cll3Page * CLL3_PAGE_SIZE);
+        let canW = cll3CanWrite(), seeImg = cll3CanSeeImages();
+        document.getElementById('cll3Count').textContent = `— ${cll3Filtered.length.toLocaleString('vi-VN')} ca`;
+        const e = v => escapeHtml(v ?? '');
+        let head = `<thead><tr>${CLL3_COLS.map(([, l]) => `<th>${e(l)}</th>`).join('')}${canW ? '<th class="text-end">Thao tác</th>' : ''}</tr></thead>`;
+        let body = list.length ? list.map(r => {
+            let imgs = r.images || [];
+            let thumbs = !imgs.length ? '' : seeImg
+                ? `<div class="cll3-thumbs">${imgs.map((im, i) => `<button type="button" class="cll3-thumb" data-row="${r.id}" data-i="${i}" aria-label="Xem ảnh ${i + 1} của ca ${e(r.soHopDong)}"><img data-img="${im.id}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:3px;"></button>`).join('')}</div>`
+                : `<div class="small mt-1" style="color:var(--slate);"><i class="bi bi-image me-1"></i>${imgs.length} ảnh (ẩn với tài khoản chỉ xem)</div>`;
+            let mine = r.createdBy && currentUser && r.createdBy === currentUser.username;
+            return `<tr>
+                <td class="fw-bold mono text-nowrap">${e(r.soHopDong)}</td>
+                <td class="text-nowrap">${e(r.doiTacQuanLy)}</td>
+                <td class="mono text-nowrap">${e(r.nhanVien)}</td>
+                <td class="c3-rate">${e(r.tyLeCll2)}</td>
+                <td class="c3-mid">${e(r.tinhTrang)}</td>
+                <td class="text-center mono">${r.soLanLap ?? ''}</td>
+                <td class="text-nowrap">${e(r.ngayPsLap)}</td>
+                <td class="text-nowrap">${e(r.doiTruong)}</td>
+                <td class="c3-long">${e(r.thongTinXuLy)}</td>
+                <td class="text-center text-nowrap ${r.danhGia ? '' : 'c3-need'}">${r.danhGia ? e(r.danhGia) : 'Chưa đánh giá'}</td>
+                <td class="c3-long">${e(r.hanhDong)}${thumbs}</td>
+                ${canW ? `<td class="text-end text-nowrap"><button class="btn btn-sm btn-link p-0 me-2" title="Sửa / đính ảnh" aria-label="Sửa ca ${e(r.soHopDong)}" onclick="cll3OpenEditModal(${r.id})"><i class="bi bi-pencil-square"></i></button>${cll3IsAdmin() || mine ? `<button class="btn btn-sm btn-link p-0 text-danger" title="Xoá ca" aria-label="Xoá ca ${e(r.soHopDong)}" onclick="cll3DeleteRow(${r.id})"><i class="bi bi-trash"></i></button>` : ''}</td>` : ''}
+            </tr>`;
+        }).join('') : `<tr><td colspan="${CLL3_COLS.length + (canW ? 1 : 0)}" class="text-center py-4 small" style="color:var(--slate);">${cll3Data.length ? 'Không có ca nào khớp bộ lọc.' : 'Chưa có ca CLL3 nào' + (canW ? ' — bấm "Thêm ca" để nhập ca đầu tiên.' : '.')}</td></tr>`;
+        document.getElementById('cll3Table').innerHTML = head + '<tbody>' + body + '</tbody>';
+        let nums = [...new Set([1, pages, cll3Page - 1, cll3Page, cll3Page + 1].filter(x => x >= 1 && x <= pages))].sort((a, b) => a - b);
+        let html = '', prev = 0;
+        nums.forEach(x => { if (x - prev > 1) html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+            html += `<li class="page-item ${x === cll3Page ? 'active' : ''}"><a class="page-link" href="#" data-c3page="${x}">${x}</a></li>`; prev = x; });
+        document.getElementById('cll3Pagination').innerHTML = pages > 1 ? html : '';
+        cll3LoadThumbs(document.getElementById('cll3Table'));
+    }
+    // Ảnh lấy qua apiFetch (kèm phiên đăng nhập) → objectURL; mỗi ảnh tải 1 lần
+    async function cll3ImageUrl(id) {
+        if (cll3ImgUrl.has(id)) return cll3ImgUrl.get(id);
+        let p = (async () => {
+            let res = await apiFetch(`api/cll3/image?id=${id}`, { method: "GET" });
+            if (!res.ok) throw new Error('img ' + res.status);
+            return URL.createObjectURL(await res.blob());
+        })();
+        cll3ImgUrl.set(id, p);
+        try { return await p; } catch (e) { cll3ImgUrl.delete(id); throw e; }
+    }
+    function cll3LoadThumbs(root) {
+        if (!cll3CanSeeImages()) return;
+        root.querySelectorAll('img[data-img]:not([src])').forEach(async img => {
+            try { img.src = await cll3ImageUrl(parseInt(img.dataset.img, 10)); } catch (e) { img.alt = 'Lỗi ảnh'; }
+        });
+    }
+    async function cll3OpenViewer(ids, i, label) {
+        cll3View = { list: ids, i, label };
+        let lb = document.getElementById('cll3Lightbox');
+        cll3View.back = document.activeElement;
+        lb.hidden = false;
+        document.getElementById('c3_viewClose').focus();
+        await cll3ShowView();
+    }
+    async function cll3ShowView() {
+        let { list, i, label } = cll3View, img = document.getElementById('c3_viewImg');
+        document.getElementById('c3_viewCap').textContent = `${label} · ảnh ${i + 1}/${list.length}`;
+        document.getElementById('c3_viewPrev').hidden = document.getElementById('c3_viewNext').hidden = list.length < 2;
+        img.removeAttribute('src');
+        try { img.src = await cll3ImageUrl(list[i]); } catch (e) { img.alt = 'Không tải được ảnh'; }
+    }
+    document.getElementById('c3_viewPrev').addEventListener('click', () => { cll3View.i = (cll3View.i - 1 + cll3View.list.length) % cll3View.list.length; cll3ShowView(); });
+    document.getElementById('c3_viewNext').addEventListener('click', () => { cll3View.i = (cll3View.i + 1) % cll3View.list.length; cll3ShowView(); });
+    function cll3CloseViewer() {
+        let lb = document.getElementById('cll3Lightbox');
+        if (lb.hidden) return;
+        lb.hidden = true;
+        if (cll3View.back && cll3View.back.focus) cll3View.back.focus();
+    }
+    document.getElementById('c3_viewClose').addEventListener('click', cll3CloseViewer);
+    document.getElementById('cll3Lightbox').addEventListener('click', e => { if (e.target.id === 'cll3Lightbox') cll3CloseViewer(); });
+    // Bắt phím ở pha capture → Esc chỉ đóng ảnh, không lọt xuống form sửa (modal Bootstrap) bên dưới
+    window.addEventListener('keydown', e => {
+        if (document.getElementById('cll3Lightbox').hidden) return;
+        if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cll3CloseViewer(); }
+        else if (e.key === 'ArrowLeft') { e.stopPropagation(); document.getElementById('c3_viewPrev').click(); }
+        else if (e.key === 'ArrowRight') { e.stopPropagation(); document.getElementById('c3_viewNext').click(); }
+    }, true);
+    // Modal Bootstrap giữ tiêu điểm trong nó — tạm thời cho phép tiêu điểm ở lớp xem ảnh
+    document.addEventListener('focusin', e => { if (!document.getElementById('cll3Lightbox').hidden && e.target.closest('#cll3Lightbox')) e.stopImmediatePropagation(); }, true);
+    document.getElementById('cll3Table').addEventListener('click', e => {
+        let b = e.target.closest('.cll3-thumb'); if (!b) return;
+        let r = cll3Data.find(x => x.id === parseInt(b.dataset.row, 10)); if (!r) return;
+        cll3OpenViewer(r.images.map(im => im.id), parseInt(b.dataset.i, 10), `${r.soHopDong} · ${r.ngayPsLap}`);
+    });
+    document.getElementById('cll3Pagination').addEventListener('click', e => {
+        let a = e.target.closest('[data-c3page]'); if (!a) return;
+        e.preventDefault(); cll3Page = parseInt(a.dataset.c3page, 10); cll3RenderTable();
+    });
+
+    // ---------- Form thêm / sửa ----------
+    const C3_FIELDS = ['soHopDong', 'nhanVien', 'tyLeCll2', 'tinhTrang', 'soLanLap', 'thongTinXuLy', 'danhGia', 'hanhDong', 'doiTacQuanLy', 'doiTruong'];
+    function cll3OpenEditModal(id) {
+        if (!cll3CanWrite()) return;
+        cll3Editing = id ? cll3Data.find(r => r.id === id) || null : null;
+        let r = cll3Editing || {};
+        C3_FIELDS.forEach(f => document.getElementById('c3_' + f).value = r[f] ?? '');
+        document.getElementById('c3_ngayPsLap').value = cll3DmyToIso(r.ngayPsLap) || new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
+        document.getElementById('cll3EditTitle').textContent = cll3Editing ? `Sửa ca CLL3 · ${r.soHopDong}` : 'Thêm ca CLL3';
+        document.getElementById('c3_msg').textContent = '';
+        document.querySelectorAll('.c3-manual').forEach(el => el.classList.add('d-none'));
+        document.getElementById('c3_mapInfo').textContent = cll3Editing ? `Đối tác ${r.doiTacQuanLy || '—'} · Đội trưởng ${r.doiTruong || '—'}` : 'Nhập Nhân viên (Mobinet) — Đối tác và Đội trưởng tự điền theo tab Nhân Sự.';
+        document.getElementById('c3_mapInfo').style.color = 'var(--slate)';
+        cll3UpdateCounts();
+        cll3RenderImages();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('cll3EditModal')).show();
+    }
+    function cll3UpdateCounts() {
+        document.querySelectorAll('.cll3-count').forEach(sp => { let el = document.getElementById(sp.dataset.for); sp.textContent = `(${[...el.value].length}/${el.maxLength})`; });
+    }
+    document.getElementById('cll3EditModal').addEventListener('input', e => { if (e.target.closest('textarea')) cll3UpdateCounts(); });
+    async function cll3Lookup() {
+        let nv = document.getElementById('c3_nhanVien').value.trim(), info = document.getElementById('c3_mapInfo');
+        if (!nv) return;
+        try {
+            let j = await (await apiFetch(`api/cll3/lookup?nhanVien=${encodeURIComponent(nv)}`, { method: "GET" })).json();
+            if (j.found) {
+                info.textContent = `Đối tác ${j.doiTacQuanLy || '—'} · Đội trưởng ${j.doiTruong || '—'} (theo tab Nhân Sự)`; info.style.color = 'var(--brand)';
+                document.querySelectorAll('.c3-manual').forEach(el => el.classList.add('d-none'));
+            } else if (cll3IsAdmin()) {
+                info.textContent = `"${nv}" chưa có trong tab Nhân Sự — Admin nhập tay Đối tác / Đội trưởng bên dưới.`; info.style.color = 'var(--amber)';
+                document.querySelectorAll('.c3-manual').forEach(el => el.classList.remove('d-none'));
+            } else {
+                info.textContent = `"${nv}" chưa có trong tab Nhân Sự (cột Mobinet) — nhờ Admin bổ sung trước khi lưu.`; info.style.color = 'var(--red)';
+            }
+        } catch (e) { /* lỗi mạng: Worker vẫn kiểm tra khi lưu */ }
+    }
+    document.getElementById('c3_nhanVien').addEventListener('change', cll3Lookup);
+    async function cll3SaveEdit() {
+        let v = id => document.getElementById(id).value;
+        let row = {}; C3_FIELDS.forEach(f => row[f] = v('c3_' + f).trim());
+        row.ngayPsLap = cll3IsoToDmy(v('c3_ngayPsLap'));
+        let msg = document.getElementById('c3_msg');
+        if (!row.soHopDong || !row.ngayPsLap || !row.nhanVien) { msg.textContent = 'Cần nhập Số HĐ, Ngày PS lặp và Nhân viên.'; msg.style.color = 'var(--red)'; return; }
+        let btn = document.getElementById('c3_saveBtn'); btn.disabled = true;
+        try {
+            let res = await apiFetch("api/cll3/save", { method: "POST", body: JSON.stringify({ id: cll3Editing ? cll3Editing.id : null, row }) });
+            let j = await res.json();
+            if (!j.success) { msg.textContent = j.error || 'Không lưu được.'; msg.style.color = 'var(--red)'; return; }
+            let imgs = cll3Editing ? cll3Editing.images : [];
+            let saved = Object.assign(j.row, { images: imgs || [] });
+            let d = parseFlexibleDate(saved.ngayPsLap); saved._t = d ? d.getTime() : null;
+            let idx = cll3Data.findIndex(r => r.id === saved.id);
+            if (idx >= 0) cll3Data[idx] = saved; else cll3Data.unshift(saved);
+            let isNew = !cll3Editing;
+            cll3Editing = saved;
+            document.getElementById('cll3EditTitle').textContent = `Sửa ca CLL3 · ${saved.soHopDong}`;
+            document.getElementById('c3_mapInfo').textContent = `Đối tác ${saved.doiTacQuanLy || '—'} · Đội trưởng ${saved.doiTruong || '—'}`;
+            msg.textContent = isNew ? 'Đã lưu ✓ — có thể đính ảnh minh chứng bên dưới.' : 'Đã lưu ✓'; msg.style.color = 'var(--brand)';
+            cll3RenderImages();
+            hiFillSelect('cll3FilterDoiTac', hiUniq(cll3Data, 'doiTacQuanLy'), 'Tất cả Đối tác', true);
+            cll3ApplyFilters();
+        } catch (e) { console.error("Lỗi lưu CLL3:", e); msg.textContent = 'Lỗi kết nối, vui lòng thử lại.'; msg.style.color = 'var(--red)'; }
+        finally { btn.disabled = false; }
+    }
+    async function cll3DeleteRow(id) {
+        let r = cll3Data.find(x => x.id === id); if (!r) return;
+        if (!confirm(`Xoá ca ${r.soHopDong} (${r.ngayPsLap})${(r.images || []).length ? ` và ${r.images.length} ảnh` : ''}? Không khôi phục được.`)) return;
+        try {
+            let j = await (await apiFetch("api/cll3/delete", { method: "POST", body: JSON.stringify({ id }) })).json();
+            if (!j.success) { alert(j.error || 'Không xoá được!'); return; }
+            cll3Data = cll3Data.filter(x => x.id !== id);
+            cll3ApplyFilters();
+        } catch (e) { alert('Lỗi kết nối, vui lòng thử lại!'); }
+    }
+
+    // ---------- Ảnh trong form ----------
+    function cll3RenderImages() {
+        let r = cll3Editing, grid = document.getElementById('c3_imgGrid');
+        let imgs = r ? r.images || [] : [];
+        document.getElementById('c3_imgCount').textContent = r ? `(${imgs.length}/${CLL3_MAX_IMAGES})` : '';
+        document.getElementById('c3_imgPick').classList.toggle('d-none', !r || imgs.length >= CLL3_MAX_IMAGES);
+        document.getElementById('c3_imgHint').textContent = !r ? 'Lưu ca trước, sau đó đính ảnh minh chứng.'
+            : imgs.length >= CLL3_MAX_IMAGES ? `Đã đủ ${CLL3_MAX_IMAGES} ảnh — xoá bớt nếu cần thay.` : 'Chọn ảnh hoặc dán ảnh (Ctrl+V) vào đây — tối đa 6 ảnh, tự nén trước khi tải lên.';
+        grid.innerHTML = imgs.map((im, i) => `<div class="cll3-img-cell"><img data-img="${im.id}" data-i="${i}" alt="Ảnh ${i + 1}">
+            ${cll3IsAdmin() || im.by === currentUser.username ? `<button type="button" class="cll3-img-del" data-del="${im.id}" aria-label="Xoá ảnh ${i + 1}"><i class="bi bi-x-lg"></i></button>` : ''}</div>`).join('');
+        cll3LoadThumbs(grid);
+    }
+    // Nén ảnh: cạnh dài tối đa 1600px, JPEG chất lượng 0.82 (hạ dần nếu vẫn > 560KB)
+    async function cll3Compress(file) {
+        let bmp = await createImageBitmap(file);
+        let scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+        let c = document.createElement('canvas');
+        c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+        let ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(bmp, 0, 0, c.width, c.height);
+        if (bmp.close) bmp.close();
+        for (let q of [0.82, 0.7, 0.55, 0.4]) {
+            let blob = await new Promise(res => c.toBlob(res, 'image/jpeg', q));
+            if (blob && blob.size <= 560 * 1024) return blob;
+        }
+        throw new Error('Ảnh quá lớn kể cả sau khi nén');
+    }
+    const cll3BlobToB64 = blob => new Promise((res, rej) => { let fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(blob); });
+    async function cll3UploadFiles(files) {
+        let r = cll3Editing; if (!r || !cll3CanWrite()) return;
+        let msg = document.getElementById('c3_msg');
+        files = [...files].filter(f => /^image\//.test(f.type));
+        let room = CLL3_MAX_IMAGES - (r.images || []).length;
+        if (!files.length) return;
+        if (files.length > room) { msg.textContent = `Chỉ còn chỗ cho ${room} ảnh — đã lấy ${room} ảnh đầu.`; msg.style.color = 'var(--amber)'; files = files.slice(0, room); }
+        for (let i = 0; i < files.length; i++) {
+            msg.textContent = `Đang tải ảnh ${i + 1}/${files.length}...`; msg.style.color = 'var(--slate)';
+            try {
+                let data = await cll3BlobToB64(await cll3Compress(files[i]));
+                let j = await (await apiFetch("api/cll3/image-upload", { method: "POST", body: JSON.stringify({ cll3Id: r.id, data }) })).json();
+                if (!j.success) { msg.textContent = j.error || 'Không tải được ảnh.'; msg.style.color = 'var(--red)'; break; }
+                r.images = (r.images || []).concat([j.image]);
+                cll3RenderImages();
+                msg.textContent = `Đã tải ${i + 1}/${files.length} ảnh ✓`; msg.style.color = 'var(--brand)';
+            } catch (e) { console.error(e); msg.textContent = `Ảnh "${files[i].name || 'dán'}" không đọc được hoặc quá lớn.`; msg.style.color = 'var(--red)'; }
+        }
+        cll3RenderTable();
+    }
+    document.getElementById('c3_imgInput').addEventListener('change', e => { let f = e.target.files; cll3UploadFiles(f).finally(() => e.target.value = ''); });
+    document.getElementById('cll3EditModal').addEventListener('paste', e => {
+        let files = [...(e.clipboardData?.files || [])].filter(f => /^image\//.test(f.type));
+        if (files.length && cll3Editing) { e.preventDefault(); cll3UploadFiles(files); }
+    });
+    const c3Zone = document.getElementById('c3_imgZone');
+    c3Zone.addEventListener('dragover', e => { if (cll3Editing) { e.preventDefault(); c3Zone.classList.add('is-drop'); } });
+    c3Zone.addEventListener('dragleave', () => c3Zone.classList.remove('is-drop'));
+    c3Zone.addEventListener('drop', e => { c3Zone.classList.remove('is-drop'); if (cll3Editing) { e.preventDefault(); cll3UploadFiles(e.dataTransfer.files); } });
+    document.getElementById('c3_imgGrid').addEventListener('click', async e => {
+        let del = e.target.closest('[data-del]');
+        if (del) {
+            if (!confirm('Xoá ảnh này?')) return;
+            let id = parseInt(del.dataset.del, 10);
+            let j = await (await apiFetch("api/cll3/image-delete", { method: "POST", body: JSON.stringify({ id }) })).json();
+            if (!j.success) { alert(j.error || 'Không xoá được ảnh!'); return; }
+            cll3Editing.images = cll3Editing.images.filter(im => im.id !== id);
+            cll3RenderImages(); cll3RenderTable();
+            return;
+        }
+        let img = e.target.closest('img[data-img]');
+        if (img && cll3Editing) cll3OpenViewer(cll3Editing.images.map(im => im.id), parseInt(img.dataset.i, 10), `${cll3Editing.soHopDong} · ${cll3Editing.ngayPsLap}`);
+    });
+
+    // ---------- Xuất / nhập Excel ----------
+    function cll3ExportExcel() {
+        if (typeof XLSX === 'undefined') return;
+        let rows = cll3Filtered.map(r => {
+            let o = {}; CLL3_COLS.forEach(([f, l]) => o[l] = r[f] ?? '');
+            o['Số ảnh'] = (r.images || []).length; o['Người tạo'] = r.createdBy || ''; o['Cập nhật'] = r.ngayCapNhat || ''; return o;
+        });
+        let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'CLL3');
+        XLSX.writeFile(wb, `CLL3_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    }
+    function cll3DownloadTemplate() {
+        let o = {}; CLL3_COLS.forEach(([f, l]) => o[l] = '');
+        Object.assign(o, { 'Số HĐ': 'DNFD66575', 'Đối tác': 'DNI02', 'Nhân viên': 'DNI02.TRIEUNX', 'Tỷ lệ CLL2 Lũy kế': '15%', 'Tình trạng (nguyên nhân đầu vào)': 'Không có tín hiệu quang',
+            'Số lần lặp': 3, 'NGÀY PS LẶP': '22/10/2026', 'Đội Trưởng': '', 'Thông tin xử lý KTV/ ĐT/ TPPKT': 'CL1: WiFi sóng yếu hoặc chập chờn\nCách xử lý: Hướng dẫn KH kết nối đúng sóng WiFi\nCL2: Không có tín hiệu quang\nCách xử lý: Gãy FC trong nhà, đã bấm lại',
+            'Đánh giá (Khách quan/ Chủ quan)': 'Chủ quan', 'Hành động TPPKT, ĐT': 'Mời họp lúc 8h ngày 7/10 chia sẻ phân tích hướng dẫn trách lặp lại.' });
+        let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([o]), 'CLL3');
+        XLSX.writeFile(wb, 'mau_import_CLL3.xlsx');
+    }
+    async function cll3HandleImportFile(event) {
+        let file = event.target.files[0]; event.target.value = '';
+        if (!file || !cll3IsAdmin()) return;
+        if (typeof XLSX === 'undefined') { alert("Thư viện Excel chưa tải xong, vui lòng thử lại."); return; }
+        let wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+        let sh = wb.Sheets[wb.SheetNames[0]];
+        let raw = XLSX.utils.sheet_to_json(sh, { defval: '', raw: true }), txt = XLSX.utils.sheet_to_json(sh, { defval: '', raw: false });
+        if (!raw.length) { alert("File không có dữ liệu!"); return; }
+        let colMap = {};
+        Object.keys(raw[0]).forEach(h => { let k = hiNorm(h).replace(/[^a-z0-9]/g, ''); let hit = CLL3_HEADER_PREFIX.find(([p]) => k.startsWith(p)); if (hit && !Object.values(colMap).includes(hit[1])) colMap[h] = hit[1]; });
+        let missing = ['soHopDong', 'ngayPsLap', 'nhanVien'].filter(f => !Object.values(colMap).includes(f));
+        if (missing.length) { alert(`File thiếu cột: ${missing.map(f => CLL3_COLS.find(c => c[0] === f)[1]).join(', ')}.\nDùng "Tải file mẫu" để xem đúng tiêu đề.`); return; }
+        let dctx = {}; Object.keys(colMap).forEach(h => dctx[h] = hiDateCtx(raw.map(r => r[h])));
+        let rows = [], errors = [];
+        raw.forEach((r, i) => {
+            let row = {};
+            Object.entries(colMap).forEach(([h, f]) => {
+                let t = (txt[i] || {})[h];
+                row[f] = f === 'ngayPsLap' ? hiSmartDate(r[h], t, false, dctx[h])
+                    : f === 'tyLeCll2' ? (typeof r[h] === 'number' && r[h] <= 1 && !String(t).includes('%') ? Math.round(r[h] * 1000) / 10 + '%' : String(t ?? '').trim())
+                    : String(r[h] ?? '').trim();
+            });
+            if (!row.soHopDong && !row.ngayPsLap) return;
+            if (!row.soHopDong || !/^\d{2}\/(0[1-9]|1[0-2])\/\d{4}$/.test(row.ngayPsLap || '')) { errors.push(`Dòng ${i + 2} (${row.soHopDong || '?'}): thiếu Số HĐ hoặc Ngày PS lặp "${row.ngayPsLap || ''}" không đọc được`); return; }
+            rows.push(row);
+        });
+        let known = new Set(cll3Data.map(r => r.soHopDong + '|' + r.ngayPsLap));
+        let upd = rows.filter(r => known.has(String(r.soHopDong).replace(/\s+/g, '').toUpperCase() + '|' + r.ngayPsLap)).length;
+        let sus = hiSuspiciousDates(rows.map(r => r.ngayPsLap));
+        let text = `File có ${rows.length} ca hợp lệ: ≈ ${rows.length - upd} ca mới, ${upd} ca đã có (chỉ cập nhật ô có chữ, ô trống giữ nguyên).`
+            + (sus ? `\n⚠ ${sus} ca có Ngày PS lặp bất thường (tương lai / cũ hơn 120 ngày) — kiểm tra đảo ngày/tháng.` : '')
+            + (errors.length ? `\n\n${errors.length} dòng lỗi (bỏ qua):\n${errors.slice(0, 8).join('\n')}${errors.length > 8 ? '\n…' : ''}` : '')
+            + `\n\n5 dòng đầu: ${rows.slice(0, 5).map(r => `${r.soHopDong} ${r.ngayPsLap}`).join(' · ')}\n\nNhập vào hệ thống?`;
+        if (!rows.length) { alert(text.replace('\n\nNhập vào hệ thống?', '')); return; }
+        if (!confirm(text)) return;
+        let sum = { inserted: 0, updated: 0 };
+        for (let i = 0; i < rows.length; i += CLL3_IMPORT_CHUNK) {
+            let j = await (await apiFetch("api/cll3/import", { method: "POST", body: JSON.stringify({ rows: rows.slice(i, i + CLL3_IMPORT_CHUNK) }) })).json();
+            if (!j.success) { alert(`Dừng ở dòng ${i + 1}: ${j.error || 'lỗi không xác định'}\nĐã nhập trước đó: ${sum.inserted} mới, ${sum.updated} cập nhật.`); break; }
+            sum.inserted += j.inserted; sum.updated += j.updated;
+        }
+        alert(`Xong: ${sum.inserted} ca mới, ${sum.updated} ca cập nhật.`);
+        cll3FetchData(true);
+    }
+    document.getElementById('cll3-tab').addEventListener('shown.bs.tab', () => cll3FetchData(false));
 
     // ================== IQC & ĐẦU VÀO (dataIQCDV) ==================
     // Đối tác / Đội trưởng do Worker ghép từ Nhân viên ↔ dataNS.mobinet. Ca "Chưa map"
