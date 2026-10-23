@@ -362,6 +362,7 @@
         .hi-gauge-foot b { color:var(--ink); font-family:'IBM Plex Mono', monospace; }
         .hi-chart-box { position:relative; height:260px; }
         .hi-rank-scroll { max-height:520px; overflow-y:auto; }
+        .hi-rank-scroll.is-full { max-height:none; overflow:visible; } /* SH & RKN: hiện đủ mọi Đội trưởng, không thanh kéo */
         .hi-spot-list { list-style:none; padding:0; margin:0; }
         .hi-spot-list li { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--line); font-size:13px; }
         .hi-spot-list li:last-child { border-bottom:none; }
@@ -1378,7 +1379,7 @@
                         <div class="col-lg-8">
                             <div class="hi-card">
                                 <div class="hi-card-title mb-2" id="rknRankTitle">Tình trạng xử lý</div>
-                                <div class="hi-rank-scroll"><div id="rknRankBox" style="position:relative;"><canvas id="rknRankChart"></canvas></div></div>
+                                <div class="hi-rank-scroll is-full"><div id="rknRankBox" style="position:relative;"><canvas id="rknRankChart"></canvas></div></div>
                                 <div class="small mt-2" style="color:var(--slate-soft);">Sắp xếp theo số ca còn mở · Bấm 1 cột để lọc xuống cấp dưới</div>
                             </div>
                         </div>
@@ -2865,7 +2866,7 @@
         });
     })();
 
-    const APP_BUILD = "2026-10-21.1";
+    const APP_BUILD = "2026-10-23.1";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
