@@ -508,7 +508,7 @@
         body.ro-mode [onclick^="submit"], body.ro-mode [onclick^="applyBatch"], body.ro-mode label.filter-reset-btn:has(input[type="file"]),
         body.ro-mode #iqcProcessLbl, body.ro-mode [onclick="openChangePasswordModal()"], body.ro-mode #btnTopPet,
         body.ro-mode #linhThuMe, body.ro-mode #ltCare, body.ro-mode #ltCardVisit, body.ro-mode #ltCardGifts, body.ro-mode #linhThuPickBanner,
-        body.ro-mode .rkn-note-save, body.ro-mode .cb-note-save, body.ro-mode .iqc-note-save, body.ro-mode .iqc-dvkh-save,
+        body.ro-mode .rkn-note-save, body.ro-mode .cb-note-save, body.ro-mode .iqc-note-save,
         body.ro-mode .chat-input-bar, body.ro-mode #superAdminImportBar, body.ro-mode #hiAdminBar, body.ro-mode #shdAdminBox { display:none !important; }
         body.ro-mode tbody select:disabled, body.ro-mode tbody input:disabled, body.ro-mode tbody textarea:disabled { cursor:not-allowed; }
         .ro-chat-note { display:none; }
@@ -782,7 +782,7 @@
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chatContent" type="button" role="tab">
-                <i class="bi bi-chat-dots-fill me-1"></i> Trò chuyện <span id="badgeChatUnread" class="count-chip d-none">0</span>
+                <i class="bi bi-journal-text me-1"></i> Log <span id="badgeChatUnread" class="count-chip d-none">0</span>
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -793,11 +793,6 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="phantich-tab" data-bs-toggle="tab" data-bs-target="#phanTichContent" type="button" role="tab">
                 <i class="bi bi-cpu me-1"></i> Phân tích SHD
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="huongdan-tab" data-bs-toggle="tab" data-bs-target="#huongDanContent" type="button" role="tab">
-                <i class="bi bi-question-circle me-1"></i> Hướng dẫn
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -1173,7 +1168,7 @@
         <!-- TAB 4: TRÒ CHUYỆN NỘI BỘ -->
         <div class="tab-pane fade" id="chatContent" role="tabpanel">
             <div class="chat-panel">
-                <div class="chat-panel-head"><i class="bi bi-chat-dots-fill me-2" style="color:var(--brand);"></i>Trò chuyện nội bộ</div>
+                <div class="chat-panel-head"><i class="bi bi-journal-text me-2" style="color:var(--brand);"></i>Log — tin nhắn nội bộ &amp; nhật ký thao tác</div>
                 <div class="chat-messages" id="chatMessagesBody">
                     <div class="text-center small py-4" style="color:var(--slate);">Đang tải tin nhắn...</div>
                 </div>
@@ -1644,9 +1639,11 @@
             <div class="filter-strip row g-2 mb-3 align-items-end">
                 <div class="col-md-2 f-group"><label>Đối tác</label><select id="nsFilterDoiTac" class="form-select form-select-sm" onchange="nsOnFilterChange()"></select></div>
                 <div class="col-md-3 f-group"><label>Đội trưởng</label><select id="nsFilterDoiTruong" class="form-select form-select-sm" onchange="nsApplyFilters()"></select></div>
-                <div class="col-md-2 f-group"><label>Bậc</label><select id="nsFilterBac" class="form-select form-select-sm" onchange="nsApplyFilters()"></select></div>
+                <div class="col-md-1 f-group"><label>Bậc</label><select id="nsFilterBac" class="form-select form-select-sm" onchange="nsApplyFilters()"></select></div>
                 <div class="col-md-2 f-group"><label>Thâm niên</label><select id="nsFilterTn" class="form-select form-select-sm" onchange="nsApplyFilters()"></select></div>
-                <div class="col-md-3 f-group"><label>Tìm tên / mã NV / Mobinet / mail</label>
+                <div class="col-md-2 f-group"><label>Trạng thái</label><select id="nsFilterStatus" class="form-select form-select-sm" onchange="nsApplyFilters()">
+                    <option value="on" selected>Còn làm (ON)</option><option value="off">Đã nghỉ (OFF)</option><option value="">Tất cả</option></select></div>
+                <div class="col-md-2 f-group"><label>Tìm tên / mã NV / Mobinet / mail</label>
                     <input type="text" id="nsSearch" class="form-control form-control-sm" placeholder="Nhập để tìm..." oninput="clearTimeout(window._nsT); window._nsT = setTimeout(nsApplyFilters, 250);"></div>
                 <div class="col-12 f-group d-flex justify-content-end gap-2">
                     <span class="small align-self-center me-auto" id="nsLastLoaded" style="color:var(--slate-soft);"></span>
@@ -1771,256 +1768,6 @@
                         <button class="btn btn-sm text-white text-nowrap" style="background:var(--brand);" id="shdLinkSaveBtn" onclick="saveShdLink()">Lưu link</button>
                     </div>
                     <div class="small mt-1" style="color:var(--slate-soft);">Lưu xong mọi người dùng thấy link mới ngay, không cần sửa index.html.</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 7: HƯỚNG DẪN SỬ DỤNG -->
-        <div class="tab-pane fade" id="huongDanContent" role="tabpanel">
-            <div class="table-panel p-4 mb-3">
-                <h5 class="fw-bold mb-1"><i class="bi bi-book me-2" style="color:var(--brand);"></i>Hướng dẫn sử dụng — Hệ thống Chất Lượng Dịch Vụ</h5>
-                <p class="small mb-0" style="color:var(--slate);">Bấm vào từng mục để xem chi tiết. Mục cuối tóm tắt từng loại tài khoản được thấy và làm gì.</p>
-            </div>
-
-            <div class="accordion" id="guideAccordion">
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#g0">1. Tổng quan các tab</button></h2>
-                    <div id="g0" class="accordion-collapse collapse show" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-bordered align-middle mb-0">
-                                    <thead><tr><th>Tab</th><th>Dùng để</th><th>Ai thấy</th></tr></thead>
-                                    <tbody>
-                                        <tr><td><b>Bảo Trì</b></td><td>Kiểm tra checklist ca bảo trì (TPKT Check), xử lý lại ca lỗi (XL Lại) và xem báo cáo tiến độ</td><td>Mọi tài khoản trừ cus</td></tr>
-                                        <tr><td><b>Cảnh Báo</b></td><td>Số HĐ vừa có ca Bảo Trì vừa bị Suy hao / Rớt kết nối — ghi chú hướng xử lý</td><td>Mọi tài khoản trừ cus</td></tr>
-                                        <tr><td><b>CLL3</b></td><td>Ghi chép ca chất lượng lặp lần 3: thông tin xử lý, đánh giá Khách quan / Chủ quan, hành động TPPKT / ĐT kèm ảnh</td><td>Mọi tài khoản trừ HR (Chỉ xem: không xem ảnh)</td></tr>
-                                        <tr><td><b>HI FPT</b></td><td>Tỉ lệ cài đặt và tỉ lệ tương tác ứng dụng HI FPT</td><td>Mọi tài khoản trừ cus</td></tr>
-                                        <tr><td><b>SH &amp; RKN</b></td><td>Theo dõi và xử lý ca Suy hao / Rớt kết nối liên tục</td><td>Tất cả</td></tr>
-                                        <tr><td><b>IQC &amp; Đầu Vào</b></td><td>Đội trưởng kiểm tra ca IQC / Đầu Vào (OK / NOT + ghi chú), link tới trang ảnh IQC</td><td>Mọi tài khoản trừ HR (cus xem Đối tác mình + ghi chú DVKH)</td></tr>
-                                        <tr><td><b>Nhân Sự</b></td><td>Danh sách nhân sự, thâm niên tự tính, cơ cấu theo thâm niên / bậc</td><td>Tất cả (cus chỉ xem)</td></tr>
-                                        <tr><td><b>Lịch Trực ĐT</b></td><td>Khai báo lịch ON / OFF của Đội trưởng, xem nhanh lịch hôm nay và ngày mai</td><td>Tất cả (cus chỉ xem)</td></tr>
-                                        <tr><td><b>Trò chuyện</b></td><td>Chat nội bộ + nhật ký tự động (XL Lại, SH &amp; RKN)</td><td>Tất cả</td></tr>
-                                        <tr><td><b>Linh Thú</b></td><td>Nuôi thú, chọn lô đất trong khu dân cư — cho vui, không tính hiệu suất</td><td>Tất cả</td></tr>
-                                        <tr><td><b>Phân tích SHD</b></td><td>Mở công cụ n8n chẩn đoán số hợp đồng</td><td>Admin, SuperAdmin, Đối tác quản lý, Đội trưởng DNI02</td></tr>
-                                        <tr><td><b>Tài khoản cus</b></td><td>Tạo tài khoản cus cho nhân sự của đối tác</td><td>Chỉ Đối tác quản lý</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gsec">2. Đăng nhập &amp; bảo mật</button></h2>
-                    <div id="gsec" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li>Mật khẩu được mã hoá một chiều — quản trị viên cũng không xem được. Quên mật khẩu: liên hệ SuperAdmin để đặt lại.</li>
-                            <li>Nhập sai mật khẩu <b>5 lần trong 15 phút</b> → tài khoản tạm khoá <b>15 phút</b>.</li>
-                            <li><b>Đổi mật khẩu</b> (nút trên đầu trang): mật khẩu mới tối thiểu 6 ký tự; tài khoản sẽ tự đăng xuất trên mọi máy khác.</li>
-                            <li>Phiên đăng nhập tối đa 12 giờ; tự đăng xuất sau 20 phút không thao tác. Đóng trình duyệt trên Safari/iPhone có thể phải đăng nhập lại.</li>
-                        </ul></div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g1">3. Tab Bảo Trì — bộ lọc &amp; xử lý ca</button></h2>
-                    <div id="g1" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li><b>Bộ lọc</b>: TG Hoàn Tất (từ–đến), Đối tác → Đội trưởng → Nhân viên (chọn cấp trên sẽ thu hẹp cấp dưới), TPKT Check, tìm Số HĐ. Ô bị khoá xám là phạm vi cố định theo tài khoản. Lựa chọn <b>"Đội trưởng xử lý (tất cả lỗi)"</b> gộp cả 4 loại lỗi.</li>
-                            <li><b>Ca chưa kiểm tra</b> → chọn 1 trong 5 giá trị TPKT Check. Chọn <b>"Bảo trì ok"</b> → bấm Gửi → ca rời khỏi danh sách.</li>
-                            <li><b>Ca lỗi</b> (Suy hao / Không tín hiệu / Rớt kết nối / Vùng phủ không đảm bảo) → chọn XL Lại: <i>Chuyển KTV XL lại</i> (vẫn hiện để theo dõi), <i>Đã xử lý lại</i> hoặc <i>Checklist Onsite</i> (ca rời khỏi danh sách) → bấm Gửi.</li>
-                            <li>Dòng nền đỏ nhạt <b>"Quá X ngày chưa xử lý"</b>: ca lỗi đã quá 3 ngày kể từ TG Hoàn Tất mà chưa xong.</li>
-                            <li><b>Chọn hàng loạt</b>: tick tối đa 20 dòng → thanh công cụ hiện ra để áp dụng TPKT Check / XL Lại cùng lúc.</li>
-                            <li><b>Xuất Excel</b>: xuất toàn bộ danh sách đang lọc. <b>Nhập Excel</b>: cập nhật TPKT Check / XL Lại cho ca đã có, khớp theo <b>Số HĐ + TG tạo</b> (tối đa 300 dòng/lần; SuperAdmin 1000). Tải file mẫu để có đúng định dạng.</li>
-                            <li><b>SuperAdmin — Nhập dữ liệu MỚI</b> (thanh vàng trên cùng): nguồn duy nhất đưa ca bảo trì mới vào hệ thống; ca đã có không bị ghi đè. Cả lô bị từ chối nếu cột thời gian không đúng dạng ngày <code>dd/mm/yyyy hh:mm:ss</code>.</li>
-                        </ul></div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g2">4. Tab Bảo Trì — báo cáo</button></h2>
-                    <div id="g2" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li>Báo cáo nằm phía trên danh sách và dùng chung bộ lọc. 5 chỉ số: Tổng ca, Chưa kiểm tra, Chưa xử lý, Tỉ lệ chưa xử lý, Bảo trì OK / Đã xử lý.</li>
-                            <li><b>Tỉ lệ hoàn thành</b> = (Bảo trì OK + ca lỗi đã xử lý) / tổng ca. <b>Tỉ lệ xử lý ca lỗi</b> = ca lỗi đã xử lý / tổng ca lỗi. Màu: xanh ≥ 80%, cam 50–80%, đỏ &lt; 50%.</li>
-                            <li>Biểu đồ theo Đối tác / Đội trưởng — cột "Ca lỗi" không tính ca đã xử lý bằng Checklist Onsite.</li>
-                            <li><b>Cảnh báo Đội trưởng tồn đọng</b>: "Cần xử lý gấp" khi tồn ≥ 10 ca hoặc có ca quá 3 ngày. <b>Cảnh báo nhân sự</b>: "Rủi ro cao" khi ≥ 5 ca lỗi hoặc tỉ lệ lỗi ≥ 30%.</li>
-                            <li>Nút <b>Thu gọn báo cáo</b> để chỉ làm việc với danh sách — trình duyệt nhớ lựa chọn.</li>
-                        </ul></div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g3">5. Cảnh Báo — Số HĐ trùng Bảo Trì &amp; SH/RKN</button></h2>
-                    <div id="g3" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li>Liệt kê các Số HĐ <b>vừa có ca Bảo Trì vừa bị Suy hao / Rớt kết nối</b> (có mặt ở cả 2 nguồn dữ liệu), mỗi Số HĐ 1 dòng: tóm tắt ca Bảo Trì gần nhất và ca SH &amp; RKN gần nhất. Số đỏ trên tab = số HĐ chưa ghi chú.</li>
-                            <li>Phạm vi giống tab Bảo Trì (Đội trưởng — đội mình, Đối tác — đối tác mình, Admin — tất cả). Tài khoản cus không thấy tab này.</li>
-                            <li>Nhập <b>ghi chú hướng xử lý</b> (tối đa 500 ký tự) ngay trên dòng → bấm ✓ hoặc Enter (Shift+Enter để xuống dòng). Dòng <b>không bị ẩn</b> sau khi ghi chú, chỉ đổi nhãn sang "Đã ghi chú"; mỗi Số HĐ 1 ghi chú, người sửa sau ghi đè và hiện tên người sửa cuối.</li>
-                            <li>Lọc theo Đối tác, Đội trưởng, Hướng XL của SH &amp; RKN, tình trạng ghi chú; bảng Tổng hợp cho biết đơn vị nào còn nhiều HĐ chưa ghi chú. Có Xuất Excel.</li>
-                        </ul></div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ghifpt">6. HI FPT — tỉ lệ cài đặt &amp; tương tác</button></h2>
-                    <div id="ghifpt" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li><b>Tỉ lệ cài đặt</b> = ca có Tình trạng kích hoạt khác "Chua kich hoat" / tổng ca. <b>Tỉ lệ tương tác</b> = ca "Có Gửi" có Tương tác = "Có" / tổng ca "Có Gửi".</li>
-                            <li>Bộ lọc: Ngày hoàn tất, Đối tác, Đội trưởng, Nhân viên, Tình trạng kích hoạt, Tương tác, tìm Số HĐ.</li>
-                            <li>Báo cáo theo Đối tác / Đội trưởng / Nhân viên: 2 đồng hồ, cơ cấu tình trạng, diễn biến theo ngày, xếp hạng, điểm nhấn. Bấm 1 dòng/cột để lọc xuống cấp dưới.</li>
-                            <li><b>Tự động</b>: ca có Tương tác = "Có" mà đang "Chua kich hoat" (hoặc trống) sẽ được chuyển thành "Kich hoat khi Trien Khai".</li>
-                            <li><b>SuperAdmin</b>: nhập Excel (tiêu đề như sheet "Import", có màn xem trước), sửa / xoá / thêm dòng. Nhập trùng Số HĐ + Ngày hoàn tất thì dòng cũ được cập nhật.</li>
-                        </ul></div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#grkn">7. SH &amp; RKN — Suy hao &amp; Rớt kết nối liên tục</button></h2>
-                    <div id="grkn" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li><b>Phạm vi</b>: Đội trưởng thấy ca của đội mình; Đối tác quản lý và tài khoản cus thấy ca của Đối tác mình; Admin/SuperAdmin thấy tất cả.</li>
-                            <li><b>Hướng XL</b>: <b>Chưa XL</b> → <b>Đã Tạo CL</b> → <b>Đã XL</b>. Ca "Đã XL" tự ẩn khỏi Danh sách cần xử lý (tick "Hiện cả ca Đã XL" để xem lại).</li>
-                            <li>Trên danh sách, mọi tài khoản chọn được Hướng XL. Tài khoản cus nhập <b>DVKH care note</b>; Đội trưởng / Đối tác nhập <b>Đội trưởng note</b> — tối đa 100 ký tự, bấm ✓ hoặc Enter để lưu.</li>
-                            <li>Mọi thay đổi (Hướng XL, ghi chú, nhập/sửa/xoá ca) được ghi vào <b>Trò chuyện</b> dưới tên "Nhật ký SH &amp; RKN".</li>
-                            <li>Báo cáo theo Đối tác / Đội trưởng / Hướng XL: tỉ lệ đã XL, cơ cấu Hướng XL, mức Up/Down của ca còn mở, diễn biến theo ngày data, điểm nhấn.</li>
-                            <li><b>Admin / SuperAdmin</b>: nhập Excel (tiêu đề như sheet "From-import"), sửa đủ cột, thêm / xoá ca. Mỗi Số HĐ chỉ có 1 ca mở. Khi nhập, Số HĐ đang tồn ca <b>Chưa XL</b> / <b>Đã Tạo CL</b> không tạo ca mới mà <b>tự cập nhật ca đó sang Ngày data mới nhất</b> (kèm Số lần Up/Down, DSP, Tập điểm, Suy Hao), giữ nguyên Hướng XL và ghi chú; Số HĐ có ca <b>Đã XL</b> mà xuất hiện lại ở ngày mới hơn: ca đó được cập nhật ngày và chuyển sang <b>XL Lại</b> (tính là ca còn mở, giữ ghi chú lần trước). Một Số HĐ lặp nhiều ngày trong file thì lấy dòng ngày mới nhất.</li>
-                        </ul></div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gcll3">6a. CLL3 — ca chất lượng lặp lần 3</button></h2>
-                    <div id="gcll3" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li><b>Thêm ca</b>: nhập Số HĐ, Ngày PS lặp, Nhân viên (Mobinet) — Đối tác và Đội trưởng tự điền theo tab Nhân Sự. Nhân viên chưa có trong Nhân Sự thì nhờ Admin bổ sung (Admin nhập tay được). Mỗi cặp Số HĐ + Ngày PS lặp chỉ có 1 ca.</li>
-                            <li>Điền Tỷ lệ CLL2 lũy kế, Tình trạng (nguyên nhân đầu vào), Số lần lặp, Thông tin xử lý KTV / ĐT / TPPKT (≤ 2000 ký tự), Đánh giá (Khách quan / Chủ quan), Hành động TPPKT, ĐT (≤ 1000 ký tự) → <b>Lưu</b>.</li>
-                            <li><b>Ảnh minh chứng</b>: sau khi lưu, bấm <b>Chọn ảnh</b>, kéo thả hoặc dán ảnh (Ctrl+V) vào form — tối đa 6 ảnh/ca, ảnh tự nén trước khi tải lên. Bấm ảnh nhỏ trong bảng để xem to (phím ← → chuyển ảnh, Esc đóng).</li>
-                            <li><b>Phạm vi</b>: Đội trưởng — đội mình; Đối tác quản lý và tài khoản cus — đối tác mình; Admin — tất cả. Ai trong phạm vi cũng thêm / sửa / đính ảnh được. Xoá ca: Admin hoặc người tạo ca; xoá ảnh: Admin hoặc người tải ảnh. HR không thấy tab; tài khoản Chỉ xem không xem được ảnh.</li>
-                            <li>Bộ lọc mặc định tháng hiện tại theo Ngày PS lặp. Ô Đánh giá chưa điền có viền cam nhắc. Admin có <b>Tải file mẫu</b> / <b>Nhập Excel</b> (tiêu đề cột giống mẫu báo cáo, ≤ 1000 dòng/lần): ca mới được thêm, ca đã có chỉ cập nhật ô có chữ — ô trống giữ nội dung đã nhập trên web.</li>
-                        </ul></div>
-                    </div>
-                </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#giqc">7a. IQC &amp; Đầu Vào</button></h2>
-                    <div id="giqc" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li>Mỗi ca được gán Đối tác / Đội trưởng tự động theo <b>Nhân viên</b> (khớp cột <b>Mobinet</b> trong tab Nhân Sự). Nhân viên chưa có trong Nhân Sự → ca "Chưa map", chỉ Admin thấy cho tới khi bổ sung nhân sự. Chuyển đội ở tab Nhân Sự thì ca IQC đi theo.</li>
-                            <li>Đội trưởng chọn <b>Check IQC</b> và <b>Check Đầu Vào</b> (mặc định "Chưa kiểm tra" → OK / NOT) và nhập ghi chú (≤ 500 ký tự, Enter để lưu). Ca <b>cả 2 OK</b> tự ẩn khỏi danh sách (tick "Hiện cả ca đã đạt" để xem lại).</li>
-                            <li>Làm hàng loạt: <b>Xuất ca chưa kiểm tra</b> (theo bộ lọc, VD chọn đội của mình) → điền OK / NOT / ghi chú trong Excel → <b>Nhập file đã xử lý</b> (tối đa 100 dòng/lần; ô để trống giữ nguyên giá trị cũ).</li>
-                            <li>Mặc định chỉ hiện ca có Ngày hoàn tất PTC trong tháng hiện tại; chọn ngày để xem tháng cũ.</li>
-                            <li><b>Tài khoản cus</b>: xem báo cáo và danh sách IQC của Đối tác mình (không thấy ca "Chưa map"), không đổi được Check IQC / Check Đầu Vào; ghi được cột <b>Ghi chú DVKH</b> (≤ 500 ký tự, Enter để lưu). Admin cũng sửa được cột này; Đội trưởng / Đối tác chỉ xem.</li>
-                            <li><b>Admin / SuperAdmin</b>: nhập dữ liệu mới (Admin 1.000 dòng, SuperAdmin 10.000 dòng mỗi lần), xoá ca. Nhập lại ca đã có giữ nguyên kết quả kiểm tra.</li>
-                            <li>Hai ô link trên đầu tab: <b>uploadiqc.fteldni.com</b> (ảnh lỗi KTV khắc phục lại) và <b>iqc.fpt.net</b> (xem ảnh KTV upload khi TKM).</li>
-                        </ul></div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gns">7b. Nhân Sự</button></h2>
-                    <div id="gns" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li>Phạm vi xem giống tab Bảo Trì (Đội trưởng — đội mình, Đối tác — đối tác mình, Admin — tất cả); tài khoản cus xem theo đối tác của mình và <b>chỉ được xem</b>.</li>
-                            <li><b>Thâm niên</b> tự tính = hôm nay − Ngày vào CT, hiển thị "X năm Y tháng" (nhân sự dưới 6 tháng tô màu cam). Báo cáo: tổng nhân sự, thâm niên trung bình, cơ cấu theo nhóm thâm niên (theo Đối tác / Đội trưởng) và phân bố theo Bậc.</li>
-                            <li>Mọi tài khoản (trừ cus) bấm ✏️ để sửa thông tin nhân sự trong phạm vi của mình; <b>Note</b> tối đa 500 ký tự. Chỉ Admin được chuyển nhân sự sang Đối tác / Đội trưởng khác.</li>
-                            <li><b>Admin / SuperAdmin / HR</b>: nhập Excel (khoá là Mã nhân viên — trùng thì cập nhật; ô DVKH / Note trống trong file sẽ giữ nội dung đã nhập trên web), thêm, xoá, chuyển nhân sự sang Đối tác / Đội trưởng khác.</li>
-                            <li><b>Tài khoản HR</b>: quản lý Nhân sự của toàn bộ đối tác, xem Lịch Trực (không khai báo), không xem dữ liệu vận hành (Bảo Trì, Cảnh Báo, HI FPT, SH &amp; RKN). Mọi thao tác của HR được ghi <b>"Nhật ký Nhân Sự"</b> vào Trò chuyện — chuyển đội thì cả đội cũ và đội mới đều thấy.</li>
-                        </ul></div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#glich">7c. Lịch Trực Đội Trưởng</button></h2>
-                    <div id="glich" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li>Đầu tab là <b>báo cáo nhanh Hôm nay và Ngày mai</b>: ai trực (ON), ai nghỉ (OFF), ai chưa khai báo.</li>
-                            <li>Bảng lịch theo tháng: mỗi dòng 1 Đội trưởng, mỗi cột 1 ngày (cột hôm nay viền xanh). Dùng nút ‹ › hoặc ô Tháng để chuyển tháng.</li>
-                            <li>Khai báo: chọn <b>ON / OFF / Xoá</b> ở ô "Khai báo", rồi bấm vào ô ngày — hoặc giữ chuột kéo qua nhiều ô để khai báo cả tuần một lần.</li>
-                            <li>Đội trưởng khai báo cho chính mình; Đối tác quản lý khai báo cho các đội trong đối tác; Admin khai báo cho tất cả; tài khoản cus chỉ xem.</li>
-                        </ul></div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g5">8. Trò chuyện</button></h2>
-                    <div id="g5" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li>Chat chung cho mọi tài khoản, tin tối đa 500 ký tự, tự tải tin mới vài giây một lần. Số đỏ trên tab là tin chưa đọc.</li>
-                            <li>Tin nền xanh nhạt là <b>nhật ký tự động</b>: <b>"Nhật ký XL Lại"</b> (cột XL Lại của ca bảo trì đổi giá trị) <b>"Nhật ký SH &amp; RKN"</b> (thay đổi trong tab SH &amp; RKN) và <b>"Nhật ký Nhân Sự"</b> (thao tác của tài khoản HR). Nhật ký không tính vào số tin chưa đọc.</li>
-                            <li>Mỗi người chỉ thấy nhật ký trong phạm vi dữ liệu của mình: Đội trưởng — đội mình; Đối tác — đối tác mình; Admin — tất cả; tài khoản cus — chỉ nhật ký SH &amp; RKN của đối tác mình; HR — chỉ Nhật ký Nhân Sự.</li>
-                            <li>Mọi tin nhắn và nhật ký <b>tự động xoá sau 7 ngày</b>.</li>
-                        </ul></div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g6">9. Linh Thú</button></h2>
-                    <div id="g6" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li><b>Nhận thú và lô:</b> mỗi tài khoản (mọi vai trò) có 1 Linh thú, chọn 1 trong 32 loài, đặt tên (≤ 20 ký tự) và trạng thái (≤ 50 ký tự, hiện thành bong bóng trên đầu thú) → bấm Lưu. Khu dân cư 112 lô: bấm <b>Chọn lô</b> rồi bấm 1 lô tô vàng để nhận (có Đổi lô / Trả lô). Giữ và kéo thú của mình để dắt đi chơi; <b>Gọi thú về lô</b> đưa thú về giữa lô.</li>
-                            <li><b>Chăm hằng ngày:</b> 3 việc mỗi ngày — 🍚 Cho ăn, 🎾 Chơi, 🫧 Tắm (mỗi việc làm 1 lần/ngày). Tâm trạng: 😄 Vui (đủ 3 việc hôm nay), 🙂 Ổn (1–2 việc), 😟 Nhớ chủ (hôm nay chưa chăm, hôm qua có chăm), 😿 Đói (từ 2 ngày không chăm).</li>
-                            <li><b>Chuỗi ngày 🔥:</b> chăm ít nhất 1 việc mỗi ngày liên tiếp thì chuỗi tăng; bỏ 1 ngày chuỗi về 0. Đạt mốc <b>3 / 7 / 14 / 30 ngày</b> nhận cúp độc quyền 🥉 🥈 🥇 👑 (không mua được); mốc 7/14/30 có thông báo trong Trò chuyện.</li>
-                            <li><b>Hạt 🌰:</b> mỗi việc chăm +5; làm đủ việc thứ 3 trong ngày +5 thưởng; được bạn tặng quà +3; ghé thăm lô người khác +1 (tối đa 5 lô khác nhau mỗi ngày). Hạt chỉ để mua đồ — không có điểm kinh nghiệm, cấp độ hay bảng xếp hạng.</li>
-                            <li><b>Cửa hàng &amp; trang trí:</b> nút <b>Cửa hàng &amp; Trang trí</b> bán 20 món (20–200 hạt) và 4 cúp độc quyền; mỗi món mua 1 lần, giữ vĩnh viễn. Lô có 6 ô trang trí — chọn mỗi món 1 ô rồi Lưu; cần đang có lô, trả lô thì đồ vẫn giữ trong kho. Mọi người nhìn sân đều thấy đồ của bạn.</li>
-                            <li><b>Ghé thăm &amp; tặng quà:</b> bấm vào thú hoặc lô của người khác để mở thẻ (chủ, tâm trạng, chuỗi, đồ trang trí). 👋 <b>Ghé thăm</b> mỗi người 1 lần/ngày; 🎁 <b>Tặng quà</b> (🌸 🍰 🐟 🎈 🍬 🦴) chỉ 1 quà/ngày cho 1 người, không tự tặng mình, người nhận phải có thú.</li>
-                            <li><b>Nhắc nhở:</b> chấm đỏ trên tab Linh Thú khi còn việc chưa chăm hoặc có quà chưa mở; nút thú nhỏ trên thanh trên cùng hiện tâm trạng, bấm để vào tab; khi bạn bè ghé thăm hoặc tặng quà sẽ hiện trong khung "Linh thú của tôi" (Mở quà để tắt). Tin chat tự báo khi thú nhận đủ 5 quà trong ngày.</li>
-                        </ul></div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g7">10. Phân tích SHD</button></h2>
-                    <div id="g7" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li>Bấm nút để mở công cụ chẩn đoán trên n8n ở tab mới: đăng nhập MyPT bằng OTP, dán danh sách Số HĐ → nhận nguyên nhân và hướng xử lý gợi ý.</li>
-                            <li>Ai dùng được: Admin, SuperAdmin, Đối tác quản lý và <b>Đội trưởng thuộc đối tác DNI02</b>. Tài khoản cus và HR không dùng được tab này.</li>
-                            <li>Khi link hết hạn (khoảng 15 ngày/lần), <b>SuperAdmin</b> dán link mới vào ô "Đổi link" ngay trong tab — mọi người thấy link mới ngay.</li>
-                        </ul></div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g8pet">11. Tài khoản cus (Đối tác quản lý tạo)</button></h2>
-                    <div id="g8pet" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li>Đối tác quản lý tự tạo tài khoản cus cho nhân sự của mình (VD bộ phận chăm sóc khách hàng): <b>Tải file mẫu</b> (cột username, password) → điền → <b>Nhập Excel</b>, tối đa 50 tài khoản/lần. Bắt buộc điền password (từ 6 ký tự, khác username); username 3–50 ký tự gồm chữ, số, dấu . _ - @ — nhắc nhân sự đổi mật khẩu sau lần đăng nhập đầu.</li>
-                            <li>Tài khoản cus thấy: <b>SH &amp; RKN</b> (theo đối tác, được đổi Hướng XL và nhập DVKH care note), <b>IQC &amp; Đầu Vào</b> (theo đối tác, chỉ ghi cột Ghi chú DVKH), <b>Nhân Sự</b> và <b>Lịch Trực ĐT</b> (chỉ xem), <b>Trò chuyện</b>, <b>Linh Thú</b>, <b>Hướng dẫn</b>. Không xem được dữ liệu Bảo Trì, Cảnh Báo, HI FPT, Phân tích SHD — Worker chặn cả khi gọi thẳng API.</li>
-                            <li>Danh sách trong tab chỉ hiện tài khoản do chính Đối tác quản lý đó tạo.</li>
-                        </ul></div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g9">12. Lưu ý khi nhập file Excel</button></h2>
-                    <div id="g9" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small"><ul class="mb-0">
-                            <li>Luôn bấm <b>Tải file mẫu</b> trước để có đúng tiêu đề cột.</li>
-                            <li>Cột ngày giữ đúng dạng <code>dd/mm/yyyy</code> (kèm giờ nếu có). <b>Không mở file CSV bằng Excel cài định dạng Mỹ</b> — Excel sẽ đảo ngày/tháng (01/10 thành 10/01). Nên xuất thẳng <code>.xlsx</code> từ Google Sheet.</li>
-                            <li>HI FPT và SH &amp; RKN có màn <b>xem trước</b> — kiểm tra kỹ cột ngày ở 5 dòng đầu rồi mới bấm "Nhập vào hệ thống".</li>
-                        </ul></div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#g10">13. Phân quyền theo loại tài khoản</button></h2>
-                    <div id="g10" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                        <div class="accordion-body small">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-bordered align-middle mb-0">
-                                    <thead><tr><th>Tài khoản</th><th>Bảo Trì · Cảnh Báo · HI FPT</th><th>SH &amp; RKN</th><th>IQC &amp; Đầu Vào</th><th>Nhân Sự · Lịch Trực</th><th>Phân tích SHD</th><th>Quyền riêng</th></tr></thead>
-                                    <tbody>
-                                        <tr><td><b>Đội trưởng</b></td><td>Đội mình</td><td>Đội mình · Hướng XL + Đội trưởng note</td><td>Đội mình · Check + ghi chú</td><td>Đội mình · sửa / khai báo lịch của mình</td><td>✗ (✓ nếu thuộc DNI02)</td><td>Nhập Excel cập nhật ca: 300 dòng</td></tr>
-                                        <tr><td><b>Đối tác quản lý</b></td><td>Cả đối tác</td><td>Cả đối tác · Hướng XL + Đội trưởng note</td><td>Cả đối tác · Check + ghi chú</td><td>Cả đối tác · sửa / khai báo lịch</td><td>✓</td><td>Tạo tài khoản cus</td></tr>
-                                        <tr><td><b>Admin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Quản lý dữ liệu SH &amp; RKN</td></tr>
-                                        <tr><td><b>SuperAdmin</b></td><td>Tất cả</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>Tất cả · nhập / sửa / xoá</td><td>✓</td><td>Nhập ca bảo trì mới, quản lý HI FPT, đổi link Phân tích SHD, nhập Excel 1000 dòng</td></tr>
-                                        <tr><td><b>cus</b></td><td>✗</td><td>Đối tác mình · Hướng XL + DVKH care note</td><td>Đối tác mình · Ghi chú DVKH</td><td>Đối tác mình · chỉ xem</td><td>✗</td><td>—</td></tr>
-                                        <tr><td><b>Chỉ xem</b></td><td>Tất cả · chỉ xem</td><td>Tất cả · chỉ xem</td><td>Tất cả · chỉ xem</td><td>Tất cả · chỉ xem</td><td>Thấy tab, không mở được công cụ</td><td>Dành cho khách tham quan / ban giám khảo: không thao tác, không xuất Excel; Số HĐ hiện mã giả, mail và dãy số trong ghi chú / chat bị che</td></tr>
-                                        <tr><td><b>HR</b></td><td>✗</td><td>✗</td><td>✗</td><td>Nhân Sự: toàn bộ · nhập / sửa / xoá · Lịch: chỉ xem</td><td>✗</td><td>Mọi thao tác Nhân Sự ghi "Nhật ký Nhân Sự" vào Trò chuyện</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -3008,7 +2755,7 @@
         });
     })();
 
-    const APP_BUILD = "2026-10-23.2";
+    const APP_BUILD = "2026-10-31.1";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -6066,7 +5813,9 @@
                        'maNhanVien', 'ten', 'ngayVaoCT', 'mbp', 'mail', 'dvkh', 'note'];
     const NS_LABELS = { doiTacQuanLy: 'Đối tác quản lý', doiTruong: 'Đội trưởng', blockQuanLy: 'Block quản lý', mobinet: 'Mobinet',
         bac: 'Bậc', saleClub: 'SaleClub', maNhanVien: 'Mã nhân viên', ten: 'Tên', ngayVaoCT: 'Ngày Vào CT', mbp: 'MBP', mail: 'Mail',
-        dvkh: 'DVKH', note: 'Note' };
+        dvkh: 'Trạng thái', note: 'Note' };
+    // Cột dvkh (D1) dùng làm Trạng thái: ON = còn làm, OFF = đã nghỉ việc; ô trống coi là ON
+    const nsIsOff = r => String(r.dvkh || '').trim().toUpperCase() === 'OFF';
     const NS_NOTE_MAX = 500, NS_PAGE_SIZE = 50;
     const NS_TN_BUCKETS = [['lt6', '< 6 tháng', 0, 182], ['6to12', '6–12 tháng', 183, 365], ['1to3', '1–3 năm', 366, 1095],
                            ['3to5', '3–5 năm', 1096, 1826], ['gt5', '> 5 năm', 1827, Infinity]];
@@ -6139,6 +5888,7 @@
     }
     function nsResetFilters() {
         ['nsFilterBac', 'nsFilterTn', 'nsSearch'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('nsFilterStatus').value = 'on';
         if (!isDoiTacLocked()) document.getElementById('nsFilterDoiTac').value = '';
         if (!isDoiTruongLocked()) document.getElementById('nsFilterDoiTruong').value = '';
         nsOnFilterChange();
@@ -6146,8 +5896,9 @@
     function nsApplyFilters() {
         let dt = document.getElementById('nsFilterDoiTac').value, dtr = document.getElementById('nsFilterDoiTruong').value;
         let bac = document.getElementById('nsFilterBac').value, tn = document.getElementById('nsFilterTn').value;
-        let q = hiNorm(document.getElementById('nsSearch').value);
-        nsFiltered = nsData.filter(r => (!dt || r.doiTacQuanLy === dt) && (!dtr || r.doiTruong === dtr) && (!bac || r.bac === bac)
+        let q = hiNorm(document.getElementById('nsSearch').value), st = document.getElementById('nsFilterStatus').value;
+        // Mặc định chỉ người còn làm (ON) — KPI, cơ cấu thâm niên, phân bố Bậc đều tính trên danh sách đã lọc
+        nsFiltered = nsData.filter(r => (!st || (st === 'off') === nsIsOff(r)) && (!dt || r.doiTacQuanLy === dt) && (!dtr || r.doiTruong === dtr) && (!bac || r.bac === bac)
             && (!tn || r._bucket === tn) && (!q || [r.ten, r.maNhanVien, r.mobinet, r.mail, r.saleClub, r.mbp].some(v => hiNorm(v).includes(q))));
         nsPage = 1;
         nsRenderAll();
@@ -6199,14 +5950,14 @@
         let slice = rows.slice((nsPage - 1) * NS_PAGE_SIZE, nsPage * NS_PAGE_SIZE);
         let canEdit = nsCanEdit(), isAdmin = nsIsAdmin();
         document.getElementById('nsDetailCount').textContent = `— ${rows.length.toLocaleString('vi-VN')} người`;
-        document.getElementById('nsDetailTable').innerHTML = `<thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Block</th><th>Mobinet</th><th class="text-center">Bậc</th><th>SaleClub</th><th>Mã NV</th><th>Tên</th><th>Ngày vào CT</th><th>Thâm niên</th><th>MBP</th><th>Mail</th><th>DVKH</th><th>Note</th>${canEdit ? '<th class="text-end">Sửa</th>' : ''}</tr></thead><tbody>` +
+        document.getElementById('nsDetailTable').innerHTML = `<thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Block</th><th>Mobinet</th><th class="text-center">Bậc</th><th>SaleClub</th><th>Mã NV</th><th>Tên</th><th>Ngày vào CT</th><th>Thâm niên</th><th>MBP</th><th>Mail</th><th>Trạng thái</th><th>Note</th>${canEdit ? '<th class="text-end">Sửa</th>' : ''}</tr></thead><tbody>` +
             (slice.length ? slice.map(r => `<tr>
                 <td>${escapeHtml(r.doiTacQuanLy || '')}</td><td class="small">${escapeHtml(r.doiTruong || '')}</td><td class="small">${escapeHtml(r.blockQuanLy || '')}</td>
                 <td class="small mono">${escapeHtml(r.mobinet || '')}</td><td class="text-center fw-bold">${escapeHtml(r.bac || '')}</td><td class="small mono">${escapeHtml(r.saleClub || '')}</td>
                 <td class="mono small">${escapeHtml(r.maNhanVien || '')}</td><td class="fw-semibold text-nowrap">${escapeHtml(r.ten || '')}</td>
                 <td class="mono small">${escapeHtml(r.ngayVaoCT || '')}</td>
                 <td class="small text-nowrap" style="${r._bucket === 'lt6' ? 'color:var(--amber);font-weight:700;' : ''}">${nsTenureText(r.ngayVaoCT)}</td>
-                <td class="small mono">${escapeHtml(r.mbp || '')}</td><td class="small">${escapeHtml(r.mail || '')}</td><td class="small">${escapeHtml(r.dvkh || '')}</td>
+                <td class="small mono">${escapeHtml(r.mbp || '')}</td><td class="small">${escapeHtml(r.mail || '')}</td><td class="small">${nsIsOff(r) ? '<span class="hi-tag no">OFF · đã nghỉ</span>' : '<span class="hi-tag ok">ON</span>'}</td>
                 <td class="small" style="max-width:260px; white-space:normal;">${escapeHtml(r.note || '')}</td>
                 ${canEdit ? `<td class="text-end text-nowrap"><button class="btn btn-sm btn-link p-0 me-2" title="Sửa" onclick="nsOpenEditModal(${r.id})"><i class="bi bi-pencil-square"></i></button>${isAdmin ? `<button class="btn btn-sm btn-link p-0 text-danger" title="Xoá" onclick="nsDeleteRow(${r.id})"><i class="bi bi-trash"></i></button>` : ''}</td>` : ''}
             </tr>`).join('') : `<tr><td colspan="15" class="text-center py-4 small" style="color:var(--slate);">Chưa có dữ liệu.</td></tr>`) + '</tbody>';
@@ -6241,6 +5992,8 @@
             let v = row ? (row[f] ?? '') : (f === 'doiTacQuanLy' && currentUser.doiTac !== 'ALL' ? currentUser.doiTac || '' : '');
             let locked = (f === 'maNhanVien' && row) || (!isAdmin && (f === 'doiTacQuanLy' || f === 'doiTruong'));
             let req = ['doiTacQuanLy', 'maNhanVien'].includes(f) ? ' *' : '';
+            if (f === 'dvkh') return `<div class="col-md-6"><label class="small fw-bold mb-1" style="color:var(--slate);">Trạng thái</label>
+                <select class="form-select form-select-sm" data-nsfield="dvkh"><option value="ON" ${String(v).toUpperCase() !== 'OFF' ? 'selected' : ''}>ON — còn làm</option><option value="OFF" ${String(v).toUpperCase() === 'OFF' ? 'selected' : ''}>OFF — đã nghỉ việc</option></select></div>`;
             if (f === 'note') return `<div class="col-12"><div class="d-flex justify-content-between"><label class="small fw-bold mb-1" style="color:var(--slate);">Note</label><span class="lt-counter" id="nsNoteCount"></span></div>
                 <textarea class="form-control form-control-sm" rows="3" data-nsfield="note" maxlength="${NS_NOTE_MAX}" oninput="document.getElementById('nsNoteCount').textContent = this.value.length + '/${NS_NOTE_MAX}'">${escapeHtml(v)}</textarea></div>`;
             return `<div class="col-md-6"><label class="small fw-bold mb-1" style="color:var(--slate);">${NS_LABELS[f]}${req}</label>
@@ -6286,7 +6039,7 @@
     function nsDownloadTemplate() {
         let o = {}; NS_FIELDS.forEach(f => o[NS_LABELS[f]] = '');
         Object.assign(o, { 'Đối tác quản lý': 'BHA1', 'Đội trưởng': 'Nguyễn Ngọc Phán', 'Block quản lý': 'Phuong Bien Hoa-001', 'Mobinet': 'DNI01.DAMHH', 'Bậc': '1',
-            'SaleClub': 'DNI.PNC.DAMHH', 'Mã nhân viên': '00078539', 'Tên': 'Huỳnh Hoàng Đảm', 'Ngày Vào CT': '01/10/2025', 'MBP': 'phuongnam.DAMHH', 'Mail': 'phuongnam.DAMHH@fpt.net' });
+            'SaleClub': 'DNI.PNC.DAMHH', 'Mã nhân viên': '00078539', 'Tên': 'Huỳnh Hoàng Đảm', 'Ngày Vào CT': '01/10/2025', 'MBP': 'phuongnam.DAMHH', 'Mail': 'phuongnam.DAMHH@fpt.net', 'Trạng thái': 'ON' });
         let ws = XLSX.utils.json_to_sheet([o]);
         Object.keys(ws).forEach(k => { if (k[0] !== '!' ) ws[k].t = 's'; }); // để dạng chữ, giữ số 0 đầu mã NV
         let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'NhanSu');
@@ -6294,7 +6047,7 @@
     }
     const NS_HEADER_MAP = { doitacquanly: 'doiTacQuanLy', doitac: 'doiTacQuanLy', doitruong: 'doiTruong', blockquanly: 'blockQuanLy', mobinet: 'mobinet',
         bac: 'bac', saleclub: 'saleClub', manhanvien: 'maNhanVien', manv: 'maNhanVien', ten: 'ten', hoten: 'ten', ngayvaoct: 'ngayVaoCT',
-        ngayvaocongty: 'ngayVaoCT', mbp: 'mbp', mail: 'mail', email: 'mail', dvkh: 'dvkh', note: 'note', ghichu: 'note' };
+        ngayvaocongty: 'ngayVaoCT', mbp: 'mbp', mail: 'mail', email: 'mail', dvkh: 'dvkh', trangthai: 'dvkh', note: 'note', ghichu: 'note' };
     async function nsHandleImportFile(event) {
         let file = event.target.files[0]; event.target.value = '';
         if (!file || typeof XLSX === 'undefined') return;
@@ -7314,15 +7067,14 @@
         let slice = rows.slice((iqcPage - 1) * IQC_PAGE_SIZE, iqcPage * IQC_PAGE_SIZE);
         document.getElementById('iqcDetailCount').textContent = `— ${rows.length.toLocaleString('vi-VN')} ca${showDone ? '' : ' cần xử lý'}`;
         let isAdmin = rknIsAdmin();
-        let isCus = !!currentUser && currentUser.role === 'petonly';   // cus: chỉ xem Check, ghi Ghi chú DVKH
-        let canDvkh = isCus || isAdmin;
+        let isCus = !!currentUser && currentUser.role === 'petonly';   // cus: chỉ xem (từ 31/10/2026 bỏ cột Ghi chú DVKH)
         let pl = document.getElementById('iqcProcessLbl'); if (pl) pl.classList.toggle('d-none', isCus);
         const sel = (r, f) => {
             let cls = r[f] === 'OK' ? 'v-ok' : r[f] === 'NOT' ? 'v-not' : 'v-pending';
             return `<select class="form-select form-select-sm iqc-sel ${cls}" data-id="${r.id}" data-field="${f}" ${isCus ? 'disabled' : ''} aria-label="${f === 'checkIQC' ? 'Check IQC' : 'Check Đầu Vào'} ${escapeHtml(r.soHopDong)}">
                 ${IQC_VALUES.map(v => `<option ${v === r[f] ? 'selected' : ''}>${v}</option>`).join('')}</select>`;
         };
-        document.getElementById('iqcDetailTable').innerHTML = `<thead><tr><th>Đối tác / Đội trưởng</th><th>Số HĐ</th><th>Ngày hoàn tất PTC</th><th>Nhân viên</th><th style="min-width:220px;">Ghi chú</th><th>Check IQC</th><th>Check Đầu Vào</th><th style="min-width:230px;">Ghi chú đội trưởng</th><th style="min-width:200px;">Ghi chú DVKH</th>${isAdmin ? '<th class="text-end">Xoá</th>' : ''}</tr></thead><tbody>` +
+        document.getElementById('iqcDetailTable').innerHTML = `<thead><tr><th>Đối tác / Đội trưởng</th><th>Số HĐ</th><th>Ngày hoàn tất PTC</th><th>Nhân viên</th><th style="min-width:220px;">Ghi chú</th><th>Check IQC</th><th>Check Đầu Vào</th><th style="min-width:230px;">Ghi chú đội trưởng</th>${isAdmin ? '<th class="text-end">Xoá</th>' : ''}</tr></thead><tbody>` +
             (slice.length ? slice.map(r => `<tr>
                 <td>${iqcUnmapped(r) ? '<span class="hi-tag no">Chưa map</span>' : `<span class="fw-semibold">${escapeHtml(r.doiTacQuanLy)}</span><br><span class="small">${escapeHtml(r.doiTruong || '')}</span>`}</td>
                 <td class="fw-bold mono">${escapeHtml(r.soHopDong)}</td><td class="mono small">${escapeHtml(r.ngayHoanTat || '')}</td>
@@ -7332,11 +7084,8 @@
                 <td>${isCus ? `<span class="small" style="white-space:normal;">${escapeHtml(r.dtNote || '')}</span>` : `<div class="d-flex gap-1"><input type="text" class="form-control form-control-sm iqc-note" data-id="${r.id}" maxlength="${IQC_NOTE_MAX}" value="${escapeHtml(r.dtNote || '')}" placeholder="Nhập ghi chú..." aria-label="Ghi chú đội trưởng ${escapeHtml(r.soHopDong)}">
                     <button class="btn btn-sm btn-outline-success iqc-note-save d-none" data-id="${r.id}" title="Lưu ghi chú" aria-label="Lưu ghi chú"><i class="bi bi-check-lg"></i></button></div>`}
                     <div class="small mt-1" style="color:var(--slate-soft);">${r.updatedBy ? `${escapeHtml(r.updatedBy)} · ${formatDateTime(r.ngayCapNhat)}` : ''}</div></td>
-                <td>${canDvkh ? `<div class="d-flex gap-1"><input type="text" class="form-control form-control-sm iqc-dvkh" data-id="${r.id}" maxlength="${IQC_NOTE_MAX}" value="${escapeHtml(r.dvkhNote || '')}" placeholder="Ghi chú DVKH..." aria-label="Ghi chú DVKH ${escapeHtml(r.soHopDong)}">
-                    <button class="btn btn-sm btn-outline-success iqc-dvkh-save d-none" data-id="${r.id}" title="Lưu ghi chú DVKH" aria-label="Lưu ghi chú DVKH"><i class="bi bi-check-lg"></i></button></div>`
-                    : `<span class="small" style="white-space:normal;">${escapeHtml(r.dvkhNote || '')}</span>`}</td>
                 ${isAdmin ? `<td class="text-end"><button class="btn btn-sm btn-link p-0 text-danger" title="Xoá" aria-label="Xoá ca ${escapeHtml(r.soHopDong)}" onclick="iqcDeleteRow(${r.id})"><i class="bi bi-trash"></i></button></td>` : ''}
-            </tr>`).join('') : `<tr><td colspan="10" class="text-center py-4 small" style="color:var(--slate);">${iqcData.length ? 'Không còn ca nào cần xử lý trong khoảng đang lọc 🎉' : 'Chưa có dữ liệu.'}</td></tr>`) + '</tbody>';
+            </tr>`).join('') : `<tr><td colspan="9" class="text-center py-4 small" style="color:var(--slate);">${iqcData.length ? 'Không còn ca nào cần xử lý trong khoảng đang lọc 🎉' : 'Chưa có dữ liệu.'}</td></tr>`) + '</tbody>';
         let nums = [...new Set([1, pages, iqcPage - 1, iqcPage, iqcPage + 1].filter(n => n >= 1 && n <= pages))].sort((a, b) => a - b);
         let html = '', prev = 0;
         nums.forEach(n => { if (n - prev > 1) html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
@@ -7374,25 +7123,6 @@
     }
     document.getElementById('iqcDetailTable').addEventListener('click', e => { let b = e.target.closest('.iqc-note-save'); if (b) iqcSaveNote(b.parentElement.querySelector('.iqc-note')); });
     document.getElementById('iqcDetailTable').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.closest('.iqc-note')) iqcSaveNote(e.target); });
-    // Ghi chú DVKH (cus / Admin)
-    document.getElementById('iqcDetailTable').addEventListener('input', e => {
-        let inp = e.target.closest('.iqc-dvkh'); if (!inp) return;
-        let row = iqcData.find(x => x.id === parseInt(inp.dataset.id, 10));
-        inp.parentElement.querySelector('.iqc-dvkh-save').classList.toggle('d-none', !row || (row.dvkhNote || '') === inp.value.trim());
-    });
-    async function iqcSaveDvkh(inp) {
-        let id = parseInt(inp.dataset.id, 10), row = iqcData.find(x => x.id === id), note = inp.value.trim();
-        if (!row || (row.dvkhNote || '') === note) return;
-        inp.disabled = true;
-        try {
-            let r = await (await apiFetch("api/iqc/dvkh-note", { method: "POST", body: JSON.stringify({ id, note }) })).json();
-            if (!r.success) alert(r.error || "Không lưu được!");
-            else { Object.assign(row, { dvkhNote: note, updatedBy: r.updatedBy, ngayCapNhat: r.ngayCapNhat }); inp.parentElement.querySelector('.iqc-dvkh-save').classList.add('d-none'); }
-        } catch (e) { console.error("Lỗi lưu ghi chú DVKH:", e); alert("Lỗi kết nối, vui lòng thử lại!"); }
-        inp.disabled = false;
-    }
-    document.getElementById('iqcDetailTable').addEventListener('click', e => { let b = e.target.closest('.iqc-dvkh-save'); if (b) iqcSaveDvkh(b.parentElement.querySelector('.iqc-dvkh')); });
-    document.getElementById('iqcDetailTable').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.closest('.iqc-dvkh')) iqcSaveDvkh(e.target); });
     document.getElementById('iqcPagination').addEventListener('click', e => { let a = e.target.closest('[data-iqcpage]'); if (!a) return; e.preventDefault(); iqcPage = parseInt(a.dataset.iqcpage, 10); iqcRenderDetail(); });
     document.getElementById('iqcGroupSeg').addEventListener('click', e => { let b = e.target.closest('button[data-group]'); if (!b) return; iqcGroupBy = b.dataset.group; iqcRenderAll(); });
     document.getElementById('iqcGroupTable').addEventListener('click', e => {
