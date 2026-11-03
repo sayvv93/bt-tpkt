@@ -2580,7 +2580,7 @@
         });
     })();
 
-    const APP_BUILD = "2026-11-01.1";
+    const APP_BUILD = "2026-11-03.1";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -4188,8 +4188,27 @@
     // từ chữ hiển thị, giờ:phút:giây lấy từ giá trị ngầm cho đủ giây.
     // Bối cảnh cả cột ngày trong file: nếu có ô ngày thật mang NGÀY > 12 thì giá trị ngầm chắc chắn đúng
     // (sự cố locale Mỹ đọc "01/10" thành 10/01 chỉ sinh ra ngày ≤ 12) → tin giá trị ngầm cho cả cột.
-    function hiDateCtx(values) {
-        let serialTrusted = (values || []).some(v => { if (typeof v !== 'number' || !isFinite(v)) return false; let p = XLSX.SSF.parse_date_code(v); return p && p.d > 12; });
+    // Bổ sung 03/11/2026: ô ngày thật định dạng m/d/yy (Excel locale Mỹ, giá trị ngầm ĐÚNG) hiện "11/1/26" cho 01/11 —
+    // đọc chữ theo dd/mm sẽ thành 11/01 (và 11/10 thành 10/11 ở tương lai). Khi 2 cách đọc khác nhau, chọn cách cho
+    // ra nhiều ngày HỢP LÝ hơn trên cả cột (không quá 1 ngày tương lai, không cũ hơn 120 ngày). Sự cố Google Sheet
+    // 03/10 vẫn đúng vì khi đó giá trị ngầm mới là ngày vô lý. Hoà (VD Ngày vào CT cũ) → giữ cách đọc dd/mm như trước.
+    function hiDateCtx(values, texts) {
+        values = values || [];
+        let serialTrusted = values.some(v => { if (typeof v !== 'number' || !isFinite(v)) return false; let p = XLSX.SSF.parse_date_code(v); return p && p.d > 12; });
+        if (!serialTrusted && texts) {
+            let now = Date.now(), lo = now - 120 * 86400000, hi = now + 86400000, sv = 0, tv = 0;
+            const ok = (y, m, d) => { let t = Date.UTC(y, m - 1, d); return m >= 1 && m <= 12 && t >= lo && t <= hi; };
+            values.forEach((v, i) => {
+                if (typeof v !== 'number' || !isFinite(v)) return;
+                let p = XLSX.SSF.parse_date_code(v), t = String(texts[i] ?? '').trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+                if (!p || !t) return;
+                let td = parseInt(t[1], 10), tm = parseInt(t[2], 10);
+                if (td === p.d && tm === p.m) return;          // 2 cách đọc trùng nhau — không cần chọn
+                if (ok(p.y, p.m, p.d)) sv++;
+                if (ok(p.y, tm, td)) tv++;
+            });
+            serialTrusted = sv > tv;
+        }
         return { serialTrusted };
     }
     function hiSmartDate(rawVal, txtVal, withTime, ctx) {
@@ -4237,7 +4256,7 @@
         }
 
         let errors = [], byKey = new Map(), dupInFile = 0, dctx = {};
-        Object.keys(colMap).forEach(h => dctx[h] = hiDateCtx(raw.map(r => r[h])));
+        Object.keys(colMap).forEach(h => dctx[h] = hiDateCtx(raw.map(r => r[h]), txt.map(r => (r || {})[h])));
         raw.forEach((r, i) => {
             let row = {};
             HI_FIELDS.forEach(f => row[f] = '');
@@ -5103,7 +5122,7 @@
 
         const dKey = d => { let m = String(d || '').match(/^(\d{2})\/(\d{2})\/(\d{4})/); return m ? m[3] + m[2] + m[1] : ''; };
         let errors = [], latest = new Map(), dupInFile = 0, dctx = {};
-        Object.keys(colMap).forEach(h => dctx[h] = hiDateCtx(raw.map(r => r[h])));
+        Object.keys(colMap).forEach(h => dctx[h] = hiDateCtx(raw.map(r => r[h]), txt.map(r => (r || {})[h])));
         raw.forEach((r, i) => {
             let row = {}; RKN_FIELDS.forEach(f => row[f] = '');
             Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayData' ? hiSmartDate(r[h], (txt[i] || {})[h], false, dctx[h]) : String(r[h] ?? '').trim());
@@ -5498,7 +5517,7 @@
         let missing = ['doiTacQuanLy', 'maNhanVien'].filter(f => !Object.values(colMap).includes(f));
         if (missing.length) { alert(`File thiếu cột: ${missing.map(f => NS_LABELS[f]).join(', ')}`); return; }
         let rows = [], errors = [], seen = new Set(), dctx = {};
-        Object.keys(colMap).forEach(h => dctx[h] = hiDateCtx(raw.map(r => r[h])));
+        Object.keys(colMap).forEach(h => dctx[h] = hiDateCtx(raw.map(r => r[h]), txt.map(r => (r || {})[h])));
         raw.forEach((r, i) => {
             let row = {}; NS_FIELDS.forEach(f => row[f] = '');
             // Dùng chữ hiển thị (giữ số 0 đầu của Mã NV), riêng ngày đọc theo dd/mm
@@ -6062,7 +6081,7 @@
             alert('File thiếu cột "Số hợp đồng" hoặc "Ngày hoàn tất PTC". Hãy dùng "Tải file mẫu".'); return null;
         }
         let rows = [], errors = [], dctx = {};
-        Object.keys(colMap).forEach(h => dctx[h] = hiDateCtx(raw.map(r => r[h])));
+        Object.keys(colMap).forEach(h => dctx[h] = hiDateCtx(raw.map(r => r[h]), txt.map(r => (r || {})[h])));
         raw.forEach((r, i) => {
             let row = {};
             Object.entries(colMap).forEach(([h, f]) => row[f] = f === 'ngayHoanTat' ? hiSmartDate(r[h], (txt[i] || {})[h], /\d:\d/.test(String((txt[i] || {})[h])), dctx[h]) : String((txt[i] || {})[h] ?? '').trim());
