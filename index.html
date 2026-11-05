@@ -1074,7 +1074,7 @@
                     <span class="small align-self-center me-auto" id="hiLastLoaded" style="color:var(--slate-soft);"></span>
                     <button class="filter-reset-btn" onclick="hiResetFilters()"><i class="bi bi-x-circle me-1"></i>Xoá lọc</button>
                     <button class="filter-reset-btn" onclick="hiFetchData(true)"><i class="bi bi-arrow-clockwise me-1"></i>Tải lại</button>
-                    <button class="filter-reset-btn" onclick="hiExportExcel()"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Xuất Excel</button>
+                    <button class="filter-reset-btn" onclick="hiExportExcel()" title="Bảng tổng hợp theo Đối tác / Đội trưởng / Nhân viên, theo bộ lọc đang chọn"><i class="bi bi-file-earmark-bar-graph me-1"></i>Xuất báo cáo tổng hợp</button>
                 </div>
             </div>
 
@@ -2581,7 +2581,7 @@
         });
     })();
 
-    const APP_BUILD = "2026-11-05.1";
+    const APP_BUILD = "2026-11-05.2";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -4113,25 +4113,64 @@
         }
     }
 
-    // ---------- Xuất Excel (theo bộ lọc hiện tại) ----------
+    // ---------- Báo cáo tổng hợp Excel dùng chung (IQC & Đầu Vào, HI FPT) ----------
+    // 3 sheet Theo Đối tác / Theo Đội trưởng / Theo Nhân viên; mỗi sheet: tiêu đề, phạm vi lọc, giờ + người xuất,
+    // bảng số liệu (sắp theo tên) và dòng TỔNG. cols: [[nhãn, (stats) => giá trị, laTiLe]] — tỉ lệ là số 0..1 định dạng 0.0%.
+    function exportSummaryWorkbook({ title, rows, scope, note, cols, statsFn, keyFn, filename }) {
+        const LEVELS = [
+            ['Theo Đối tác', ['doiTacQuanLy'], ['Đối tác']],
+            ['Theo Đội trưởng', ['doiTacQuanLy', 'doiTruong'], ['Đối tác', 'Đội trưởng']],
+            ['Theo Nhân viên', ['doiTacQuanLy', 'doiTruong', 'nhanVien'], ['Đối tác', 'Đội trưởng', 'Nhân viên']]
+        ];
+        const now = new Date(), p2 = n => String(n).padStart(2, '0');
+        const stamp = `${p2(now.getDate())}/${p2(now.getMonth() + 1)}/${now.getFullYear()} ${p2(now.getHours())}:${p2(now.getMinutes())}`;
+        const nums = st => cols.map(([, f]) => { let v = f(st); return v === null || v === undefined || Number.isNaN(v) ? '' : v; });
+        let wb = XLSX.utils.book_new();
+        LEVELS.forEach(([name, keys, labels]) => {
+            let g = new Map();
+            rows.forEach(r => {
+                let vals = keys.map(k => keyFn(r, k));
+                let id = vals.join('\u0001');
+                if (!g.has(id)) g.set(id, { vals, rows: [] });
+                g.get(id).rows.push(r);
+            });
+            let list = [...g.values()].sort((a, b) => { for (let i = 0; i < a.vals.length; i++) { let c = a.vals[i].localeCompare(b.vals[i], 'vi'); if (c) return c; } return 0; });
+            let aoa = [
+                [`${title} — ${name.toUpperCase()}`],
+                [`Phạm vi lọc: ${scope}`],
+                [`Xuất lúc ${stamp} bởi ${currentUser ? currentUser.username : ''}${note ? ' · ' + note : ''}`],
+                [],
+                [...labels, ...cols.map(c => c[0])],
+                ...list.map(x => [...x.vals, ...nums(statsFn(x.rows))]),
+                ['TỔNG', ...labels.slice(1).map(() => ''), ...nums(statsFn(rows))]
+            ];
+            let ws = XLSX.utils.aoa_to_sheet(aoa);
+            cols.forEach(([, , pct], i) => {
+                if (!pct) return;
+                for (let r = 5; r < aoa.length; r++) { let cell = ws[XLSX.utils.encode_cell({ r, c: labels.length + i })]; if (cell && cell.t === 'n') cell.z = '0.0%'; }
+            });
+            ws['!cols'] = [...labels.map(l => ({ wch: l === 'Đối tác' ? 14 : 24 })), ...cols.map(c => ({ wch: Math.max(9, c[0].length + 2) }))];
+            ws['!merges'] = [0, 1, 2].map(r => ({ s: { r, c: 0 }, e: { r, c: labels.length + cols.length - 1 } }));
+            XLSX.utils.book_append_sheet(wb, ws, name);
+        });
+        XLSX.writeFile(wb, filename.replace(/\s+/g, '_'));
+    }
+
+    // ---------- HI FPT: Xuất báo cáo tổng hợp (theo bộ lọc hiện tại, mọi tài khoản xem được tab) ----------
+    // Từ 05/11/2026 chỉ xuất bảng số liệu (bỏ sheet Chi tiết); dùng chung hiStats nên khớp KPI.
     function hiExportExcel() {
         if (typeof XLSX === 'undefined') { alert("Thư viện Excel chưa tải xong."); return; }
-        let wb = XLSX.utils.book_new();
-        let detail = hiFiltered.map(r => { let o = {}; HI_FIELDS.forEach(f => o[HI_LABELS[f]] = r[f] || ''); return o; });
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detail), 'Chi tiết');
-        [['doiTacQuanLy', 'Theo Đối tác'], ['doiTruong', 'Theo Đội trưởng'], ['nhanVien', 'Theo Nhân viên']].forEach(([f, name]) => {
-            let g = new Map();
-            hiFiltered.forEach(r => { let k = r[f] || '(trống)'; if (!g.has(k)) g.set(k, []); g.get(k).push(r); });
-            let rows = [...g.entries()].map(([k, rs]) => {
-                let s = hiStats(rs);
-                return { [HI_LABELS[f]]: k, 'Tổng ca': s.total, 'Đã cài': s.installed, 'Chưa cài': s.notInstalled,
-                    'Tỉ lệ cài (%)': s.installRate === null ? '' : +s.installRate.toFixed(1),
-                    'Có gửi': s.sent, 'Có tương tác': s.interact,
-                    'Tỉ lệ tương tác (%)': s.interactRate === null ? '' : +s.interactRate.toFixed(1) };
-            }).sort((a, b) => b['Tổng ca'] - a['Tổng ca']);
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), name);
+        if (!hiFiltered.length) { alert("Không có dữ liệu trong phạm vi đang lọc."); return; }
+        const r100 = v => v === null ? null : v / 100;
+        let f = document.getElementById('hiFilterFrom').value, t = document.getElementById('hiFilterTo').value, dt = document.getElementById('hiFilterDoiTac').value;
+        exportSummaryWorkbook({
+            title: 'BÁO CÁO TỔNG HỢP HI FPT', rows: hiFiltered, scope: hiScopeText(),
+            note: 'Tỉ lệ cài đặt = đã cài / tổng ca; Tỉ lệ tương tác = có tương tác / ca có gửi',
+            cols: [['Tổng ca', s => s.total], ['Đã cài', s => s.installed], ['Chưa cài', s => s.notInstalled], ['Tỉ lệ cài đặt', s => r100(s.installRate), true],
+                   ['Có gửi', s => s.sent], ['Có tương tác', s => s.interact], ['Tỉ lệ tương tác', s => r100(s.interactRate), true]],
+            statsFn: hiStats, keyFn: (r, k) => (r[k] || '').trim() || '(trống)',
+            filename: `BaoCao_HI_FPT_${dt || 'tat_ca'}_${f || 'dau'}_${t || 'cuoi'}.xlsx`
         });
-        XLSX.writeFile(wb, `HI_FPT_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
 
     // ---------- SuperAdmin: file mẫu + nhập Excel ----------
@@ -4405,7 +4444,8 @@
         return [...m.values()].map(g => Object.assign(g, hiStats(g.rows)));
     }
 
-    function hiRenderScopeChip() {
+    function hiRenderScopeChip() { document.getElementById('hiScopeChip').textContent = hiScopeText(); }
+    function hiScopeText() {
         let parts = [];
         ['hiFilterDoiTac', 'hiFilterDoiTruong', 'hiFilterNhanVien', 'hiFilterTinhTrang', 'hiFilterTuongTac'].forEach(id => {
             let v = document.getElementById(id).value; if (v) parts.push(v);
@@ -4414,7 +4454,7 @@
         const vn = d => d.split('-').reverse().join('/');
         if (f || t) parts.push(`${f ? vn(f) : '…'} → ${t ? vn(t) : '…'}`);
         let q = document.getElementById('hiSearch').value.trim(); if (q) parts.push(`HĐ "${q}"`);
-        document.getElementById('hiScopeChip').textContent = parts.length ? parts.join(' · ') : 'Toàn bộ phạm vi';
+        return parts.length ? parts.join(' · ') : 'Toàn bộ phạm vi';
     }
 
     function hiGauge(name, canvasId, rate) {
@@ -6065,47 +6105,20 @@
     // với KPI / bảng trên màn hình nên số liệu khớp. Tỉ lệ đạt = OK / đã kiểm tra; Đạt cả 2 = ca OK cả 2 / tổng ca.
     function iqcExportReport() {
         if (typeof XLSX === 'undefined' || !currentUser || currentUser.role !== 'superadmin') return;
-        let rows = iqcFiltered;
-        if (!rows.length) { alert("Không có dữ liệu trong phạm vi đang lọc."); return; }
-        const LEVELS = [
-            ['Theo Đối tác', ['doiTacQuanLy'], ['Đối tác']],
-            ['Theo Đội trưởng', ['doiTacQuanLy', 'doiTruong'], ['Đối tác', 'Đội trưởng']],
-            ['Theo Nhân viên', ['doiTacQuanLy', 'doiTruong', 'nhanVien'], ['Đối tác', 'Đội trưởng', 'Nhân viên']]
-        ];
-        const COLS = ['Tổng ca', 'Chưa kiểm tra', 'Có NOT', 'Đạt cả 2', 'Đã KT IQC', 'IQC OK', 'Tỉ lệ đạt IQC', 'Đã KT Đầu Vào', 'Đầu Vào OK', 'Tỉ lệ đạt Đầu Vào', 'Tỉ lệ đạt cả 2'];
-        const PCT = new Set(['Tỉ lệ đạt IQC', 'Tỉ lệ đạt Đầu Vào', 'Tỉ lệ đạt cả 2']);
-        const nums = st => [st.total, st.pending, st.not, st.done, st.iqcChecked, st.iqcOk, st.iqcChecked ? st.iqcOk / st.iqcChecked : '',
-            st.dvChecked, st.dvOk, st.dvChecked ? st.dvOk / st.dvChecked : '', st.total ? st.done / st.total : ''];
-        const now = new Date(), p2 = n => String(n).padStart(2, '0');
-        const stamp = `${p2(now.getDate())}/${p2(now.getMonth() + 1)}/${now.getFullYear()} ${p2(now.getHours())}:${p2(now.getMinutes())}`;
-        let wb = XLSX.utils.book_new();
-        LEVELS.forEach(([name, keys, labels]) => {
-            let g = new Map();
-            rows.forEach(r => {
-                let vals = keys.map(k => (r.doiTacQuanLy ? (r[k] || '') : (k === 'nhanVien' ? (r.nhanVien || '') : '')) || (k === 'doiTacQuanLy' ? '(Chưa map)' : '—'));
-                let id = vals.join('\u0001');
-                if (!g.has(id)) g.set(id, { vals, rows: [] });
-                g.get(id).rows.push(r);
-            });
-            let list = [...g.values()].sort((a, b) => { for (let i = 0; i < a.vals.length; i++) { let c = a.vals[i].localeCompare(b.vals[i], 'vi'); if (c) return c; } return 0; });
-            let aoa = [
-                [`BÁO CÁO TỔNG HỢP IQC & ĐẦU VÀO — ${name.toUpperCase()}`],
-                [`Phạm vi lọc: ${iqcScopeText()}`],
-                [`Xuất lúc ${stamp} bởi ${currentUser.username} · Tỉ lệ đạt = số ca OK / số ca đã kiểm tra; Đạt cả 2 = ca OK cả IQC lẫn Đầu Vào / tổng ca`],
-                [],
-                [...labels, ...COLS],
-                ...list.map(x => [...x.vals, ...nums(iqcStats(x.rows))]),
-                ['TỔNG', ...labels.slice(1).map(() => ''), ...nums(iqcStats(rows))]
-            ];
-            let ws = XLSX.utils.aoa_to_sheet(aoa);
-            let hdrRow = 4, pctCols = COLS.map((c, i) => PCT.has(c) ? labels.length + i : -1).filter(i => i >= 0);
-            for (let r = hdrRow + 1; r < aoa.length; r++) pctCols.forEach(c => { let cell = ws[XLSX.utils.encode_cell({ r, c })]; if (cell && cell.t === 'n') cell.z = '0.0%'; });
-            ws['!cols'] = [...labels.map(l => ({ wch: l === 'Đối tác' ? 14 : 24 })), ...COLS.map(c => ({ wch: Math.max(9, c.length + 2) }))];
-            ws['!merges'] = [0, 1, 2].map(r => ({ s: { r, c: 0 }, e: { r, c: labels.length + COLS.length - 1 } }));
-            XLSX.utils.book_append_sheet(wb, ws, name);
-        });
+        if (!iqcFiltered.length) { alert("Không có dữ liệu trong phạm vi đang lọc."); return; }
+        const rate = (a, b) => b ? a / b : null;
         let f = document.getElementById('iqcFilterFrom').value, t = document.getElementById('iqcFilterTo').value, dt = document.getElementById('iqcFilterDoiTac').value;
-        XLSX.writeFile(wb, `BaoCao_IQC_DauVao_${dt || 'tat_ca'}_${f || 'dau'}_${t || 'cuoi'}.xlsx`.replace(/\s+/g, '_'));
+        exportSummaryWorkbook({
+            title: 'BÁO CÁO TỔNG HỢP IQC & ĐẦU VÀO', rows: iqcFiltered, scope: iqcScopeText(),
+            note: 'Tỉ lệ đạt = số ca OK / số ca đã kiểm tra; Đạt cả 2 = ca OK cả IQC lẫn Đầu Vào / tổng ca',
+            cols: [['Tổng ca', s => s.total], ['Chưa kiểm tra', s => s.pending], ['Có NOT', s => s.not], ['Đạt cả 2', s => s.done],
+                   ['Đã KT IQC', s => s.iqcChecked], ['IQC OK', s => s.iqcOk], ['Tỉ lệ đạt IQC', s => rate(s.iqcOk, s.iqcChecked), true],
+                   ['Đã KT Đầu Vào', s => s.dvChecked], ['Đầu Vào OK', s => s.dvOk], ['Tỉ lệ đạt Đầu Vào', s => rate(s.dvOk, s.dvChecked), true],
+                   ['Tỉ lệ đạt cả 2', s => rate(s.done, s.total), true]],
+            statsFn: iqcStats,
+            keyFn: (r, k) => (r.doiTacQuanLy || k === 'nhanVien' ? (r[k] || '') : '') || (k === 'doiTacQuanLy' ? '(Chưa map)' : '—'),
+            filename: `BaoCao_IQC_DauVao_${dt || 'tat_ca'}_${f || 'dau'}_${t || 'cuoi'}.xlsx`
+        });
     }
     // Xuất ca CHƯA KIỂM TRA theo bộ lọc hiện tại (VD đã chọn 1 Đội trưởng) — sửa xong nhập lại bằng "Nhập file đã xử lý"
     function iqcExportPending() {
