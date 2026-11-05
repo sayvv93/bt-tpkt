@@ -1369,6 +1369,7 @@
                     <button class="filter-reset-btn" onclick="iqcFetchData(true)"><i class="bi bi-arrow-clockwise me-1"></i>Tải lại</button>
                     <button class="filter-reset-btn" onclick="iqcDownloadTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu</button>
                     <button class="filter-reset-btn" onclick="iqcExportPending()"><i class="bi bi-file-earmark-arrow-down me-1"></i>Xuất ca chưa kiểm tra</button>
+                    <button class="filter-reset-btn d-none" id="iqcReportExportBtn" onclick="iqcExportReport()" title="Bảng tổng hợp theo Đối tác / Đội trưởng / Nhân viên, theo bộ lọc đang chọn"><i class="bi bi-file-earmark-bar-graph me-1"></i>Xuất báo cáo tổng hợp</button>
                     <label class="filter-reset-btn mb-0" id="iqcProcessLbl" style="cursor:pointer;"><i class="bi bi-file-earmark-arrow-up me-1"></i>Nhập file đã xử lý (≤100)
                         <input type="file" accept=".xlsx,.xls,.csv" class="d-none" onchange="iqcHandleImportProcess(event)">
                     </label>
@@ -2580,7 +2581,7 @@
         });
     })();
 
-    const APP_BUILD = "2026-11-03.1";
+    const APP_BUILD = "2026-11-05.1";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -5798,6 +5799,7 @@
     }
     function iqcRenderAll() {
         document.getElementById('iqcAdminBar').classList.toggle('d-none', !rknIsAdmin());
+        document.getElementById('iqcReportExportBtn').classList.toggle('d-none', !(currentUser && currentUser.role === 'superadmin'));
         document.getElementById('iqcImportLimitLbl').textContent = currentUser && currentUser.role === 'superadmin' ? '10.000' : '1.000';
         document.querySelectorAll('#iqcGroupSeg button').forEach(b => b.classList.toggle('active', b.dataset.group === iqcGroupBy));
         let s = iqcStats(iqcFiltered), fmt = n => n.toLocaleString('vi-VN');
@@ -6057,6 +6059,53 @@
         let wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, iqcSheet([{ soHopDong: 'DNAAA0001', ngayHoanTat: '05/10/2026 10:00:00', ghiChu: 'Mô tả lỗi IQC', nhanVien: 'DNI02.ANHTT18', checkIQC: 'OK', checkDauVao: 'NOT', dtNote: 'Đã nhắc KTV chụp bổ sung' }]), 'dataIQCDV');
         XLSX.writeFile(wb, 'mau_IQC_DauVao.xlsx');
+    }
+    // SuperAdmin: xuất BÁO CÁO TỔNG HỢP (chỉ số liệu, không kèm danh sách ca) theo bộ lọc đang chọn —
+    // 3 sheet Theo Đối tác / Theo Đội trưởng / Theo Nhân viên, mỗi sheet có dòng TỔNG. Dùng chung iqcStats
+    // với KPI / bảng trên màn hình nên số liệu khớp. Tỉ lệ đạt = OK / đã kiểm tra; Đạt cả 2 = ca OK cả 2 / tổng ca.
+    function iqcExportReport() {
+        if (typeof XLSX === 'undefined' || !currentUser || currentUser.role !== 'superadmin') return;
+        let rows = iqcFiltered;
+        if (!rows.length) { alert("Không có dữ liệu trong phạm vi đang lọc."); return; }
+        const LEVELS = [
+            ['Theo Đối tác', ['doiTacQuanLy'], ['Đối tác']],
+            ['Theo Đội trưởng', ['doiTacQuanLy', 'doiTruong'], ['Đối tác', 'Đội trưởng']],
+            ['Theo Nhân viên', ['doiTacQuanLy', 'doiTruong', 'nhanVien'], ['Đối tác', 'Đội trưởng', 'Nhân viên']]
+        ];
+        const COLS = ['Tổng ca', 'Chưa kiểm tra', 'Có NOT', 'Đạt cả 2', 'Đã KT IQC', 'IQC OK', 'Tỉ lệ đạt IQC', 'Đã KT Đầu Vào', 'Đầu Vào OK', 'Tỉ lệ đạt Đầu Vào', 'Tỉ lệ đạt cả 2'];
+        const PCT = new Set(['Tỉ lệ đạt IQC', 'Tỉ lệ đạt Đầu Vào', 'Tỉ lệ đạt cả 2']);
+        const nums = st => [st.total, st.pending, st.not, st.done, st.iqcChecked, st.iqcOk, st.iqcChecked ? st.iqcOk / st.iqcChecked : '',
+            st.dvChecked, st.dvOk, st.dvChecked ? st.dvOk / st.dvChecked : '', st.total ? st.done / st.total : ''];
+        const now = new Date(), p2 = n => String(n).padStart(2, '0');
+        const stamp = `${p2(now.getDate())}/${p2(now.getMonth() + 1)}/${now.getFullYear()} ${p2(now.getHours())}:${p2(now.getMinutes())}`;
+        let wb = XLSX.utils.book_new();
+        LEVELS.forEach(([name, keys, labels]) => {
+            let g = new Map();
+            rows.forEach(r => {
+                let vals = keys.map(k => (r.doiTacQuanLy ? (r[k] || '') : (k === 'nhanVien' ? (r.nhanVien || '') : '')) || (k === 'doiTacQuanLy' ? '(Chưa map)' : '—'));
+                let id = vals.join('\u0001');
+                if (!g.has(id)) g.set(id, { vals, rows: [] });
+                g.get(id).rows.push(r);
+            });
+            let list = [...g.values()].sort((a, b) => { for (let i = 0; i < a.vals.length; i++) { let c = a.vals[i].localeCompare(b.vals[i], 'vi'); if (c) return c; } return 0; });
+            let aoa = [
+                [`BÁO CÁO TỔNG HỢP IQC & ĐẦU VÀO — ${name.toUpperCase()}`],
+                [`Phạm vi lọc: ${iqcScopeText()}`],
+                [`Xuất lúc ${stamp} bởi ${currentUser.username} · Tỉ lệ đạt = số ca OK / số ca đã kiểm tra; Đạt cả 2 = ca OK cả IQC lẫn Đầu Vào / tổng ca`],
+                [],
+                [...labels, ...COLS],
+                ...list.map(x => [...x.vals, ...nums(iqcStats(x.rows))]),
+                ['TỔNG', ...labels.slice(1).map(() => ''), ...nums(iqcStats(rows))]
+            ];
+            let ws = XLSX.utils.aoa_to_sheet(aoa);
+            let hdrRow = 4, pctCols = COLS.map((c, i) => PCT.has(c) ? labels.length + i : -1).filter(i => i >= 0);
+            for (let r = hdrRow + 1; r < aoa.length; r++) pctCols.forEach(c => { let cell = ws[XLSX.utils.encode_cell({ r, c })]; if (cell && cell.t === 'n') cell.z = '0.0%'; });
+            ws['!cols'] = [...labels.map(l => ({ wch: l === 'Đối tác' ? 14 : 24 })), ...COLS.map(c => ({ wch: Math.max(9, c.length + 2) }))];
+            ws['!merges'] = [0, 1, 2].map(r => ({ s: { r, c: 0 }, e: { r, c: labels.length + COLS.length - 1 } }));
+            XLSX.utils.book_append_sheet(wb, ws, name);
+        });
+        let f = document.getElementById('iqcFilterFrom').value, t = document.getElementById('iqcFilterTo').value, dt = document.getElementById('iqcFilterDoiTac').value;
+        XLSX.writeFile(wb, `BaoCao_IQC_DauVao_${dt || 'tat_ca'}_${f || 'dau'}_${t || 'cuoi'}.xlsx`.replace(/\s+/g, '_'));
     }
     // Xuất ca CHƯA KIỂM TRA theo bộ lọc hiện tại (VD đã chọn 1 Đội trưởng) — sửa xong nhập lại bằng "Nhập file đã xử lý"
     function iqcExportPending() {
