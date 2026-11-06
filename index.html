@@ -540,6 +540,16 @@
         .lt-wp-mgr { font-size: 13px; margin-bottom: 10px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
         .pv-mgr .sw, .pv-dir .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; border: 1px solid rgba(0,0,0,.15); margin-right: 6px; vertical-align: -1px; }
         .lt-wp-asg { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+        .bt-unmapped-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; color: #9A2A21; background: #FBE7E4; border: 1px solid #F1C3BD; white-space: nowrap; }
+        .bt-unmapped-panel { background: var(--card); border: 1px solid #F1C3BD; border-left: 4px solid var(--red); border-radius: 10px; padding: 12px 14px; }
+        .bt-miss-list { display: grid; gap: 4px; max-height: 320px; overflow-y: auto; }
+        .bt-miss-list > div { display: grid; grid-template-columns: minmax(150px, 240px) minmax(70px, 140px) 64px auto; justify-content: start; gap: 8px; align-items: center; padding: 4px 6px; border-bottom: 1px dashed var(--line); font-size: 13px; }
+        .bt-miss-list > div > span { overflow-wrap: anywhere; }
+        .bt-res-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .bt-res-grid > div { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+        .bt-res-grid span { display: block; font-size: 11.5px; color: var(--slate); }
+        .bt-res-grid b { font-size: 20px; font-family: var(--font-mono, monospace); }
+        @media (max-width: 576px) { .bt-miss-list > div { grid-template-columns: minmax(0, 1fr) 56px; } .bt-miss-list > div > span:nth-child(2) { display: none; } .bt-miss-list > div > :last-child { grid-column: 1 / -1; } }
         .pv-tip { position: absolute; left: 0; top: 0; z-index: 5; max-width: 300px; pointer-events: none; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; box-shadow: 0 8px 24px rgba(18,24,27,.16); font-size: 12.5px; line-height: 1.4; }
         .pv-tip[hidden] { display: none; }
         .pv-tip-name { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
@@ -785,12 +795,19 @@
                         <option value="">Tất cả Nhân viên</option>
                     </select>
                 </div>
+                <div class="col-md-2 f-group" id="filterMapGroup">
+                    <label for="filterMap">Map nhân sự</label>
+                    <select id="filterMap" class="form-select form-select-sm" onchange="filterData()">
+                        <option value="">Tất cả</option>
+                        <option value="__UNMAPPED__">Chưa map (thiếu nhân sự)</option>
+                    </select>
+                </div>
 
                 <div class="col-md-5 mt-3">
                     <label style="font-size:11.5px;font-weight:600;letter-spacing:.03em;color:var(--slate);">TÌM KIẾM SỐ HỢP ĐỒNG</label>
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-transparent border-0 border-bottom" style="border-bottom:2px solid var(--line) !important; color:var(--slate);"><i class="bi bi-search"></i></span>
-                        <input type="text" id="searchSoHopDong" class="form-control" autocomplete="off" placeholder="Nhập số hợp đồng cần tìm..." oninput="debounceFilter()" style="border:none; border-bottom:2px solid var(--line); border-radius:0;">
+                        <input type="text" id="searchSoHopDong" name="q-searchSoHopDong" class="form-control" autocomplete="off" placeholder="Nhập số hợp đồng cần tìm..." oninput="debounceFilter()" style="border:none; border-bottom:2px solid var(--line); border-radius:0;">
                         <button class="btn btn-sm" type="button" onclick="clearSearchHopDong()" style="border:none; border-bottom:2px solid var(--line); border-radius:0; color:var(--slate);"><i class="bi bi-x-lg"></i></button>
                     </div>
                 </div>
@@ -964,13 +981,14 @@
                 </div>
             </div>
 
+            <div id="btUnmappedPanel" class="bt-unmapped-panel mb-3 d-none" aria-live="polite"></div>
+
             <div class="table-panel">
                 <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="dataTable">
                     <thead>
                         <tr>
                             <th style="width: 40px;"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
-                            <th class="sortable" onclick="onSortClick('vung')" style="cursor:pointer;">Vùng <span class="sort-indicator" data-key="vung"></span></th>
                             <th class="sortable" onclick="onSortClick('doiTac')" style="cursor:pointer;">Đối tác <span class="sort-indicator" data-key="doiTac"></span></th>
                             <th class="sortable" onclick="onSortClick('doiTruong')" style="cursor:pointer;">Đội trưởng <span class="sort-indicator" data-key="doiTruong"></span></th>
                             <th class="sortable" onclick="onSortClick('soHopDong')" style="cursor:pointer;">Số HĐ <span class="sort-indicator" data-key="soHopDong"></span></th>
@@ -982,7 +1000,7 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <tr><td colspan="10" class="text-center">Đang tải dữ liệu...</td></tr>
+                        <tr><td colspan="9" class="text-center">Đang tải dữ liệu...</td></tr>
                     </tbody>
                 </table>
                 </div>
@@ -1068,7 +1086,7 @@
                 </div>
                 <div class="col-md-4 f-group">
                     <label>Tìm số hợp đồng</label>
-                    <input type="text" id="hiSearch" class="form-control form-control-sm" placeholder="Nhập số hợp đồng..." oninput="clearTimeout(window._hiSearchT); window._hiSearchT = setTimeout(hiApplyFilters, 250);">
+                    <input type="text" id="hiSearch" name="q-hiSearch" autocomplete="off" class="form-control form-control-sm" placeholder="Nhập số hợp đồng..." oninput="clearTimeout(window._hiSearchT); window._hiSearchT = setTimeout(hiApplyFilters, 250);">
                 </div>
                 <div class="col-md-6 f-group d-flex justify-content-end gap-2">
                     <span class="small align-self-center me-auto" id="hiLastLoaded" style="color:var(--slate-soft);"></span>
@@ -1223,7 +1241,7 @@
                 </div>
                 <div class="col-md-4 f-group">
                     <label>Tìm Số HĐ / Suy Hao / Tập điểm</label>
-                    <input type="text" id="rknSearch" class="form-control form-control-sm" placeholder="Nhập số HĐ, suy hao hoặc tập điểm..." oninput="clearTimeout(window._rknSearchT); window._rknSearchT = setTimeout(rknApplyFilters, 250);">
+                    <input type="text" id="rknSearch" name="q-rknSearch" autocomplete="off" class="form-control form-control-sm" placeholder="Nhập số HĐ, suy hao hoặc tập điểm..." oninput="clearTimeout(window._rknSearchT); window._rknSearchT = setTimeout(rknApplyFilters, 250);">
                 </div>
                 <div class="col-md-8 f-group d-flex justify-content-end gap-2">
                     <span class="small align-self-center me-auto" id="rknLastLoaded" style="color:var(--slate-soft);"></span>
@@ -1358,7 +1376,7 @@
                 <div class="col-md-2 f-group"><label>Đội trưởng</label><select id="iqcFilterDoiTruong" class="form-select form-select-sm" onchange="iqcOnFilterChange('dtr')"></select></div>
                 <div class="col-md-2 f-group"><label>Nhân viên</label><select id="iqcFilterNhanVien" class="form-select form-select-sm" onchange="iqcApplyFilters()"></select></div>
                 <div class="col-md-3 f-group"><label>Tìm Số HĐ</label>
-                    <input type="text" id="iqcSearch" class="form-control form-control-sm" placeholder="Nhập số hợp đồng..." oninput="clearTimeout(window._iqcT); window._iqcT = setTimeout(iqcApplyFilters, 250);"></div>
+                    <input type="text" id="iqcSearch" name="q-iqcSearch" autocomplete="off" class="form-control form-control-sm" placeholder="Nhập số hợp đồng..." oninput="clearTimeout(window._iqcT); window._iqcT = setTimeout(iqcApplyFilters, 250);"></div>
                 <div class="col-md-2 f-group"><label>Check IQC</label>
                     <select id="iqcFilterIqc" class="form-select form-select-sm" onchange="iqcApplyFilters()"><option value="">Tất cả</option><option>Chưa kiểm tra</option><option>OK</option><option>NOT</option></select></div>
                 <div class="col-md-2 f-group"><label>Check Đầu Vào</label>
@@ -1495,7 +1513,7 @@
                 <div class="col-md-2 f-group"><label>Trạng thái</label><select id="nsFilterStatus" class="form-select form-select-sm" onchange="nsApplyFilters()">
                     <option value="on" selected>Còn làm (ON)</option><option value="off">Đã nghỉ (OFF)</option><option value="">Tất cả</option></select></div>
                 <div class="col-md-2 f-group"><label>Tìm tên / mã NV / Mobinet / mail</label>
-                    <input type="text" id="nsSearch" class="form-control form-control-sm" placeholder="Nhập để tìm..." oninput="clearTimeout(window._nsT); window._nsT = setTimeout(nsApplyFilters, 250);"></div>
+                    <input type="text" id="nsSearch" name="q-nsSearch" autocomplete="off" class="form-control form-control-sm" placeholder="Nhập để tìm..." oninput="clearTimeout(window._nsT); window._nsT = setTimeout(nsApplyFilters, 250);"></div>
                 <div class="col-12 f-group d-flex justify-content-end gap-2">
                     <span class="small align-self-center me-auto" id="nsLastLoaded" style="color:var(--slate-soft);"></span>
                     <button class="filter-reset-btn" onclick="nsResetFilters()"><i class="bi bi-x-circle me-1"></i>Xoá lọc</button>
@@ -1555,7 +1573,7 @@
                     </div>
                 </div>
                 <div class="col-md-2 f-group"><label>Đối tác</label><select id="lichFilterDoiTac" class="form-select form-select-sm" onchange="lichRender()"></select></div>
-                <div class="col-md-3 f-group"><label>Tìm Đội trưởng</label><input type="text" id="lichSearch" class="form-control form-control-sm" placeholder="Nhập tên..." oninput="clearTimeout(window._lichSearchT); window._lichSearchT = setTimeout(lichRender, 250);"></div>
+                <div class="col-md-3 f-group"><label>Tìm Đội trưởng</label><input type="text" id="lichSearch" name="q-lichSearch" autocomplete="off" class="form-control form-control-sm" placeholder="Nhập tên..." oninput="clearTimeout(window._lichSearchT); window._lichSearchT = setTimeout(lichRender, 250);"></div>
                 <div class="col-md-3 f-group" id="lichBrushBox">
                     <label>Khai báo (chọn rồi bấm / kéo trên ô ngày)</label>
                     <div class="lich-brush" id="lichBrush">
@@ -1617,7 +1635,7 @@
                         <h6 class="lt-map-title" id="pvDirTitle">Danh bạ người quản lý</h6>
                         <div class="small" style="color:var(--slate);">Đội trưởng tự cập nhật SĐT / mail của mình; Đối tác quản lý cập nhật cho đối tác và các đội.</div>
                     </div>
-                    <input type="search" id="pvDirSearch" class="form-control form-control-sm" placeholder="Tìm Đối tác, Đội trưởng, SĐT…" aria-label="Tìm trong danh bạ">
+                    <input type="search" id="pvDirSearch" name="q-pvDirSearch" autocomplete="off" class="form-control form-control-sm" placeholder="Tìm Đối tác, Đội trưởng, SĐT…" aria-label="Tìm trong danh bạ">
                 </div>
                 <div class="table-responsive"><table class="table table-sm mb-0">
                     <thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Người quản lý</th><th>SĐT</th><th>Mail</th><th class="text-end">Phường/xã</th><th class="text-end"><span class="visually-hidden">Sửa</span></th></tr></thead>
@@ -1693,6 +1711,21 @@
     </div>
 </div>
 
+<!-- MODAL: Kết quả nhập dữ liệu Bảo Trì mới -->
+<div class="modal fade" id="btImportResultModal" tabindex="-1" aria-labelledby="btImportResultTitle">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header"><h6 class="modal-title fw-bold" id="btImportResultTitle">Kết quả nhập dữ liệu Bảo Trì</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+            <div class="modal-body" id="btImportResultBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-sm text-white" style="background:var(--brand);" id="btImportShowUnmapped" onclick="btFilterUnmapped()">Lọc ca Chưa map</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL ĐỔI MẬT KHẨU -->
 <div id="changePasswordModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(18, 24, 27, 0.82); backdrop-filter: blur(4px); z-index: 1050; align-items: center; justify-content: center;">
   <div style="width: 100%; max-width: 380px; background: #ffffff; border-radius: 10px; box-shadow: 0 24px 60px rgba(0,0,0,0.35); padding: 26px; border-top: 3px solid var(--amber);">
@@ -1702,22 +1735,27 @@
     </div>
 
 
+    <!-- Form riêng + ô tên đăng nhập ẩn: không có thì Chrome tự điền tên đăng nhập vào ô chữ khác
+         (ô Tìm kiếm Số HĐ ở Bảo Trì — sự cố 06/11/2026) -->
+    <form id="changePasswordForm" onsubmit="event.preventDefault(); submitChangePassword();">
+    <input type="text" id="cpUsername" name="username" autocomplete="username" tabindex="-1" aria-hidden="true" readonly style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;">
     <div class="mb-3">
-      <label class="form-label small fw-bold" style="color:var(--slate);">Mật khẩu hiện tại</label>
-      <input type="password" id="txtCurrentPassword" class="form-control" placeholder="Nhập mật khẩu hiện tại...">
+      <label class="form-label small fw-bold" style="color:var(--slate);" for="txtCurrentPassword">Mật khẩu hiện tại</label>
+      <input type="password" id="txtCurrentPassword" name="current-password" autocomplete="current-password" class="form-control" placeholder="Nhập mật khẩu hiện tại...">
     </div>
 
     <div class="mb-3">
-      <label class="form-label small fw-bold" style="color:var(--slate);">Mật khẩu mới</label>
-      <input type="password" id="txtNewPassword" class="form-control" placeholder="Nhập mật khẩu mới...">
+      <label class="form-label small fw-bold" style="color:var(--slate);" for="txtNewPassword">Mật khẩu mới</label>
+      <input type="password" id="txtNewPassword" name="new-password" autocomplete="new-password" class="form-control" placeholder="Nhập mật khẩu mới...">
     </div>
 
     <div id="changePassMessage" class="alert py-2 small mb-3 d-none"></div>
 
     <div class="d-flex justify-content-end gap-2">
       <button type="button" class="btn btn-sm px-3" style="background:var(--surface); color:var(--slate); border:1px solid var(--line);" onclick="closeChangePasswordModal()">Hủy</button>
-      <button type="button" class="btn btn-sm px-3 fw-bold" style="background:var(--ink); color:#fff;" onclick="submitChangePassword()">Xác nhận đổi</button>
+      <button type="submit" class="btn btn-sm px-3 fw-bold" style="background:var(--ink); color:#fff;">Xác nhận đổi</button>
     </div>
+    </form>
   </div>
 </div>
 
@@ -1970,7 +2008,6 @@
         let rows = filteredDataCache.map(item => {
             let tpktCheckVal = normalizeVal(item.userSelectedTpkt) || normalizeVal(item.tpktCheck) || "Chưa kiểm tra";
             return {
-                "Vùng": item.vung || "",
                 "Đối tác": item.doiTac || "",
                 "Đội trưởng": item.doiTruong || "",
                 "Số HĐ": item.soHopDong || "",
@@ -2145,116 +2182,143 @@
     // đây là kênh DUY NHẤT tạo thêm dòng mới trong dataBT (đã bỏ đồng bộ n8n), dùng
     // đúng khoá UNIQUE (soHopDong, tgTao) + ON CONFLICT DO NOTHING để không đè
     // mất dữ liệu đã có nếu lỡ import trùng ca cũ.
+    // ================== BẢO TRÌ: NHẬP DỮ LIỆU MỚI TỪ FILE GỐC (06/11/2026) ==================
+    // Đọc thẳng file báo cáo "ChiTiet-DungHen-DungHan" (hoặc file mẫu) theo TÊN CỘT, chỉ lấy cột cần thiết.
+    // Đối tác / Đội trưởng do Worker map theo Nhân viên = Mobinet ở tab Nhân Sự; không map được = "Chưa map".
+    const BT_NEW_COLS = {
+        'so hd': 'soHopDong', 'so hop dong': 'soHopDong', 'sohopdong': 'soHopDong',
+        'nhan vien': 'nhanVien', 'nhanvien': 'nhanVien',
+        'tg tao': 'tgTao', 'tgtao': 'tgTao', 'thoi gian tao': 'tgTao',
+        'tg hoan tat': 'tgHoanTat', 'tghoantat': 'tgHoanTat', 'thoi gian hoan tat': 'tgHoanTat',
+        'ghi chu': 'ghiChu', 'ghichu': 'ghiChu',
+        'block quan ly': 'blockQuanLy', 'blockquanly': 'blockQuanLy',
+        'doi tac quan ly': 'doiTacFile',                         // tên Đối tác trong file gốc ("Phuong Nam DNI-02") — chỉ dự phòng
+        'doitacquanly': 'doiTacQuanLy', 'doitruong': 'doiTruong', // file mẫu cũ (vẫn nhận)
+        'tpktcheck': 'tpktCheck', 'xllai': 'xlLai'
+    };
+    const BT_NEW_REQUIRED = { soHopDong: 'Số HĐ', nhanVien: 'Nhân viên', tgTao: 'TG Tạo', tgHoanTat: 'TG Hoàn Tất' };
+    const btHdrKey = h => String(h ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase().replace(/\s+/g, ' ').trim();
+    const BT_NEW_MAX_FILE = 5000, BT_NEW_CHUNK = 500;
     function downloadNewDataTemplate() {
-        if (typeof XLSX === 'undefined') {
-            alert("Thư viện Excel chưa tải xong, vui lòng thử lại sau giây lát.");
-            return;
-        }
-        let ws = XLSX.utils.json_to_sheet([
-            {
-                vung: "08.Dong Nai", doiTacQuanLy: "DNI02", doiTruong: "Bùi Công Chi", blockQuanLy: "",
-                soHopDong: "DNAAA0099", nhanVien: "DNI02.PHUOCND", tgTao: "01/09/2026 09:00:00",
-                tgHoanTat: "01/09/2026 10:00:00", ghiChu: "Ví dụ ghi chú ca bảo trì", tpktCheck: "", xlLai: ""
-            }
+        if (typeof XLSX === 'undefined') { alert("Thư viện Excel chưa tải xong, vui lòng thử lại sau giây lát."); return; }
+        let ws = XLSX.utils.aoa_to_sheet([
+            ['Số HĐ', 'Nhân viên', 'TG Tạo', 'TG Hoàn Tất', 'Ghi chú', 'Block quản lý', 'Đối tác quản lý'],
+            ['DNAAA0099', 'DNI02.PHUOCND', '05/11/2026 10:49:32', '05/11/2026 13:58:30', 'Ví dụ ghi chú ca bảo trì', 'Phuong Long Khanh-001', 'Phuong Nam DNI-02']
         ]);
-        ws['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 18 }, { wch: 12 }, { wch: 14 }, { wch: 16 }, { wch: 20 }, { wch: 20 }, { wch: 40 }, { wch: 16 }, { wch: 18 }];
+        Object.keys(ws).forEach(k => { if (k[0] !== '!') ws[k].t = 's'; });
+        ws['!cols'] = [{ wch: 14 }, { wch: 18 }, { wch: 20 }, { wch: 20 }, { wch: 40 }, { wch: 22 }, { wch: 20 }];
         let wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Mau Du Lieu Moi");
-        XLSX.writeFile(wb, "mau_import_du_lieu_moi.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "ChiTiet-DungHen-DungHan");
+        XLSX.writeFile(wb, "mau_import_bao_tri.xlsx");
     }
-
-    function triggerImportNewData() {
-        document.getElementById('importNewDataFileInput').click();
+    function triggerImportNewData() { document.getElementById('importNewDataFileInput').click(); }
+    // Đọc file → { rows, errors, missingCols } (tách riêng để test được)
+    function btParseNewDataSheet(sheet) {
+        let aoaRaw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: true });
+        let aoaTxt = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
+        let hi = aoaRaw.findIndex(r => r.some(c => BT_NEW_COLS[btHdrKey(c)] === 'soHopDong'));   // dòng tiêu đề
+        if (hi < 0) return { rows: [], errors: [], missingCols: Object.values(BT_NEW_REQUIRED) };
+        let col = {};
+        aoaRaw[hi].forEach((h, i) => { let f = BT_NEW_COLS[btHdrKey(h)]; if (f && col[f] === undefined) col[f] = i; });
+        let missingCols = Object.entries(BT_NEW_REQUIRED).filter(([f]) => col[f] === undefined).map(([, l]) => l);
+        if (missingCols.length) return { rows: [], errors: [], missingCols };
+        let body = aoaRaw.slice(hi + 1), bodyTxt = aoaTxt.slice(hi + 1);
+        let ctx = {};
+        ['tgTao', 'tgHoanTat'].forEach(f => { ctx[f] = hiDateCtx(body.map(r => r[col[f]]), bodyTxt.map(r => (r || [])[col[f]])); });
+        let rows = [], errors = [];
+        body.forEach((r, i) => {
+            if (!r.some(c => String(c).trim() !== '')) return;              // dòng trống
+            let o = {}, t = bodyTxt[i] || [];
+            Object.entries(col).forEach(([f, ci]) => {
+                o[f] = (f === 'tgTao' || f === 'tgHoanTat') ? hiSmartDate(r[ci], t[ci], true, ctx[f]) : String(r[ci] ?? '').trim();
+            });
+            let n = hi + i + 2;
+            if (!o.soHopDong || !o.tgTao) { errors.push(`Dòng ${n}: thiếu Số HĐ hoặc TG Tạo`); return; }
+            if (!/^\d{2}\/\d{2}\/\d{4}/.test(o.tgTao) || (o.tgHoanTat && !/^\d{2}\/\d{2}\/\d{4}/.test(o.tgHoanTat))) { errors.push(`Dòng ${n} (${o.soHopDong}): thời gian phải dạng dd/mm/yyyy hh:mm:ss`); return; }
+            rows.push(o);
+        });
+        return { rows, errors, missingCols: [] };
     }
-
     async function handleImportNewData(event) {
         let file = event.target.files[0];
         event.target.value = "";
         if (!file) return;
-
-        if (!currentUser || currentUser.role !== 'superadmin') {
-            alert("Chỉ SuperAdmin mới được dùng tính năng này!");
-            return;
-        }
-        if (typeof XLSX === 'undefined') {
-            alert("Thư viện Excel chưa tải xong, vui lòng thử lại sau giây lát.");
-            return;
-        }
-
+        if (!currentUser || currentUser.role !== 'superadmin') { alert("Chỉ SuperAdmin mới được dùng tính năng này!"); return; }
+        if (typeof XLSX === 'undefined') { alert("Thư viện Excel chưa tải xong, vui lòng thử lại sau giây lát."); return; }
         try {
-            let buf = await file.arrayBuffer();
-            let wb = XLSX.read(buf, { type: 'array' });
-            let sheet = wb.Sheets[wb.SheetNames[0]];
-            let rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-            if (rawRows.length === 0) {
-                alert("File không có dữ liệu!");
-                return;
+            let wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+            let { rows, errors, missingCols } = btParseNewDataSheet(wb.Sheets[wb.SheetNames[0]]);
+            if (missingCols.length) { alert(`File thiếu cột: ${missingCols.join(', ')}.\nCần tối thiểu các cột: ${Object.values(BT_NEW_REQUIRED).join(', ')} (đúng tên như file báo cáo gốc hoặc file mẫu).`); return; }
+            if (errors.length) { alert(`File có ${errors.length} dòng lỗi, không dòng nào được nhập:\n\n` + errors.slice(0, 15).join('\n') + (errors.length > 15 ? `\n... và ${errors.length - 15} dòng lỗi khác` : '')); return; }
+            if (!rows.length) { alert("File không có dữ liệu!"); return; }
+            if (rows.length > BT_NEW_MAX_FILE) { alert(`File có ${rows.length} dòng, tối đa ${BT_NEW_MAX_FILE} dòng mỗi lần.`); return; }
+            // Tóm tắt trước khi nhập
+            let ts = rows.map(r => parseFlexibleDate(r.tgHoanTat)).filter(Boolean).map(d => d.getTime());
+            const vn = t => { let d = new Date(t); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; };
+            let range = ts.length ? `${vn(Math.min(...ts))} → ${vn(Math.max(...ts))}` : '—';
+            let future = ts.filter(t => t > Date.now() + 86400000).length;
+            if (!confirm(`Nhập MỚI ${rows.length} ca bảo trì?\nTG Hoàn Tất: ${range}${future ? `\n⚠ ${future} ca có TG Hoàn Tất ở tương lai — kiểm tra lại file` : ''}\n\nĐối tác / Đội trưởng lấy theo Nhân viên ↔ Mobinet ở tab Nhân Sự.\nCa đã có (trùng Số HĐ + TG Tạo) bỏ qua, không ghi đè.`)) return;
+            let tot = { inserted: 0, skippedExisting: 0, skippedNoKey: 0, mapped: 0, unmapped: 0 }, miss = new Map();
+            for (let i = 0; i < rows.length; i += BT_NEW_CHUNK) {
+                let res = await apiFetch("api/import/newdata", { method: "POST", body: JSON.stringify({ rows: rows.slice(i, i + BT_NEW_CHUNK) }) });
+                let r = await res.json();
+                if (!r.success) { alert(`Đợt ${i / BT_NEW_CHUNK + 1} lỗi: ${r.error || 'Import thất bại'}${i ? `\n(${i} dòng đầu đã nhập xong)` : ''}`); break; }
+                Object.keys(tot).forEach(k => tot[k] += r[k] || 0);
+                (r.unmappedList || []).forEach(x => { let k = x.nhanVien.toLowerCase(); if (!miss.has(k)) miss.set(k, Object.assign({}, x, { count: 0 })); miss.get(k).count += x.count; });
             }
-            if (rawRows.length > getImportMaxRows()) {
-                alert(`File có ${rawRows.length} dòng, vượt quá giới hạn tối đa ${getImportMaxRows()} dòng/lần import.`);
-                return;
-            }
-
-            let rows = [];
-            let errors = [];
-            rawRows.forEach((r, idx) => {
-                let soHopDong = String(r.soHopDong || "").trim();
-                let tgTao = String(r.tgTao || "").trim();
-                let rowNum = idx + 2;
-                if (!soHopDong || !tgTao) {
-                    errors.push(`Dòng ${rowNum}: thiếu soHopDong hoặc tgTao (2 khoá bắt buộc)`);
-                    return;
-                }
-                rows.push({
-                    vung: String(r.vung || "").trim(),
-                    doiTacQuanLy: String(r.doiTacQuanLy || "").trim(),
-                    doiTruong: String(r.doiTruong || "").trim(),
-                    blockQuanLy: String(r.blockQuanLy || "").trim(),
-                    soHopDong, tgTao,
-                    nhanVien: String(r.nhanVien || "").trim(),
-                    tgHoanTat: String(r.tgHoanTat || "").trim(),
-                    ghiChu: String(r.ghiChu || "").trim(),
-                    tpktCheck: String(r.tpktCheck || "").trim(),
-                    xlLai: String(r.xlLai || "").trim()
-                });
-            });
-
-            if (errors.length > 0) {
-                alert(`File có ${errors.length} dòng lỗi, vui lòng sửa lại rồi import lại:\n\n` +
-                    errors.slice(0, 15).join('\n') +
-                    (errors.length > 15 ? `\n... và ${errors.length - 15} dòng lỗi khác` : ''));
-                return;
-            }
-            if (rows.length === 0) {
-                alert("Không có dòng hợp lệ để import!");
-                return;
-            }
-
-            if (!confirm(`Xác nhận NHẬP MỚI ${rows.length} ca bảo trì vào hệ thống?\nCa nào đã tồn tại (trùng Số HĐ + tgTao) sẽ tự động bị bỏ qua, không ghi đè.`)) {
-                return;
-            }
-
-            let res = await apiFetch("api/import/newdata", {
-                method: "POST",
-                body: JSON.stringify({ rows })
-            });
-            let result = await res.json();
-
-            if (!result.success) {
-                alert(result.error || "Import thất bại, vui lòng thử lại!");
-                return;
-            }
-
-            let msg = `Nhập dữ liệu mới hoàn tất:\n${result.inserted} ca được thêm mới\n${result.skippedExisting} ca đã tồn tại (bỏ qua, không ghi đè)`;
-            if (result.skippedNoKey > 0) msg += `\n${result.skippedNoKey} dòng thiếu khoá (đã bỏ qua)`;
-            alert(msg);
-
             await refreshData();
+            btShowImportResult(tot, [...miss.values()].sort((a, b) => b.count - a.count));
         } catch (e) {
             console.error("Lỗi import dữ liệu mới:", e);
-            alert("Lỗi đọc file Excel — vui lòng dùng đúng file mẫu đã tải, không đổi tên cột!");
+            alert("Lỗi đọc file Excel — kiểm tra lại file (cần các cột Số HĐ, Nhân viên, TG Tạo, TG Hoàn Tất).");
         }
+    }
+    // ---------- Ca Chưa map: Mobinet chưa có trong Nhân Sự → thêm nhân sự ngay tại Bảo Trì ----------
+    function btFilterUnmapped() {
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('btImportResultModal')).hide();
+        document.getElementById('filterMap').value = '__UNMAPPED__';
+        filterData();
+        document.getElementById('btUnmappedPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function btRenderUnmappedPanel(on) {
+        let box = document.getElementById('btUnmappedPanel');
+        if (!on) { box.classList.add('d-none'); box.innerHTML = ''; return; }
+        let g = new Map();
+        filteredDataCache.forEach(r => { let k = (r.nhanVien || '').toLowerCase(); if (!g.has(k)) g.set(k, { nv: r.nhanVien || '', dt: r.doiTac || '', n: 0 }); g.get(k).n++; });
+        let list = [...g.values()].sort((a, b) => b.n - a.n || a.nv.localeCompare(b.nv));
+        let can = nsCanEdit();
+        box.classList.remove('d-none');
+        box.innerHTML = list.length ? `<div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2 mb-2">
+                <b><i class="bi bi-person-exclamation me-1" style="color:var(--red);"></i>${list.length} Mobinet chưa có trong Nhân Sự · ${filteredDataCache.length} ca</b>
+                <span class="small" style="color:var(--slate);">${can ? 'Thêm nhân sự (đúng Mobinet, chọn Đội trưởng) — các ca tự gắn đội ngay.' : 'Báo Đối tác quản lý / Admin thêm nhân sự để ca được gắn đội.'}</span></div>
+            <div class="bt-miss-list">${list.map(x => `<div><span class="mono">${escapeHtml(x.nv || '(trống)')}</span><span>${escapeHtml(x.dt || '—')}</span><span class="mono">${x.n} ca</span>
+                ${can && x.nv ? `<button type="button" class="filter-reset-btn bt-add-ns" data-nv="${escapeHtml(x.nv)}" data-dt="${escapeHtml(x.dt)}"><i class="bi bi-person-plus me-1"></i>Thêm nhân sự</button>` : '<span></span>'}</div>`).join('')}</div>`
+            : `<div class="small" style="color:var(--slate);"><i class="bi bi-check2-circle me-1" style="color:var(--brand);"></i>Không có ca Chưa map trong phạm vi đang lọc.</div>`;
+    }
+    document.getElementById('btUnmappedPanel').addEventListener('click', async e => {
+        let b = e.target.closest('.bt-add-ns'); if (!b) return;
+        b.disabled = true;
+        try { await nsFetchData(); } finally { b.disabled = false; }   // cần danh sách Đội trưởng cho ô chọn
+        nsOpenEditModal(null);
+        const setF = (f, v) => { let el = document.querySelector(`#nsEditFields [data-nsfield="${f}"]`); if (el && !el.disabled && v) el.value = v; };
+        setF('mobinet', b.dataset.nv); setF('doiTacQuanLy', b.dataset.dt);
+        let mob = document.querySelector('#nsEditFields [data-nsfield="mobinet"]'); if (mob) mob.readOnly = true;
+        let first = document.querySelector('#nsEditFields [data-nsfield="maNhanVien"]'); if (first) setTimeout(() => first.focus(), 300);
+    });
+    function btShowImportResult(t, miss) {
+        let box = document.getElementById('btImportResultBody');
+        box.innerHTML = `
+            <div class="bt-res-grid">
+                <div><span>Thêm mới</span><b>${t.inserted}</b></div>
+                <div><span>Đã có, bỏ qua</span><b>${t.skippedExisting}</b></div>
+                <div><span>Map được Nhân Sự</span><b style="color:var(--brand-dark);">${t.mapped}</b></div>
+                <div><span>Chưa map</span><b style="color:${t.unmapped ? 'var(--red)' : 'inherit'};">${t.unmapped}</b></div>
+            </div>
+            ${miss.length ? `<div class="small mt-3 mb-1 fw-bold">${miss.length} Mobinet chưa có trong Nhân Sự (đã nhập với Đội trưởng trống):</div>
+                <div class="bt-miss-list">${miss.map(x => `<div><span class="mono">${escapeHtml(x.nhanVien)}</span><span>${escapeHtml(x.doiTacQuanLy || '—')}</span><span class="mono">${x.count} ca</span></div>`).join('')}</div>
+                <div class="small mt-2" style="color:var(--slate);">Thêm các nhân sự này ở tab Nhân Sự (hoặc ngay trong bộ lọc "Chưa map" của Bảo Trì) — ca sẽ tự gắn đúng đội.</div>` : ''}`;
+        document.getElementById('btImportShowUnmapped').classList.toggle('d-none', !t.unmapped);
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('btImportResultModal')).show();
     }
 
     // ================== ĐỐI TÁC QUẢN LÝ: IMPORT TÀI KHOẢN CUS (role petonly) ==================
@@ -2581,7 +2645,7 @@
         });
     })();
 
-    const APP_BUILD = "2026-11-05.2";
+    const APP_BUILD = "2026-11-06.2";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -2895,13 +2959,35 @@
         document.getElementById('filterDoiTruong').value = "";
         document.getElementById('filterTpktCheck').value = "";
         document.getElementById('filterNhanVien').value = "";
+        document.getElementById('filterMap').value = "";
         document.getElementById('searchSoHopDong').value = "";
         setCurrentMonthRange('filterTgHoanTatFrom', 'filterTgHoanTatTo');
         setCurrentMonthRange('hiFilterFrom', 'hiFilterTo');
         setCurrentMonthRange('rknFilterFrom', 'rknFilterTo');
     }
 
+    // Chốt chặn tự điền (06/11/2026): trình duyệt có thể điền tên đăng nhập đã lưu vào ô tìm kiếm.
+    // Chỉ xoá trong vài giây đầu sau khi vào phiên và chỉ khi giá trị đúng bằng tên đăng nhập.
+    const SEARCH_INPUT_IDS = ['searchSoHopDong', 'hiSearch', 'iqcSearch', 'rknSearch', 'nsSearch', 'lichSearch', 'pvDirSearch'];
+    function clearAutofilledSearch() {
+        if (!currentUser || !currentUser.username) return;
+        let u = String(currentUser.username).trim().toLowerCase();
+        SEARCH_INPUT_IDS.forEach(id => {
+            let el = document.getElementById(id);
+            if (el && !el.dataset.userTyped && el.value && el.value.trim().toLowerCase() === u) { el.value = ''; el.dispatchEvent(new Event('input', { bubbles: true })); }
+        });
+    }
+    // Ô người dùng đã tự gõ / dán / bấm vào thì không xoá nữa
+    SEARCH_INPUT_IDS.forEach(id => {
+        let el = document.getElementById(id); if (!el) return;
+        ['keydown', 'paste', 'pointerdown'].forEach(ev => el.addEventListener(ev, () => { el.dataset.userTyped = '1'; }));
+    });
+    function guardSearchAutofill() { [0, 600, 1500, 2500, 4000].forEach(ms => setTimeout(clearAutofilledSearch, ms)); }
     function initSessionUI() {
+        guardSearchAutofill();
+        // Đội trưởng không thấy ca Chưa map (Đội trưởng trống) → ẩn bộ lọc Map nhân sự
+        document.getElementById('filterMapGroup').classList.toggle('d-none', !!isDoiTruongLocked());
+        let cpu = document.getElementById('cpUsername'); if (cpu && currentUser) cpu.value = currentUser.username || '';
         if (!currentUser) return;
         document.getElementById('lblCurrentUsername').innerText = currentUser.username;
         // Role "petonly" trong DB hiển thị là "cus"
@@ -3170,6 +3256,7 @@
         let doiTruong = document.getElementById('filterDoiTruong').value;
         let tpktCheckVal = document.getElementById('filterTpktCheck').value;
         let nhanVien = document.getElementById('filterNhanVien').value;
+        let onlyUnmapped = document.getElementById('filterMap').value === '__UNMAPPED__';
         let searchHDSmooth = document.getElementById('searchSoHopDong').value.trim().toLowerCase();
         let tgHoanTatFrom = document.getElementById('filterTgHoanTatFrom').value; // "YYYY-MM-DD" hoặc ""
         let tgHoanTatTo = document.getElementById('filterTgHoanTatTo').value;
@@ -3182,6 +3269,7 @@
             if (doiTac && item.doiTac !== doiTac) return false;
             if (doiTruong && item.doiTruong !== doiTruong) return false;
             if (nhanVien && item.nhanVien !== nhanVien) return false;
+            if (onlyUnmapped && item.doiTruong) return false;
 
             if (tgHoanTatFrom || tgHoanTatTo) {
                 let d = parseFlexibleDate(item.tgHoanTat);
@@ -3208,6 +3296,7 @@
 
         applySortToFilteredData();
         renderTable(filteredDataCache);
+        btRenderUnmappedPanel(onlyUnmapped);
         // Chỉ vẽ lại báo cáo (KPI + Chart.js) khi tab Bảo Trì đang mở và phần báo
         // cáo không bị thu gọn — huỷ/tạo lại biểu đồ là thao tác nặng.
         btMaybeRenderReport();
@@ -5517,6 +5606,7 @@
             if (!r.success) { alert(r.error || "Không lưu được!"); return; }
             bootstrap.Modal.getOrCreateInstance(document.getElementById('nsEditModal')).hide();
             await nsFetchData(true);
+            if (r.btRemapped > 0) await refreshData();   // ca Bảo Trì Chưa map vừa được gắn đội
         } catch (e) { console.error("Lỗi lưu Nhân sự:", e); alert("Lỗi kết nối, vui lòng thử lại!"); }
         finally { btn.disabled = false; }
     }
@@ -6218,6 +6308,7 @@
         }
         document.getElementById('filterTpktCheck').value = "";
         document.getElementById('filterNhanVien').value = "";
+        document.getElementById('filterMap').value = "";
         document.getElementById('searchSoHopDong').value = "";
         setCurrentMonthRange('filterTgHoanTatFrom', 'filterTgHoanTatTo');
         updateDependentFilters();
@@ -6237,7 +6328,7 @@
         tbody.innerHTML = "";
         
         if (data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="10" class="text-center" style="color:var(--slate);">Không có dữ liệu phù hợp</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center" style="color:var(--slate);">Không có dữ liệu phù hợp</td></tr>`;
             document.getElementById('paginationInfo').innerText = "Hiển thị 0 - 0 của 0 dòng";
             document.getElementById('paginationControls').innerHTML = "";
             return;
@@ -6345,7 +6436,6 @@
                 <td class="text-center"><input type="checkbox" class="row-checkbox" value="${row.id}" ${checkboxDisabled} ${isChecked ? 'checked' : ''} onchange="handleCheckboxChange(this)"></td>
                 <td></td>
                 <td></td>
-                <td></td>
                 <td><b></b></td>
                 <td></td>
                 <td><small></small><br><small class="mono" style="color:var(--slate-soft); font-size:11px;"></small></td>
@@ -6354,19 +6444,19 @@
                 <td>${xllaiHtml}</td>
             `;
 
-            tr.cells[1].textContent = row.vung || '';
-            tr.cells[2].textContent = row.doiTac || '';
-            tr.cells[3].textContent = row.doiTruong || '';
+            tr.cells[1].textContent = row.doiTac || '';
+            if (row.doiTruong) tr.cells[2].textContent = row.doiTruong;
+            else tr.cells[2].innerHTML = '<span class="bt-unmapped-chip" title="Nhân viên chưa có trong tab Nhân Sự (Mobinet)">Chưa map</span>';
             tr.querySelector('b').textContent = row.soHopDong || '';
-            tr.cells[5].textContent = row.nhanVien || '';
-            tr.cells[6].querySelectorAll('small')[0].textContent = tgHoanTat;
+            tr.cells[4].textContent = row.nhanVien || '';
+            tr.cells[5].querySelectorAll('small')[0].textContent = tgHoanTat;
             // "Cập nhật lần cuối" chỉ có ý nghĩa khi dòng đã từng được ai đó xử lý
             // (serverTpkt khác rỗng) — dòng còn "Chưa kiểm tra" thì ngayCapNhat chỉ
             // là thời điểm n8n import, không phải lúc người dùng thao tác.
             if (serverTpkt && row.ngayCapNhat) {
-                tr.cells[6].querySelectorAll('small')[1].textContent = `Cập nhật: ${formatDateTime(row.ngayCapNhat)}`;
+                tr.cells[5].querySelectorAll('small')[1].textContent = `Cập nhật: ${formatDateTime(row.ngayCapNhat)}`;
             }
-            tr.cells[7].querySelector('small').textContent = ghiChu;
+            tr.cells[6].querySelector('small').textContent = ghiChu;
 
             fragment.appendChild(tr);
         });
