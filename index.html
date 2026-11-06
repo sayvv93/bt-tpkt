@@ -540,6 +540,13 @@
         .lt-wp-mgr { font-size: 13px; margin-bottom: 10px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
         .pv-mgr .sw, .pv-dir .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; border: 1px solid rgba(0,0,0,.15); margin-right: 6px; vertical-align: -1px; }
         .lt-wp-asg { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+        .bt-empty-cta { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 22px; border: 0; border-radius: 999px; font-weight: 700; font-size: 14px;
+            color: #fff; background: var(--brand); box-shadow: 0 0 0 0 rgba(63,125,31,.45); animation: btCtaPulse 2s ease-out infinite; cursor: pointer; }
+        .bt-empty-cta:hover { background: var(--brand-dark); }
+        .bt-empty-cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+        .bt-empty-cta:disabled { opacity: .75; animation: none; cursor: wait; }
+        @keyframes btCtaPulse { 0% { box-shadow: 0 0 0 0 rgba(63,125,31,.45); } 70% { box-shadow: 0 0 0 12px rgba(63,125,31,0); } 100% { box-shadow: 0 0 0 0 rgba(63,125,31,0); } }
+        @media (prefers-reduced-motion: reduce) { .bt-empty-cta { animation: none; } }
         .bt-unmapped-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; color: #9A2A21; background: #FBE7E4; border: 1px solid #F1C3BD; white-space: nowrap; }
         .bt-unmapped-panel { background: var(--card); border: 1px solid #F1C3BD; border-left: 4px solid var(--red); border-radius: 10px; padding: 12px 14px; }
         .bt-miss-list { display: grid; gap: 4px; max-height: 320px; overflow-y: auto; }
@@ -2183,18 +2190,17 @@
     // đúng khoá UNIQUE (soHopDong, tgTao) + ON CONFLICT DO NOTHING để không đè
     // mất dữ liệu đã có nếu lỡ import trùng ca cũ.
     // ================== BẢO TRÌ: NHẬP DỮ LIỆU MỚI TỪ FILE GỐC (06/11/2026) ==================
-    // Đọc thẳng file báo cáo "ChiTiet-DungHen-DungHan" (hoặc file mẫu) theo TÊN CỘT, chỉ lấy cột cần thiết.
-    // Đối tác / Đội trưởng do Worker map theo Nhân viên = Mobinet ở tab Nhân Sự; không map được = "Chưa map".
+    // Đọc thẳng file báo cáo "ChiTiet-DungHen-DungHan" theo TÊN CỘT, chỉ lấy 5 cột: Số HĐ, Nhân viên, TG Tạo,
+    // TG Hoàn Tất, Ghi chú. Đối tác / Đội trưởng / Block do Worker lấy theo Nhân viên = Mobinet ở tab Nhân Sự;
+    // không map được = "Chưa map" (Đối tác suy theo tiền tố Mobinet của các nhân sự khác).
     const BT_NEW_COLS = {
         'so hd': 'soHopDong', 'so hop dong': 'soHopDong', 'sohopdong': 'soHopDong',
         'nhan vien': 'nhanVien', 'nhanvien': 'nhanVien',
         'tg tao': 'tgTao', 'tgtao': 'tgTao', 'thoi gian tao': 'tgTao',
         'tg hoan tat': 'tgHoanTat', 'tghoantat': 'tgHoanTat', 'thoi gian hoan tat': 'tgHoanTat',
         'ghi chu': 'ghiChu', 'ghichu': 'ghiChu',
-        'block quan ly': 'blockQuanLy', 'blockquanly': 'blockQuanLy',
-        'doi tac quan ly': 'doiTacFile',                         // tên Đối tác trong file gốc ("Phuong Nam DNI-02") — chỉ dự phòng
-        'doitacquanly': 'doiTacQuanLy', 'doitruong': 'doiTruong', // file mẫu cũ (vẫn nhận)
-        'tpktcheck': 'tpktCheck', 'xllai': 'xlLai'
+        // file mẫu cũ (tên cột tiếng Anh) vẫn nhận
+        'doitacquanly': 'doiTacQuanLy', 'doitruong': 'doiTruong', 'blockquanly': 'blockQuanLy', 'tpktcheck': 'tpktCheck', 'xllai': 'xlLai'
     };
     const BT_NEW_REQUIRED = { soHopDong: 'Số HĐ', nhanVien: 'Nhân viên', tgTao: 'TG Tạo', tgHoanTat: 'TG Hoàn Tất' };
     const btHdrKey = h => String(h ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase().replace(/\s+/g, ' ').trim();
@@ -2202,11 +2208,11 @@
     function downloadNewDataTemplate() {
         if (typeof XLSX === 'undefined') { alert("Thư viện Excel chưa tải xong, vui lòng thử lại sau giây lát."); return; }
         let ws = XLSX.utils.aoa_to_sheet([
-            ['Số HĐ', 'Nhân viên', 'TG Tạo', 'TG Hoàn Tất', 'Ghi chú', 'Block quản lý', 'Đối tác quản lý'],
-            ['DNAAA0099', 'DNI02.PHUOCND', '05/11/2026 10:49:32', '05/11/2026 13:58:30', 'Ví dụ ghi chú ca bảo trì', 'Phuong Long Khanh-001', 'Phuong Nam DNI-02']
+            ['Số HĐ', 'Nhân viên', 'TG Tạo', 'TG Hoàn Tất', 'Ghi chú'],
+            ['DNAAA0099', 'DNI02.PHUOCND', '05/11/2026 10:49:32', '05/11/2026 13:58:30', 'Ví dụ ghi chú ca bảo trì']
         ]);
         Object.keys(ws).forEach(k => { if (k[0] !== '!') ws[k].t = 's'; });
-        ws['!cols'] = [{ wch: 14 }, { wch: 18 }, { wch: 20 }, { wch: 20 }, { wch: 40 }, { wch: 22 }, { wch: 20 }];
+        ws['!cols'] = [{ wch: 14 }, { wch: 18 }, { wch: 20 }, { wch: 20 }, { wch: 40 }];
         let wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "ChiTiet-DungHen-DungHan");
         XLSX.writeFile(wb, "mau_import_bao_tri.xlsx");
@@ -2257,7 +2263,7 @@
             const vn = t => { let d = new Date(t); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; };
             let range = ts.length ? `${vn(Math.min(...ts))} → ${vn(Math.max(...ts))}` : '—';
             let future = ts.filter(t => t > Date.now() + 86400000).length;
-            if (!confirm(`Nhập MỚI ${rows.length} ca bảo trì?\nTG Hoàn Tất: ${range}${future ? `\n⚠ ${future} ca có TG Hoàn Tất ở tương lai — kiểm tra lại file` : ''}\n\nĐối tác / Đội trưởng lấy theo Nhân viên ↔ Mobinet ở tab Nhân Sự.\nCa đã có (trùng Số HĐ + TG Tạo) bỏ qua, không ghi đè.`)) return;
+            if (!confirm(`Nhập MỚI ${rows.length} ca bảo trì?\nTG Hoàn Tất: ${range}${future ? `\n⚠ ${future} ca có TG Hoàn Tất ở tương lai — kiểm tra lại file` : ''}\n\nĐối tác / Đội trưởng / Block lấy theo Nhân viên ↔ Mobinet ở tab Nhân Sự.\nCa đã có (trùng Số HĐ + TG Tạo) bỏ qua, không ghi đè.`)) return;
             let tot = { inserted: 0, skippedExisting: 0, skippedNoKey: 0, mapped: 0, unmapped: 0 }, miss = new Map();
             for (let i = 0; i < rows.length; i += BT_NEW_CHUNK) {
                 let res = await apiFetch("api/import/newdata", { method: "POST", body: JSON.stringify({ rows: rows.slice(i, i + BT_NEW_CHUNK) }) });
@@ -2645,7 +2651,7 @@
         });
     })();
 
-    const APP_BUILD = "2026-11-06.2";
+    const APP_BUILD = "2026-11-06.3";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -2770,6 +2776,25 @@
     }).observe(document.body, { childList: true, subtree: true });
     function isRestrictedRole() { return !!currentUser && (currentUser.role === 'petonly' || currentUser.role === 'hr'); }
 
+    // Lưu bản sao dataBT vào localStorage để mở trang nhanh. Sự cố 06/11/2026: dữ liệu vượt hạn mức (~5MB,
+    // Ghi chú dài từ file gốc) → setItem ném QuotaExceededError → refreshData nhảy vào catch, bỏ qua bước vẽ
+    // (bảng trống tới khi bấm "Đặt lại"). Giờ lưu không được thì bỏ hẳn bộ nhớ đệm + mốc đồng bộ (lần sau tải đủ).
+    function btSaveCache() {
+        try {
+            localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
+            localStorage.setItem('tpkt_last_sync_ts', lastSyncTimestamp || '');
+        } catch (e) {
+            try { localStorage.removeItem('tpkt_cached_dataBT'); localStorage.removeItem('tpkt_last_sync_ts'); } catch (e2) {}
+        }
+    }
+    // Nút gợi ý khi danh sách trống: đặt lại bộ lọc về tháng này + tải lại đủ dữ liệu từ máy chủ
+    async function btResetAndReload(btn) {
+        if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Đang tải lại…'; }
+        lastSyncTimestamp = null;           // tải đủ, không chỉ phần thay đổi
+        resetFilters();
+        await refreshData();
+        filterData();
+    }
     async function refreshData() {
         if (!currentUser || !currentUser.username || isRestrictedRole()) return;
         if (document.hidden && globalData.length) return; // tab đang ẩn: không tải ngầm (khi hiện lại sẽ tải ngay)
@@ -2828,8 +2853,7 @@
 
             globalData = Object.values(existingById);
 
-            localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
-            localStorage.setItem('tpkt_last_sync_ts', lastSyncTimestamp || '');
+            btSaveCache();
             updateLastSyncedLabel();
 
             initFilters(globalData);
@@ -6328,7 +6352,10 @@
         tbody.innerHTML = "";
         
         if (data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" class="text-center" style="color:var(--slate);">Không có dữ liệu phù hợp</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4" style="color:var(--slate);">
+                <div class="mb-2">${globalData.length ? 'Không có ca nào khớp bộ lọc đang chọn.' : 'Chưa tải được dữ liệu ca bảo trì.'}</div>
+                <button type="button" class="bt-empty-cta" onclick="btResetAndReload(this)"><i class="bi bi-arrow-repeat me-2" aria-hidden="true"></i>Đặt lại bộ lọc &amp; tải lại dữ liệu</button>
+            </td></tr>`;
             document.getElementById('paginationInfo').innerText = "Hiển thị 0 - 0 của 0 dòng";
             document.getElementById('paginationControls').innerHTML = "";
             return;
@@ -6892,7 +6919,7 @@
             updateBatchBar();
             
             updateRecord(rowId, "Bảo trì ok", "");
-            localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
+            btSaveCache();
         }
     }
 
@@ -6913,7 +6940,7 @@
             }
             
             updateRecord(rowId, tpktVal, xllaiVal);
-            localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
+            btSaveCache();
             
             if (xllaiVal !== "Đã xử lý lại" && xllaiVal !== "Checklist Onsite") {
                 renderTable(filteredDataCache);
@@ -6939,7 +6966,7 @@
             }
         });
 
-        localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
+        btSaveCache();
         updateBatchBar(); 
         filterData();
     }
@@ -6973,7 +7000,7 @@
             }
         });
 
-        localStorage.setItem('tpkt_cached_dataBT', JSON.stringify(globalData));
+        btSaveCache();
         updateBatchBar(); 
         filterData();
     }
