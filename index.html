@@ -736,7 +736,18 @@
             .q4-countdown-pill { display: none; }
         }
         @media (prefers-reduced-motion: reduce) { .app-side { transition: none; } }
-    </style>
+    /* SuperAdmin sửa / xoá trên từng dòng (12/11/2026) */
+.row-act { display:inline-grid; place-items:center; width:32px; height:32px; border:1px solid transparent; border-radius:8px; background:transparent; color:var(--brand); font-size:15px; cursor:pointer; transition:background .15s, border-color .15s; }
+.row-act + .row-act { margin-left:4px; }
+.row-act:hover { background:var(--brand-soft, #EAF3EC); border-color:currentColor; }
+.row-act.is-del { color:var(--red); }
+.row-act.is-del:hover { background:#FBECEB; }
+.row-act:focus-visible, .chat-del:focus-visible { outline:2px solid var(--brand); outline-offset:2px; }
+@media (pointer:coarse) { .row-act { width:40px; height:40px; } }
+.chat-del { border:0; background:transparent; color:var(--slate-soft); margin-left:6px; padding:2px 6px; border-radius:6px; font-size:12px; cursor:pointer; }
+.chat-del:hover { color:var(--red); background:#FBECEB; }
+@media (pointer:coarse) { .chat-del { padding:8px 10px; } }
+</style>
 </head>
 <body>
 
@@ -1166,10 +1177,11 @@
                             <th>Ghi chú</th>
                             <th style="width: 230px;">TPKT CHECK</th>
                             <th style="width: 230px;">XL LẠI</th>
+                            <th class="text-end d-none" id="btActTh" style="width:72px;">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <tr><td colspan="9" class="text-center">Đang tải dữ liệu...</td></tr>
+                        <tr><td colspan="10" class="text-center">Đang tải dữ liệu...</td></tr>
                     </tbody>
                 </table>
                 </div>
@@ -1972,6 +1984,67 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
                     <button type="button" class="btn btn-sm text-white" style="background:var(--brand);" id="hiEditSaveBtn" onclick="hiSaveEdit()">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Mã xác nhận xoá (SuperAdmin) — mã chỉ được kiểm ở Worker -->
+    <div class="modal fade" id="pinModal" tabindex="-1" aria-labelledby="pinModalTitle">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+            <form class="modal-content" id="pinForm" autocomplete="off" onsubmit="event.preventDefault(); pinSubmit();">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold" id="pinModalTitle"><i class="bi bi-shield-lock me-2" style="color:var(--red);" aria-hidden="true"></i>Xác nhận xoá</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small mb-3" id="pinTarget" style="color:var(--slate);"></p>
+                    <label for="pinInput" class="small fw-bold mb-1" style="color:var(--slate);">Mã xác nhận xoá</label>
+                    <input type="password" class="form-control mono" id="pinInput" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="Nhập mã bí mật" aria-describedby="pinErr">
+                    <div class="small mt-2" id="pinErr" role="alert" style="color:var(--red); min-height:1.2em;"></div>
+                    <div class="small" style="color:var(--slate-soft);">Thao tác không thể hoàn tác.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-sm btn-danger" id="pinSubmitBtn"><i class="bi bi-trash me-1" aria-hidden="true"></i>Xoá</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: SuperAdmin sửa ca Bảo Trì -->
+    <div class="modal fade" id="btEditModal" tabindex="-1" aria-labelledby="btEditTitle">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold" id="btEditTitle">Sửa ca Bảo Trì</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-2" id="btEditFields"></div>
+                    <div class="small mt-2" style="color:var(--slate-soft);">Đổi Số HĐ / TG Tạo không được trùng ca khác. Đổi XL Lại sẽ ghi vào Nhật ký XL Lại.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="button" class="btn btn-sm text-white" style="background:var(--brand);" id="btEditSaveBtn" onclick="btSaveEdit()">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SuperAdmin sửa ca IQC & Đầu Vào -->
+    <div class="modal fade" id="iqcEditModal" tabindex="-1" aria-labelledby="iqcEditTitle">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold" id="iqcEditTitle">Sửa ca IQC</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body"><div class="row g-2" id="iqcEditFields"></div>
+                    <div class="small mt-2" style="color:var(--slate-soft);">Đối tác / Đội trưởng tự lấy theo Nhân viên = Mobinet ở tab Nhân Sự.</div></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="button" class="btn btn-sm text-white" style="background:var(--brand);" id="iqcEditSaveBtn" onclick="iqcSaveEdit()">Lưu</button>
                 </div>
             </div>
         </div>
@@ -2814,7 +2887,7 @@
         });
     })();
 
-    const APP_BUILD = "2026-11-12.1";
+    const APP_BUILD = "2026-11-12.2";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -2977,7 +3050,7 @@
 
             let incoming = res.dataBT || [];
             // Không có thay đổi: khỏi ghi lại cache, dựng lại bộ lọc và vẽ lại bảng
-            if (wasIncremental && incoming.length === 0) { updateLastSyncedLabel(); return; }
+            if (wasIncremental && incoming.length === 0 && !res.full) { updateLastSyncedLabel(); return; }
 
             // Giữ lại các dòng đang thao tác dở (đã chọn TPKT Check nhưng CHƯA bấm
             // Gửi — row._modified) thay vì để bản mới từ server ghi đè mất lựa chọn
@@ -2989,7 +3062,13 @@
             // Merge (upsert) thay vì thay thế toàn bộ mảng — vì "incoming" giờ chỉ
             // là phần THAY ĐỔI, không phải toàn bộ dữ liệu.
             let existingById = {};
-            globalData.forEach(item => { existingById[item.id] = item; });
+            // res.full: có ca vừa bị SuperAdmin xoá → máy chủ gửi lại toàn bộ, bỏ cache cũ (chỉ giữ dòng đang thao tác dở còn tồn tại)
+            if (res.full) {
+                let alive = new Set(incoming.map(x => String(x.id)));
+                Object.values(pendingLocalEdits).forEach(item => { if (alive.has(String(item.id))) existingById[item.id] = item; });
+            } else {
+                globalData.forEach(item => { existingById[item.id] = item; });
+            }
 
             incoming.forEach(item => {
                 if (pendingLocalEdits[item.id]) return;
@@ -2999,6 +3078,7 @@
                     vung: item.vung || "",
                     doiTac: item.doiTacQuanLy || "",
                     doiTruong: item.doiTruong || "",
+                    blockQuanLy: item.blockQuanLy || "",
                     soHopDong: item.soHopDong || "",
                     nhanVien: item.nhanVien || "",
                     tgTao: item.tgTao || "",
@@ -3014,6 +3094,8 @@
                 }
             });
 
+            // Sau khi nhận toàn bộ: dời mốc đồng bộ qua thời điểm xoá, nếu không lần sau lại bị trả toàn bộ
+            if (res.full && res.syncAt && (!lastSyncTimestamp || res.syncAt > lastSyncTimestamp)) lastSyncTimestamp = res.syncAt;
             globalData = Object.values(existingById);
 
             btSaveCache();
@@ -3612,6 +3694,13 @@
             let response = await apiFetch("api/chat/messages?since_id=" + lastChatId, { method: "GET" });
             let res = await response.json();
             let newMsgs = (res && res.messages) ? res.messages : [];
+            // Tin SuperAdmin đã xoá: gỡ khỏi màn hình
+            let gone = new Set((res && Array.isArray(res.deleted)) ? res.deleted : []);
+            if (gone.size && chatMessages.some(m => gone.has(m.id))) {
+                chatMessages = chatMessages.filter(m => !gone.has(m.id));
+                if (isChatTabActive() && newMsgs.length === 0) renderChatMessages();
+            }
+            newMsgs = newMsgs.filter(m => !gone.has(m.id));
             if (newMsgs.length === 0) return;
 
             chatMessages = chatMessages.concat(newMsgs);
@@ -3635,19 +3724,21 @@
             body.innerHTML = '<div class="text-center small py-4" style="color:var(--slate);">Chưa có tin nhắn nào.</div>';
             return;
         }
+        let canDel = isSuperAdmin();
+        const delBtn = m => canDel ? `<button type="button" class="chat-del" onclick="chatDeleteMsg(${m.id})" title="Xoá tin" aria-label="Xoá tin của ${escapeHtml(m.username)}"><i class="bi bi-trash" aria-hidden="true"></i></button>` : '';
         body.innerHTML = chatMessages.map(m => {
             let isOwn = currentUser && m.username === currentUser.username;
             if (CHAT_LOG_USERS.includes(m.username)) {
                 return `
                     <div class="chat-bubble" style="align-self:center; max-width:92%; width:100%;">
-                        <div class="chat-meta"><i class="bi bi-journal-text me-1"></i>${escapeHtml(m.username)} · ${formatDateTime(m.created_at)}</div>
+                        <div class="chat-meta"><i class="bi bi-journal-text me-1"></i>${escapeHtml(m.username)} · ${formatDateTime(m.created_at)}${delBtn(m)}</div>
                         <div class="chat-text" style="display:block; background:#EEF4FB; border-color:#C9DAEE; font-family:'IBM Plex Mono', monospace; font-size:12px;">${escapeHtml(m.message)}</div>
                     </div>
                 `;
             }
             return `
                 <div class="chat-bubble ${isOwn ? 'is-own' : ''}">
-                    <div class="chat-meta">${escapeHtml(m.username)} · ${formatDateTime(m.created_at)}</div>
+                    <div class="chat-meta">${escapeHtml(m.username)} · ${formatDateTime(m.created_at)}${delBtn(m)}</div>
                     <div class="chat-text">${escapeHtml(m.message)}</div>
                 </div>
             `;
@@ -4337,10 +4428,7 @@
                     <td class="small">${escapeHtml(r.loaiGiaoDich || '')}</td>
                     <td>${hiTag(r.phanLoaiGui, hiIsSent(r) ? 'ok' : 'neutral')}</td>
                     <td>${hiTag(r.tuongTac, hiIsInteract(r) ? 'ok' : (hiIsSent(r) ? 'no' : 'neutral'))}</td>
-                    ${isSA ? `<td class="text-end text-nowrap">
-                        <button class="btn btn-sm btn-link p-0 me-2" title="Sửa" onclick="hiOpenEditModal(${r.id})"><i class="bi bi-pencil-square"></i></button>
-                        <button class="btn btn-sm btn-link p-0 text-danger" title="Xoá" onclick="hiDeleteRow(${r.id})"><i class="bi bi-trash"></i></button>
-                    </td>` : ''}
+                    ${isSA ? `<td class="text-end text-nowrap">${rowActBtns('hiOpenEditModal', 'hiDeleteRow', r.id, r.soHopDong)}</td>` : ''}
                 </tr>`).join('');
         document.getElementById('hiDetailTable').innerHTML = head + `<tbody>${body}</tbody>`;
         // Phân trang gọn: đầu, cuối, và quanh trang hiện tại
@@ -4699,13 +4787,8 @@
 
     async function hiDeleteRow(id) {
         let row = hiData.find(r => r.id === id);
-        if (!row || !confirm(`Xoá dòng ${row.soHopDong} (${row.ngayHoanTat})? Không thể hoàn tác.`)) return;
-        try {
-            let res = await apiFetch("api/hi/delete", { method: "POST", body: JSON.stringify({ id }) });
-            let r = await res.json();
-            if (!r.success) { alert(r.error || "Không xoá được!"); return; }
-            await hiFetchData(true);
-        } catch (e) { console.error("Lỗi xoá HI FPT:", e); }
+        if (!row) return;
+        if (await deleteRowConfirmed("api/hi/delete", id, `dòng HI FPT ${row.soHopDong} (${row.ngayHoanTat})`)) await hiFetchData(true);
     }
 
     // ---------- Biểu đồ báo cáo (dành cho Ban giám đốc xem) ----------
@@ -5562,12 +5645,8 @@
     }
     async function rknDeleteRow(id) {
         let row = rknData.find(r => r.id === id);
-        if (!row || !confirm(`Xoá ca ${row.soHopDong} (${row.ngayData})? Không thể hoàn tác.`)) return;
-        try {
-            let r = await (await apiFetch("api/rkn/delete", { method: "POST", body: JSON.stringify({ id }) })).json();
-            if (!r.success) { alert(r.error || "Không xoá được!"); return; }
-            await rknFetchData(true);
-        } catch (e) { console.error("Lỗi xoá SH & RKN:", e); }
+        if (!row) return;
+        if (await deleteRowConfirmed("api/rkn/delete", id, `ca SH & RKN ${row.soHopDong} (${row.ngayData})`)) await rknFetchData(true);
     }
 
     document.getElementById('rkn-tab').addEventListener('shown.bs.tab', () => rknFetchData(false));
@@ -5723,7 +5802,7 @@
         let slice = rows.slice((nsPage - 1) * NS_PAGE_SIZE, nsPage * NS_PAGE_SIZE);
         let canEdit = nsCanEdit(), isAdmin = nsIsAdmin();
         document.getElementById('nsDetailCount').textContent = `— ${rows.length.toLocaleString('vi-VN')} người`;
-        document.getElementById('nsDetailTable').innerHTML = `<thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Block</th><th>Mobinet</th><th class="text-center">Bậc</th><th>SaleClub</th><th>Mã NV</th><th>Tên</th><th>Ngày vào CT</th><th>Thâm niên</th><th>MBP</th><th>Mail</th><th>Trạng thái</th><th>Note</th>${canEdit ? '<th class="text-end">Sửa</th>' : ''}</tr></thead><tbody>` +
+        document.getElementById('nsDetailTable').innerHTML = `<thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Block</th><th>Mobinet</th><th class="text-center">Bậc</th><th>SaleClub</th><th>Mã NV</th><th>Tên</th><th>Ngày vào CT</th><th>Thâm niên</th><th>MBP</th><th>Mail</th><th>Trạng thái</th><th>Note</th>${canEdit ? `<th class="text-end">${isAdmin ? 'Thao tác' : 'Sửa'}</th>` : ''}</tr></thead><tbody>` +
             (slice.length ? slice.map(r => `<tr>
                 <td>${escapeHtml(r.doiTacQuanLy || '')}</td><td class="small">${escapeHtml(r.doiTruong || '')}</td><td class="small">${escapeHtml(r.blockQuanLy || '')}</td>
                 <td class="small mono">${escapeHtml(r.mobinet || '')}</td><td class="text-center fw-bold">${escapeHtml(r.bac || '')}</td><td class="small mono">${escapeHtml(r.saleClub || '')}</td>
@@ -5732,7 +5811,7 @@
                 <td class="small text-nowrap" style="${r._bucket === 'lt6' ? 'color:var(--amber);font-weight:700;' : ''}">${nsTenureText(r.ngayVaoCT)}</td>
                 <td class="small mono">${escapeHtml(r.mbp || '')}</td><td class="small">${escapeHtml(r.mail || '')}</td><td class="small">${nsIsOff(r) ? '<span class="hi-tag no">OFF · đã nghỉ</span>' : '<span class="hi-tag ok">ON</span>'}</td>
                 <td class="small" style="max-width:260px; white-space:normal;">${escapeHtml(r.note || '')}</td>
-                ${canEdit ? `<td class="text-end text-nowrap"><button class="btn btn-sm btn-link p-0 me-2" title="Sửa" onclick="nsOpenEditModal(${r.id})"><i class="bi bi-pencil-square"></i></button>${isAdmin ? `<button class="btn btn-sm btn-link p-0 text-danger" title="Xoá" onclick="nsDeleteRow(${r.id})"><i class="bi bi-trash"></i></button>` : ''}</td>` : ''}
+                ${canEdit ? `<td class="text-end text-nowrap">${isAdmin ? rowActBtns('nsOpenEditModal', 'nsDeleteRow', r.id, r.ten) : `<button type="button" class="row-act" title="Sửa" aria-label="Sửa ${escapeHtml(r.ten || '')}" onclick="nsOpenEditModal(${r.id})"><i class="bi bi-pencil-square" aria-hidden="true"></i></button>`}</td>` : ''}
             </tr>`).join('') : `<tr><td colspan="15" class="text-center py-4 small" style="color:var(--slate);">Chưa có dữ liệu.</td></tr>`) + '</tbody>';
         let nums = [...new Set([1, pages, nsPage - 1, nsPage, nsPage + 1].filter(n => n >= 1 && n <= pages))].sort((a, b) => a - b);
         let html = '', prev = 0;
@@ -5805,10 +5884,8 @@
     }
     async function nsDeleteRow(id) {
         let row = nsData.find(r => r.id === id);
-        if (!row || !confirm(`Xoá nhân sự ${row.ten} (${row.maNhanVien})?`)) return;
-        let r = await (await apiFetch("api/ns/delete", { method: "POST", body: JSON.stringify({ id }) })).json();
-        if (!r.success) { alert(r.error || "Không xoá được!"); return; }
-        await nsFetchData(true);
+        if (!row) return;
+        if (await deleteRowConfirmed("api/ns/delete", id, `nhân sự ${row.ten} (${row.maNhanVien})`)) await nsFetchData(true);
     }
 
     function nsExportExcel() {
@@ -6323,7 +6400,7 @@
             return `<select class="form-select form-select-sm iqc-sel ${cls}" data-id="${r.id}" data-field="${f}" ${isCus ? 'disabled' : ''} aria-label="${f === 'checkIQC' ? 'Check IQC' : 'Check Đầu Vào'} ${escapeHtml(r.soHopDong)}">
                 ${IQC_VALUES.map(v => `<option ${v === r[f] ? 'selected' : ''}>${v}</option>`).join('')}</select>`;
         };
-        document.getElementById('iqcDetailTable').innerHTML = `<thead><tr><th>Đối tác / Đội trưởng</th><th>Số HĐ</th><th>Ngày hoàn tất PTC</th><th>Nhân viên</th><th style="min-width:220px;">Ghi chú</th><th>Check IQC</th><th>Check Đầu Vào</th><th style="min-width:230px;">Ghi chú đội trưởng</th>${isAdmin ? '<th class="text-end">Xoá</th>' : ''}</tr></thead><tbody>` +
+        document.getElementById('iqcDetailTable').innerHTML = `<thead><tr><th>Đối tác / Đội trưởng</th><th>Số HĐ</th><th>Ngày hoàn tất PTC</th><th>Nhân viên</th><th style="min-width:220px;">Ghi chú</th><th>Check IQC</th><th>Check Đầu Vào</th><th style="min-width:230px;">Ghi chú đội trưởng</th>${isAdmin ? `<th class="text-end">${isSuperAdmin() ? 'Thao tác' : 'Xoá'}</th>` : ''}</tr></thead><tbody>` +
             (slice.length ? slice.map(r => `<tr>
                 <td>${iqcUnmapped(r) ? '<span class="hi-tag no">Chưa map</span>' : `<span class="fw-semibold">${escapeHtml(r.doiTacQuanLy)}</span><br><span class="small">${escapeHtml(r.doiTruong || '')}</span>`}</td>
                 <td class="fw-bold mono">${escapeHtml(r.soHopDong)}</td><td class="mono small">${escapeHtml(r.ngayHoanTat || '')}</td>
@@ -6333,7 +6410,7 @@
                 <td>${isCus ? `<span class="small" style="white-space:normal;">${escapeHtml(r.dtNote || '')}</span>` : `<div class="d-flex gap-1"><input type="text" class="form-control form-control-sm iqc-note" data-id="${r.id}" maxlength="${IQC_NOTE_MAX}" value="${escapeHtml(r.dtNote || '')}" placeholder="Nhập ghi chú..." aria-label="Ghi chú đội trưởng ${escapeHtml(r.soHopDong)}">
                     <button class="btn btn-sm btn-outline-success iqc-note-save d-none" data-id="${r.id}" title="Lưu ghi chú" aria-label="Lưu ghi chú"><i class="bi bi-check-lg"></i></button></div>`}
                     <div class="small mt-1" style="color:var(--slate-soft);">${r.updatedBy ? `${escapeHtml(r.updatedBy)} · ${formatDateTime(r.ngayCapNhat)}` : ''}</div></td>
-                ${isAdmin ? `<td class="text-end"><button class="btn btn-sm btn-link p-0 text-danger" title="Xoá" aria-label="Xoá ca ${escapeHtml(r.soHopDong)}" onclick="iqcDeleteRow(${r.id})"><i class="bi bi-trash"></i></button></td>` : ''}
+                ${isAdmin ? `<td class="text-end text-nowrap">${isSuperAdmin() ? rowActBtns('iqcOpenEdit', 'iqcDeleteRow', r.id, r.soHopDong) : `<button class="btn btn-sm btn-link p-0 text-danger" title="Xoá" aria-label="Xoá ca ${escapeHtml(r.soHopDong)}" onclick="iqcDeleteRow(${r.id})"><i class="bi bi-trash"></i></button>`}</td>` : ''}
             </tr>`).join('') : `<tr><td colspan="9" class="text-center py-4 small" style="color:var(--slate);">${iqcData.length ? 'Không còn ca nào cần xử lý trong khoảng đang lọc 🎉' : 'Chưa có dữ liệu.'}</td></tr>`) + '</tbody>';
         let nums = [...new Set([1, pages, iqcPage - 1, iqcPage, iqcPage + 1].filter(n => n >= 1 && n <= pages))].sort((a, b) => a - b);
         let html = '', prev = 0;
@@ -6502,10 +6579,38 @@
     }
     async function iqcDeleteRow(id) {
         let row = iqcData.find(r => r.id === id);
-        if (!row || !confirm(`Xoá ca ${row.soHopDong} (${row.ngayHoanTat})?`)) return;
-        let r = await (await apiFetch("api/iqc/delete", { method: "POST", body: JSON.stringify({ id }) })).json();
-        if (!r.success) { alert(r.error || "Không xoá được!"); return; }
-        iqcFetchData(true);
+        if (!row) return;
+        if (await deleteRowConfirmed("api/iqc/delete", id, `ca IQC ${row.soHopDong} (${row.ngayHoanTat})`)) iqcFetchData(true);
+    }
+    // ---------- SuperAdmin: sửa đủ cột 1 ca IQC ----------
+    let iqcEditingId = null;
+    function iqcOpenEdit(id) {
+        let row = iqcData.find(r => r.id === id);
+        if (!row) return;
+        iqcEditingId = id;
+        document.getElementById('iqcEditTitle').textContent = `Sửa ca IQC — ${row.soHopDong}`;
+        const inp = (f, label, ph = '') => `<div class="col-md-6"><label class="small fw-bold mb-1" style="color:var(--slate);" for="iqcE_${f}">${label}</label>
+            <input type="text" class="form-control form-control-sm" id="iqcE_${f}" data-iqcfield="${f}" value="${escapeHtml(row[f] || '')}" placeholder="${ph}"></div>`;
+        const sel = (f, label) => `<div class="col-md-6"><label class="small fw-bold mb-1" style="color:var(--slate);" for="iqcE_${f}">${label}</label>
+            <select class="form-select form-select-sm" id="iqcE_${f}" data-iqcfield="${f}">${IQC_VALUES.map(v => `<option ${v === row[f] ? 'selected' : ''}>${v}</option>`).join('')}</select></div>`;
+        document.getElementById('iqcEditFields').innerHTML = inp('soHopDong', 'Số HĐ *') + inp('ngayHoanTat', 'Ngày hoàn tất PTC *', 'dd/mm/yyyy') +
+            inp('nhanVien', 'Nhân viên (Mobinet)') + sel('checkIQC', 'Check IQC') + sel('checkDauVao', 'Check Đầu Vào') + inp('dtNote', 'Ghi chú đội trưởng') +
+            `<div class="col-12"><label class="small fw-bold mb-1" style="color:var(--slate);" for="iqcE_ghiChu">Ghi chú</label>
+            <textarea class="form-control form-control-sm" id="iqcE_ghiChu" data-iqcfield="ghiChu" rows="3" maxlength="2000">${escapeHtml(row.ghiChu || '')}</textarea></div>`;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('iqcEditModal')).show();
+    }
+    async function iqcSaveEdit() {
+        let row = {};
+        document.querySelectorAll('#iqcEditFields [data-iqcfield]').forEach(i => row[i.dataset.iqcfield] = i.value.trim());
+        if (!row.soHopDong || !/^\d{2}\/\d{2}\/\d{4}/.test(row.ngayHoanTat)) { alert("Cần nhập Số HĐ và Ngày hoàn tất dạng dd/mm/yyyy"); return; }
+        let btn = document.getElementById('iqcEditSaveBtn'); btn.disabled = true;
+        try {
+            let r = await (await apiFetch("api/iqc/edit", { method: "POST", body: JSON.stringify({ id: iqcEditingId, row }) })).json();
+            if (!r.success) { alert(r.error || "Không lưu được!"); return; }
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('iqcEditModal')).hide();
+            iqcFetchData(true);
+        } catch (e) { console.error("Lỗi sửa IQC:", e); alert("Lỗi kết nối, vui lòng thử lại!"); }
+        finally { btn.disabled = false; }
     }
     document.getElementById('iqc-tab').addEventListener('shown.bs.tab', () => iqcFetchData(false));
 
@@ -6526,8 +6631,127 @@
         filterData();
     }
 
+    // ================== SUPERADMIN SỬA / XOÁ TRỰC TIẾP (từ 12/11/2026) ==================
+    const isSuperAdmin = () => !!currentUser && currentUser.role === 'superadmin';
+    function rowActBtns(editFn, delFn, id, label) {
+        let l = escapeHtml(label || '');
+        return `<button type="button" class="row-act" title="Sửa" aria-label="Sửa ${l}" onclick="${editFn}(${id})"><i class="bi bi-pencil-square" aria-hidden="true"></i></button>` +
+            `<button type="button" class="row-act is-del" title="Xoá" aria-label="Xoá ${l}" onclick="${delFn}(${id})"><i class="bi bi-trash" aria-hidden="true"></i></button>`;
+    }
+    // Xoá 1 dòng. SuperAdmin: hỏi mã xác nhận (Worker kiểm, mã không nằm trong trang) — sai thì nhập lại ngay trong hộp.
+    // Vai trò khác: hỏi confirm() như trước. Trả true khi đã xoá.
+    let pinPending = null;
+    function deleteRowConfirmed(path, id, label) {
+        if (!isSuperAdmin()) {
+            if (!confirm(`Xoá ${label}? Không thể hoàn tác.`)) return Promise.resolve(false);
+            return apiFetch(path, { method: "POST", body: JSON.stringify({ id }) }).then(r => r.json()).then(r => {
+                if (!r.success) { alert(r.error || "Không xoá được!"); return false; }
+                return true;
+            }).catch(e => { console.error("Lỗi xoá:", e); alert("Lỗi kết nối, vui lòng thử lại!"); return false; });
+        }
+        return new Promise(resolve => {
+            pinPending = { path, id, resolve, done: false };
+            document.getElementById('pinTarget').textContent = `Xoá ${label}.`;
+            document.getElementById('pinInput').value = '';
+            document.getElementById('pinErr').textContent = '';
+            document.getElementById('pinSubmitBtn').disabled = false;
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('pinModal')).show();
+        });
+    }
+    async function pinSubmit() {
+        let p = pinPending; if (!p || p.done) return;
+        let input = document.getElementById('pinInput'), err = document.getElementById('pinErr'), btn = document.getElementById('pinSubmitBtn');
+        let pin = input.value.trim();
+        if (!pin) { err.textContent = 'Nhập mã xác nhận để xoá.'; input.focus(); return; }
+        btn.disabled = true; err.textContent = '';
+        try {
+            let r = await (await apiFetch(p.path, { method: "POST", body: JSON.stringify({ id: p.id, pin }) })).json();
+            if (r.success) {
+                p.done = true;
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('pinModal')).hide();
+                p.resolve(true);
+                return;
+            }
+            err.textContent = r.error || 'Không xoá được.';
+            input.value = ''; input.focus();
+        } catch (e) { console.error("Lỗi xoá:", e); err.textContent = 'Lỗi kết nối, vui lòng thử lại.'; }
+        finally { if (!p.done) btn.disabled = false; }
+    }
+    document.getElementById('pinModal').addEventListener('shown.bs.modal', () => document.getElementById('pinInput').focus());
+    document.getElementById('pinModal').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('pinInput').value = '';
+        if (pinPending && !pinPending.done) { pinPending.done = true; pinPending.resolve(false); }
+        pinPending = null;
+    });
+
+    // ---------- Bảo Trì: sửa đủ cột / xoá 1 ca ----------
+    const BT_TPKT_OPTS = ["Chưa kiểm tra", "Bảo trì ok", "Suy hao", "Không tín hiệu", "Rớt kết nối", "Vùng phủ không đảm bảo"];
+    const BT_XLLAI_OPTS = ["", "Chuyển KTV XL lại", "Đã xử lý lại", "Checklist Onsite"];
+    let btEditingId = null;
+    function btOpenEdit(id) {
+        let row = globalData.find(r => String(r.id) === String(id));
+        if (!row) return;
+        btEditingId = row.id;
+        document.getElementById('btEditTitle').textContent = `Sửa ca Bảo Trì — ${row.soHopDong}`;
+        const inp = (f, label, v, ph = '') => `<div class="col-md-6"><label class="small fw-bold mb-1" style="color:var(--slate);" for="btE_${f}">${label}</label>
+            <input type="text" class="form-control form-control-sm" id="btE_${f}" data-btfield="${f}" value="${escapeHtml(v || '')}" placeholder="${ph}"></div>`;
+        const sel = (f, label, opts, v) => `<div class="col-md-6"><label class="small fw-bold mb-1" style="color:var(--slate);" for="btE_${f}">${label}</label>
+            <select class="form-select form-select-sm" id="btE_${f}" data-btfield="${f}">${opts.map(o => `<option value="${escapeHtml(o)}" ${o === v ? 'selected' : ''}>${escapeHtml(o || '(trống)')}</option>`).join('')}</select></div>`;
+        let tp = normalizeVal(row.tpktCheck) || 'Chưa kiểm tra';
+        document.getElementById('btEditFields').innerHTML =
+            inp('doiTacQuanLy', 'Đối tác', row.doiTac) + inp('doiTruong', 'Đội trưởng', row.doiTruong) +
+            inp('soHopDong', 'Số HĐ *', row.soHopDong) + inp('nhanVien', 'Nhân viên', row.nhanVien) +
+            inp('tgTao', 'TG Tạo *', row.tgTao, 'dd/mm/yyyy hh:mm:ss') + inp('tgHoanTat', 'TG Hoàn Tất', row.tgHoanTat, 'dd/mm/yyyy hh:mm:ss') +
+            sel('tpktCheck', 'TPKT Check', BT_TPKT_OPTS, tp) + sel('xlLai', 'XL Lại', BT_XLLAI_OPTS, normalizeVal(row.xlLai)) +
+            inp('blockQuanLy', 'Block quản lý', row.blockQuanLy) +
+            `<div class="col-12"><label class="small fw-bold mb-1" style="color:var(--slate);" for="btE_ghiChu">Ghi chú</label>
+            <textarea class="form-control form-control-sm" id="btE_ghiChu" data-btfield="ghiChu" rows="3" maxlength="2000">${escapeHtml(row.ghiChu || '')}</textarea></div>`;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('btEditModal')).show();
+    }
+    async function btSaveEdit() {
+        let row = {};
+        document.querySelectorAll('#btEditFields [data-btfield]').forEach(i => row[i.dataset.btfield] = i.value.trim());
+        if (row.tpktCheck === 'Chưa kiểm tra') row.tpktCheck = '';
+        const dmy = /^\d{2}\/\d{2}\/\d{4}/;
+        if (!row.soHopDong || !dmy.test(row.tgTao) || (row.tgHoanTat && !dmy.test(row.tgHoanTat))) {
+            alert("Cần nhập Số HĐ, TG Tạo (và TG Hoàn Tất nếu có) dạng dd/mm/yyyy hh:mm:ss"); return;
+        }
+        let btn = document.getElementById('btEditSaveBtn'); btn.disabled = true;
+        try {
+            let r = await (await apiFetch("api/bt/update", { method: "POST", body: JSON.stringify({ id: btEditingId, row }) })).json();
+            if (!r.success) { alert(r.error || "Không lưu được!"); return; }
+            let item = globalData.find(x => String(x.id) === String(btEditingId));
+            if (item) {
+                Object.assign(item, { doiTac: row.doiTacQuanLy, doiTruong: row.doiTruong, blockQuanLy: row.blockQuanLy, soHopDong: row.soHopDong,
+                    nhanVien: row.nhanVien, tgTao: row.tgTao, tgHoanTat: row.tgHoanTat, ghiChu: row.ghiChu,
+                    tpktCheck: row.tpktCheck, xlLai: row.xlLai, ngayCapNhat: r.ngayCapNhat || item.ngayCapNhat,
+                    userSelectedTpkt: row.tpktCheck || 'Chưa kiểm tra', _modified: false });
+            }
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('btEditModal')).hide();
+            btSaveCache(); initFilters(globalData); filterData();
+        } catch (e) { console.error("Lỗi sửa ca Bảo Trì:", e); alert("Lỗi kết nối, vui lòng thử lại!"); }
+        finally { btn.disabled = false; }
+    }
+    async function btDeleteRow(id) {
+        let row = globalData.find(r => String(r.id) === String(id));
+        if (!row) return;
+        if (!await deleteRowConfirmed("api/bt/delete", row.id, `ca Bảo Trì ${row.soHopDong} (${row.tgHoanTat || row.tgTao})`)) return;
+        globalData = globalData.filter(r => String(r.id) !== String(id));
+        btSaveCache(); initFilters(globalData); filterData();
+    }
+    // ---------- Log: xoá 1 tin ----------
+    async function chatDeleteMsg(id) {
+        let m = chatMessages.find(x => x.id === id);
+        if (!m) return;
+        let preview = String(m.message || '').replace(/\s+/g, ' ').slice(0, 60);
+        if (!await deleteRowConfirmed("api/chat/delete", id, `tin của ${m.username}: “${preview}${(m.message || '').length > 60 ? '…' : ''}”`)) return;
+        chatMessages = chatMessages.filter(x => x.id !== id);
+        renderChatMessages();
+    }
+
     function renderTable(data) {
         let tbody = document.getElementById('tableBody');
+        document.getElementById('btActTh').classList.toggle('d-none', !isSuperAdmin());
 
         // Lưu lại các dòng đang được tick TRƯỚC khi xoá DOM — nếu dò lại sau khi
         // đã tbody.innerHTML = "" thì querySelector luôn trả về null (DOM đã mất),
@@ -6539,7 +6763,7 @@
         tbody.innerHTML = "";
         
         if (data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4" style="color:var(--slate);">
+            tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4" style="color:var(--slate);">
                 <div class="mb-2">${globalData.length ? 'Không có ca nào khớp bộ lọc đang chọn.' : 'Chưa tải được dữ liệu ca bảo trì.'}</div>
                 <button type="button" class="bt-empty-cta" onclick="btResetAndReload(this)"><i class="bi bi-arrow-repeat me-2" aria-hidden="true"></i>Đặt lại bộ lọc &amp; tải lại dữ liệu</button>
             </td></tr>`;
@@ -6656,6 +6880,7 @@
                 <td><small></small></td>
                 <td>${tpktHtml}</td>
                 <td>${xllaiHtml}</td>
+                ${isSuperAdmin() ? `<td class="text-end text-nowrap">${rowActBtns('btOpenEdit', 'btDeleteRow', row.id, row.soHopDong)}</td>` : ''}
             `;
 
             tr.cells[1].textContent = row.doiTac || '';
