@@ -383,11 +383,7 @@
             .online-dot { animation: none !important; }
             * { scroll-behavior: auto !important; }
         }
-        /* Điện thoại: 10 tab thành 1 hàng vuốt ngang thay vì chiếm nửa màn hình */
         @media (max-width: 767.98px) {
-            .seg-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 2px; }
-            .seg-tabs::-webkit-scrollbar { display: none; }
-            .seg-tabs .nav-link { white-space: nowrap; padding: 9px 13px; }
             .filter-strip .f-group { border-right: none !important; }
             .lich-day-big { font-size: 21px; white-space: nowrap; }
             /* IQC & Đầu Vào: thẻ xếp dọc trên điện thoại */
@@ -591,7 +587,156 @@
             .lt-map-wrap { height: 68vh; }
             .lt-ward-panel { max-height: none; }
         }
-</style>
+
+        /* =====================================================================
+           GIAO DIỆN MỚI (12/11/2026): menu trái kiểu SaaS — nền sáng, thẻ trắng bo tròn.
+           Giữ nguyên mọi id/lớp cũ; khối này chỉ sắp lại khung và ghi đè kiểu.
+           ===================================================================== */
+        :root {
+            --surface: #F3F5F1;
+            --radius: 14px;
+            --shadow-sm: 0 1px 2px rgba(18, 24, 27, 0.05), 0 2px 8px rgba(18, 24, 27, 0.04);
+            --shadow-md: 0 2px 4px rgba(18, 24, 27, 0.05), 0 10px 28px rgba(18, 24, 27, 0.08);
+            --side-w: 252px;
+        }
+        ::selection { background: #CFE4B8; color: var(--ink); }
+        html { scrollbar-color: #C9CFC4 transparent; }
+        *::-webkit-scrollbar { width: 10px; height: 10px; }
+        *::-webkit-scrollbar-thumb { background: #C9CFC4; border-radius: 10px; border: 2px solid var(--surface); }
+        *::-webkit-scrollbar-track { background: transparent; }
+        .stat-value, .mono, #dataTable td b { font-variant-numeric: tabular-nums; }
+
+        .app-shell { display: grid; grid-template-columns: var(--side-w) minmax(0, 1fr); min-height: 100vh; }
+        .app-main { min-width: 0; padding: 0 28px 48px; }
+
+        /* ---- Menu trái ---- */
+        .app-side {
+            position: sticky; top: 0; height: 100vh; overflow-y: auto; z-index: 1040;
+            display: flex; flex-direction: column; gap: 18px;
+            background: var(--card); border-right: 1px solid var(--line); padding: 18px 14px 16px;
+        }
+        .app-brand { display: flex; align-items: center; gap: 10px; padding: 2px 6px 14px; border-bottom: 1px solid var(--line); position: relative; }
+        .app-logo { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; flex-shrink: 0;
+            background: var(--ink); color: #9FD971; font-size: 19px; box-shadow: 0 4px 10px rgba(18,24,27,.18); }
+        .app-brand-text { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+        .app-brand-text b { font-size: 14.5px; letter-spacing: -0.01em; }
+        .app-brand-text span { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--slate); letter-spacing: 0.04em; }
+        .app-side-close { display: none; margin-left: auto; border: 0; background: transparent; width: 40px; height: 40px; border-radius: 10px; color: var(--slate); }
+        .app-side-close:hover { background: var(--surface); color: var(--ink); }
+
+        .app-side .seg-tabs { flex-direction: column; flex-wrap: nowrap; gap: 2px; overflow: visible; }
+        .app-side .seg-tabs .nav-item { width: 100%; }
+        .app-side .seg-tabs .nav-link {
+            width: 100%; display: flex; align-items: center; gap: 10px; text-align: left;
+            border: 0; background: transparent; color: var(--slate);
+            border-radius: 10px; font-size: 14px; font-weight: 600; padding: 10px 12px; min-height: 42px;
+            transition: background-color .18s cubic-bezier(.16,1,.3,1), color .18s cubic-bezier(.16,1,.3,1);
+        }
+        .app-side .seg-tabs .nav-link i { font-size: 16px; width: 20px; text-align: center; margin: 0 !important; flex-shrink: 0; }
+        .app-side .seg-tabs .nav-link:hover { background: var(--surface); color: var(--ink); }
+        .app-side .seg-tabs .nav-link.active { background: var(--brand-soft); color: var(--brand-dark); }
+        .app-side .seg-tabs .nav-link.active i { color: var(--brand-dark) !important; }
+        .app-side .seg-tabs .nav-link .count-chip { margin-left: auto; }
+
+        .app-user { margin-top: auto; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; background: var(--surface); display: grid; gap: 10px; }
+        .app-user-head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .app-avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0;
+            background: var(--brand); color: #fff; font-weight: 700; font-size: 15px; }
+        .app-user-name { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .app-user-name strong { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .app-user-scope { display: flex; flex-wrap: wrap; gap: 6px; }
+        .app-user-actions { display: grid; grid-template-columns: 1fr; gap: 6px; }
+        .app-user-actions .ops-btn { padding: 7px 10px; font-size: 13px; text-align: left; }
+
+        /* Nhãn / nút dùng chung — bản nền sáng (trước dành cho thanh đầu tối) */
+        .ops-pill { font-family: inherit; font-weight: 600; font-size: 11.5px; border-radius: 999px; padding: 3px 10px; border: 1px solid var(--line); color: var(--slate); background: var(--card); }
+        .ops-pill.is-brand { color: var(--brand-dark); border-color: #CFE0BC; background: var(--brand-soft); }
+        .ops-pill.ro-pill { background: #FFF4D6; color: #7A4B00; border-color: #E8C46A; }
+        .ops-btn { border-radius: 10px; font-size: 13px; font-weight: 600; border: 1px solid var(--line); color: var(--ink); background: var(--card);
+            padding: 8px 14px; min-height: 38px; transition: background-color .18s, border-color .18s, color .18s; }
+        .ops-btn:hover { background: var(--surface); border-color: #CBD2C5; color: var(--ink); }
+        .ops-btn.is-danger:hover { background: var(--red-soft); border-color: #F1C3BD; color: var(--red); }
+        .ops-btn.is-primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+        .ops-btn.is-primary:hover { background: var(--brand-dark); border-color: var(--brand-dark); color: #fff; }
+        .ops-btn:focus-visible, .app-burger:focus-visible, .app-side-close:focus-visible, .app-side .seg-tabs .nav-link:focus-visible { outline: 3px solid #8BBE5E; outline-offset: 2px; }
+
+        /* ---- Thanh trên vùng nội dung ---- */
+        .app-top {
+            position: sticky; top: 0; z-index: 1030; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+            margin: 0 -28px 18px; padding: 14px 28px; background: rgba(243, 245, 241, 0.92);
+            backdrop-filter: saturate(1.4) blur(10px); -webkit-backdrop-filter: saturate(1.4) blur(10px);
+            border-bottom: 1px solid var(--line);
+        }
+        .app-burger { display: none; width: 42px; height: 42px; border-radius: 11px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 20px; }
+        .app-title { min-width: 0; display: flex; flex-direction: column; }
+        .app-title h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0; line-height: 1.2; }
+        .app-title .small { color: var(--slate); font-size: 12px; }
+        .app-top-tools { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+        .app-online { position: relative; }
+        #onlinePanel { position: absolute; top: calc(100% + 8px); right: 0; min-width: 220px; z-index: 2000; background: var(--card);
+            border: 1px solid var(--line); border-radius: 12px; padding: 12px; box-shadow: var(--shadow-md); color: var(--ink); }
+        #onlinePanel .fw-bold { color: var(--slate); }
+        .online-dot { background: var(--brand); }
+        .q4-countdown-pill { white-space: nowrap; }
+        .app-main > .sx-banner { border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+
+        /* ---- Thẻ, bộ lọc, bảng: bo tròn + đổ bóng nhẹ ---- */
+        .filter-strip, .table-panel, .alert-console, .hi-card, .lt-map-section, .bt-unmapped-panel, .hi-admin-bar,
+        .modal-content { border-radius: var(--radius) !important; }
+        .filter-strip, .table-panel, .alert-console, .hi-card, .lt-map-section { box-shadow: var(--shadow-sm); }
+        .filter-strip { padding: 16px 20px; }
+        .table-panel { padding: 0; overflow: hidden; }
+        .table thead th { background-color: #F1F4EE !important; color: var(--slate); border-bottom: 1px solid var(--line); font-size: 11.5px; letter-spacing: 0.03em; }
+        .table thead th.sortable:hover { background-color: #E5ECDD !important; color: var(--ink); }
+        .sort-indicator.active { color: var(--brand); }
+        #dataTable tbody tr:hover { background: #F6FAF1; }
+        .filter-reset-btn { border-radius: 10px; min-height: 36px; }
+        .filter-reset-btn:hover { background: var(--surface); color: var(--ink); border-color: #CBD2C5; }
+
+        /* ---- KPI: thẻ rời có biểu tượng (bootstrap-icons) thay cho dải liền ---- */
+        .stat-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 12px; background: none; border: 0; border-radius: 0; overflow: visible; }
+        .stat-item { background: var(--card); border: 1px solid var(--line) !important; border-radius: var(--radius); padding: 16px 56px 16px 18px; box-shadow: var(--shadow-sm); min-width: 0; }
+        .stat-item::after {
+            font-family: 'bootstrap-icons'; position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 10px;
+            display: grid; place-items: center; font-size: 17px; content: "\f2cc"; background: #EEF1EB; color: var(--slate);
+        }
+        .stat-item.accent-brand::after { content: "\f270"; background: var(--brand-soft); color: var(--brand-dark); }
+        .stat-item.accent-amber::after { content: "\f41f"; background: #FCF0DC; color: var(--amber); }
+        .stat-item.accent-red::after { content: "\f33b"; background: var(--red-soft); color: var(--red); }
+        .stat-label { font-size: 12px; letter-spacing: 0.01em; }
+        .stat-value { font-size: 28px; letter-spacing: -0.02em; margin-top: 4px; }
+
+        /* ---- Giao diện theo dịp: chuyển sang khối logo của menu ---- */
+        .theme-finish .app-logo { background: #1D1410; color: #FFB27A; }
+        .theme-finish .app-brand::after { content: ""; position: absolute; left: 6px; right: 6px; bottom: -1px; height: 4px; border-radius: 2px;
+            background: repeating-linear-gradient(90deg, #12181B 0 6px, #F5F5F0 6px 12px); opacity: .85; }
+        .theme-finish .q4-countdown-pill { background: #FFF1E6; border-color: #F4C9A4; color: #9A3A02; }
+        .theme-2010 .app-logo { background: #6B1F45; color: #FFC2D9; }
+
+        /* ---- Máy tính bảng / điện thoại: menu trượt từ trái ---- */
+        @media (max-width: 991.98px) {
+            .app-shell { grid-template-columns: minmax(0, 1fr); }
+            .app-side { position: fixed; left: 0; top: 0; bottom: 0; width: min(86vw, 300px); transform: translateX(-104%);
+                transition: transform .32s cubic-bezier(.16,1,.3,1); box-shadow: var(--shadow-md); }
+            .app-shell.side-open .app-side { transform: none; }
+            .app-side-close { display: grid; place-items: center; }
+            .app-backdrop { position: fixed; inset: 0; z-index: 1035; background: rgba(18, 24, 27, 0.38); }
+            .app-burger { display: grid; place-items: center; }
+            .app-main { padding: 0 14px 40px; }
+            .app-top { margin: 0 -14px 14px; padding: 10px 14px; gap: 10px; }
+            .app-title h1 { font-size: 18px; }
+            .app-top-tools { width: 100%; justify-content: flex-start; margin-left: 0; }
+        }
+        @media (max-width: 576px) {
+            .stat-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+            .stat-item { padding: 12px 44px 12px 14px; border-bottom: 1px solid var(--line) !important; }
+            .stat-item::after { width: 28px; height: 28px; font-size: 14px; top: 10px; right: 10px; border-radius: 8px; }
+            .stat-item:last-child:nth-child(odd) { grid-column: 1 / -1; }
+            .stat-value { font-size: 22px; }
+            .q4-countdown-pill { display: none; }
+        }
+        @media (prefers-reduced-motion: reduce) { .app-side { transition: none; } }
+    </style>
 </head>
 <body>
 
@@ -658,48 +803,16 @@
   </div>
 </div>
 
-<div class="container-fluid py-4">
-    <div class="ops-header d-flex flex-wrap align-items-center justify-content-between mb-3">
-        <svg class="sx-deco sx-deco-header" aria-hidden="true" focusable="false"><use href="#sx-branch"/></svg>
-        <div>
-            <span class="ops-mark mb-2 d-inline-block">TPKT · OPS</span>
-            <h2 class="fw-bold mb-0 fs-4">Hệ thống Chất Lượng Dịch Vụ</h2>
-            <div class="d-flex align-items-center gap-3 mt-2" style="position:relative;">
-                <div style="position:relative;">
-                    <button class="ops-pill" id="btnOnlineCount" onclick="toggleOnlinePanel()" style="cursor:pointer;">
-                        <span class="online-dot"></span> <span id="lblOnlineCount">--</span> online
-                    </button>
-                    <span class="q4-countdown-pill ms-2" id="lblYearCountdown">🏁 --</span>
-                    <div id="onlinePanel" class="d-none" style="position:absolute; top:130%; left:0; min-width:200px; background:var(--ink); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:10px; z-index:2000; box-shadow:0 12px 30px rgba(0,0,0,0.4);">
-                        <div class="small fw-bold mb-2" style="color:#9AA39C;">Đang online</div>
-                        <div id="onlineListBody" class="small" style="color:#E7E9E5;">--</div>
-                    </div>
-                </div>
-                <span class="small" id="lblLastSynced" style="color:#9AA39C;">--</span>
-            </div>
+<div class="app-shell" id="appShell">
+    <!-- MENU TRÁI (giao diện mới 12/11/2026): logo, các tab, người dùng -->
+    <aside class="app-side" id="appSide" aria-label="Menu chính">
+        <div class="app-brand">
+            <span class="app-logo" aria-hidden="true"><i class="bi bi-shield-check"></i></span>
+            <div class="app-brand-text"><b>Chất Lượng Dịch Vụ</b><span>TPKT · OPS</span></div>
+            <button type="button" class="app-side-close" id="appSideClose" aria-label="Đóng menu"><i class="bi bi-x-lg"></i></button>
         </div>
-        <div class="d-flex flex-wrap align-items-center gap-2 mt-3 mt-md-0">
-            <span class="text-end small me-1" style="color:#9AA39C;">Xin chào, <strong id="lblCurrentUsername" style="color:#fff;">--</strong></span>
-            <span class="ops-pill" id="lblCurrentRole">Role: --</span>
-            <span class="ops-pill ro-pill d-none" id="lblReadOnly"><i class="bi bi-eye me-1"></i>Chế độ chỉ xem — dữ liệu nhạy cảm đã được che</span>
-            <span class="ops-pill is-brand" id="lblCurrentDoiTac">Đối tác: Tất cả</span>
-            <span class="ops-pill is-brand d-none" id="lblCurrentDoiTruong">Đội trưởng: --</span>
-            <button class="ops-btn" id="btnManualRefresh" onclick="refreshData()" title="Làm mới dữ liệu ngay"><i class="bi bi-arrow-clockwise me-1"></i>Làm mới</button>
-            <button class="ops-btn" onclick="openChangePasswordModal()"><i class="bi bi-key me-1"></i>Đổi mật khẩu</button>
-            <button class="ops-btn is-danger" onclick="handleLogout()"><i class="bi bi-box-arrow-right me-1"></i>Đăng xuất</button>
-        </div>
-    </div>
-
-    <!-- Dải chúc mừng theo dịp (20/10, …) — bật/tắt tự động theo ngày, xem SEASONAL_THEMES -->
-    <div class="sx-banner mb-3" id="sxBanner" role="status" hidden>
-        <svg class="sx-banner-flower" aria-hidden="true" focusable="false"><use id="sxBannerIcon" href="#sx-flower"/></svg>
-        <div class="sx-banner-text"><strong id="sxBannerTitle"></strong><span id="sxBannerMsg"></span></div>
-        <div class="sx-banner-extra" id="sxBannerExtra"></div>
-        <button type="button" class="sx-banner-close" id="sxBannerClose" aria-label="Đóng dải thông điệp"><i class="bi bi-x-lg"></i></button>
-    </div>
-
-    <!-- TABS -->
-    <ul class="nav seg-tabs mb-3" id="mainTabs" role="tablist">
+        <!-- TABS -->
+    <ul class="nav seg-tabs" id="mainTabs" role="tablist" aria-label="Chức năng">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="bt-tab" data-bs-toggle="tab" data-bs-target="#btContent" type="button" role="tab">
                 <i class="bi bi-tools me-1" style="color:var(--brand);"></i> Bảo Trì
@@ -751,6 +864,55 @@
             </button>
         </li>
     </ul>
+
+
+        <div class="app-user">
+            <div class="app-user-head">
+                <span class="app-avatar" id="appAvatar" aria-hidden="true">?</span>
+                <div class="app-user-name"><strong id="lblCurrentUsername">--</strong><span class="ops-pill" id="lblCurrentRole">Role: --</span></div>
+            </div>
+            <div class="app-user-scope">
+                <span class="ops-pill is-brand" id="lblCurrentDoiTac">Đối tác: Tất cả</span>
+                <span class="ops-pill is-brand d-none" id="lblCurrentDoiTruong">Đội trưởng: --</span>
+            </div>
+            <div class="app-user-actions">
+                <button class="ops-btn" onclick="openChangePasswordModal()"><i class="bi bi-key me-1"></i>Đổi mật khẩu</button>
+                <button class="ops-btn is-danger" onclick="handleLogout()"><i class="bi bi-box-arrow-right me-1"></i>Đăng xuất</button>
+            </div>
+        </div>
+    </aside>
+    <div class="app-backdrop" id="appBackdrop" hidden></div>
+
+    <main class="app-main">
+        <header class="app-top">
+            <button type="button" class="app-burger" id="appBurger" aria-label="Mở menu" aria-controls="appSide" aria-expanded="false"><i class="bi bi-list"></i></button>
+            <div class="app-title">
+                <h1 id="appPageTitle">Bảo Trì</h1>
+                <span class="small" id="lblLastSynced">--</span>
+            </div>
+            <div class="app-top-tools">
+                <span class="ops-pill ro-pill d-none" id="lblReadOnly"><i class="bi bi-eye me-1"></i>Chế độ chỉ xem — dữ liệu nhạy cảm đã được che</span>
+                <span class="q4-countdown-pill" id="lblYearCountdown">🏁 --</span>
+                <div class="app-online">
+                    <button class="ops-pill" id="btnOnlineCount" onclick="toggleOnlinePanel()" style="cursor:pointer;">
+                        <span class="online-dot"></span> <span id="lblOnlineCount">--</span> online
+                    </button>
+                    <div id="onlinePanel" class="d-none">
+                        <div class="small fw-bold mb-2">Đang online</div>
+                        <div id="onlineListBody" class="small">--</div>
+                    </div>
+                </div>
+                <button class="ops-btn is-primary" id="btnManualRefresh" onclick="refreshData()" title="Làm mới dữ liệu ngay"><i class="bi bi-arrow-clockwise me-1"></i>Làm mới</button>
+            </div>
+        </header>
+
+    <!-- Dải chúc mừng theo dịp (20/10, …) — bật/tắt tự động theo ngày, xem SEASONAL_THEMES -->
+    <div class="sx-banner mb-3" id="sxBanner" role="status" hidden>
+        <svg class="sx-banner-flower" aria-hidden="true" focusable="false"><use id="sxBannerIcon" href="#sx-flower"/></svg>
+        <div class="sx-banner-text"><strong id="sxBannerTitle"></strong><span id="sxBannerMsg"></span></div>
+        <div class="sx-banner-extra" id="sxBannerExtra"></div>
+        <button type="button" class="sx-banner-close" id="sxBannerClose" aria-label="Đóng dải thông điệp"><i class="bi bi-x-lg"></i></button>
+    </div>
 
     <div class="tab-content" id="mainTabsContent">
         <!-- TAB: BẢO TRÌ (gộp TPKT Check + Báo cáo Tổng quan, cùng 1 bộ lọc) -->
@@ -1716,6 +1878,7 @@
         </div>
 
     </div>
+    </main>
 </div>
 
 <!-- MODAL: Kết quả nhập dữ liệu Bảo Trì mới -->
@@ -2651,7 +2814,7 @@
         });
     })();
 
-    const APP_BUILD = "2026-11-06.3";
+    const APP_BUILD = "2026-11-12.1";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -3007,8 +3170,14 @@
         ['keydown', 'paste', 'pointerdown'].forEach(ev => el.addEventListener(ev, () => { el.dataset.userTyped = '1'; }));
     });
     function guardSearchAutofill() { [0, 600, 1500, 2500, 4000].forEach(ms => setTimeout(clearAutofilledSearch, ms)); }
+    // Tạm ẩn tab SH & RKN (12/11/2026, theo yêu cầu) — đổi thành false để hiện lại
+    const HIDE_RKN_TAB = true;
     function initSessionUI() {
         guardSearchAutofill();
+        if (HIDE_RKN_TAB) document.getElementById('rkn-tab').closest('li').classList.add('d-none');
+        let av = document.getElementById('appAvatar');
+        if (av && currentUser && currentUser.username) av.textContent = String(currentUser.username).trim().charAt(0).toUpperCase();
+        setTimeout(() => appSetTitle(document.querySelector('#mainTabs .nav-link.active')), 0);
         // Đội trưởng không thấy ca Chưa map (Đội trưởng trống) → ẩn bộ lọc Map nhân sự
         document.getElementById('filterMapGroup').classList.toggle('d-none', !!isDoiTruongLocked());
         let cpu = document.getElementById('cpUsername'); if (cpu && currentUser) cpu.value = currentUser.username || '';
@@ -5858,9 +6027,27 @@
     });
     document.getElementById('lich-tab').addEventListener('shown.bs.tab', lichLoad);
 
-    // Điện thoại: thanh tab vuốt ngang — tự cuộn tới tab vừa mở để luôn nhìn thấy tab đang chọn
+    // ---------- Khung giao diện (12/11/2026): menu trái, tiêu đề trang, menu trượt trên điện thoại ----------
+    function appSetTitle(btn) {
+        if (!btn) return;
+        let t = [...btn.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join(' ').replace(/\s+/g, ' ').trim();
+        document.getElementById('appPageTitle').textContent = t || 'Chất Lượng Dịch Vụ';
+    }
+    function appSide(open) {
+        let shell = document.getElementById('appShell'), bd = document.getElementById('appBackdrop');
+        shell.classList.toggle('side-open', open);
+        bd.hidden = !open;
+        document.getElementById('appBurger').setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (open) setTimeout(() => { let a = document.querySelector('#mainTabs .nav-link.active'); (a || document.getElementById('appSideClose')).focus(); }, 50);
+    }
+    document.getElementById('appBurger').addEventListener('click', () => appSide(true));
+    document.getElementById('appSideClose').addEventListener('click', () => appSide(false));
+    document.getElementById('appBackdrop').addEventListener('click', () => appSide(false));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('appShell').classList.contains('side-open')) appSide(false); });
     document.getElementById('mainTabs').addEventListener('shown.bs.tab', e => {
-        e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        appSetTitle(e.target);
+        if (document.getElementById('appShell').classList.contains('side-open')) appSide(false);
+        window.scrollTo({ top: 0 });
     });
 
     // ================== IQC & ĐẦU VÀO (dataIQCDV) ==================
