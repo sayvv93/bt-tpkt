@@ -771,8 +771,9 @@
     #ppTable, #ppTable tbody, #ppTable tr, #ppTable td { display:block; width:100%; }
     #ppTable tr { border-bottom:1px solid var(--line); padding:10px 8px; }
     #ppTable td { border:none; padding:2px 4px; text-align:left !important; }
-    #ppTable td:nth-child(5)::before { content:'Tập điểm: '; color:var(--slate-soft); font-size:12px; }
-    #ppTable td:nth-child(6)::before { content:'Ảnh: '; color:var(--slate-soft); font-size:12px; }
+    #ppTable td:nth-child(4)::before { content:'Đội trưởng: '; color:var(--slate-soft); font-size:12px; }
+    #ppTable td:nth-child(6)::before { content:'Tập điểm: '; color:var(--slate-soft); font-size:12px; }
+    #ppTable td:nth-child(7)::before { content:'Ảnh: '; color:var(--slate-soft); font-size:12px; }
 }
 .pp-info-row { display:grid; grid-template-columns: 130px 1fr; gap:8px; padding:8px 0; border-bottom:1px solid var(--line); font-size:14px; }
 .pp-info-label { color:var(--slate-soft); font-size:12px; font-weight:600; padding-top:2px; }
@@ -804,6 +805,8 @@
 .pp-lb-close { top:12px; right:12px; } .pp-lb-prev { left:12px; } .pp-lb-next { right:12px; }
 .pp-lb-count { position:absolute; bottom:12px; color:#fff; font-size:13px; }
 .pp-assign-sel { min-width:150px; }
+.pp-src { font-size:10.5px; color:var(--slate-soft); border:1px solid var(--line); border-radius:6px; padding:0 4px; margin-left:2px; }
+.pp-team-preview { background:#F3F6F2; border-radius:8px; padding:6px 10px; color:var(--slate); }
 #pinModal { z-index:1065; }
 </style>
 </head>
@@ -1294,7 +1297,7 @@
                 <div class="d-flex flex-wrap gap-2">
                     <button class="filter-reset-btn" onclick="hiDownloadTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu</button>
                     <label class="filter-reset-btn mb-0" style="cursor:pointer;"><i class="bi bi-upload me-1"></i>Nhập Excel
-                        <input type="file" accept=".xlsx,.xls,.csv" class="d-none" onchange="hiHandleImportFile(event)">
+                        <input type="file" id="hiImportFile" accept=".xlsx,.xls,.csv" class="d-none" onchange="hiHandleImportFile(event)">
                     </label>
                     <button class="filter-reset-btn" onclick="hiOpenEditModal(null)"><i class="bi bi-plus-lg me-1"></i>Thêm dòng</button>
                 </div>
@@ -1749,12 +1752,16 @@
                     <label for="ppFilterPartner">Đối tác</label>
                     <select id="ppFilterPartner" class="form-select form-select-sm" onchange="ppPage = 1; prepaidRender();"><option value="">Tất cả</option></select>
                 </div>
+                <div class="col-md-2 col-6 f-group">
+                    <label for="ppFilterTeam">Đội trưởng</label>
+                    <select id="ppFilterTeam" class="form-select form-select-sm" onchange="ppPage = 1; prepaidRender();"><option value="">Tất cả</option></select>
+                </div>
                 <div class="col-md-3 col-12 f-group">
-                    <label for="ppSearch">Tìm tên site / mã kế hoạch / tập điểm / địa chỉ</label>
+                    <label for="ppSearch">Tìm site / mã KH / tập điểm / địa chỉ</label>
                     <input type="search" id="ppSearch" class="form-control form-control-sm" placeholder="VD: DNIP010 hoặc Ngọc Anh" autocomplete="off">
                 </div>
                 <div class="col-md-2 col-6 f-group">
-                    <label for="ppFilterFill">Tỉ lệ lấp đầy</label>
+                    <label for="ppFilterFill">Lấp đầy</label>
                     <select id="ppFilterFill" class="form-select form-select-sm" onchange="ppPage = 1; prepaidRender();">
                         <option value="">Tất cả</option><option value="low">Còn trống nhiều (&lt;50%)</option><option value="mid">50–80%</option><option value="ok">≥ 80%</option><option value="over">Vượt port đầu tư</option>
                     </select>
@@ -1765,9 +1772,9 @@
                         <option value="">Tất cả</option><option value="unassigned">Chưa gán Đối tác</option><option value="nocoord">Chưa có tọa độ</option><option value="noimg">Chưa có ảnh</option>
                     </select>
                 </div>
-                <div class="col-md-3 col-12 f-group d-flex gap-2">
-                    <button type="button" class="filter-reset-btn w-100 text-nowrap" onclick="prepaidResetFilters()"><i class="bi bi-arrow-counterclockwise me-1"></i>Xoá lọc</button>
-                    <button type="button" class="filter-reset-btn w-100 text-nowrap" id="ppExportBtn" onclick="prepaidExport()"><i class="bi bi-file-earmark-excel me-1"></i>Xuất Excel</button>
+                <div class="col-md-12 col-12 f-group d-flex gap-2 justify-content-end">
+                    <button type="button" class="filter-reset-btn text-nowrap" onclick="prepaidResetFilters()"><i class="bi bi-arrow-counterclockwise me-1"></i>Xoá lọc</button>
+                    <button type="button" class="filter-reset-btn text-nowrap" id="ppExportBtn" onclick="prepaidExport()"><i class="bi bi-file-earmark-excel me-1"></i>Xuất Excel</button>
                 </div>
             </div>
 
@@ -3064,7 +3071,7 @@
         });
     })();
 
-    const APP_BUILD = "2026-11-14.1";
+    const APP_BUILD = "2026-11-14.2";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -3999,6 +4006,32 @@
         const p = ltMapData().proj;
         return { lat: p.lat0 - y / p.sy, lng: p.lon0 + x / p.sx };
     }
+    // Phường/xã chứa tọa độ (Prepaid gán đội theo Phân Vùng, 14/11/2026). Đa giác lấy từ path SVG của ltWardData
+    // (mỗi "M…" là 1 vòng; chẵn-lẻ để xử lý lỗ). Trả {code, name} hoặc null nếu ngoài 95 phường/xã.
+    let ppWardPolyCache = null;
+    function pvWardPolys() {
+        if (ppWardPolyCache) return ppWardPolyCache;
+        ppWardPolyCache = ltMapData().wards.map(w => {
+            let rings = w.d.split(/(?=M)/).map(seg => { let n = (seg.match(/-?\d+(?:\.\d+)?/g) || []).map(Number), r = []; for (let i = 0; i + 1 < n.length; i += 2) r.push([n[i], n[i + 1]]); return r; }).filter(r => r.length > 2);
+            let xs = rings.flat().map(p => p[0]), ys = rings.flat().map(p => p[1]);
+            return { code: w.code, name: w.name, rings, box: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] };
+        });
+        return ppWardPolyCache;
+    }
+    function pvWardAt(lat, lng) {
+        if (lat === null || lat === undefined || lng === null || lng === undefined) return null;
+        let { x, y } = pvLatLngToXY(lat, lng);
+        for (let w of pvWardPolys()) {
+            if (x < w.box[0] || x > w.box[2] || y < w.box[1] || y > w.box[3]) continue;
+            let inside = false;
+            for (let ring of w.rings) for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+                let [xi, yi] = ring[i], [xj, yj] = ring[j];
+                if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+            }
+            if (inside) return { code: w.code, name: w.name };
+        }
+        return null;
+    }
     let ltAssign = new Map();                    // code → { doiTacQuanLy, doiTruong }
     let ltWardsMeta = { teams: [], partners: [], canAssign: null };
     let pvContacts = new Map();                  // "Đối tác||Đội trưởng" → { ten, sdt, mail, updatedBy, updatedAt }
@@ -4603,14 +4636,14 @@
         hiPage = Math.min(hiPage, pages);
         let slice = rows.slice((hiPage - 1) * HI_PAGE_SIZE, hiPage * HI_PAGE_SIZE);
         document.getElementById('hiDetailCount').textContent = `— ${rows.length.toLocaleString('vi-VN')} dòng`;
-        let head = `<thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Block</th><th>Số HĐ</th><th>Ngày hoàn tất</th><th>Nhân viên</th>
+        let head = `<thead><tr><th>Đối tác</th><th>Đội trưởng</th><th>Số HĐ</th><th>Ngày hoàn tất</th><th>Nhân viên</th>
             <th>Tình trạng kích hoạt</th><th>Loại giao dịch</th><th>Phân loại gửi</th><th>Tương tác</th>${isSA ? '<th class="text-end">Thao tác</th>' : ''}</tr></thead>`;
         let body = slice.length === 0
-            ? `<tr><td colspan="${isSA ? 11 : 10}" class="text-center py-4 small" style="color:var(--slate);">Không có dữ liệu.</td></tr>`
+            ? `<tr><td colspan="${isSA ? 10 : 9}" class="text-center py-4 small" style="color:var(--slate);">Không có dữ liệu.</td></tr>`
             : slice.map(r => `
                 <tr>
-                    <td>${escapeHtml(r.doiTacQuanLy || '')}</td><td>${escapeHtml(r.doiTruong || '')}</td>
-                    <td class="small">${escapeHtml(r.blockQuanLy || '')}</td><td class="fw-bold mono">${escapeHtml(r.soHopDong || '')}</td>
+                    <td>${escapeHtml(r.doiTacQuanLy || '')}</td><td>${(r.doiTruong || '').trim() ? escapeHtml(r.doiTruong) : '<span class="bt-unmapped-chip" title="Nhân viên chưa có Mobinet trong tab Nhân Sự">Chưa map</span>'}</td>
+                    <td class="fw-bold mono">${escapeHtml(r.soHopDong || '')}</td>
                     <td class="mono small">${escapeHtml(r.ngayHoanTat || '')}</td><td class="small">${escapeHtml(r.nhanVien || '')}</td>
                     <td>${hiTag(r.tinhTrangKichHoat, hiIsInstalled(r) ? 'ok' : 'no')}</td>
                     <td class="small">${escapeHtml(r.loaiGiaoDich || '')}</td>
@@ -4733,12 +4766,11 @@
 
     // ---------- SuperAdmin: file mẫu + nhập Excel ----------
     function hiDownloadTemplate() {
+        // Từ 14/11/2026: file báo cáo gốc 7 cột — Đối tác / Đội trưởng lấy theo Nhân viên ↔ Mobinet ở tab Nhân Sự
         let sample = [
-            { 'Đối tác quản lý': 'DNI05', 'Đội trưởng': 'Nguyễn Minh Tân', 'Block quản lý': 'Phuong Binh Phuoc-001', 'Số hợp đồng': 'BPAAA0201',
-              'Ngày hoàn tất': '27/09/2026 09:43:43', 'Nhân viên': 'BPCPN.PHUNT3', 'Tình trạng kích hoạt': 'Kich hoat truoc Trien Khai',
+            { 'Số hợp đồng': 'BPAAA0201', 'Ngày hoàn tất': '27/09/2026 09:43:43', 'Nhân viên': 'BPCPN.PHUNT3', 'Tình trạng kích hoạt': 'Kich hoat truoc Trien Khai',
               'Loại giao dịch': 'Khôi phục dịch vụ', 'Phân loại gửi': 'Không Gửi', 'Tương tác': 'Loại' },
-            { 'Đối tác quản lý': 'DNI05', 'Đội trưởng': 'Nguyễn Minh Tân', 'Block quản lý': 'TPDong Xoai-003', 'Số hợp đồng': 'BPAAA0372',
-              'Ngày hoàn tất': '19/09/2026 16:20:34', 'Nhân viên': 'BPCPN.MANHD', 'Tình trạng kích hoạt': 'Chua kich hoat',
+            { 'Số hợp đồng': 'BPAAA0372', 'Ngày hoàn tất': '19/09/2026 16:20:34', 'Nhân viên': 'BPCPN.MANHD', 'Tình trạng kích hoạt': 'Chua kich hoat',
               'Loại giao dịch': 'KH nâng cấp dịch vụ gia tăng', 'Phân loại gửi': 'Có Gửi', 'Tương tác': 'Không' }
         ];
         let ws = XLSX.utils.json_to_sheet(sample);
@@ -4847,7 +4879,7 @@
         let headerKeys = Object.keys(raw[0]);
         let colMap = {};
         headerKeys.forEach(h => { let f = HI_HEADER_MAP[hiNorm(h).replace(/[^a-z0-9]/g, '')]; if (f) colMap[h] = f; });
-        let missing = ['doiTacQuanLy', 'soHopDong', 'ngayHoanTat'].filter(f => !Object.values(colMap).includes(f));
+        let missing = ['soHopDong', 'ngayHoanTat', 'nhanVien'].filter(f => !Object.values(colMap).includes(f));
         if (missing.length) {
             alert(`File thiếu cột bắt buộc: ${missing.map(f => HI_LABELS[f]).join(', ')}.\nHãy dùng "Tải file mẫu" để xem đúng tiêu đề cột.`);
             return;
@@ -4861,8 +4893,8 @@
             Object.entries(colMap).forEach(([h, f]) => {
                 row[f] = f === 'ngayHoanTat' ? hiSmartDate(r[h], (txt[i] || {})[h], true, dctx[h]) : String(r[h] ?? '').trim();
             });
-            if (!row.soHopDong && !row.doiTacQuanLy && !row.ngayHoanTat) return; // dòng trống
-            if (!row.soHopDong || !row.doiTacQuanLy || !row.ngayHoanTat) { errors.push(`Dòng ${i + 2}: thiếu Số HĐ / Đối tác / Ngày hoàn tất`); return; }
+            if (!row.soHopDong && !row.ngayHoanTat) return; // dòng trống
+            if (!row.soHopDong || !row.ngayHoanTat) { errors.push(`Dòng ${i + 2}: thiếu Số HĐ / Ngày hoàn tất`); return; }
             if (!/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/.test(row.ngayHoanTat)) { errors.push(`Dòng ${i + 2} (${row.soHopDong}): Ngày hoàn tất "${row.ngayHoanTat}" không đọc được`); return; }
             let key = row.soHopDong + '||' + row.ngayHoanTat;
             if (byKey.has(key)) dupInFile++;
@@ -4874,9 +4906,9 @@
         let existingKeys = new Set(hiData.map(r => r.soHopDong + '||' + r.ngayHoanTat));
         let willUpdate = hiPendingImport.filter(r => existingKeys.has(r.soHopDong + '||' + r.ngayHoanTat)).length;
         let st = hiStats(hiPendingImport);
-        let byDt = {};
-        hiPendingImport.forEach(r => byDt[r.doiTacQuanLy] = (byDt[r.doiTacQuanLy] || 0) + 1);
-        let ignored = headerKeys.filter(h => !colMap[h]);
+        let nvCount = new Set(hiPendingImport.map(r => (r.nhanVien || '').toUpperCase()).filter(Boolean)).size;
+        let ignored = headerKeys.filter(h => !colMap[h] || colMap[h] === 'blockQuanLy');
+        let showCols = HI_FIELDS.filter(f => f !== 'blockQuanLy' && (!['doiTacQuanLy', 'doiTruong'].includes(f) || Object.values(colMap).includes(f)));
 
         document.getElementById('hiImportPreview').innerHTML = `
             <div class="row g-2 mb-3 small">
@@ -4885,15 +4917,15 @@
                 <div class="col-md-3">Tỉ lệ cài: <b>${st.installRate === null ? '--' : st.installRate.toFixed(1) + '%'}</b></div>
                 <div class="col-md-3">Tỉ lệ tương tác: <b>${st.interactRate === null ? '--' : st.interactRate.toFixed(1) + '%'}</b></div>
             </div>
-            <div class="small mb-2"><b>Theo đối tác:</b> ${Object.entries(byDt).map(([k, v]) => `${escapeHtml(k)} (${v})`).join(' · ')}</div>
+            <div class="small mb-2"><i class="bi bi-people me-1" aria-hidden="true"></i>Đối tác / Đội trưởng lấy theo <b>Nhân viên ↔ Mobinet</b> ở tab Nhân Sự (${nvCount.toLocaleString('vi-VN')} nhân viên trong file). Nhân viên chưa có trong Nhân Sự → ca để <b>Chưa map</b>, tự gắn đội khi thêm nhân sự.</div>
             ${dupInFile ? `<div class="small mb-2" style="color:var(--amber);">${dupInFile} dòng trùng Số HĐ + Ngày hoàn tất trong file — chỉ giữ dòng cuối.</div>` : ''}
             ${(n => n ? `<div class="alert alert-warning small py-2"><b>${n} dòng có Ngày hoàn tất bất thường</b> (ở tương lai hoặc cũ hơn 120 ngày) — có thể bị đảo ngày/tháng. Kiểm tra lại file trước khi nhập.</div>` : '')(hiSuspiciousDates(hiPendingImport.map(r => r.ngayHoanTat)))}
             ${ignored.length ? `<div class="small mb-2" style="color:var(--slate-soft);">Bỏ qua cột không dùng: ${ignored.map(escapeHtml).join(', ')}</div>` : ''}
             ${errors.length ? `<div class="alert alert-danger small py-2"><b>${errors.length} dòng lỗi (sẽ không nhập):</b><br>${errors.slice(0, 10).map(escapeHtml).join('<br>')}${errors.length > 10 ? `<br>… và ${errors.length - 10} dòng khác` : ''}</div>` : ''}
             <div class="small fw-bold mb-1">5 dòng đầu — kiểm tra kỹ cột Ngày hoàn tất (phải đúng ngày/tháng):</div>
             <div class="table-responsive"><table class="table table-sm table-bordered small mb-0">
-                <thead><tr>${HI_FIELDS.map(f => `<th>${HI_LABELS[f]}</th>`).join('')}</tr></thead>
-                <tbody>${hiPendingImport.slice(0, 5).map(r => `<tr>${HI_FIELDS.map(f => `<td>${escapeHtml(r[f])}</td>`).join('')}</tr>`).join('')}</tbody>
+                <thead><tr>${showCols.map(f => `<th>${HI_LABELS[f]}</th>`).join('')}</tr></thead>
+                <tbody>${hiPendingImport.slice(0, 5).map(r => `<tr>${showCols.map(f => `<td>${escapeHtml(r[f])}</td>`).join('')}</tr>`).join('')}</tbody>
             </table></div>`;
         document.getElementById('hiImportConfirmBtn').disabled = hiPendingImport.length === 0;
         document.getElementById('hiImportConfirmBtn').textContent = 'Nhập vào hệ thống';
@@ -4904,7 +4936,7 @@
         if (hiPendingImport.length === 0) return;
         let btn = document.getElementById('hiImportConfirmBtn');
         btn.disabled = true;
-        let inserted = 0, updated = 0;
+        let inserted = 0, updated = 0, mapped = 0, unmapped = 0, unm = new Map();
         try {
             for (let i = 0; i < hiPendingImport.length; i += HI_IMPORT_CHUNK) {
                 btn.textContent = `Đang nhập ${Math.min(i + HI_IMPORT_CHUNK, hiPendingImport.length)}/${hiPendingImport.length}...`;
@@ -4914,10 +4946,13 @@
                     alert(`Dừng ở dòng ${i + 1}: ${r.error || 'lỗi không xác định'}\nĐã nhập trước đó: ${inserted} thêm mới, ${updated} cập nhật.`);
                     break;
                 }
-                inserted += r.inserted; updated += r.updated;
+                inserted += r.inserted; updated += r.updated; mapped += r.mapped || 0; unmapped += r.unmapped || 0;
+                (r.unmappedList || []).forEach(u => { let x = unm.get(u.nhanVien) || { ...u, count: 0 }; x.count += u.count; unm.set(u.nhanVien, x); });
             }
             bootstrap.Modal.getOrCreateInstance(document.getElementById('hiImportModal')).hide();
-            alert(`Hoàn tất: ${inserted} dòng thêm mới, ${updated} dòng cập nhật.`);
+            let list = [...unm.values()].sort((a, b) => b.count - a.count);
+            alert(`Hoàn tất: ${inserted} dòng thêm mới, ${updated} dòng cập nhật.\nMap theo Nhân Sự: ${mapped} ca · Chưa map: ${unmapped} ca.`
+                + (list.length ? `\n\nMobinet chưa có trong tab Nhân Sự (thêm nhân sự để ca tự gắn đội):\n` + list.slice(0, 15).map(u => `• ${u.nhanVien} — ${u.count} ca${u.doiTacQuanLy ? ' (' + u.doiTacQuanLy + ')' : ''}`).join('\n') + (list.length > 15 ? `\n… và ${list.length - 15} Mobinet khác` : '') : ''));
         } catch (e) {
             console.error("Lỗi nhập HI FPT:", e);
             alert("Lỗi kết nối khi nhập dữ liệu, vui lòng kiểm tra lại.");
@@ -4937,7 +4972,7 @@
         [['hiDlTinhTrang', 'tinhTrangKichHoat'], ['hiDlLoaiGD', 'loaiGiaoDich'], ['hiDlPhanLoai', 'phanLoaiGui'], ['hiDlTuongTac', 'tuongTac']]
             .forEach(([dl, f]) => document.getElementById(dl).innerHTML = hiUniq(hiData, f).map(v => `<option value="${escapeHtml(v)}">`).join(''));
         const lists = { tinhTrangKichHoat: 'hiDlTinhTrang', loaiGiaoDich: 'hiDlLoaiGD', phanLoaiGui: 'hiDlPhanLoai', tuongTac: 'hiDlTuongTac' };
-        document.getElementById('hiEditFields').innerHTML = HI_FIELDS.map(f => `
+        document.getElementById('hiEditFields').innerHTML = HI_FIELDS.filter(f => f !== 'blockQuanLy').map(f => `
             <div class="col-md-6">
                 <label class="small fw-bold mb-1" style="color:var(--slate);">${HI_LABELS[f]}${['doiTacQuanLy', 'soHopDong', 'ngayHoanTat'].includes(f) ? ' *' : ''}</label>
                 <input type="text" class="form-control form-control-sm" data-hifield="${f}" value="${escapeHtml(row ? row[f] || '' : '')}"
@@ -4949,6 +4984,8 @@
     async function hiSaveEdit() {
         let row = {};
         document.querySelectorAll('#hiEditFields [data-hifield]').forEach(i => row[i.dataset.hifield] = i.value.trim());
+        let oldRow = hiEditingId ? hiData.find(r => r.id === hiEditingId) : null;
+        row.blockQuanLy = oldRow ? (oldRow.blockQuanLy || '') : '';   // cột Block đã ẩn (14/11/2026) — giữ giá trị cũ
         row.ngayHoanTat = hiNormalizeDate(row.ngayHoanTat);
         if (!row.soHopDong || !row.doiTacQuanLy || !/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/.test(row.ngayHoanTat)) {
             alert("Cần nhập Đối tác, Số HĐ và Ngày hoàn tất đúng dạng dd/mm/yyyy hh:mm:ss");
@@ -4990,7 +5027,7 @@
     function hiGroupStats(rows, field) {
         let m = new Map();
         rows.forEach(r => {
-            let k = (r[field] || '').trim() || '(trống)';
+            let k = (r[field] || '').trim() || (field === 'doiTruong' ? 'Chưa map' : '(trống)');
             if (!m.has(k)) m.set(k, { key: k, rows: [], doiTruong: r.doiTruong, doiTac: r.doiTacQuanLy });
             m.get(k).rows.push(r);
         });
@@ -6825,6 +6862,8 @@
     // Site (khu trọ) theo Đối tác: port đầu tư / đã dùng, tập điểm, tọa độ, kho ≤20 ảnh (D1).
     // Phạm vi do Worker lọc (theo Đối tác, không theo Đội trưởng). SuperAdmin sửa mọi thông tin.
     let ppData = [], ppMeta = { partners: [], canEdit: false, canUpload: false }, ppLoaded = false, ppPage = 1, ppMapWhole = false;
+    let ppWardAssign = new Map(), ppBackfillTried = false, ppTeamDefaulted = false;
+    function ppWardName(code) { let w = code && ltMapData().wards.find(x => x.code === code); return w ? w.name : ''; }
     const PP_PAGE_SIZE = 50;
     const PP_DOT_COLORS = ['#2D6A4F', '#1D4E89', '#B5651D', '#7B2D8B', '#B42318', '#0F766E', '#8A6A12', '#4C3D99', '#B83260', '#5B7F1E', '#34508C', '#9C5A1F'];
     const PP_BOUNDS = { lat: [10.3, 12.4], lng: [106.3, 107.8] };
@@ -6863,7 +6902,20 @@
             if (!j.success) { document.getElementById('ppTable').innerHTML = `<tbody><tr><td class="text-center py-4 small" style="color:var(--slate);">${escapeHtml(j.error || 'Không tải được dữ liệu Prepaid')}</td></tr></tbody>`; return; }
             ppData = j.sites || [];
             ppMeta = { partners: j.partners || [], canEdit: !!j.canEdit, canUpload: !!j.canUpload };
+            ppWardAssign = new Map((j.wards || []).map(w => [w.code, w]));
             ppLoaded = true;
+            // Site có tọa độ nhưng chưa có mã phường/xã (dữ liệu trước 14/11) → SuperAdmin tự bổ sung 1 lần
+            if (ppMeta.canEdit && !ppBackfillTried) {
+                ppBackfillTried = true;
+                let items = ppData.filter(s => s.lat !== null && s.lat !== undefined && !s.wardCode)
+                    .map(s => ({ id: s.id, wardCode: (pvWardAt(s.lat, s.lng) || {}).code || '' })).filter(it => it.wardCode);
+                if (items.length) {
+                    try {
+                        for (let i = 0; i < items.length; i += 500) await apiFetch('api/prepaid/wards', { method: 'POST', body: JSON.stringify({ items: items.slice(i, i + 500) }) });
+                        return prepaidFetch(true);
+                    } catch (e) { console.error('Lỗi bổ sung mã phường/xã:', e); }
+                }
+            }
             let sel = document.getElementById('ppFilterPartner'), cur = sel.value;
             let opts = ppMeta.partners.slice();
             sel.innerHTML = (opts.length > 1 || ppMeta.canEdit ? '<option value="">Tất cả</option>' : '') + opts.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')
@@ -6873,16 +6925,26 @@
             prepaidRender();
         } catch (e) { console.error('Lỗi tải Prepaid:', e); }
     }
+    // Ô lọc Đội trưởng: theo Đối tác đang chọn; Đội trưởng đăng nhập mặc định lọc đội mình (1 lần)
+    function ppFillTeamOptions() {
+        let sel = document.getElementById('ppFilterTeam'), cur = sel.value, p = document.getElementById('ppFilterPartner').value;
+        let teams = [...new Set(ppData.filter(s => !p || (p === '__none' ? !s.doiTacQuanLy : s.doiTacQuanLy === p)).map(s => s.doiTruong).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'vi'));
+        sel.innerHTML = '<option value="">Tất cả</option>' + teams.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('') + '<option value="__none">Chưa gán</option>';
+        if (!ppTeamDefaulted && currentUser && currentUser.doiTruong && teams.includes(currentUser.doiTruong)) { cur = currentUser.doiTruong; }
+        ppTeamDefaulted = true;
+        sel.value = [...sel.options].some(o => o.value === cur) ? cur : '';
+    }
     function prepaidResetFilters() {
-        ['ppFilterFill', 'ppFilterMissing', 'ppSearch'].forEach(id => document.getElementById(id).value = '');
+        ['ppFilterFill', 'ppFilterMissing', 'ppSearch', 'ppFilterTeam'].forEach(id => document.getElementById(id).value = '');
         let sel = document.getElementById('ppFilterPartner'); sel.value = sel.options[0] ? sel.options[0].value : '';
         ppPage = 1; prepaidRender();
     }
     function prepaidFiltered() {
-        let p = document.getElementById('ppFilterPartner').value, fill = document.getElementById('ppFilterFill').value,
+        let p = document.getElementById('ppFilterPartner').value, team = document.getElementById('ppFilterTeam').value, fill = document.getElementById('ppFilterFill').value,
             miss = document.getElementById('ppFilterMissing').value, q = hiNorm(document.getElementById('ppSearch').value);
         return ppData.filter(s => {
             if (p === '__none' ? !!s.doiTacQuanLy : (p && s.doiTacQuanLy !== p)) return false;
+            if (team === '__none' ? !!s.doiTruong : (team && s.doiTruong !== team)) return false;
             if (fill && prepaidFillClass(s.portDung, s.portDauTu) !== fill) return false;
             if (miss === 'unassigned' && s.doiTacQuanLy) return false;
             if (miss === 'nocoord' && s.lat !== null && s.lat !== undefined) return false;
@@ -6892,6 +6954,7 @@
         });
     }
     function prepaidRender() {
+        ppFillTeamOptions();
         let rows = prepaidFiltered();
         let dauTu = rows.reduce((a, s) => a + (Number(s.portDauTu) || 0), 0), dung = rows.reduce((a, s) => a + (Number(s.portDung) || 0), 0);
         document.getElementById('ppKpiSites').textContent = ppFmt(rows.length);
@@ -6909,23 +6972,24 @@
         ppPage = Math.min(ppPage, pages);
         let slice = rows.slice((ppPage - 1) * PP_PAGE_SIZE, ppPage * PP_PAGE_SIZE), sa = ppMeta.canEdit;
         document.getElementById('ppCount').textContent = `— ${ppFmt(rows.length)} site`;
-        document.getElementById('ppTable').innerHTML = `<thead><tr><th style="min-width:170px;">Site</th><th>Mã kế hoạch</th><th>Đối tác</th><th>Port dùng / đầu tư</th><th class="text-center">Tập điểm</th><th class="text-center">Ảnh</th><th class="text-center">Vị trí</th>${sa ? '<th class="text-end">Thao tác</th>' : ''}</tr></thead><tbody>` +
+        document.getElementById('ppTable').innerHTML = `<thead><tr><th style="min-width:170px;">Site</th><th>Mã kế hoạch</th><th>Đối tác</th><th style="min-width:120px;">Đội trưởng</th><th>Port dùng / đầu tư</th><th class="text-center">Tập điểm</th><th class="text-center">Ảnh</th><th class="text-center">Vị trí</th>${sa ? '<th class="text-end">Thao tác</th>' : ''}</tr></thead><tbody>` +
             (slice.length ? slice.map(s => {
                 let fc = prepaidFillClass(s.portDung, s.portDauTu), pct = s.portDauTu ? Math.min(100, Math.round(s.portDung * 100 / s.portDauTu)) : (s.portDung ? 100 : 0);
-                let partner = s.doiTacQuanLy ? `<span class="pp-partner"><i style="background:${ppPartnerColor(s.doiTacQuanLy)}"></i>${escapeHtml(s.doiTacQuanLy)}</span>`
+                let partner = s.doiTacQuanLy ? `<span class="pp-partner" title="${s.teamSource === 'vung' ? 'Theo Phân Vùng: ' + escapeHtml(ppWardName(s.wardCode)) : 'Đối tác chọn tay (phường/xã chưa chia vùng)'}"><i style="background:${ppPartnerColor(s.doiTacQuanLy)}"></i>${escapeHtml(s.doiTacQuanLy)}${s.teamSource === 'vung' ? '' : ' <span class="pp-src">tay</span>'}</span>`
                     : (sa ? `<button type="button" class="pp-assign" onclick="event.stopPropagation(); prepaidQuickAssign(${s.id}, this)">Chưa gán <i class="bi bi-chevron-down" aria-hidden="true"></i></button>` : '<span class="hi-tag no">Chưa gán</span>');
                 let hasLoc = s.lat !== null && s.lat !== undefined;
                 return `<tr data-id="${s.id}" class="pp-row" tabindex="0" onclick="prepaidOpen(${s.id})" onkeydown="if(event.key==='Enter')prepaidOpen(${s.id})">
                     <td><div class="fw-semibold">${escapeHtml(s.ten)}</div>${s.diaChi ? `<div class="small" style="color:var(--slate-soft);">${escapeHtml(s.diaChi)}</div>` : ''}</td>
                     <td class="small mono">${String(s.maKeHoach || '').split('\n').filter(Boolean).map(escapeHtml).join('<br>') || '<span style="color:var(--slate-soft);">—</span>'}</td>
                     <td>${partner}</td>
+                    <td class="small">${s.doiTruong ? escapeHtml(s.doiTruong) : '<span style="color:var(--slate-soft);">Chưa gán</span>'}</td>
                     <td><div class="pp-port"><span class="mono"><b>${ppFmt(s.portDung)}</b> / ${ppFmt(s.portDauTu)}</span>${fc === 'over' ? '<span class="hi-tag no">Vượt</span>' : ''}</div><div class="pp-bar" title="${pct}%"><i class="pp-bg-${fc}" style="width:${pct}%"></i></div></td>
                     <td class="text-center">${ppTapList(s).length || '<span style="color:var(--slate-soft);">0</span>'}</td>
                     <td class="text-center small">${s.imgCount || 0}/20</td>
                     <td class="text-center">${hasLoc ? `<a class="row-act" href="${ppMapsUrl(s)}" target="_blank" rel="noopener noreferrer" title="Chỉ đường Google Maps" aria-label="Chỉ đường tới ${escapeHtml(s.ten)}" onclick="event.stopPropagation()"><i class="bi bi-sign-turn-right" aria-hidden="true"></i></a>` : '<span class="small" style="color:var(--slate-soft);">—</span>'}</td>
                     ${sa ? `<td class="text-end text-nowrap" onclick="event.stopPropagation()">${rowActBtns('prepaidEdit', 'prepaidDeleteRow', s.id, s.ten)}</td>` : ''}
                 </tr>`;
-            }).join('') : `<tr><td colspan="8" class="text-center py-4 small" style="color:var(--slate);">${ppData.length ? 'Không có site khớp bộ lọc.' : 'Chưa có site nào.'}</td></tr>`) + '</tbody>';
+            }).join('') : `<tr><td colspan="9" class="text-center py-4 small" style="color:var(--slate);">${ppData.length ? 'Không có site khớp bộ lọc.' : 'Chưa có site nào.'}</td></tr>`) + '</tbody>';
         let nums = [...new Set([1, pages, ppPage - 1, ppPage, ppPage + 1].filter(n => n >= 1 && n <= pages))].sort((a, b) => a - b);
         let html = '', prev = 0;
         nums.forEach(n => { if (n - prev > 1) html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
@@ -6994,7 +7058,10 @@
         document.getElementById('ppModalBody').innerHTML = `
             <div class="row g-4">
                 <div class="col-lg-5">
-                    ${row('Đối tác', s.doiTacQuanLy ? `<span class="pp-partner"><i style="background:${ppPartnerColor(s.doiTacQuanLy)}"></i>${escapeHtml(s.doiTacQuanLy)}</span>` : '<span class="hi-tag no">Chưa gán</span>')}
+                    ${row('Đối tác', (s.doiTacQuanLy ? `<span class="pp-partner"><i style="background:${ppPartnerColor(s.doiTacQuanLy)}"></i>${escapeHtml(s.doiTacQuanLy)}</span>` : '<span class="hi-tag no">Chưa gán</span>')
+                        + `<div class="small" style="color:var(--slate-soft);">${s.teamSource === 'vung' ? 'theo Phân Vùng' : (s.wardCode ? 'chọn tay — phường/xã chưa chia vùng' : 'chọn tay — chưa xác định phường/xã')}</div>`)}
+                    ${row('Đội trưởng', s.doiTruong ? escapeHtml(s.doiTruong) : '<span style="color:var(--slate-soft);">Chưa gán</span>')}
+                    ${row('Phường/xã', s.wardCode ? escapeHtml(ppWardName(s.wardCode)) : '<span style="color:var(--slate-soft);">—</span>')}
                     ${row('Port dùng / đầu tư', `<div class="pp-port"><span class="mono"><b>${ppFmt(s.portDung)}</b> / ${ppFmt(s.portDauTu)}</span><span class="pp-fill-${fc} fw-bold">${s.portDauTu ? Math.round(s.portDung * 100 / s.portDauTu) + '%' : ''}</span>${fc === 'over' ? '<span class="hi-tag no">Vượt</span>' : ''}</div><div class="pp-bar"><i class="pp-bg-${fc}" style="width:${s.portDauTu ? Math.min(100, Math.round(s.portDung * 100 / s.portDauTu)) : 0}%"></i></div>`)}
                     ${row('Mã kế hoạch', String(s.maKeHoach || '').split('\n').filter(Boolean).map(x => `<div class="mono small">${escapeHtml(x)}</div>`).join('') || '<span style="color:var(--slate-soft);">—</span>')}
                     ${row(`Tập điểm (${taps.length})`, taps.length ? `<div class="pp-chips">${taps.map(t => `<span class="pp-chip mono">${escapeHtml(t)}</span>`).join('')}</div>` : '<span style="color:var(--slate-soft);">Chưa có</span>')}
@@ -7141,13 +7208,14 @@
         ppEditPin = (s.lat !== null && s.lat !== undefined) ? { lat: s.lat, lng: s.lng } : null;
         document.getElementById('ppModalTitle').textContent = id === null ? 'Thêm site Prepaid' : `Sửa site — ${s.ten}`;
         const inp = (f, label, v, attrs = '') => `<div class="col-md-6"><label class="small fw-bold mb-1" style="color:var(--slate);" for="ppE_${f}">${label}</label><input class="form-control form-control-sm" id="ppE_${f}" value="${escapeHtml(v ?? '')}" ${attrs}></div>`;
-        let partners = ppMeta.partners.slice(); if (s.doiTacQuanLy && !partners.includes(s.doiTacQuanLy)) partners.push(s.doiTacQuanLy);
+        let manual = s.manualDoiTac !== undefined ? s.manualDoiTac : s.doiTacQuanLy;
+        let partners = ppMeta.partners.slice(); if (manual && !partners.includes(manual)) partners.push(manual);
         document.getElementById('ppModalBody').innerHTML = `
             <div class="row g-3">
                 <div class="col-lg-7"><div class="row g-2">
                     ${inp('ten', 'Tên site *', s.ten, 'maxlength="200" required')}
-                    <div class="col-md-6"><label class="small fw-bold mb-1" style="color:var(--slate);" for="ppE_doiTac">Đối tác</label>
-                        <select class="form-select form-select-sm" id="ppE_doiTac"><option value="">— Chưa gán —</option>${partners.map(p => `<option ${p === s.doiTacQuanLy ? 'selected' : ''}>${escapeHtml(p)}</option>`).join('')}</select></div>
+                    <div class="col-md-6"><label class="small fw-bold mb-1" style="color:var(--slate);" for="ppE_doiTac">Đối tác (khi chưa chia vùng)</label>
+                        <select class="form-select form-select-sm" id="ppE_doiTac"><option value="">— Chưa gán —</option>${partners.map(p => `<option ${p === manual ? 'selected' : ''}>${escapeHtml(p)}</option>`).join('')}</select></div>
                     ${inp('portDauTu', 'Port đã đầu tư', s.portDauTu, 'type="number" min="0" step="1" inputmode="numeric"')}
                     ${inp('portDung', 'Port đã sử dụng', s.portDung, 'type="number" min="0" step="1" inputmode="numeric"')}
                     <div class="col-12"><label class="small fw-bold mb-1" style="color:var(--slate);" for="ppE_maKeHoach">Mã kế hoạch <span class="fw-normal">(mỗi mã 1 dòng)</span></label>
@@ -7164,6 +7232,7 @@
                     <label class="small fw-bold mb-1" style="color:var(--slate);" for="ppE_coord">Vị trí — dán tọa độ / link Google Maps, hoặc bấm lên bản đồ</label>
                     <input class="form-control form-control-sm mono" id="ppE_coord" value="${ppEditPin ? ppEditPin.lat + ', ' + ppEditPin.lng : ''}" placeholder="10.9512, 106.8423 hoặc link Google Maps" autocomplete="off" aria-describedby="ppE_coordErr">
                     <div class="small mt-1" id="ppE_coordErr" role="alert" style="color:var(--red); min-height:1.2em;"></div>
+                    <div class="small mb-2 pp-team-preview" id="ppE_team" role="status"></div>
                     <div class="pp-map-wrap"><svg id="ppE_map" role="img" aria-label="Bấm để đặt vị trí site" preserveAspectRatio="xMidYMid meet"></svg></div>
                     <div class="small mt-1" style="color:var(--slate-soft);">Bấm lên bản đồ để đặt nhanh (chính xác tới khu vực); cần đúng từng nhà thì dán link Google Maps.</div>
                 </div>
@@ -7177,16 +7246,28 @@
         ti.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); ppTapAddFromInput(); } });
         ti.addEventListener('paste', () => setTimeout(() => { if (/[,;\n\s]/.test(ti.value.trim())) ppTapAddFromInput(); }, 0));
         let ci = document.getElementById('ppE_coord');
-        ci.addEventListener('change', () => { let ll = prepaidParseLatLng(ci.value); document.getElementById('ppE_coordErr').textContent = ''; if (ll) { ppEditPin = ll; ppRenderEditMap(true); } });
+        ci.addEventListener('change', () => { let ll = prepaidParseLatLng(ci.value); document.getElementById('ppE_coordErr').textContent = ''; if (ll) { ppEditPin = ll; ppRenderEditMap(true); } else if (!ci.value.trim()) ppEditPin = null; ppRenderTeamPreview(); });
         document.getElementById('ppE_map').addEventListener('click', e => {
             let svg = e.currentTarget, pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
             let p = pt.matrixTransform(svg.getScreenCTM().inverse()), ll = pvXYToLatLng(p.x, p.y);
             ppEditPin = { lat: Math.round(ll.lat * 1e6) / 1e6, lng: Math.round(ll.lng * 1e6) / 1e6 };
             ci.value = ppEditPin.lat + ', ' + ppEditPin.lng; document.getElementById('ppE_coordErr').textContent = '';
-            ppRenderEditMap(false);
+            ppRenderEditMap(false); ppRenderTeamPreview();
         });
+        document.getElementById('ppE_doiTac').addEventListener('change', ppRenderTeamPreview);
+        ppRenderTeamPreview();
         if (!ppModalEl().classList.contains('show')) ppShowModal();
         setTimeout(() => ppRenderEditMap(true), 50);
+    }
+    // Xem trước site sẽ thuộc đội nào theo tọa độ đang nhập
+    function ppRenderTeamPreview() {
+        let el = document.getElementById('ppE_team'); if (!el) return;
+        let w = ppEditPin ? pvWardAt(ppEditPin.lat, ppEditPin.lng) : null, a = w ? ppWardAssign.get(w.code) : null;
+        let manual = document.getElementById('ppE_doiTac').value;
+        el.innerHTML = !ppEditPin ? `<i class="bi bi-info-circle me-1" aria-hidden="true"></i>Chưa có tọa độ → dùng Đối tác chọn tay${manual ? ` (<b>${escapeHtml(manual)}</b>)` : ''}.`
+            : !w ? `<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>Tọa độ nằm ngoài 95 phường/xã → dùng Đối tác chọn tay.`
+            : a ? `<i class="bi bi-geo-alt me-1" aria-hidden="true"></i>${escapeHtml(w.name)} → <b>${escapeHtml(a.doiTacQuanLy)}</b>${a.doiTruong ? ' · <b>' + escapeHtml(a.doiTruong) + '</b>' : ' · chưa giao Đội trưởng'} <span style="color:var(--slate-soft);">(theo Phân Vùng)</span>`
+            : `<i class="bi bi-geo-alt me-1" aria-hidden="true"></i>${escapeHtml(w.name)} — phường/xã chưa chia vùng → dùng Đối tác chọn tay${manual ? ` (<b>${escapeHtml(manual)}</b>)` : ''}.`;
     }
     function ppRenderChips() {
         document.getElementById('ppE_chips').innerHTML = ppEditTaps.length ? ppEditTaps.map((t, i) => `<span class="pp-chip mono">${escapeHtml(t)}<button type="button" class="pp-chip-x" onclick="ppEditTaps.splice(${i}, 1); ppRenderChips();" aria-label="Bỏ ${escapeHtml(t)}"><i class="bi bi-x" aria-hidden="true"></i></button></span>`).join('')
@@ -7229,6 +7310,7 @@
             diaChi: document.getElementById('ppE_diaChi').value.trim(),
             ghiChu: document.getElementById('ppE_ghiChu').value.trim(),
             lat: ll ? ll.lat : null, lng: ll ? ll.lng : null,
+            wardCode: ll ? ((pvWardAt(ll.lat, ll.lng) || {}).code || '') : '',
         };
         if (!row.ten) { err.textContent = 'Nhập tên site.'; document.getElementById('ppE_ten').focus(); return; }
         let btn = document.getElementById('ppE_saveBtn'); btn.disabled = true;
@@ -7297,7 +7379,7 @@
             let td = get('tapDiem').split(/[,;\r\n]+/).map(x => x.trim().toUpperCase().replace(/\s+/g, '')).filter(Boolean); if (td.length) row.tapDiem = [...new Set(td)].join(', ');
             let dt = get('doiTacQuanLy'); if (dt) row.doiTacQuanLy = dt;
             let coordText = C.toaDo >= 0 ? get('toaDo') : (get('lat') && get('lng') ? get('lat') + ', ' + get('lng') : '');
-            if (coordText) { let ll = prepaidParseLatLng(coordText); if (ll) { row.lat = ll.lat; row.lng = ll.lng; } else badCoord.push(ten); }
+            if (coordText) { let ll = prepaidParseLatLng(coordText); if (ll) { row.lat = ll.lat; row.lng = ll.lng; row.wardCode = (pvWardAt(ll.lat, ll.lng) || {}).code || ''; } else badCoord.push(ten); }
             let dc = get('diaChi'); if (dc) row.diaChi = dc;
             let gc = get('ghiChu'); if (gc) row.ghiChu = gc;
             rows.push(row);
@@ -7350,11 +7432,11 @@
     }
     function prepaidExport() {
         let rows = prepaidFiltered();
-        let aoa = [['Tên site', 'Mã kế hoạch', 'Đối tác', 'Port đầu tư', 'Port đã dùng', 'Tỉ lệ lấp đầy', 'Tập điểm', 'Vĩ độ', 'Kinh độ', 'Địa chỉ', 'Ghi chú', 'Số ảnh']].concat(
-            rows.map(s => [s.ten, s.maKeHoach || '', s.doiTacQuanLy || 'Chưa gán', Number(s.portDauTu) || 0, Number(s.portDung) || 0,
+        let aoa = [['Tên site', 'Mã kế hoạch', 'Đối tác', 'Đội trưởng', 'Phường/xã', 'Port đầu tư', 'Port đã dùng', 'Tỉ lệ lấp đầy', 'Tập điểm', 'Vĩ độ', 'Kinh độ', 'Địa chỉ', 'Ghi chú', 'Số ảnh']].concat(
+            rows.map(s => [s.ten, s.maKeHoach || '', s.doiTacQuanLy || 'Chưa gán', s.doiTruong || '', ppWardName(s.wardCode), Number(s.portDauTu) || 0, Number(s.portDung) || 0,
                 s.portDauTu ? Math.round(s.portDung * 1000 / s.portDauTu) / 10 + '%' : '', s.tapDiem || '', s.lat ?? '', s.lng ?? '', s.diaChi || '', s.ghiChu || '', s.imgCount || 0]));
         let ws = XLSX.utils.aoa_to_sheet(aoa);
-        ws['!cols'] = [{ wch: 32 }, { wch: 26 }, { wch: 10 }, { wch: 11 }, { wch: 11 }, { wch: 11 }, { wch: 40 }, { wch: 11 }, { wch: 11 }, { wch: 30 }, { wch: 30 }, { wch: 7 }];
+        ws['!cols'] = [{ wch: 32 }, { wch: 26 }, { wch: 10 }, { wch: 22 }, { wch: 22 }, { wch: 11 }, { wch: 11 }, { wch: 11 }, { wch: 40 }, { wch: 11 }, { wch: 11 }, { wch: 30 }, { wch: 30 }, { wch: 7 }];
         let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Prepaid');
         let d = new Date(), pad = n => String(n).padStart(2, '0');
         XLSX.writeFile(wb, `Prepaid_ha_tang_nha_tro_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}.xlsx`);
