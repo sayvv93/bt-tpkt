@@ -408,6 +408,14 @@
         body.ro-mode .rkn-note-save, body.ro-mode .iqc-note-save,
         body.ro-mode .chat-input-bar, body.ro-mode #superAdminImportBar, body.ro-mode #hiAdminBar, body.ro-mode #shdAdminBox { display:none !important; }
         body.ro-mode tbody select:disabled, body.ro-mode tbody input:disabled, body.ro-mode tbody textarea:disabled { cursor:not-allowed; }
+        /* Tab "Chỉ xem" / "Cho xem" theo quyền tài khoản (19/11/2026) */
+        .ro-tab [onclick*="Template"], .ro-tab [onclick*="triggerImport"], .ro-tab [onclick*="Export"],
+        .ro-tab [onclick*="exportFiltered"], .ro-tab [onclick*="OpenEditModal"], .ro-tab [onclick*="DeleteRow"],
+        .ro-tab [onclick^="submit"], .ro-tab [onclick^="applyBatch"], .ro-tab label.filter-reset-btn:has(input[type="file"]),
+        .ro-tab #iqcProcessLbl, 
+        .ro-tab .rkn-note-save, .ro-tab .iqc-note-save,
+        .ro-tab .chat-input-bar, .ro-tab #superAdminImportBar, .ro-tab #hiAdminBar, .ro-tab #shdAdminBox, .ro-tab #nsTeamBar, .ro-tab #ppAdminBar, .ro-tab .row-act:not(a), .ro-tab .bt-empty-cta { display:none !important; }
+        .ro-tab tbody select:disabled, .ro-tab tbody input:disabled, .ro-tab tbody textarea:disabled { cursor:not-allowed; }
         .ro-chat-note { display:none; }
         body.ro-mode .ro-chat-note { display:block; }
         /* ---------- GIAO DIỆN THEO DỊP (SEASONAL_THEMES) ---------- */
@@ -808,6 +816,25 @@
 .pp-src { font-size:10.5px; color:var(--slate-soft); border:1px solid var(--line); border-radius:6px; padding:0 4px; margin-left:2px; }
 .pp-team-preview { background:#F3F6F2; border-radius:8px; padding:6px 10px; color:var(--slate); }
 #pinModal { z-index:1065; }
+/* QL Tài khoản (19/11/2026) */
+.ua-chip { display:inline-block; font-size:11.5px; font-weight:600; border-radius:8px; padding:2px 8px; background:#EEF0EE; color:var(--slate); white-space:nowrap; }
+.ua-chip.is-ok { background:#E6F2EA; color:#1F5A3A; } .ua-chip.is-off { background:#FBECEB; color:var(--red); }
+.ua-chip.is-warn { background:#FFF1E2; color:#8A4B0B; } .ua-chip.is-perm { background:#EDEBFA; color:#4C3D99; cursor:help; }
+.ua-role { font-size:12px; font-weight:600; border:1px solid var(--line); border-radius:8px; padding:2px 8px; white-space:nowrap; }
+.ua-role-superadmin { border-color:#C24E03; color:#8A4B0B; } .ua-role-admin { border-color:var(--brand); color:var(--brand); }
+.ua-perm-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:6px 16px; }
+@media (max-width: 576px) { .ua-perm-grid { grid-template-columns: 1fr; } }
+.ua-perm-row { display:flex; align-items:center; justify-content:space-between; gap:8px; border-bottom:1px solid var(--line); padding:4px 0; }
+.ua-perm-row label { font-size:13px; }
+.ua-perm-row select { max-width:150px; }
+.ua-def { font-size:10.5px; border-radius:6px; padding:0 5px; margin-left:4px; background:#EEF0EE; color:var(--slate); }
+.ua-def-none { background:#FBECEB; color:var(--red); } .ua-def-edit { background:#E6F2EA; color:#1F5A3A; }
+@media (max-width: 576px) {
+    #uaTable thead { display:none; }
+    #uaTable, #uaTable tbody, #uaTable tr, #uaTable td { display:block; width:100%; }
+    #uaTable tr { border-bottom:1px solid var(--line); padding:10px 8px; }
+    #uaTable td { border:none; padding:2px 4px; text-align:left !important; }
+}
 </style>
 </head>
 <body>
@@ -936,8 +963,8 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link d-none" id="petaccounts-tab" data-bs-toggle="tab" data-bs-target="#petAccountsContent" type="button" role="tab">
-                <i class="bi bi-person-plus me-1"></i> Tài khoản cus
+            <button class="nav-link d-none" id="accounts-tab" data-bs-toggle="tab" data-bs-target="#accountsContent" type="button" role="tab">
+                <i class="bi bi-person-gear me-1"></i> QL Tài khoản
             </button>
         </li>
     </ul>
@@ -1993,39 +2020,45 @@
             </div>
         </div>
 
-        <!-- TAB 8: TÀI KHOẢN CUS (chỉ Đối tác quản lý) -->
-        <div class="tab-pane fade" id="petAccountsContent" role="tabpanel">
-            <div class="table-panel p-4 mb-3">
-                <h5 class="fw-bold mb-1"><i class="bi bi-person-plus me-2" style="color:var(--brand);"></i>Tạo tài khoản cus cho nhân sự</h5>
-                <p class="small mb-0" style="color:var(--slate);">
-                    Dành cho nhân sự của đối tác (VD chăm sóc khách hàng). Tài khoản cus thấy tab <b>SH &amp; RKN</b> theo đối tác của bạn (được đổi Hướng XL và nhập DVKH care note), IQC &amp; Đầu Vào, Nhân Sự, Lịch Trực (chỉ xem), Phân Vùng, Phân tích SHD, Log — <b>không</b> xem được dữ liệu Bảo Trì, HI FPT.
-                </p>
-            </div>
-
-            <div class="d-flex flex-wrap gap-2 mb-3">
-                <button class="filter-reset-btn" onclick="downloadPetAccountTemplate()"><i class="bi bi-download me-1"></i>Tải file mẫu</button>
-                <button class="filter-reset-btn" onclick="triggerImportPetAccounts()"><i class="bi bi-file-earmark-arrow-up me-1"></i>Nhập Excel (tối đa 50 tài khoản/lần)</button>
-                <input type="file" id="importPetAccountsFileInput" accept=".xlsx,.xls" class="d-none" onchange="handleImportPetAccounts(event)">
-            </div>
-
-            <div class="alert-console">
-                <div class="alert-console-head">
-                    <span><i class="bi bi-people-fill me-2"></i>Danh sách tài khoản cus đã tạo</span>
-                    <span class="count-pill" id="petAccountsCountBadge">0 tài khoản</span>
+        <!-- ===== QL TÀI KHOẢN (chỉ SuperAdmin, 19/11/2026) ===== -->
+        <div class="tab-pane fade" id="accountsContent" role="tabpanel">
+            <div class="filter-strip row g-2 mb-3 align-items-end">
+                <div class="col-md-3 col-12 f-group">
+                    <label for="uaSearch">Tìm tài khoản / Đội trưởng / ghi chú</label>
+                    <input type="search" id="uaSearch" class="form-control form-control-sm" placeholder="VD: dni02" autocomplete="off">
                 </div>
-                <div class="table-responsive mb-0">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Username</th>
-                                <th>Ngày tạo</th>
-                            </tr>
-                        </thead>
-                        <tbody id="petAccountsTableBody">
-                            <tr><td colspan="2" class="text-center py-4" style="color:var(--slate);">Đang tải...</td></tr>
-                        </tbody>
-                    </table>
+                <div class="col-md-2 col-6 f-group">
+                    <label for="uaFilterRole">Vai trò</label>
+                    <select id="uaFilterRole" class="form-select form-select-sm" onchange="uaRender()"></select>
                 </div>
+                <div class="col-md-2 col-6 f-group">
+                    <label for="uaFilterPartner">Đối tác</label>
+                    <select id="uaFilterPartner" class="form-select form-select-sm" onchange="uaRender()"><option value="">Tất cả</option></select>
+                </div>
+                <div class="col-md-2 col-6 f-group">
+                    <label for="uaFilterStatus">Trạng thái</label>
+                    <select id="uaFilterStatus" class="form-select form-select-sm" onchange="uaRender()">
+                        <option value="">Tất cả</option><option value="active">Hoạt động</option><option value="disabled">Đã khoá</option>
+                        <option value="locked">Bị khoá đăng nhập</option><option value="perms">Có quyền riêng</option><option value="oldpw">Mật khẩu cũ</option>
+                    </select>
+                </div>
+                <div class="col-md-3 col-6 f-group d-flex gap-2 justify-content-end">
+                    <button type="button" class="btn btn-sm text-white text-nowrap" style="background:var(--brand);" id="uaAddBtn" onclick="uaOpen(null)"><i class="bi bi-person-plus me-1" aria-hidden="true"></i>Thêm tài khoản</button>
+                </div>
+            </div>
+            <div class="stat-strip">
+                <div class="stat-item accent-neutral"><div class="stat-label">TỔNG TÀI KHOẢN</div><div class="stat-value" id="uaKpiTotal">0</div></div>
+                <div class="stat-item accent-brand"><div class="stat-label">QUẢN TRỊ (ADMIN / SA)</div><div class="stat-value" id="uaKpiAdmin">0</div></div>
+                <div class="stat-item accent-amber"><div class="stat-label">CÓ QUYỀN RIÊNG</div><div class="stat-value" id="uaKpiPerms">0</div></div>
+                <div class="stat-item accent-red"><div class="stat-label">ĐÃ KHOÁ</div><div class="stat-value" id="uaKpiDisabled">0</div></div>
+                <div class="stat-item accent-red"><div class="stat-label">MẬT KHẨU CŨ CHƯA BĂM</div><div class="stat-value" id="uaKpiOldPw">0</div></div>
+            </div>
+            <div class="table-panel">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 p-3 pb-2">
+                    <div class="fw-bold"><i class="bi bi-people me-2" style="color:var(--brand);"></i>Tài khoản <span class="small fw-normal" id="uaCount" style="color:var(--slate-soft);"></span></div>
+                    <div class="small" style="color:var(--slate-soft);">Đổi vai trò / phạm vi / quyền / khoá / mật khẩu sẽ đăng xuất người đó khỏi mọi thiết bị.</div>
+                </div>
+                <div class="table-responsive"><table class="table table-hover align-middle mb-0" id="uaTable"></table></div>
             </div>
         </div>
 
@@ -2173,24 +2206,87 @@
         </div>
     </div>
 
+    <!-- MODAL: QL Tài khoản — thêm / sửa -->
+    <div class="modal fade" id="uaModal" tabindex="-1" aria-labelledby="uaModalTitle">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
+            <form class="modal-content" autocomplete="off" onsubmit="event.preventDefault(); uaSave();">
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold" id="uaModalTitle">Tài khoản</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-2">
+                        <div class="col-md-6"><label class="small fw-bold mb-1" style="color:var(--slate);" for="uaE_username">Tên đăng nhập *</label>
+                            <input class="form-control form-control-sm mono" id="uaE_username" maxlength="50" autocomplete="off" spellcheck="false"></div>
+                        <div class="col-md-6"><label class="small fw-bold mb-1" style="color:var(--slate);" for="uaE_role">Vai trò *</label>
+                            <select class="form-select form-select-sm" id="uaE_role"></select>
+                            <div class="small mt-1" id="uaE_roleDesc" style="color:var(--slate-soft);"></div></div>
+                        <div class="col-md-6 ua-scope"><label class="small fw-bold mb-1" style="color:var(--slate);" for="uaE_doiTac">Đối tác quản lý *</label>
+                            <select class="form-select form-select-sm" id="uaE_doiTac"></select></div>
+                        <div class="col-md-6 ua-scope ua-scope-team"><label class="small fw-bold mb-1" style="color:var(--slate);" for="uaE_doiTruong">Đội trưởng</label>
+                            <select class="form-select form-select-sm" id="uaE_doiTruong"></select></div>
+                        <div class="col-md-6" id="uaE_pwWrap"><label class="small fw-bold mb-1" style="color:var(--slate);" for="uaE_password">Mật khẩu *</label>
+                            <div class="input-group input-group-sm"><input class="form-control mono" id="uaE_password" type="text" autocomplete="new-password" maxlength="200" spellcheck="false">
+                            <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('uaE_password').value = uaGenPw()" title="Tạo mật khẩu ngẫu nhiên">Tạo</button></div>
+                            <div class="small mt-1" style="color:var(--slate-soft);">≥ 6 ký tự, khác tên đăng nhập. Gửi cho người dùng và nhắc đổi sau khi đăng nhập.</div></div>
+                        <div class="col-md-6 d-flex align-items-center"><div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" role="switch" id="uaE_disabled">
+                            <label class="form-check-label small fw-bold" for="uaE_disabled">Khoá tài khoản (không đăng nhập được)</label></div></div>
+                        <div class="col-12"><label class="small fw-bold mb-1" style="color:var(--slate);" for="uaE_note">Ghi chú</label>
+                            <input class="form-control form-control-sm" id="uaE_note" maxlength="300"></div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="fw-bold small mb-1">Quyền theo tab</div>
+                        <div class="small mb-2" style="color:var(--slate-soft);">Để "Theo vai trò" là dùng quyền mặc định. <b>Chỉ xem</b> khoá mọi thao tác ghi · <b>Ẩn</b> chặn hẳn tab · <b>Cho xem</b> mở tab vai trò vốn không thấy (chỉ xem, trong phạm vi Đối tác / Đội trưởng của tài khoản).</div>
+                        <div class="ua-perm-grid" id="uaE_perms"></div>
+                        <div class="small mt-2" id="uaE_permNote" role="status" style="color:#8A4B0B;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span class="small me-auto" id="uaE_err" role="alert" style="color:var(--red);"></span>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-sm text-white" style="background:var(--brand);" id="uaSaveBtn">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- MODAL: đặt lại mật khẩu -->
+    <div class="modal fade" id="uaPwModal" tabindex="-1" aria-labelledby="uaPwTitle">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+            <form class="modal-content" autocomplete="off" onsubmit="event.preventDefault(); uaResetPw();">
+                <div class="modal-header"><h6 class="modal-title fw-bold" id="uaPwTitle">Đặt lại mật khẩu</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+                <div class="modal-body">
+                    <label class="small fw-bold mb-1" style="color:var(--slate);" for="uaPwInput">Mật khẩu mới</label>
+                    <div class="input-group input-group-sm"><input class="form-control mono" id="uaPwInput" type="text" autocomplete="new-password" maxlength="200" spellcheck="false">
+                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('uaPwInput').value = uaGenPw()">Tạo</button></div>
+                    <div class="small mt-2" id="uaPwErr" role="alert" style="color:var(--red); min-height:1.2em;"></div>
+                    <div class="small" style="color:var(--slate-soft);">Người dùng bị đăng xuất khỏi mọi thiết bị.</div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-sm text-white" style="background:var(--brand);" id="uaPwSaveBtn">Đặt lại</button></div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL: Mã xác nhận xoá (SuperAdmin) — mã chỉ được kiểm ở Worker -->
     <div class="modal fade" id="pinModal" tabindex="-1" aria-labelledby="pinModalTitle">
         <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
             <form class="modal-content" id="pinForm" autocomplete="off" onsubmit="event.preventDefault(); pinSubmit();">
                 <div class="modal-header">
-                    <h6 class="modal-title fw-bold" id="pinModalTitle"><i class="bi bi-shield-lock me-2" style="color:var(--red);" aria-hidden="true"></i>Xác nhận xoá</h6>
+                    <h6 class="modal-title fw-bold" id="pinModalTitle"><i class="bi bi-shield-lock me-2" style="color:var(--red);" aria-hidden="true"></i>Nhập mã xác nhận</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">
                     <p class="small mb-3" id="pinTarget" style="color:var(--slate);"></p>
-                    <label for="pinInput" class="small fw-bold mb-1" style="color:var(--slate);">Mã xác nhận xoá</label>
+                    <label for="pinInput" class="small fw-bold mb-1" style="color:var(--slate);">Mã xác nhận</label>
                     <input type="password" class="form-control mono" id="pinInput" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="Nhập mã bí mật" aria-describedby="pinErr">
                     <div class="small mt-2" id="pinErr" role="alert" style="color:var(--red); min-height:1.2em;"></div>
                     <div class="small" style="color:var(--slate-soft);">Thao tác không thể hoàn tác.</div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
-                    <button type="submit" class="btn btn-sm btn-danger" id="pinSubmitBtn"><i class="bi bi-trash me-1" aria-hidden="true"></i>Xoá</button>
+                    <button type="submit" class="btn btn-sm btn-danger" id="pinSubmitBtn"><i class="bi bi-trash me-1" aria-hidden="true"></i><span id="pinSubmitText">Xoá</span></button>
                 </div>
             </form>
         </div>
@@ -2747,129 +2843,6 @@
         bootstrap.Modal.getOrCreateInstance(document.getElementById('btImportResultModal')).show();
     }
 
-    // ================== ĐỐI TÁC QUẢN LÝ: IMPORT TÀI KHOẢN CUS (role petonly) ==================
-    function downloadPetAccountTemplate() {
-        if (typeof XLSX === 'undefined') {
-            alert("Thư viện Excel chưa tải xong, vui lòng thử lại sau giây lát.");
-            return;
-        }
-        let ws = XLSX.utils.json_to_sheet([
-            { username: "nv_vidu1", password: "doimatkhau1" },
-            { username: "nv_vidu2", password: "matkhaurieng123" }
-        ]);
-        ws['!cols'] = [{ wch: 20 }, { wch: 22 }];
-        let wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Mau Tai Khoan");
-        XLSX.writeFile(wb, "mau_import_tai_khoan_nuoi_thu.xlsx");
-    }
-
-    function triggerImportPetAccounts() {
-        document.getElementById('importPetAccountsFileInput').click();
-    }
-
-    async function handleImportPetAccounts(event) {
-        let file = event.target.files[0];
-        event.target.value = "";
-        if (!file) return;
-
-        if (typeof XLSX === 'undefined') {
-            alert("Thư viện Excel chưa tải xong, vui lòng thử lại sau giây lát.");
-            return;
-        }
-
-        try {
-            let buf = await file.arrayBuffer();
-            let wb = XLSX.read(buf, { type: 'array' });
-            let sheet = wb.Sheets[wb.SheetNames[0]];
-            let rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-            if (rawRows.length === 0) {
-                alert("File không có dữ liệu!");
-                return;
-            }
-            if (rawRows.length > 50) {
-                alert(`File có ${rawRows.length} dòng, vượt quá giới hạn tối đa 50 tài khoản/lần import.`);
-                return;
-            }
-
-            let rows = rawRows.map(r => ({
-                username: String(r.username || "").trim(),
-                password: String(r.password || "").trim()
-            })).filter(r => r.username);
-
-            if (rows.length === 0) {
-                alert("Không có username hợp lệ nào trong file!");
-                return;
-            }
-            // Bắt buộc mật khẩu ≥ 6 ký tự, khác username; username 3–50 ký tự chữ/số . _ -
-            let badRows = rows.filter(r => !/^[A-Za-z0-9._@-]{3,50}$/.test(r.username) || r.password.length < 6 || r.password.toLowerCase() === r.username.toLowerCase());
-            if (badRows.length) {
-                alert(`${badRows.length} dòng không hợp lệ — mỗi tài khoản cần username 3–50 ký tự (chữ, số, . _ - @) và mật khẩu từ 6 ký tự, khác username:\n` + badRows.slice(0, 10).map(r => `• ${r.username || '(trống)'}`).join('\n') + '\n\nSửa file rồi nhập lại.');
-                return;
-            }
-
-            if (!confirm(`Xác nhận tạo ${rows.length} tài khoản cus mới?\nNên báo nhân sự đổi mật khẩu sau khi đăng nhập lần đầu.`)) {
-                return;
-            }
-
-            // Gửi từng tài khoản 1 request: mỗi mật khẩu phải băm PBKDF2 ở Worker,
-            // gộp 50 tài khoản/request dễ vượt giới hạn CPU của Cloudflare.
-            let result = { success: true, created: 0, skippedExists: 0, skippedInvalid: 0 };
-            for (let row of rows) {
-                let res = await apiFetch("api/accounts/import-petonly", {
-                    method: "POST",
-                    body: JSON.stringify({ rows: [row] })
-                });
-                let r = await res.json();
-                if (!r.success) {
-                    alert((r.error || "Import thất bại") + `\nĐã tạo trước đó: ${result.created} tài khoản.`);
-                    await fetchPetAccountsList();
-                    return;
-                }
-                result.created += r.created; result.skippedExists += r.skippedExists; result.skippedInvalid += r.skippedInvalid;
-            }
-
-            let msg = `Import hoàn tất:\n${result.created} tài khoản được tạo mới`;
-            if (result.skippedExists > 0) msg += `\n${result.skippedExists} username đã tồn tại (bị bỏ qua)`;
-            if (result.skippedInvalid > 0) msg += `\n${result.skippedInvalid} username không hợp lệ (bị bỏ qua)`;
-            alert(msg);
-
-            await fetchPetAccountsList();
-        } catch (e) {
-            console.error("Lỗi import tài khoản cus:", e);
-            alert("Lỗi đọc file Excel — vui lòng dùng đúng file mẫu đã tải, không đổi tên cột!");
-        }
-    }
-
-    async function fetchPetAccountsList() {
-        let tbody = document.getElementById('petAccountsTableBody');
-        if (!tbody) return;
-        try {
-            let res = await apiFetch("api/accounts/petonly-list", { method: "GET" });
-            let result = await res.json();
-            let accounts = result.accounts || [];
-
-            document.getElementById('petAccountsCountBadge').innerText = accounts.length + ' tài khoản';
-
-            if (accounts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="2" class="text-center py-4" style="color:var(--slate);">Chưa tạo tài khoản cus nào.</td></tr>`;
-                return;
-            }
-            tbody.innerHTML = accounts.map(a => `
-                <tr>
-                    <td class="fw-bold">${escapeHtml(a.username)}</td>
-                    <td>${a.created_at ? formatDateTime(a.created_at) : '--'}</td>
-                </tr>
-            `).join('');
-        } catch (e) {
-            console.error("Lỗi tải danh sách tài khoản cus:", e);
-            tbody.innerHTML = `<tr><td colspan="2" class="text-center py-4" style="color:var(--slate);">Lỗi tải danh sách.</td></tr>`;
-        }
-    }
-
-    document.getElementById('petaccounts-tab').addEventListener('shown.bs.tab', () => {
-        fetchPetAccountsList();
-    });
 
 
     // Danh sách tài khoản KHÔNG còn được tải về client nữa.
@@ -2922,7 +2895,9 @@
                     filterData();
                     refreshData();
                     startAutoRefresh();
+                    if (currentUser.role === 'petonly') pvActivate();   // cus được "Cho xem" Bảo Trì: vẫn mở Phân Vùng trước
                 }
+                ensureVisibleActiveTab();
                 startPingOnline();
                 startChatPolling();
                 startIdleWatcher();
@@ -3071,7 +3046,7 @@
         });
     })();
 
-    const APP_BUILD = "2026-11-14.3";
+    const APP_BUILD = "2026-11-19.1";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -3184,17 +3159,26 @@
     const isViewerRole = () => !!currentUser && currentUser.role === 'viewer';
     let roLockQueued = false;
     function roLockControls() {
-        if (!document.body.classList.contains('ro-mode')) return;
-        document.querySelectorAll('tbody select, tbody input, tbody textarea').forEach(el => {
+        let sel = document.body.classList.contains('ro-mode') ? 'tbody select, tbody input, tbody textarea' : '.ro-tab tbody select, .ro-tab tbody input, .ro-tab tbody textarea';
+        if (!document.body.classList.contains('ro-mode') && !document.querySelector('.ro-tab')) return;
+        document.querySelectorAll(sel).forEach(el => {
             if (!el.disabled) { el.disabled = true; el.title = 'Tài khoản chỉ xem'; }
         });
     }
     new MutationObserver(() => {
-        if (roLockQueued || !document.body.classList.contains('ro-mode')) return;
+        if (roLockQueued || (!document.body.classList.contains('ro-mode') && !document.querySelector('.ro-tab'))) return;
         roLockQueued = true;
         requestAnimationFrame(() => { roLockQueued = false; roLockControls(); });
     }).observe(document.body, { childList: true, subtree: true });
-    function isRestrictedRole() { return !!currentUser && (currentUser.role === 'petonly' || currentUser.role === 'hr'); }
+    // Quyền theo tab (19/11/2026): currentUser.perms = {tab: 'off'|'ro'|'view'} do SuperAdmin đặt ở QL Tài khoản.
+    const PERM_TAB_IDS = { bt: 'bt-tab', hi: 'hifpt-tab', rkn: 'rkn-tab', iqc: 'iqc-tab', prepaid: 'prepaid-tab', ns: 'ns-tab', lich: 'lich-tab', chat: 'chat-tab', phanvung: 'linhthu-tab', shd: 'phantich-tab' };
+    const userPerm = tab => (currentUser && currentUser.perms && currentUser.perms[tab]) || '';
+    // Bảo Trì / HI FPT: cus + HR mặc định không thấy, trừ khi được "Cho xem"; "Ẩn" thì không tải
+    function isRestrictedRole(tab = 'bt') {
+        if (!currentUser) return true;
+        if (userPerm(tab) === 'off') return true;
+        return (currentUser.role === 'petonly' || currentUser.role === 'hr') && userPerm(tab) !== 'view';
+    }
 
     // Lưu bản sao dataBT vào localStorage để mở trang nhanh. Sự cố 06/11/2026: dữ liệu vượt hạn mức (~5MB,
     // Ghi chú dài từ file gốc) → setItem ném QuotaExceededError → refreshData nhảy vào catch, bỏ qua bước vẽ
@@ -3340,7 +3324,9 @@
                     lastSyncTimestamp = null;
                     await refreshData();
                     startAutoRefresh();
+                    if (currentUser.role === 'petonly') pvActivate();
                 }
+                ensureVisibleActiveTab();
                 startPingOnline();
                 startChatPolling();
                 startIdleWatcher();
@@ -3476,11 +3462,8 @@
         // Tab "Phân tích SHD": mọi tài khoản (từ 01/11/2026); Chỉ xem thấy tab nhưng không có link.
         document.getElementById('phantich-tab').classList.toggle('d-none', !canUseShd());
 
-        // Tab "Tài khoản cus" — CHỈ dành riêng cho Đối tác quản lý (role
-        // 'user', không gắn doiTruong) — không phải Đội trưởng, không phải
-        // Admin/SuperAdmin/petonly.
-        let isDoiTacQuanLyTier = currentUser.role === 'user' && !isDoiTruongLocked();
-        document.getElementById('petaccounts-tab').classList.toggle('d-none', !isDoiTacQuanLyTier);
+        // Tab "QL Tài khoản" — chỉ SuperAdmin (thay tab "Tài khoản cus" từ 19/11/2026)
+        document.getElementById('accounts-tab').classList.toggle('d-none', currentUser.role !== 'superadmin');
 
         // Role "petonly" (hiển thị là tài khoản cus) — KHÔNG được
         // đụng vào dataBT ở bất kỳ hình thức nào — ẩn hết các tab liên quan
@@ -3494,6 +3477,7 @@
         document.getElementById('rkn-tab').classList.toggle('d-none', isHr);
         document.getElementById('iqc-tab').classList.toggle('d-none', isHr);
         document.getElementById('prepaid-tab').classList.toggle('d-none', isHr);
+        applyTabPerms();
         if (isHr) {
             // Tab mặc định cho HR là Nhân Sự
             document.getElementById('bt-tab').classList.remove('active');
@@ -3509,6 +3493,27 @@
             document.getElementById('linhthu-tab').classList.add('active');
             document.getElementById('linhThuContent').classList.add('show', 'active');
         }
+    }
+
+    // Áp quyền theo tab: off → ẩn tab; view → hiện tab vốn ẩn; ro / view → khung tab chỉ xem (ẩn nút ghi, khoá ô).
+    // Worker là nơi chặn thật (mọi POST của tab ro / view → 403).
+    function applyTabPerms() {
+        Object.entries(PERM_TAB_IDS).forEach(([tab, id]) => {
+            let btn = document.getElementById(id); if (!btn) return;
+            let pane = document.querySelector(btn.getAttribute('data-bs-target')), p = userPerm(tab);
+            if (p === 'off') btn.classList.add('d-none');
+            if (p === 'view' && !(tab === 'rkn' && HIDE_RKN_TAB)) btn.classList.remove('d-none');
+            if (pane) pane.classList.toggle('ro-tab', p === 'ro' || p === 'view');
+        });
+        roLockControls();
+    }
+    // Tab đang mở bị ẩn (VD Bảo Trì bị "Ẩn") → mở tab đầu tiên còn hiện (bắn shown.bs.tab để tải dữ liệu)
+    function ensureVisibleActiveTab() {
+        let act = document.querySelector('#mainTabs .nav-link.active');
+        const visible = b => !b.classList.contains('d-none') && !b.closest('li').classList.contains('d-none');
+        if (act && visible(act)) return;
+        let first = [...document.querySelectorAll('#mainTabs .nav-link')].find(visible);
+        if (first) bootstrap.Tab.getOrCreateInstance(first).show();
     }
 
     // Parse linh hoạt nhiều định dạng ngày mà server/n8n có thể trả về.
@@ -3872,7 +3877,7 @@
     }
 
     async function fetchChatMessages() {
-        if (!currentUser || !currentUser.username) return;
+        if (!currentUser || !currentUser.username || userPerm('chat') === 'off') return;   // tab Log bị "Ẩn": không poll (Worker sẽ trả 403)
         if (document.hidden) return; // tab ẩn: tạm ngưng poll chat
         try {
             let response = await apiFetch("api/chat/messages?since_id=" + lastChatId, { method: "GET" });
@@ -4459,7 +4464,7 @@
 
     // ---------- Tải dữ liệu ----------
     async function hiFetchData(force) {
-        if (!currentUser || isRestrictedRole()) return;
+        if (!currentUser || isRestrictedRole('hi')) return;
         if (!force && hiLoadedFor === currentUser.username && Date.now() - hiLoadedAt < HI_STALE_MS) {
             hiRenderAll();
             return;
@@ -5236,7 +5241,7 @@
 
     // ================== PHÂN TÍCH SHD: link lấy từ D1 (app_settings.shd_link) ==================
     // Từ 01/11/2026: mọi tài khoản dùng Phân tích SHD (Worker canUseShd); Chỉ xem thấy tab nhưng không có link.
-    function canUseShd() { return !!currentUser; }
+    function canUseShd() { return !!currentUser && userPerm('shd') !== 'off'; }
     async function loadShdLink() {
         let btn = document.getElementById('shdLinkBtn'), info = document.getElementById('shdLinkInfo');
         let isSA = currentUser && currentUser.role === 'superadmin';
@@ -6371,7 +6376,7 @@
     const iqcKey = r => (r.doiTacQuanLy ? r[iqcGroupBy] : '') || '(Chưa map)';
 
     async function iqcFetchData(force) {
-        if (!currentUser || currentUser.role === 'hr') return; // cus được xem IQC của Đối tác mình
+        if (!currentUser || userPerm('iqc') === 'off' || (currentUser.role === 'hr' && userPerm('iqc') !== 'view')) return; // cus được xem IQC của Đối tác mình
         if (!force && iqcLoadedFor === currentUser.username && Date.now() - iqcLoadedAt < HI_STALE_MS) { iqcRenderAll(); return; }
         try {
             let res = await apiFetch("api/iqc/data", { method: "GET" });
@@ -7441,6 +7446,206 @@
         XLSX.writeFile(wb, `Prepaid_ha_tang_nha_tro_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}.xlsx`);
     }
 
+
+    // ================== QL TÀI KHOẢN (chỉ SuperAdmin, 19/11/2026) ==================
+    // Vai trò + phạm vi (a) và quyền theo tab (b): Theo vai trò / Chỉ xem (ro) / Ẩn (off) / Cho xem (view).
+    // Worker là nơi kiểm thật (chốt quyền theo tab, chặn tự khoá mình, SuperAdmin cuối, mã xác nhận).
+    const UA_TABS = [['bt', 'Bảo Trì'], ['hi', 'HI FPT'], ['rkn', 'SH & RKN'], ['iqc', 'IQC & Đầu Vào'], ['prepaid', 'Prepaid'], ['ns', 'Nhân Sự'], ['lich', 'Lịch Trực ĐT'], ['chat', 'Log'], ['phanvung', 'Phân Vùng'], ['shd', 'Phân tích SHD']];
+    const UA_ROLES = [
+        ['user', 'Đội trưởng / Đối tác quản lý', 'Có Đội trưởng = chỉ thấy đội mình; để trống Đội trưởng = Đối tác quản lý, thấy cả Đối tác.'],
+        ['petonly', 'cus', 'Tài khoản DVKH theo Đối tác: không thấy Bảo Trì / HI FPT, chủ yếu xem.'],
+        ['hr', 'HR', 'Quản trị Nhân Sự toàn bộ Đối tác, không thấy dữ liệu vận hành.'],
+        ['viewer', 'Chỉ xem', 'Xem mọi tab, không ghi gì, dữ liệu nhạy cảm bị che.'],
+        ['admin', 'Admin', 'Thấy tất cả, nhập / sửa / xoá dữ liệu vận hành.'],
+        ['superadmin', 'SuperAdmin', 'Toàn quyền, quản lý tài khoản. Cấp vai trò này cần mã xác nhận.'],
+    ];
+    const UA_LEVEL = { edit: 'Sửa', view: 'Xem', none: 'Không thấy' };
+    let uaData = { accounts: [], partners: [], teams: [], tabDefaults: {}, me: '' }, uaEditing = null, uaPwUser = null;
+    const uaRoleName = a => a.role === 'user' ? ((a.doiTruong || '').trim() ? 'Đội trưởng' : 'Đối tác quản lý') : (UA_ROLES.find(r => r[0] === a.role) || [0, a.role])[1];
+    function uaGenPw() {
+        const c = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789', b = crypto.getRandomValues(new Uint32Array(10));
+        return [...b].map(x => c[x % c.length]).join('');
+    }
+    async function uaFetch() {
+        try {
+            let j = await (await apiFetch('api/users/list')).json();
+            if (!j.success) { document.getElementById('uaTable').innerHTML = `<tbody><tr><td class="text-center py-4 small">${escapeHtml(j.error || 'Không tải được')}</td></tr></tbody>`; return; }
+            uaData = j;
+            let fr = document.getElementById('uaFilterRole'), cr = fr.value;
+            fr.innerHTML = '<option value="">Tất cả</option>' + UA_ROLES.map(r => `<option value="${r[0]}">${escapeHtml(r[1])}</option>`).join('');
+            fr.value = cr;
+            let fp = document.getElementById('uaFilterPartner'), cp = fp.value;
+            fp.innerHTML = '<option value="">Tất cả</option>' + j.partners.map(p => `<option>${escapeHtml(p)}</option>`).join('');
+            fp.value = [...fp.options].some(o => o.value === cp) ? cp : '';
+            uaRender();
+        } catch (e) { console.error('Lỗi tải tài khoản:', e); }
+    }
+    const uaLocked = a => (a.lockedUntil || 0) > Date.now();
+    function uaFiltered() {
+        let q = hiNorm(document.getElementById('uaSearch').value), r = document.getElementById('uaFilterRole').value,
+            p = document.getElementById('uaFilterPartner').value, st = document.getElementById('uaFilterStatus').value;
+        return uaData.accounts.filter(a => {
+            if (r && a.role !== r) return false;
+            if (p && a.doiTacQuanLy !== p) return false;
+            if (st === 'active' && (a.disabled || uaLocked(a))) return false;
+            if (st === 'disabled' && !a.disabled) return false;
+            if (st === 'locked' && !uaLocked(a)) return false;
+            if (st === 'perms' && !Object.keys(a.perms || {}).length) return false;
+            if (st === 'oldpw' && !a.oldPassword) return false;
+            if (q && !hiNorm([a.username, a.doiTruong, a.note].join(' ')).includes(q)) return false;
+            return true;
+        });
+    }
+    function uaRender() {
+        let all = uaData.accounts, rows = uaFiltered();
+        const set = (id, v) => document.getElementById(id).textContent = v;
+        set('uaKpiTotal', all.length); set('uaKpiAdmin', all.filter(a => a.role === 'admin' || a.role === 'superadmin').length);
+        set('uaKpiPerms', all.filter(a => Object.keys(a.perms || {}).length).length);
+        set('uaKpiDisabled', all.filter(a => a.disabled).length); set('uaKpiOldPw', all.filter(a => a.oldPassword).length);
+        set('uaCount', `— ${rows.length} tài khoản`);
+        const permText = a => Object.entries(a.perms || {}).map(([t, v]) => `${(UA_TABS.find(x => x[0] === t) || [t, t])[1]}: ${{ off: 'Ẩn', ro: 'Chỉ xem', view: 'Cho xem' }[v] || v}`).join(', ');
+        document.getElementById('uaTable').innerHTML = '<thead><tr><th>Tài khoản</th><th>Vai trò</th><th>Đối tác</th><th>Đội trưởng</th><th>Quyền riêng</th><th>Trạng thái</th><th>Hoạt động gần nhất</th><th class="text-end">Thao tác</th></tr></thead><tbody>' +
+            (rows.length ? rows.map(a => {
+                let me = a.username === uaData.me, u = escapeHtml(a.username), pc = Object.keys(a.perms || {}).length;
+                let status = (a.disabled ? '<span class="ua-chip is-off">Đã khoá</span>' : uaLocked(a) ? `<span class="ua-chip is-warn" title="Nhập sai mật khẩu / mã quá nhiều lần">Khoá đăng nhập tới ${new Date(a.lockedUntil).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>` : '<span class="ua-chip is-ok">Hoạt động</span>')
+                    + (a.oldPassword ? ' <span class="ua-chip is-warn" title="Mật khẩu chưa được băm — nên đặt lại">Mật khẩu cũ</span>' : '');
+                return `<tr data-user="${u}">
+                    <td><div class="fw-semibold mono">${u}${me ? ' <span class="ua-chip">bạn</span>' : ''}</div>${a.note ? `<div class="small" style="color:var(--slate-soft);">${escapeHtml(a.note)}</div>` : ''}</td>
+                    <td><span class="ua-role ua-role-${escapeHtml(a.role)}">${escapeHtml(uaRoleName(a))}</span></td>
+                    <td class="small">${escapeHtml(a.doiTacQuanLy === 'ALL' ? 'Tất cả' : (a.doiTacQuanLy || '—'))}</td>
+                    <td class="small">${escapeHtml(a.doiTruong || '—')}</td>
+                    <td class="small">${pc ? `<span class="ua-chip is-perm" title="${escapeHtml(permText(a))}">${pc} tab</span>` : '<span style="color:var(--slate-soft);">—</span>'}</td>
+                    <td class="small">${status}</td>
+                    <td class="small mono">${escapeHtml(a.lastActive || a.lastLogin || '—')}</td>
+                    <td class="text-end text-nowrap">
+                        <button type="button" class="row-act ua-edit" title="Sửa" aria-label="Sửa ${u}" onclick="uaOpen('${u}')"><i class="bi bi-pencil-square" aria-hidden="true"></i></button>
+                        <button type="button" class="row-act ua-pw" title="Đặt lại mật khẩu" aria-label="Đặt lại mật khẩu ${u}" onclick="uaOpenPw('${u}')"><i class="bi bi-key" aria-hidden="true"></i></button>
+                        ${uaLocked(a) ? `<button type="button" class="row-act ua-unlock" title="Mở khoá đăng nhập" aria-label="Mở khoá đăng nhập ${u}" onclick="uaAction('unlock', '${u}')"><i class="bi bi-unlock" aria-hidden="true"></i></button>` : ''}
+                        ${me ? '' : `<button type="button" class="row-act ua-logout" title="Đăng xuất mọi phiên" aria-label="Đăng xuất mọi phiên ${u}" onclick="uaAction('logout-all', '${u}')"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></button>
+                        <button type="button" class="row-act is-del ua-del" title="Xoá tài khoản" aria-label="Xoá ${u}" onclick="uaDelete('${u}')"><i class="bi bi-trash" aria-hidden="true"></i></button>`}
+                    </td></tr>`;
+            }).join('') : '<tr><td colspan="8" class="text-center py-4 small" style="color:var(--slate);">Không có tài khoản khớp bộ lọc.</td></tr>') + '</tbody>';
+    }
+    let uaSearchTimer = null;
+    document.getElementById('uaSearch').addEventListener('input', () => { clearTimeout(uaSearchTimer); uaSearchTimer = setTimeout(uaRender, 200); });
+    document.getElementById('accounts-tab').addEventListener('shown.bs.tab', uaFetch);
+
+    // --- ô thêm / sửa ---
+    let uaPermState = {};
+    function uaOpen(username) {
+        let a = username ? uaData.accounts.find(x => x.username === username) : null;
+        uaEditing = a ? a.username : null;
+        let me = a && a.username === uaData.me;
+        document.getElementById('uaModalTitle').textContent = a ? `Sửa tài khoản — ${a.username}` : 'Thêm tài khoản';
+        let un = document.getElementById('uaE_username'); un.value = a ? a.username : ''; un.disabled = !!a;
+        let rs = document.getElementById('uaE_role');
+        rs.innerHTML = UA_ROLES.map(r => `<option value="${r[0]}">${escapeHtml(r[1])}</option>`).join('');
+        rs.value = a ? a.role : 'user'; rs.disabled = !!me;
+        document.getElementById('uaE_doiTac').innerHTML = '<option value="">— Chọn Đối tác —</option>' + uaData.partners.map(p => `<option>${escapeHtml(p)}</option>`).join('');
+        document.getElementById('uaE_doiTac').value = a && a.doiTacQuanLy !== 'ALL' ? (a.doiTacQuanLy || '') : '';
+        uaFillTeams(a ? (a.doiTruong || '') : '');
+        document.getElementById('uaE_pwWrap').classList.toggle('d-none', !!a);
+        document.getElementById('uaE_password').value = a ? '' : uaGenPw();
+        let dz = document.getElementById('uaE_disabled'); dz.checked = !!(a && a.disabled); dz.disabled = !!me;
+        document.getElementById('uaE_note').value = a ? (a.note || '') : '';
+        document.getElementById('uaE_err').textContent = ''; document.getElementById('uaE_permNote').textContent = '';
+        uaPermState = Object.assign({}, a ? a.perms : {});
+        uaRoleChanged(false);
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('uaModal')).show();
+    }
+    function uaFillTeams(keep) {
+        let dt = document.getElementById('uaE_doiTac').value, sel = document.getElementById('uaE_doiTruong');
+        let teams = uaData.teams.filter(t => t.doiTacQuanLy === dt).map(t => t.doiTruong);
+        if (keep && !teams.includes(keep)) teams.push(keep);
+        sel.innerHTML = '<option value="">— Không gắn đội (Đối tác quản lý) —</option>' + teams.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+        sel.value = teams.includes(keep) ? keep : '';
+    }
+    document.getElementById('uaE_doiTac').addEventListener('change', () => uaFillTeams(''));
+    document.getElementById('uaE_role').addEventListener('change', () => uaRoleChanged(true));
+    function uaRoleChanged(fromUser) {
+        let role = document.getElementById('uaE_role').value, def = uaData.tabDefaults[role] || {};
+        document.getElementById('uaE_roleDesc').textContent = (UA_ROLES.find(r => r[0] === role) || [])[2] || '';
+        document.querySelectorAll('#uaModal .ua-scope').forEach(el => el.classList.toggle('d-none', !['user', 'petonly'].includes(role)));
+        document.querySelector('#uaModal .ua-scope-team').classList.toggle('d-none', role !== 'user');
+        let dropped = [];
+        Object.keys(uaPermState).forEach(t => { if (!uaPermAllowed(def[t]).includes(uaPermState[t])) { dropped.push((UA_TABS.find(x => x[0] === t) || [t, t])[1]); delete uaPermState[t]; } });
+        let box = document.getElementById('uaE_perms');
+        if (role === 'superadmin') box.innerHTML = '<div class="small" style="color:var(--slate);">SuperAdmin luôn đủ quyền mọi tab — không áp quyền riêng.</div>';
+        else box.innerHTML = UA_TABS.map(([t, label]) => {
+            let d = def[t] || 'none', opts = uaPermAllowed(d);
+            return `<div class="ua-perm-row"><label for="uaP_${t}">${escapeHtml(label)} <span class="ua-def ua-def-${d}">${UA_LEVEL[d]}</span></label>
+                <select class="form-select form-select-sm" id="uaP_${t}" data-perm="${t}">${opts.map(v => `<option value="${v}" ${uaPermState[t] === v || (!uaPermState[t] && !v) ? 'selected' : ''}>${{ '': 'Theo vai trò', ro: 'Chỉ xem', off: 'Ẩn', view: 'Cho xem' }[v]}</option>`).join('')}</select></div>`;
+        }).join('');
+        box.querySelectorAll('select[data-perm]').forEach(sel => sel.addEventListener('change', () => {
+            if (sel.value) uaPermState[sel.dataset.perm] = sel.value; else delete uaPermState[sel.dataset.perm];
+            uaPermNote([]);
+        }));
+        uaPermNote(fromUser ? dropped : []);
+    }
+    function uaPermAllowed(d) { return d === 'edit' ? ['', 'ro', 'off'] : d === 'view' ? ['', 'off'] : ['', 'view']; }
+    function uaPermNote(dropped) {
+        let role = document.getElementById('uaE_role').value, msgs = [];
+        if (dropped.length) msgs.push(`Đã bỏ quyền riêng không còn hợp lệ với vai trò mới: ${dropped.join(', ')}.`);
+        if (role === 'hr' && Object.values(uaPermState).includes('view')) msgs.push('HR có phạm vi "Tất cả" → tab "Cho xem" sẽ thấy toàn bộ dữ liệu của mọi Đối tác.');
+        if (role === 'viewer' && uaPermState.shd === 'view') msgs.push('Chỉ xem được Cho xem Phân tích SHD sẽ thấy link n8n.');
+        document.getElementById('uaE_permNote').textContent = msgs.join(' ');
+    }
+    async function uaSave() {
+        let err = document.getElementById('uaE_err'), btn = document.getElementById('uaSaveBtn');
+        let role = document.getElementById('uaE_role').value;
+        let body = {
+            mode: uaEditing ? 'edit' : 'add', username: document.getElementById('uaE_username').value.trim(), role,
+            doiTacQuanLy: ['user', 'petonly'].includes(role) ? document.getElementById('uaE_doiTac').value : '',
+            doiTruong: role === 'user' ? document.getElementById('uaE_doiTruong').value : '',
+            disabled: document.getElementById('uaE_disabled').checked, note: document.getElementById('uaE_note').value.trim(),
+            perms: role === 'superadmin' ? {} : Object.assign({}, uaPermState),
+        };
+        if (!uaEditing) body.password = document.getElementById('uaE_password').value;
+        err.textContent = '';
+        if (!/^[A-Za-z0-9._@-]{3,50}$/.test(body.username)) { err.textContent = 'Tên đăng nhập 3–50 ký tự: chữ, số, . _ @ -'; return; }
+        if (!uaEditing && (body.password.length < 6 || body.password.toLowerCase() === body.username.toLowerCase())) { err.textContent = 'Mật khẩu ≥ 6 ký tự và khác tên đăng nhập.'; return; }
+        if (['user', 'petonly'].includes(role) && !body.doiTacQuanLy) { err.textContent = 'Chọn Đối tác quản lý.'; return; }
+        const send = pin => apiFetch('api/users/save', { method: 'POST', body: JSON.stringify(pin ? { ...body, pin } : body) }).then(r => r.json());
+        btn.disabled = true;
+        try {
+            let r = await send();
+            if (!r.success && r.pinError) {
+                btn.disabled = false;
+                if (!await pinRun(`Cấp quyền SuperAdmin cho ${body.username}.`, send, 'Xác nhận')) return;
+                r = { success: true };
+            }
+            if (!r.success) { err.textContent = r.error || 'Không lưu được.'; return; }
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('uaModal')).hide();
+            await uaFetch();
+        } catch (e) { console.error('Lỗi lưu tài khoản:', e); err.textContent = 'Lỗi kết nối, vui lòng thử lại.'; }
+        finally { btn.disabled = false; }
+    }
+    function uaOpenPw(username) {
+        uaPwUser = username;
+        document.getElementById('uaPwTitle').textContent = `Đặt lại mật khẩu — ${username}`;
+        document.getElementById('uaPwInput').value = uaGenPw(); document.getElementById('uaPwErr').textContent = '';
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('uaPwModal')).show();
+    }
+    async function uaResetPw() {
+        let pw = document.getElementById('uaPwInput').value, err = document.getElementById('uaPwErr');
+        if (pw.length < 6 || pw.toLowerCase() === String(uaPwUser).toLowerCase()) { err.textContent = 'Mật khẩu ≥ 6 ký tự và khác tên đăng nhập.'; return; }
+        let r = await (await apiFetch('api/users/reset-password', { method: 'POST', body: JSON.stringify({ username: uaPwUser, password: pw }) })).json();
+        if (!r.success) { err.textContent = r.error || 'Không đặt lại được.'; return; }
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('uaPwModal')).hide();
+        await uaFetch();
+    }
+    async function uaAction(kind, username) {
+        if (kind === 'logout-all' && !confirm(`Đăng xuất ${username} khỏi mọi thiết bị?`)) return;
+        let r = await (await apiFetch('api/users/' + kind, { method: 'POST', body: JSON.stringify({ username }) })).json();
+        if (!r.success) { alert(r.error || 'Không thực hiện được!'); return; }
+        await uaFetch();
+    }
+    async function uaDelete(username) {
+        let ok = await pinRun(`Xoá tài khoản ${username}. Dữ liệu và nhật ký người này đã tạo vẫn giữ.`,
+            pin => apiFetch('api/users/delete', { method: 'POST', body: JSON.stringify({ username, pin }) }).then(r => r.json()), 'Xoá');
+        if (ok) await uaFetch();
+    }
+
     // ================== SUPERADMIN SỬA / XOÁ TRỰC TIẾP (từ 12/11/2026) ==================
     const isSuperAdmin = () => !!currentUser && currentUser.role === 'superadmin';
     function rowActBtns(editFn, delFn, id, label) {
@@ -7459,9 +7664,14 @@
                 return true;
             }).catch(e => { console.error("Lỗi xoá:", e); alert("Lỗi kết nối, vui lòng thử lại!"); return false; });
         }
+        return pinRun(`Xoá ${label}.`, pin => apiFetch(path, { method: "POST", body: JSON.stringify({ id, pin }) }).then(r => r.json()), 'Xoá');
+    }
+    // Hộp mã xác nhận dùng chung: send(pin) → JSON phản hồi; sai mã thì nhập lại ngay trong hộp. Trả true khi thành công.
+    function pinRun(text, send, btnText) {
         return new Promise(resolve => {
-            pinPending = { path, id, resolve, done: false };
-            document.getElementById('pinTarget').textContent = `Xoá ${label}.`;
+            pinPending = { send, resolve, done: false };
+            document.getElementById('pinSubmitText').textContent = btnText || 'Xác nhận';
+            document.getElementById('pinTarget').textContent = text;
             document.getElementById('pinInput').value = '';
             document.getElementById('pinErr').textContent = '';
             document.getElementById('pinSubmitBtn').disabled = false;
@@ -7472,17 +7682,17 @@
         let p = pinPending; if (!p || p.done) return;
         let input = document.getElementById('pinInput'), err = document.getElementById('pinErr'), btn = document.getElementById('pinSubmitBtn');
         let pin = input.value.trim();
-        if (!pin) { err.textContent = 'Nhập mã xác nhận để xoá.'; input.focus(); return; }
+        if (!pin) { err.textContent = 'Nhập mã xác nhận.'; input.focus(); return; }
         btn.disabled = true; err.textContent = '';
         try {
-            let r = await (await apiFetch(p.path, { method: "POST", body: JSON.stringify({ id: p.id, pin }) })).json();
+            let r = await p.send(pin);
             if (r.success) {
                 p.done = true;
                 bootstrap.Modal.getOrCreateInstance(document.getElementById('pinModal')).hide();
                 p.resolve(true);
                 return;
             }
-            err.textContent = r.error || 'Không xoá được.';
+            err.textContent = r.error || 'Không thực hiện được.';
             input.value = ''; input.focus();
         } catch (e) { console.error("Lỗi xoá:", e); err.textContent = 'Lỗi kết nối, vui lòng thử lại.'; }
         finally { if (!p.done) btn.disabled = false; }
