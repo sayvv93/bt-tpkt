@@ -1655,7 +1655,9 @@
                     <select id="iqcFilterIqc" class="form-select form-select-sm" onchange="iqcApplyFilters()"><option value="">Tất cả</option><option>Chưa kiểm tra</option><option>OK</option><option>NOT</option></select></div>
                 <div class="col-md-2 f-group"><label>Check Đầu Vào</label>
                     <select id="iqcFilterDv" class="form-select form-select-sm" onchange="iqcApplyFilters()"><option value="">Tất cả</option><option>Chưa kiểm tra</option><option>OK</option><option>NOT</option></select></div>
-                <div class="col-md-8 f-group d-flex flex-wrap justify-content-end gap-2">
+                <div class="col-md-2 f-group d-none" id="iqcFilterMapGroup"><label for="iqcFilterMap">Map nhân sự</label>
+                    <select id="iqcFilterMap" class="form-select form-select-sm" onchange="iqcApplyFilters()"><option value="">Tất cả</option><option value="__UNMAPPED__">Chưa map (thiếu nhân sự)</option></select></div>
+                <div class="col f-group d-flex flex-wrap justify-content-end gap-2">
                     <span class="small align-self-center me-auto" id="iqcLastLoaded" style="color:var(--slate-soft);"></span>
                     <button class="filter-reset-btn" onclick="iqcResetFilters()"><i class="bi bi-x-circle me-1"></i>Xoá lọc</button>
                     <button class="filter-reset-btn" onclick="iqcFetchData(true)"><i class="bi bi-arrow-clockwise me-1"></i>Tải lại</button>
@@ -1667,6 +1669,7 @@
                     </label>
                 </div>
             </div>
+            <div id="iqcUnmappedPanel" class="bt-unmapped-panel mb-3 d-none" aria-live="polite"></div>
 
             <div class="stat-strip">
                 <div class="stat-item accent-neutral"><div class="stat-label">TỔNG CA</div><div class="stat-value" id="iqcKpiTotal">0</div></div>
@@ -1735,7 +1738,7 @@
                                         <button type="button" data-metric="rate">Tỉ lệ đạt cả 2</button>
                                     </div>
                                 </div>
-                                <div class="hi-rank-scroll"><div id="iqcRankBox" style="position:relative;"><canvas id="iqcRankChart"></canvas></div></div>
+                                <div class="hi-rank-scroll is-full"><div id="iqcRankBox" style="position:relative;"><canvas id="iqcRankChart"></canvas></div></div>
                                 <div class="small mt-2" style="color:var(--slate-soft);">Bấm vào 1 cột để lọc xuống cấp dưới · Tỉ lệ đạt cả 2 = ca cả 2 OK / tổng ca</div>
                             </div>
                         </div>
@@ -3046,7 +3049,7 @@
         });
     })();
 
-    const APP_BUILD = "2026-11-19.1";
+    const APP_BUILD = "2026-11-21.1";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -6108,6 +6111,7 @@
             bootstrap.Modal.getOrCreateInstance(document.getElementById('nsEditModal')).hide();
             await nsFetchData(true);
             if (r.btRemapped > 0) await refreshData();   // ca Bảo Trì Chưa map vừa được gắn đội
+            if (iqcLoadedFor) await iqcFetchData(true);   // IQC ghép đội lúc đọc → tải lại để ca Chưa map nhận đội mới
         } catch (e) { console.error("Lỗi lưu Nhân sự:", e); alert("Lỗi kết nối, vui lòng thử lại!"); }
         finally { btn.disabled = false; }
     }
@@ -6405,7 +6409,7 @@
         iqcApplyFilters();
     }
     function iqcResetFilters() {
-        ['iqcSearch', 'iqcFilterIqc', 'iqcFilterDv', 'iqcFilterNhanVien'].forEach(id => document.getElementById(id).value = '');
+        ['iqcSearch', 'iqcFilterIqc', 'iqcFilterDv', 'iqcFilterNhanVien', 'iqcFilterMap'].forEach(id => document.getElementById(id).value = '');
         if (!isDoiTacLocked()) document.getElementById('iqcFilterDoiTac').value = '';
         if (!isDoiTruongLocked()) document.getElementById('iqcFilterDoiTruong').value = '';
         setCurrentMonthRange('iqcFilterFrom', 'iqcFilterTo');
@@ -6415,11 +6419,11 @@
     function iqcApplyFilters() {
         let v = id => document.getElementById(id).value;
         let dt = v('iqcFilterDoiTac'), dtr = v('iqcFilterDoiTruong'), nv = v('iqcFilterNhanVien'), qi = v('iqcFilterIqc'), qd = v('iqcFilterDv');
-        let q = v('iqcSearch').trim().toUpperCase();
+        let q = v('iqcSearch').trim().toUpperCase(), un = isSuperAdmin() && v('iqcFilterMap') === '__UNMAPPED__';
         let f = v('iqcFilterFrom'), t = v('iqcFilterTo');
         let fromT = f ? new Date(f + 'T00:00:00').getTime() : null, toT = t ? new Date(t + 'T23:59:59').getTime() : null;
         iqcFiltered = iqcData.filter(r => (!dt || r.doiTacQuanLy === dt) && (!dtr || r.doiTruong === dtr) && (!nv || r.nhanVien === nv)
-            && (!qi || r.checkIQC === qi) && (!qd || r.checkDauVao === qd) && (!q || String(r.soHopDong).toUpperCase().includes(q))
+            && (!qi || r.checkIQC === qi) && (!qd || r.checkDauVao === qd) && (!q || String(r.soHopDong).toUpperCase().includes(q)) && (!un || iqcUnmapped(r))
             && ((fromT === null && toT === null) || (r._t && (fromT === null || r._t >= fromT) && (toT === null || r._t <= toT))));
         iqcPage = 1;
         iqcRenderAll();
@@ -6439,6 +6443,7 @@
     function iqcScopeText() {
         let p = [], v = id => document.getElementById(id).value;
         ['iqcFilterDoiTac', 'iqcFilterDoiTruong', 'iqcFilterNhanVien'].forEach(id => { if (v(id)) p.push(v(id)); });
+        if (isSuperAdmin() && v('iqcFilterMap')) p.push('Chưa map');
         if (v('iqcFilterIqc')) p.push('IQC ' + v('iqcFilterIqc')); if (v('iqcFilterDv')) p.push('Đầu Vào ' + v('iqcFilterDv'));
         const vn = d => d.split('-').reverse().join('/');
         if (v('iqcFilterFrom') || v('iqcFilterTo')) p.push(`${v('iqcFilterFrom') ? vn(v('iqcFilterFrom')) : '…'} → ${v('iqcFilterTo') ? vn(v('iqcFilterTo')) : '…'}`);
@@ -6447,6 +6452,8 @@
     function iqcRenderAll() {
         document.getElementById('iqcAdminBar').classList.toggle('d-none', !rknIsAdmin());
         document.getElementById('iqcReportExportBtn').classList.toggle('d-none', !(currentUser && currentUser.role === 'superadmin'));
+        document.getElementById('iqcFilterMapGroup').classList.toggle('d-none', !isSuperAdmin());
+        iqcRenderUnmappedPanel(isSuperAdmin() && document.getElementById('iqcFilterMap').value === '__UNMAPPED__');
         document.getElementById('iqcImportLimitLbl').textContent = currentUser && currentUser.role === 'superadmin' ? '10.000' : '1.000';
         document.querySelectorAll('#iqcGroupSeg button').forEach(b => b.classList.toggle('active', b.dataset.group === iqcGroupBy));
         let s = iqcStats(iqcFiltered), fmt = n => n.toLocaleString('vi-VN');
@@ -6528,7 +6535,7 @@
         } else document.getElementById('iqcTrendNote').textContent = 'Không có dữ liệu ngày';
 
         // 4) Xếp hạng theo nhóm đang chọn
-        let groups = iqcGroups(rows), label = { doiTacQuanLy: 'Đối tác', doiTruong: 'Đội trưởng', nhanVien: 'Nhân viên' }[iqcGroupBy];
+        let groups = iqcGroups(rows).filter(g => g.k !== '(Chưa map)'), label = { doiTacQuanLy: 'Đối tác', doiTruong: 'Đội trưởng', nhanVien: 'Nhân viên' }[iqcGroupBy];
         document.querySelectorAll('#iqcRankMetricSeg button').forEach(b => b.classList.toggle('active', b.dataset.metric === iqcRankMetric));
         hiDestroyChart('iqcRank');
         let box = document.getElementById('iqcRankBox');
@@ -6585,8 +6592,36 @@
             <ul class="hi-spot-list mb-3">${mostNot.length ? mostNot.map(g => li('📷', g, fmt(g.not) + ' ca', HI_COLOR_BAD)).join('') : empty}</ul>
             <div class="hi-spot-head" style="color:${HI_COLOR_GOOD};">🏆 Tỉ lệ đạt cả 2 cao nhất <span class="fw-normal" style="color:var(--slate-soft);">(≥ ${minN} ca)</span></div>
             <ul class="hi-spot-list">${best.length ? best.map((g, i) => li(medals[i], g, g.rate.toFixed(1) + '%', hiRateColor(g.rate))).join('') : empty}</ul>
-            ${unm ? `<div class="small mt-2" style="color:var(--red);">${fmt(unm)} ca "Chưa map" — nhân viên chưa có trong tab Nhân Sự.</div>` : ''}`;
+            ${unm ? `<div class="small mt-2" style="color:var(--red);">${fmt(unm)} ca "Chưa map" — nhân viên chưa có trong tab Nhân Sự (không tính vào biểu đồ).${isSuperAdmin() ? ' <button type="button" class="btn btn-link btn-sm p-0 align-baseline iqc-show-unmapped" onclick="iqcFilterUnmapped()">Xem và thêm nhân sự</button>' : ''}</div>` : ''}`;
     }
+    // ---------- Ca Chưa map (SuperAdmin): Mobinet chưa có trong Nhân Sự → thêm nhân sự ngay tại IQC ----------
+    function iqcFilterUnmapped() {
+        document.getElementById('iqcFilterMap').value = '__UNMAPPED__';
+        iqcApplyFilters();
+        document.getElementById('iqcUnmappedPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function iqcRenderUnmappedPanel(on) {
+        let box = document.getElementById('iqcUnmappedPanel');
+        if (!on) { box.classList.add('d-none'); box.innerHTML = ''; return; }
+        let g = new Map();
+        iqcFiltered.forEach(r => { let k = (r.nhanVien || '').toLowerCase(); if (!g.has(k)) g.set(k, { nv: r.nhanVien || '', n: 0 }); g.get(k).n++; });
+        let list = [...g.values()].sort((a, b) => b.n - a.n || a.nv.localeCompare(b.nv));
+        box.classList.remove('d-none');
+        box.innerHTML = list.length ? `<div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2 mb-2">
+                <b><i class="bi bi-person-exclamation me-1" style="color:var(--red);"></i>${list.length} Mobinet chưa có trong Nhân Sự · ${iqcFiltered.length} ca</b>
+                <span class="small" style="color:var(--slate);">Thêm nhân sự (đúng Mobinet, chọn Đối tác / Đội trưởng) — ca IQC tự gắn đội ngay.</span></div>
+            <div class="bt-miss-list">${list.map(x => `<div><span class="mono">${escapeHtml(x.nv || '(trống)')}</span><span>—</span><span class="mono">${x.n} ca</span>
+                ${x.nv ? `<button type="button" class="filter-reset-btn iqc-add-ns" data-nv="${escapeHtml(x.nv)}"><i class="bi bi-person-plus me-1"></i>Thêm nhân sự</button>` : '<span></span>'}</div>`).join('')}</div>`
+            : `<div class="small" style="color:var(--slate);"><i class="bi bi-check2-circle me-1" style="color:var(--brand);"></i>Không có ca Chưa map trong phạm vi đang lọc.</div>`;
+    }
+    document.getElementById('iqcUnmappedPanel').addEventListener('click', async e => {
+        let b = e.target.closest('.iqc-add-ns'); if (!b) return;
+        b.disabled = true;
+        try { await nsFetchData(); } finally { b.disabled = false; }   // cần danh sách Đội trưởng cho ô chọn
+        nsOpenEditModal(null);
+        let mob = document.querySelector('#nsEditFields [data-nsfield="mobinet"]'); if (mob) { mob.value = b.dataset.nv; mob.readOnly = true; }
+        let first = document.querySelector('#nsEditFields [data-nsfield="maNhanVien"]'); if (first) setTimeout(() => first.focus(), 300);
+    });
     function iqcDrillDown(k) {
         if (!k || k === '(Chưa map)') return;
         if (iqcGroupBy === 'doiTacQuanLy') { if (!isDoiTacLocked()) document.getElementById('iqcFilterDoiTac').value = k; iqcGroupBy = 'doiTruong'; iqcOnFilterChange(); }
