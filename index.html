@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" integrity="sha384-Ay26V7L8bsJTsX9Sxclnvsn+hkdiwRnrjZJXqKmkIDobPgIIWBOVguEcQQLDuhfN" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
@@ -300,7 +300,7 @@
         .lich-foot td { background:var(--surface); font-weight:700; font-size:11px; padding:4px 0; }
         .lich-brush { display:inline-flex; gap:4px; background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:3px; }
         .lich-brush button { border:none; border-radius:6px; padding:4px 12px; font-size:12px; font-weight:700; background:transparent; color:var(--slate); }
-        .lich-brush button.active[data-v="ON"] { background:#3F7D1F; color:#fff; }
+        .lich-brush button.active[data-v="ON"] { background:#23875B; color:#fff; }
         .lich-brush button.active[data-v="OFF"] { background:#AC2B22; color:#fff; }
         .lich-brush button.active[data-v=""] { background:var(--ink); color:#fff; }
         .lich-chip { display:inline-block; font-size:12px; font-weight:600; border-radius:12px; padding:2px 10px; margin:0 4px 4px 0; }
@@ -315,7 +315,7 @@
         .iqc-link > .bi:first-child { font-size:22px; color:var(--brand); }
         .iqc-link small { display:block; color:var(--slate); font-family:'IBM Plex Mono', monospace; font-size:12px; }
         .iqc-sel { min-width:130px; }
-        .iqc-sel.v-ok { border-left:4px solid #3F7D1F; }
+        .iqc-sel.v-ok { border-left:4px solid #23875B; }
         .iqc-sel.v-not { border-left:4px solid #AC2B22; }
         .iqc-sel.v-pending { border-left:4px solid #C9CEC6; }
 
@@ -835,6 +835,128 @@
     #uaTable tr { border-bottom:1px solid var(--line); padding:10px 8px; }
     #uaTable td { border:none; padding:2px 4px; text-align:left !important; }
 }
+
+/* =====================================================================
+   GIAO DIỆN "VIOLET" (23/11/2026) — theo mẫu AI web dashboard (Dribbble / UI UX Bunker):
+   nền xám tím rất nhạt, thẻ trắng bo 18px không viền + bóng mềm, màu nhấn tím, thẻ KPI đầu tiên
+   tô dải tím → xanh ngọc, nút chọn dạng viên thuốc. Màu trạng thái (đạt / cảnh báo / lỗi) giữ nguyên
+   ý nghĩa: "đạt" dùng --good (xanh lá) thay vì màu thương hiệu.
+   ===================================================================== */
+:root {
+    --ink: #1E1B39;
+    --surface: #F5F5FA;
+    --card: #FFFFFF;
+    --brand: #6A4DF4;
+    --brand-dark: #4E33D3;
+    --brand-soft: #EFEBFE;
+    --brand-2: #3CC3E8;
+    --good: #23875B;
+    --slate: #5D5A7A;
+    --slate-soft: #66637F;
+    --line: #ECEBF4;
+    --radius: 18px;
+    --shadow-sm: 0 1px 2px rgba(30, 27, 57, 0.04), 0 6px 20px rgba(30, 27, 57, 0.05);
+    --shadow-md: 0 2px 6px rgba(30, 27, 57, 0.06), 0 16px 40px rgba(30, 27, 57, 0.10);
+    --grad: linear-gradient(128deg, #7B5CFA 0%, #6A7CFB 48%, #3CC3E8 100%);
+}
+* { font-family: 'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif; }
+.bi, .bi::before, [class^="bi-"]::before, [class*=" bi-"]::before { font-family: 'bootstrap-icons' !important; }
+.mono, #dataTable td b, #dataTable td small, .op-code { font-family: 'IBM Plex Mono', 'Courier New', monospace; }
+body { background: var(--surface); }
+::selection { background: #E0D8FF; color: var(--ink); }
+html { scrollbar-color: #D5D1EC transparent; }
+*::-webkit-scrollbar-thumb { background: #D5D1EC; border-color: var(--surface); }
+input, textarea { caret-color: var(--brand); }
+
+/* Menu trái */
+.app-side { border-right: 0; box-shadow: 1px 0 0 var(--line); padding: 22px 16px 18px; }
+.app-brand { border-bottom: 0; padding-bottom: 8px; }
+.app-logo { background: var(--grad); color: #fff; border-radius: 50%; box-shadow: 0 6px 16px rgba(106, 77, 244, 0.28); }
+.app-brand-text span { font-family: inherit; letter-spacing: 0.02em; }
+.app-side .seg-tabs { gap: 4px; }
+.app-side .seg-tabs .nav-link { border-radius: 12px; font-weight: 600; color: var(--slate); }
+.app-side .seg-tabs .nav-link i { color: #9C99B6 !important; }
+.app-side .seg-tabs .nav-link:hover { background: #F6F4FF; color: var(--ink); }
+.app-side .seg-tabs .nav-link.active { background: var(--brand-soft); color: var(--brand); }
+.app-side .seg-tabs .nav-link.active i { color: var(--brand) !important; }
+.app-user { background: #F8F7FD; border-color: transparent; }
+.app-avatar { background: var(--grad); }
+
+/* Thanh trên */
+.app-top { background: rgba(245, 245, 250, 0.9); border-bottom: 0; }
+.app-title h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.025em; }
+
+/* Thẻ: không viền, bo 18px, bóng mềm */
+.filter-strip, .table-panel, .alert-console, .hi-card, .lt-map-section, .hi-admin-bar { border-color: transparent !important; }
+.filter-strip, .table-panel, .alert-console, .hi-card, .lt-map-section { box-shadow: var(--shadow-sm); }
+.filter-strip { padding: 18px 22px; }
+.modal-content { border: 0; box-shadow: var(--shadow-md); }
+.form-control, .form-select { border-radius: 10px; border-color: #E4E2F0; }
+.form-control:focus, .form-select:focus { border-color: #B7A8FF; box-shadow: 0 0 0 3px rgba(106, 77, 244, 0.14); }
+.table thead th { background-color: #F8F7FD !important; color: var(--slate); border-bottom: 1px solid var(--line); }
+.table thead th.sortable:hover { background-color: #EFEBFE !important; }
+#dataTable tbody tr:hover, .table-hover tbody tr:hover > * { background: #FAF9FF; }
+.table > :not(caption) > * > * { border-bottom-color: #F0EFF6; }
+
+/* Nút */
+.ops-btn, .filter-reset-btn { border-radius: 12px; }
+.ops-btn:hover, .filter-reset-btn:hover { background: #F6F4FF; border-color: #DCD5FB; color: var(--ink); }
+.ops-btn.is-primary { background: var(--brand); border-color: var(--brand); box-shadow: 0 4px 12px rgba(106, 77, 244, 0.25); }
+.ops-pill.is-brand { color: var(--brand-dark); border-color: #DCD5FB; background: var(--brand-soft); }
+.ops-btn:focus-visible, .app-burger:focus-visible, .app-side-close:focus-visible, .app-side .seg-tabs .nav-link:focus-visible,
+.filter-reset-btn:focus-visible, .hi-seg button:focus-visible { outline: 3px solid #B7A8FF; outline-offset: 2px; }
+
+/* Nút chọn dạng viên thuốc (Theo Đối tác / Đội trưởng …, Tình trạng / Tỉ lệ …) */
+.hi-seg { background: #F3F1FB; border: 0; border-radius: 999px; padding: 4px; }
+.hi-seg button { border-radius: 999px; padding: 5px 14px; color: var(--slate); transition: background-color .2s cubic-bezier(.16,1,.3,1), color .2s; }
+.hi-seg button:hover { color: var(--ink); }
+.hi-seg button.active { background: var(--brand); color: #fff; box-shadow: 0 3px 10px rgba(106, 77, 244, 0.28); }
+
+/* KPI: thẻ trắng không viền; thẻ đầu tiên của mỗi dải tô dải tím → xanh ngọc */
+.stat-strip { gap: 14px; }
+.stat-item { border: 0 !important; box-shadow: var(--shadow-sm); padding: 18px 58px 18px 20px; }
+.stat-value { font-family: inherit; font-weight: 800; font-size: 28px; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.stat-label { color: var(--slate); font-weight: 600; }
+.stat-item::after { border-radius: 50%; background: #F3F1FB; color: #8B87AA; }
+.stat-item.accent-brand::after { background: var(--brand-soft); color: var(--brand); }
+.stat-strip > .stat-item:first-child { background: var(--grad); box-shadow: 0 10px 26px rgba(106, 77, 244, 0.28); }
+.stat-strip > .stat-item:first-child .stat-label,
+.stat-strip > .stat-item:first-child .stat-value,
+.stat-strip > .stat-item:first-child .stat-sub,
+.stat-strip > .stat-item:first-child small { color: #fff !important; }
+.stat-strip > .stat-item:first-child::after { background: rgba(255, 255, 255, 0.22); color: #fff; }
+
+/* Trạng thái "đạt" giữ màu xanh lá có nghĩa */
+.status-chip.is-ok::before, .pp-bg-ok, .hi-good-bg { background: var(--good); }
+.hi-good, .pp-fill-ok { color: var(--good) !important; }
+.online-dot { background: var(--good); }
+
+/* Tiêu đề thẻ báo cáo */
+.hi-card-title { color: var(--ink); font-weight: 700; letter-spacing: -0.01em; }
+.hi-report-title { font-weight: 800; letter-spacing: -0.02em; }
+
+/* Ô lọc: hộp nền nhạt bo góc thay cho gạch chân */
+.filter-strip select, .filter-strip input:not([type=checkbox]):not([type=radio]) {
+    background-color: #F7F6FC; border: 1px solid transparent; border-radius: 10px; padding: 7px 10px; min-height: 38px;
+    transition: border-color .18s, box-shadow .18s, background-color .18s; }
+.filter-strip select { padding-right: 30px; }
+.filter-strip select:hover, .filter-strip input:not([type=checkbox]):not([type=radio]):hover { background-color: #F2F0FB; }
+.filter-strip select:focus, .filter-strip input:focus { background-color: #fff; border-color: #B7A8FF; box-shadow: 0 0 0 3px rgba(106, 77, 244, 0.14); }
+.filter-strip select:disabled { opacity: .75; }
+.filter-strip .f-group { border-right: 0; }
+.filter-strip label { color: var(--slate); font-size: 12px; letter-spacing: 0.01em; }
+
+/* Tiêu đề thẻ: chữ thường đậm, rõ như mẫu */
+.hi-card-title { font-size: 15px; text-transform: none; letter-spacing: -0.01em; color: var(--ink); margin-bottom: 10px; }
+.hi-card-title i, .hi-card-title .bi { color: var(--brand); }
+
+/* Số liệu lớn: cùng phông chữ, chữ số đều cột */
+.hi-gauge-center .big, .hi-gauge-foot b, .hi-spot-val { font-family: inherit; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.hi-gauge-center .big { font-size: 32px; }
+.hi-gauge-foot { border-top: 1px solid var(--line); }
+
+.filter-strip .d-flex > input[type=date] { min-width: 0; flex: 1 1 0; padding-left: 8px; padding-right: 6px; }
+.filter-reset-btn { white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -3049,7 +3171,7 @@
         });
     })();
 
-    const APP_BUILD = "2026-11-21.1";
+    const APP_BUILD = "2026-11-23.1";
     const APP_CHECK_MS = 15 * 60 * 1000;
     let appUpdatePending = null;
     async function appServerBuild() {
@@ -3850,7 +3972,7 @@
 
         let labels = ['Bảo trì OK', 'Lỗi đã xử lý', 'Chưa xử lý', 'Chưa kiểm tra'];
         let vals = [c.okNoLoi, c.loiFixed, c.chuaXuLy, c.chuaKiemTra];
-        let colors = ['#3F7D1F', '#7FB04F', HI_COLOR_BAD, '#C9CEC6'];
+        let colors = ['#23875B', '#6FC79C', HI_COLOR_BAD, '#CFCDE0'];
         hiDestroyChart('btDonut');
         hiCharts.btDonut = new Chart(document.getElementById('btDonutStatus'), {
             type: 'doughnut',
@@ -5026,7 +5148,19 @@
     // ---------- Biểu đồ báo cáo (dành cho Ban giám đốc xem) ----------
     let hiCharts = {};
     let hiRankMetric = 'interactRate';
-    const HI_COLOR_GOOD = '#3F7D1F', HI_COLOR_MID = '#E3A23B', HI_COLOR_BAD = '#AC2B22';
+    // Giao diện "Violet" (23/11/2026): chữ, lưới và chú thích biểu đồ theo bộ màu mới (giữ nguyên màu trạng thái).
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.font.family = "'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif";
+        Chart.defaults.color = '#5D5A7A';
+        Chart.defaults.borderColor = '#F0EFF6';
+        Object.assign(Chart.defaults.plugins.tooltip, { backgroundColor: '#1E1B39', padding: 10, cornerRadius: 10, titleFont: { weight: '700' }, boxPadding: 4 });
+        Chart.defaults.plugins.legend.labels.usePointStyle = true;
+        Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
+        Chart.defaults.elements.bar.borderRadius = 6;
+        Chart.defaults.elements.line.borderCapStyle = 'round';
+        Chart.defaults.elements.arc.borderRadius = 4;
+    }
+    const HI_COLOR_GOOD = '#23875B', HI_COLOR_MID = '#E3A23B', HI_COLOR_BAD = '#AC2B22';
     function hiRateColor(p) { return p === null ? '#C9CEC6' : (p >= 80 ? HI_COLOR_GOOD : (p >= 50 ? HI_COLOR_MID : HI_COLOR_BAD)); }
     function hiDestroyChart(name) { if (hiCharts[name]) { hiCharts[name].destroy(); delete hiCharts[name]; } }
     const hiGroupLabel = { doiTacQuanLy: 'Đối tác', doiTruong: 'Đội trưởng', nhanVien: 'Nhân viên' };
@@ -5059,7 +5193,7 @@
         let v = rate === null ? 0 : rate;
         hiCharts[name] = new Chart(document.getElementById(canvasId), {
             type: 'doughnut',
-            data: { datasets: [{ data: [v, 100 - v], backgroundColor: [hiRateColor(rate), '#EDEFEA'], borderWidth: 0, borderRadius: [6, 0] }] },
+            data: { datasets: [{ data: [v, 100 - v], backgroundColor: [hiRateColor(rate), '#EFEDF8'], borderWidth: 0, borderRadius: [6, 0] }] },
             options: { responsive: true, maintainAspectRatio: false, rotation: -90, circumference: 180, cutout: '74%',
                 plugins: { legend: { display: false }, tooltip: { enabled: false } }, animation: { duration: 700 } }
         });
@@ -5102,7 +5236,7 @@
         hiFiltered.forEach(r => { let k = (r.tinhTrangKichHoat || '').trim() || '(trống)'; cnt.set(k, (cnt.get(k) || 0) + 1); });
         let entries = [...cnt.entries()].sort((a, b) => b[1] - a[1]);
         if (entries.length > 5) { let rest = entries.slice(4).reduce((a, e) => a + e[1], 0); entries = entries.slice(0, 4).concat([['Khác', rest]]); }
-        let palette = ['#3F7D1F', '#7FB04F', '#2C7DA0', '#9DB4C0', '#C9CEC6'], pi = 0;
+        let palette = ['#23875B', '#6FC79C', '#6A4DF4', '#3CC3E8', '#CFCDE0'], pi = 0;
         let colors = entries.map(([k]) => hiNorm(k) === 'chua kich hoat' ? HI_COLOR_BAD : palette[pi++ % palette.length]);
         hiDestroyChart('donut');
         hiCharts.donut = new Chart(document.getElementById('hiDonutStatus'), {
@@ -5140,7 +5274,7 @@
                 data: { labels, datasets: [
                     { type: 'line', label: 'Tỉ lệ tương tác (%)', data: st.map(x => x.interactRate), yAxisID: 'y1', borderColor: '#E3A23B', backgroundColor: '#E3A23B',
                       cubicInterpolationMode: 'monotone', pointRadius: 2.5, borderWidth: 2.5, spanGaps: true, order: 1 },
-                    { type: 'line', label: 'Tỉ lệ cài đặt (%)', data: st.map(x => x.installRate), yAxisID: 'y1', borderColor: '#3F7D1F', backgroundColor: '#3F7D1F',
+                    { type: 'line', label: 'Tỉ lệ cài đặt (%)', data: st.map(x => x.installRate), yAxisID: 'y1', borderColor: '#23875B', backgroundColor: '#23875B',
                       cubicInterpolationMode: 'monotone', pointRadius: 2.5, borderWidth: 2.5, spanGaps: true, order: 2 },
                     { type: 'bar', label: 'Số ca', data: st.map(x => x.total), yAxisID: 'y', backgroundColor: 'rgba(92,102,96,0.18)', borderRadius: 4, order: 3 }
                 ] },
@@ -5149,7 +5283,7 @@
                         tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y1' ? ` ${c.dataset.label}: ${c.raw === null ? '--' : c.raw.toFixed(1) + '%'}` : ` Số ca: ${fmt(c.raw)}` } } },
                     scales: {
                         x: { grid: { display: false }, ticks: { font: { size: 10.5 }, maxRotation: 0, autoSkip: true } },
-                        y: { position: 'left', beginAtZero: true, grid: { color: '#EEF0EB' }, ticks: { font: { size: 10.5 } }, title: { display: true, text: 'Số ca', font: { size: 10.5 } } },
+                        y: { position: 'left', beginAtZero: true, grid: { color: '#F0EFF6' }, ticks: { font: { size: 10.5 } }, title: { display: true, text: 'Số ca', font: { size: 10.5 } } },
                         y1: { position: 'right', min: 0, max: 100, grid: { display: false }, ticks: { callback: v => v + '%', font: { size: 10.5 } } }
                     } }
             });
@@ -5185,7 +5319,7 @@
                         font: { weight: '800', size: 11, family: 'IBM Plex Mono' }, formatter: v => v.toFixed(1) + '%' }
                 },
                 scales: {
-                    x: { min: minX, max: 100, grid: { color: '#EEF0EB' }, ticks: { callback: v => v + '%', font: { size: 10.5 } } },
+                    x: { min: minX, max: 100, grid: { color: '#F0EFF6' }, ticks: { callback: v => v + '%', font: { size: 10.5 } } },
                     y: { grid: { display: false }, ticks: { font: { size: 11.5, weight: '600' }, color: '#12181B' } }
                 } },
             plugins: [ChartDataLabels, hiAvgLinePlugin]
@@ -5302,7 +5436,7 @@
         soLanUpDown: 'Số lần Up/Down', huongXL: 'Hướng XL', dvkhNote: 'DVKH care note', doiTruongNote: 'Đội trưởng note'
     };
     const RKN_STATUSES = ['Chưa XL', 'XL Lại', 'Đã Tạo CL', 'Đã XL'];
-    const RKN_STATUS_COLOR = { 'Chưa XL': '#AC2B22', 'XL Lại': '#6B3FA0', 'Đã Tạo CL': '#E3A23B', 'Đã XL': '#3F7D1F' };
+    const RKN_STATUS_COLOR = { 'Chưa XL': '#AC2B22', 'XL Lại': '#6B3FA0', 'Đã Tạo CL': '#E3A23B', 'Đã XL': '#23875B' };
     const RKN_STATUS_KEY = { 'Chưa XL': 'chua', 'XL Lại': 'lai', 'Đã Tạo CL': 'cl', 'Đã XL': 'done' };
     const RKN_NOTE_MAX = 100;
     const RKN_PAGE_SIZE = 50;
@@ -5497,7 +5631,7 @@
                 plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${fmt(c.raw)} ca còn mở` } },
                     datalabels: { anchor: 'end', align: 'end', font: { weight: '700', size: 11 }, formatter: v => v || '' } },
                 scales: { x: { grid: { display: false }, title: { display: true, text: 'Số lần Up/Down', font: { size: 10.5 } } },
-                          y: { beginAtZero: true, grid: { color: '#EEF0EB' }, ticks: { precision: 0 } } } },
+                          y: { beginAtZero: true, grid: { color: '#F0EFF6' }, ticks: { precision: 0 } } } },
             plugins: [ChartDataLabels]
         });
 
@@ -5526,7 +5660,7 @@
                     plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 10, font: { size: 11 } } },
                         tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y1' ? ` Tỉ lệ đã XL: ${c.raw === null ? '--' : c.raw.toFixed(1) + '%'}` : ` ${c.dataset.label}: ${fmt(c.raw)} ca` } } },
                     scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10.5 }, maxRotation: 0, autoSkip: true } },
-                        y: { stacked: true, beginAtZero: true, grid: { color: '#EEF0EB' }, title: { display: true, text: 'Số ca', font: { size: 10.5 } } },
+                        y: { stacked: true, beginAtZero: true, grid: { color: '#F0EFF6' }, title: { display: true, text: 'Số ca', font: { size: 10.5 } } },
                         y1: { position: 'right', min: 0, max: 100, grid: { display: false }, ticks: { callback: v => v + '%' } } } }
             });
         } else document.getElementById('rknTrendNote').textContent = 'Không có dữ liệu';
@@ -5547,7 +5681,7 @@
                     tooltip: { callbacks: { footer: items => { let g = groups[items[0].dataIndex]; return `Tỉ lệ đã XL: ${g.rate === null ? '--' : g.rate.toFixed(1) + '%'}`; } } },
                     datalabels: { color: '#fff', font: { weight: '700', size: 10.5 }, formatter: (v, c) => {
                         let g = groups[c.dataIndex]; return v && v / Math.max(1, g.total) >= 0.12 ? v : ''; } } },
-                scales: { x: { stacked: true, beginAtZero: true, grid: { color: '#EEF0EB' }, ticks: { precision: 0 } },
+                scales: { x: { stacked: true, beginAtZero: true, grid: { color: '#F0EFF6' }, ticks: { precision: 0 } },
                           y: { stacked: true, grid: { display: false }, ticks: { font: { size: 11.5, weight: '600' }, color: '#12181B' } } } },
             plugins: [ChartDataLabels]
         });
@@ -6016,10 +6150,10 @@
             hiDestroyChart('nsBac');
             hiCharts.nsBac = new Chart(document.getElementById('nsBacChart'), {
                 type: 'bar',
-                data: { labels: bacs.map(b => 'Bậc ' + b), datasets: [{ data: vals, backgroundColor: '#3F7D1F', borderRadius: 5 }] },
+                data: { labels: bacs.map(b => 'Bậc ' + b), datasets: [{ data: vals, backgroundColor: '#6A4DF4', borderRadius: 6 }] },
                 options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 18 } },
                     plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', font: { weight: '700', size: 11 } } },
-                    scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grace: '12%', ticks: { precision: 0 }, grid: { color: '#EEF0EB' } } } },
+                    scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grace: '12%', ticks: { precision: 0 }, grid: { color: '#F0EFF6' } } } },
                 plugins: [ChartDataLabels]
             });
         }
@@ -6469,7 +6603,7 @@
     // ---------- Biểu đồ báo cáo (cùng phong cách HI FPT / SH & RKN) ----------
     // Mỗi ca thuộc đúng 1 nhóm, ưu tiên: Còn chưa kiểm tra (≥ 1 mục chưa KT — khớp KPI và bảng)
     // → Đã KT xong, có NOT → Đạt cả 2.
-    const IQC_STATUS = [['done', 'Đạt cả 2', '#3F7D1F'], ['not', 'Đã KT xong, có NOT', '#AC2B22'], ['pend', 'Còn chưa kiểm tra', '#E3A23B']];
+    const IQC_STATUS = [['done', 'Đạt cả 2', '#23875B'], ['not', 'Đã KT xong, có NOT', '#AC2B22'], ['pend', 'Còn chưa kiểm tra', '#E3A23B']];
     const iqcBucket = r => iqcPending(r) ? 'pend' : (iqcDone(r) ? 'done' : 'not');
     let iqcRankMetric = 'status';
     function iqcGroups(rows) {
@@ -6521,7 +6655,7 @@
             hiCharts.iqcTrend = new Chart(document.getElementById('iqcTrendChart'), {
                 data: { labels: keys.map(k => { let d = new Date(k); return (byWeek ? 'Tuần ' : '') + `${hiPad(d.getDate())}/${hiPad(d.getMonth() + 1)}`; }),
                     datasets: [
-                        { type: 'line', label: 'Tỉ lệ đạt IQC (%)', data: st.map(x => x.iqcRate), yAxisID: 'y1', borderColor: '#2C7DA0', backgroundColor: '#2C7DA0', cubicInterpolationMode: 'monotone', pointRadius: 2.5, borderWidth: 2.5, spanGaps: true, order: 0 },
+                        { type: 'line', label: 'Tỉ lệ đạt IQC (%)', data: st.map(x => x.iqcRate), yAxisID: 'y1', borderColor: '#6A4DF4', backgroundColor: '#6A4DF4', cubicInterpolationMode: 'monotone', pointRadius: 2.5, borderWidth: 2.5, spanGaps: true, order: 0 },
                         { type: 'line', label: 'Tỉ lệ đạt Đầu Vào (%)', data: st.map(x => x.dvRate), yAxisID: 'y1', borderColor: '#12181B', backgroundColor: '#12181B', tension: 0.35, pointRadius: 2.5, borderWidth: 2, borderDash: [5, 4], spanGaps: true, order: 0 },
                         ...IQC_STATUS.map(([k, l, c]) => ({ type: 'bar', label: l, data: keys.map(key => bk.get(key).filter(r => iqcBucket(r) === k).length), backgroundColor: c, stack: 's', order: 1 }))
                     ] },
@@ -6529,7 +6663,7 @@
                     plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 10, font: { size: 11 } } },
                         tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y1' ? ` ${c.dataset.label}: ${c.raw === null ? '--' : c.raw.toFixed(1) + '%'}` : ` ${c.dataset.label}: ${fmt(c.raw)} ca` } } },
                     scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10.5 }, maxRotation: 0, autoSkip: true } },
-                        y: { stacked: true, beginAtZero: true, grid: { color: '#EEF0EB' }, title: { display: true, text: 'Số ca', font: { size: 10.5 } } },
+                        y: { stacked: true, beginAtZero: true, grid: { color: '#F0EFF6' }, title: { display: true, text: 'Số ca', font: { size: 10.5 } } },
                         y1: { position: 'right', min: 0, max: 100, grid: { display: false }, ticks: { callback: v => v + '%' } } } }
             });
         } else document.getElementById('iqcTrendNote').textContent = 'Không có dữ liệu ngày';
@@ -6545,13 +6679,13 @@
             box.style.height = Math.max(160, groups.length * 30 + 60) + 'px';
             hiCharts.iqcRank = new Chart(document.getElementById('iqcRankChart'), {
                 type: 'bar',
-                data: { labels: groups.map(g => g.k), datasets: [['bPend', 'Còn chưa kiểm tra', '#E3A23B'], ['bNot', 'Đã KT xong, có NOT', '#AC2B22'], ['bDone', 'Đạt cả 2', '#3F7D1F']].map(([f, l, c]) => ({ label: l, data: groups.map(g => g[f]), backgroundColor: c, barThickness: 18, stack: 's' })) },
+                data: { labels: groups.map(g => g.k), datasets: [['bPend', 'Còn chưa kiểm tra', '#E3A23B'], ['bNot', 'Đã KT xong, có NOT', '#AC2B22'], ['bDone', 'Đạt cả 2', '#23875B']].map(([f, l, c]) => ({ label: l, data: groups.map(g => g[f]), backgroundColor: c, barThickness: 18, stack: 's' })) },
                 options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, layout: { padding: { right: 30 } },
                     onClick: (e, els) => { if (els.length) iqcDrillDown(groups[els[0].index].k); },
                     plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 10, font: { size: 11 } } },
                         tooltip: { callbacks: { footer: it => { let g = groups[it[0].dataIndex]; return `Tỉ lệ đạt cả 2: ${g.rate === null ? '--' : g.rate.toFixed(1) + '%'}`; } } },
                         datalabels: { color: '#fff', font: { weight: '700', size: 10.5 }, formatter: (v, c) => v && v / Math.max(1, groups[c.dataIndex].total) >= 0.12 ? v : '' } },
-                    scales: { x: { stacked: true, beginAtZero: true, grid: { color: '#EEF0EB' }, ticks: { precision: 0 } },
+                    scales: { x: { stacked: true, beginAtZero: true, grid: { color: '#F0EFF6' }, ticks: { precision: 0 } },
                               y: { stacked: true, grid: { display: false }, ticks: { font: { size: 11.5, weight: '600' }, color: '#12181B' } } } },
                 plugins: [ChartDataLabels]
             });
@@ -6567,7 +6701,7 @@
                     plugins: { legend: { display: false }, hiAvgLine: { value: s.rate },
                         tooltip: { callbacks: { label: c => { let g = groups[c.dataIndex]; return ` ${g.done}/${g.total} ca đạt cả 2 (${c.raw}%)`; } } },
                         datalabels: { anchor: 'end', align: 'end', offset: 4, color: c => hiRateColor(c.dataset.data[c.dataIndex]), font: { weight: '800', size: 11, family: 'IBM Plex Mono' }, formatter: v => v.toFixed(1) + '%' } },
-                    scales: { x: { min: 0, max: 100, grid: { color: '#EEF0EB' }, ticks: { callback: v => v + '%' } },
+                    scales: { x: { min: 0, max: 100, grid: { color: '#F0EFF6' }, ticks: { callback: v => v + '%' } },
                               y: { grid: { display: false }, ticks: { font: { size: 11.5, weight: '600' }, color: '#12181B' } } } },
                 plugins: [ChartDataLabels, hiAvgLinePlugin]
             });
@@ -8251,7 +8385,7 @@
                       datalabels: { display: false } },
                     { label: 'Chưa kiểm tra', data: dtChuaKiemTraData, backgroundColor: '#8B948D', borderRadius: 3,
                       datalabels: { formatter: (v, ctx) => dtChuaKiemTraPct[ctx.dataIndex], color: '#5C6660' } },
-                    { label: 'Đã kiểm tra', data: dtDaKiemTraData, backgroundColor: '#3F7D1F', borderRadius: 3,
+                    { label: 'Đã kiểm tra', data: dtDaKiemTraData, backgroundColor: '#23875B', borderRadius: 3,
                       datalabels: { formatter: (v, ctx) => dtDaKiemTraPct[ctx.dataIndex], color: '#2E5D16' } },
                     { label: 'Ca lỗi', data: dtErrorData, backgroundColor: '#AC2B22', borderRadius: 3,
                       datalabels: { formatter: (v, ctx) => dtPercentData[ctx.dataIndex], color: '#AC2B22' } }
@@ -8281,7 +8415,7 @@
                       datalabels: { display: false } },
                     { label: 'Chưa kiểm tra', data: dtrChuaKiemTraData, backgroundColor: '#8B948D', borderRadius: 3,
                       datalabels: { formatter: (v, ctx) => dtrChuaKiemTraPct[ctx.dataIndex], color: '#5C6660' } },
-                    { label: 'Đã kiểm tra', data: dtrDaKiemTraData, backgroundColor: '#3F7D1F', borderRadius: 3,
+                    { label: 'Đã kiểm tra', data: dtrDaKiemTraData, backgroundColor: '#23875B', borderRadius: 3,
                       datalabels: { formatter: (v, ctx) => dtrDaKiemTraPct[ctx.dataIndex], color: '#2E5D16' } },
                     { label: 'Ca lỗi', data: dtrErrorData, backgroundColor: '#A6620A', borderRadius: 3,
                       datalabels: { formatter: (v, ctx) => dtrPercentData[ctx.dataIndex], color: '#A6620A' } }
